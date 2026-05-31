@@ -1,0 +1,30 @@
+# Go
+*.exe
+*.test
+*.out
+/dist/
+terraform-provider-unifi
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfvars
+!example*.tfvars
+crash.log
+override.tf
+override.tf.json
+
+# Local env / secrets
+.env
+*.local
+
+# Live network snapshot — local acceptance fixture only (real MACs/IPs); never commit
+unifi-inventory.json
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
