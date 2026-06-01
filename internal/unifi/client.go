@@ -149,6 +149,20 @@ type Client interface {
 	UpdateWLANGroup(ctx context.Context, g *WLANGroup) (*WLANGroup, error)
 	DeleteWLANGroup(ctx context.Context, id string) error
 
+	// Traffic rules (v2 trafficrules) — backs unifi_network_traffic_rule.
+	ListTrafficRules(ctx context.Context) ([]TrafficRule, error)
+	GetTrafficRule(ctx context.Context, id string) (*TrafficRule, error)
+	CreateTrafficRule(ctx context.Context, r *TrafficRule) (*TrafficRule, error)
+	UpdateTrafficRule(ctx context.Context, r *TrafficRule) (*TrafficRule, error)
+	DeleteTrafficRule(ctx context.Context, id string) error
+
+	// Traffic routes (v2 trafficroutes) — backs unifi_network_traffic_route.
+	ListTrafficRoutes(ctx context.Context) ([]TrafficRoute, error)
+	GetTrafficRoute(ctx context.Context, id string) (*TrafficRoute, error)
+	CreateTrafficRoute(ctx context.Context, r *TrafficRoute) (*TrafficRoute, error)
+	UpdateTrafficRoute(ctx context.Context, r *TrafficRoute) (*TrafficRoute, error)
+	DeleteTrafficRoute(ctx context.Context, id string) error
+
 	// Sites.
 	ListSites(ctx context.Context) ([]Site, error)
 	CreateSite(ctx context.Context, description string) (*LegacySite, error)

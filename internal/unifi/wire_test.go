@@ -387,6 +387,53 @@ func TestWLANGroup_Wire(t *testing.T) {
 	}
 }
 
+func TestTrafficRule_Wire(t *testing.T) {
+	// action/matching_target ride along; every criteria slice and nested object is
+	// omitempty so a minimal rule sends only what's set (v2 bare-JSON surface).
+	m := toMap(t, TrafficRule{Action: "BLOCK", MatchingTarget: "INTERNET"})
+	if m["action"] != "BLOCK" || m["matching_target"] != "INTERNET" {
+		t.Errorf("action/matching_target wrong: %v", m)
+	}
+	for _, k := range []string{"_id", "enabled", "domains", "ip_addresses", "ip_ranges", "regions", "app_ids", "app_category_ids", "network_ids", "target_devices", "bandwidth_limit", "description"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// A speed-limit rule: nested target_devices + bandwidth_limit serialize as objects.
+	on := true
+	dn := 5000
+	m = toMap(t, TrafficRule{
+		Action: "SPEED_LIMIT", MatchingTarget: "DOMAIN", Domains: []string{"x.example.com"},
+		TargetDevices:  []TrafficTargetDevice{{Type: "CLIENT", ClientMAC: "aa:bb:cc:00:11:22"}},
+		BandwidthLimit: &TrafficBandwidthLimit{Enabled: &on, DownloadLimitKbps: &dn},
+	})
+	td := m["target_devices"].([]any)
+	if td[0].(map[string]any)["client_mac"] != "aa:bb:cc:00:11:22" {
+		t.Errorf("target_devices nested wrong: %v", td)
+	}
+	bl := m["bandwidth_limit"].(map[string]any)
+	if bl["download_limit_kbps"] != float64(5000) {
+		t.Errorf("bandwidth_limit nested wrong: %v", bl)
+	}
+	// upload omitted (nil pointer), download present.
+	if _, ok := bl["upload_limit_kbps"]; ok {
+		t.Errorf("unset upload_limit_kbps must be omitted; got %v", bl["upload_limit_kbps"])
+	}
+}
+
+func TestTrafficRoute_Wire(t *testing.T) {
+	m := toMap(t, TrafficRoute{MatchingTarget: "DOMAIN", Domains: []string{"netflix.com"}, NetworkID: "vpn1"})
+	if m["matching_target"] != "DOMAIN" || m["network_id"] != "vpn1" {
+		t.Errorf("route fields wrong: %v", m)
+	}
+	for _, k := range []string{"_id", "enabled", "ip_addresses", "ip_ranges", "regions", "target_devices", "kill_switch_enabled", "description"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+}
+
 func TestPortProfile_Wire(t *testing.T) {
 	// name always rides along; the scalar optionals are omitempty so GET-merge-PUT
 	// leaves the controller's value untouched.
