@@ -12,6 +12,13 @@
 # wan-dhcp.tf / wan-pppoe.tf / wan-static.tf are alternatives for the same
 # primary uplink — apply the one that matches your ISP.
 
+# Keep the PPPoE secret out of version control: set it via TF_VAR_isp_password
+# or an uncommitted .tfvars file.
+variable "isp_password" {
+  type      = string
+  sensitive = true
+}
+
 import {
   to = unifi_network_wan.primary
   id = "661f3a9c2b4d5e0012ab34ce"
