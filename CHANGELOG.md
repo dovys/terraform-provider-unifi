@@ -44,6 +44,15 @@ network surface is feature-complete._
     `forward_port`, scoped by `interface` (`wan`/`wan2`/`both`), `protocol`, and
     a `source` filter. GET-merge-PUT preserves controller-managed fields. Field
     set **HIL-unverified** (no live rules; see `TODO.md`). Imports by `_id`.
+  - `unifi_network_dynamic_dns` — a dynamic-DNS updater (`dynamicdns`, legacy
+    `/rest`): publish a WAN `interface`'s IP to a DDNS `service` for a
+    `hostname`, with `login` + write-only `password` (`x_password`, preserved
+    from config on read) and an optional custom `server`. Field set
+    **HIL-unverified** (no live configs; see `TODO.md`). Imports by `_id`.
+  - `unifi_network_wlan_group` — a WLAN group (`wlangroup`, legacy `/rest`), the
+    older SSID-grouping unit that predates AP groups. Only `name` is configurable
+    (confirmed live); the controller's protected default group
+    (`attr_no_delete`) is destroy-as-state-removal. Imports by `_id`.
 
 - **Phase 2 — Wi-Fi.** SSIDs and the AP groups they broadcast on:
   - `unifi_network_wlan` — a Wi-Fi network/SSID (`wlanconf`, legacy `/rest`),

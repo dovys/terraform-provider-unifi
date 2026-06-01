@@ -65,6 +65,13 @@ rig (HIL) exists. Open items:
   the keys/enums and whether `fwd_port` truly defaults to `dst_port` server-side
   once a rule can be created.
 
+- **Dynamic DNS (`/rest/dynamicdns`) field set.** The live site has **zero**
+  DDNS configs, so `unifi_network_dynamic_dns` is modeled from documented
+  behavior: `service`, `host_name`, `server`, `login`, `x_password`,
+  `interface`. Confirm the accepted `service` provider keys, whether
+  `x_password` is echoed on read (assumed write-only → preserved from config),
+  and the `interface` values once a config can be created.
+
 ## Cross-resource wiring follow-ups
 
 - **`unifi_network_wlan` → RADIUS profile.** A `wpaeap` SSID needs a

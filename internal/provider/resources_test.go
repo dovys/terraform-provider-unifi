@@ -42,7 +42,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account", "unifi_network_static_route", "unifi_network_port_forward"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account", "unifi_network_static_route", "unifi_network_port_forward", "unifi_network_dynamic_dns", "unifi_network_wlan_group"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -921,6 +921,63 @@ func TestPortForward_RoundTrip(t *testing.T) {
 	// An unset optional reads back null.
 	if !out.ForwardPort.IsNull() {
 		t.Errorf("unset forward_port should read back null, got %v", out.ForwardPort)
+	}
+}
+
+func TestDynamicDNS_RoundTrip(t *testing.T) {
+	m := &dynamicDNSResourceModel{
+		ID:        types.StringNull(),
+		Service:   types.StringValue("dyndns"),
+		Hostname:  types.StringValue("home.example.com"),
+		Server:    types.StringNull(),
+		Login:     types.StringValue("user"),
+		Password:  types.StringValue("pw"),
+		Interface: types.StringValue("wan"),
+	}
+	d := m.toDynamicDNS()
+	if d.Service != "dyndns" || d.HostName != "home.example.com" || d.Login != "user" || d.XPassword != "pw" {
+		t.Errorf("scalar mapping wrong: %+v", d)
+	}
+
+	// Write-only password: a read that doesn't echo it keeps the configured value.
+	out := dynamicDNSResourceModel{Password: types.StringValue("keep-me")}
+	out.fromDynamicDNS(&unifi.DynamicDNS{ID: "dd9", Service: "dyndns", HostName: "home.example.com", Interface: "wan"})
+	if out.ID.ValueString() != "dd9" || out.Service.ValueString() != "dyndns" {
+		t.Errorf("fromDynamicDNS wrong: %+v", out)
+	}
+	if out.Password.ValueString() != "keep-me" {
+		t.Errorf("write-only password should be preserved on read, got %q", out.Password.ValueString())
+	}
+	// An unset optional reads back null.
+	if !out.Server.IsNull() {
+		t.Errorf("unset server should read back null, got %v", out.Server)
+	}
+}
+
+func TestWLANGroup_RoundTrip(t *testing.T) {
+	m := &wlanGroupResourceModel{
+		ID:   types.StringNull(),
+		Name: types.StringValue("Guest APs"),
+	}
+	g := m.toWLANGroup()
+	if g.Name != "Guest APs" {
+		t.Errorf("name mapping wrong: %+v", g)
+	}
+
+	var out wlanGroupResourceModel
+	out.fromWLANGroup(&unifi.WLANGroup{ID: "wg9", Name: "Guest APs"})
+	if out.ID.ValueString() != "wg9" || out.Name.ValueString() != "Guest APs" {
+		t.Errorf("fromWLANGroup wrong: %+v", out)
+	}
+	if out.AttrNoDelete.ValueBool() {
+		t.Errorf("attr_no_delete should read back false when omitted, got true")
+	}
+
+	// The protected default group reads attr_no_delete = true (destroy → no-op).
+	protected := true
+	out.fromWLANGroup(&unifi.WLANGroup{ID: "default", Name: "Default", AttrNoDelete: &protected})
+	if !out.AttrNoDelete.ValueBool() {
+		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}
 }
 
