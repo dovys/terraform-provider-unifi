@@ -248,3 +248,38 @@ func TestPortProfile_Wire(t *testing.T) {
 		t.Errorf("stp_port_mode=&false should marshal to false; got %v (present=%v)", v, ok)
 	}
 }
+
+func TestDevice_Wire(t *testing.T) {
+	// A config PUT carries only owned fields; telemetry stays off. mac is omitempty
+	// so a config write can't blank the natural key.
+	m := toMap(t, Device{ID: "d1", Name: "sw", LEDOverride: "off"})
+	if m["name"] != "sw" || m["led_override"] != "off" {
+		t.Errorf("owned fields wrong: %v", m)
+	}
+	for _, k := range []string{"mac", "site_id", "adopted", "model", "type", "version", "ip", "state", "port_overrides"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+}
+
+func TestPortOverride_Wire(t *testing.T) {
+	// port_idx is non-omitempty (the map key), even for port 0; every other field
+	// is omitempty so a per-port merge leaves unmodeled keys alone.
+	m := toMap(t, PortOverride{PortIdx: 0, Name: "p0"})
+	if v, ok := m["port_idx"]; !ok || v != float64(0) {
+		t.Errorf("port_idx must always be sent (incl. 0); got %v (present=%v)", v, ok)
+	}
+	for _, k := range []string{"portconf_id", "poe_mode", "forward", "autoneg", "speed", "stp_port_mode", "excluded_networkconf_ids"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// Explicit false on a bool pointer is sent (distinct from unset).
+	f := false
+	m = toMap(t, PortOverride{PortIdx: 5, Autoneg: &f})
+	if v, ok := m["autoneg"]; !ok || v != false {
+		t.Errorf("autoneg=&false should marshal to false; got %v (present=%v)", v, ok)
+	}
+}

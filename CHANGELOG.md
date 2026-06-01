@@ -50,11 +50,25 @@ network surface is feature-complete._
     controller-managed fields. Imports by `_id`. (Enum values for `forward`/
     `poe_mode`/`dot1x_ctrl` are modeled from documented behavior pending
     hardware verification — see `TODO.md`.)
+  - `unifi_network_device` — the single per-device resource (AP/switch/gateway),
+    keyed by MAC: it adopts the device if it's pending, manages its config (name,
+    LED override + color/brightness, management network, and per-port
+    `port_overrides` as a map keyed by port number), and exposes read-only
+    telemetry (model, type, version, ip, state, adopted). `port_overrides` does a
+    per-port GET-merge: Terraform manages only the declared ports — each is merged
+    onto the controller's existing override (unmodeled keys preserved), undeclared
+    ports are left untouched, and dropping a port reverts it. `terraform destroy`
+    reverts the managed port overrides by default; `forget_on_destroy = true`
+    unadopts the device instead. The read shape is recon-confirmed; **adoption,
+    forget, and the config write are HIL-unverified** (see `TODO.md`). Imports by
+    MAC (or `_id`). A read-only `data.unifi_network_device` (look up by `mac` or
+    `id`) exposes the full device including every `port_overrides` entry.
   - Examples (all under `examples/network/`): a smart-home scenario (`wifi.tf`)
     with a WPA3-only home SSID, a WPA2/WPA3 guest SSID, and a 2.4 GHz IoT SSID
     bound to the networks in `guest.tf`; `firewall.tf` blocking the IoT VLAN from
     the trusted LAN via a firewall group + rule; `reservation.tf` pinning a NAS;
-    `port-profile.tf` with an IoT-access and an AP-trunk port profile; and the
+    `port-profile.tf` with an IoT-access and an AP-trunk port profile; `device.tf`
+    managing a switch's name/LED/ports (one port bound to a profile); and the
     per-ISP WAN configs. Passphrases/secrets via `Sensitive` variables.
 
 ## [0.0.1]

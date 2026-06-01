@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -41,12 +42,12 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
 	}
-	for _, name := range []string{"unifi_network_network", "unifi_network_networks", "unifi_network_site", "unifi_network_application_info"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_networks", "unifi_network_site", "unifi_network_application_info", "unifi_network_device"} {
 		if _, ok := resp.DataSourceSchemas[name]; !ok {
 			t.Errorf("data source %q not registered", name)
 		}
@@ -693,5 +694,108 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 	// An unset optional string reads back null.
 	if !out.VoiceNetworkID.IsNull() {
 		t.Errorf("unset voice_network_id should read back null, got %v", out.VoiceNetworkID)
+	}
+}
+
+func TestDevice_PortOverrideRoundTrip(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	// Build a config map: port 5 with a PoE override + an excluded VLAN.
+	obj := portOverrideObject{
+		PortProfileID:            types.StringNull(),
+		Name:                     types.StringValue("camera"),
+		POEMode:                  types.StringValue("auto"),
+		Forward:                  types.StringNull(),
+		NativeNetworkID:          types.StringValue("net-iot"),
+		TaggedVLANMgmt:           types.StringValue("custom"),
+		ExcludedNetworkIDs:       sliceToStringSet([]string{"net-mgmt"}),
+		VoiceNetworkID:           types.StringNull(),
+		Autoneg:                  types.BoolValue(true),
+		Speed:                    types.Int64Null(),
+		FullDuplex:               types.BoolNull(),
+		Isolation:                types.BoolNull(),
+		PortSecurityEnabled:      types.BoolNull(),
+		PortSecurityMACAddresses: types.SetNull(types.StringType),
+		Dot1XCtrl:                types.StringNull(),
+		Dot1XIdleTimeout:         types.Int64Null(),
+		EgressRateLimitEnabled:   types.BoolNull(),
+		EgressRateLimitKbps:      types.Int64Null(),
+		STPPortMode:              types.BoolNull(),
+		STPBPDUGuard:             types.BoolNull(),
+		STPEdgeState:             types.StringNull(),
+		LLDPMEDEnabled:           types.BoolNull(),
+		PortKeepaliveEnabled:     types.BoolNull(),
+		MulticastRouterMode:      types.StringNull(),
+	}
+	elem, d := types.ObjectValueFrom(ctx, portOverrideAttrTypes, obj)
+	diags.Append(d...)
+	poMap, d := types.MapValue(types.ObjectType{AttrTypes: portOverrideAttrTypes}, map[string]attr.Value{"5": elem})
+	diags.Append(d...)
+	if diags.HasError() {
+		t.Fatalf("building map: %v", diags)
+	}
+
+	desired, keys := desiredPortOverrides(ctx, poMap, &diags)
+	if diags.HasError() {
+		t.Fatalf("desiredPortOverrides: %v", diags)
+	}
+	if len(keys) != 1 || keys[0] != 5 || len(desired) != 1 {
+		t.Fatalf("keys/desired wrong: keys=%v desired=%+v", keys, desired)
+	}
+	po := desired[0]
+	if po.PortIdx != 5 || po.Name != "camera" || po.PoEMode != "auto" || po.NativeNetworkConfID != "net-iot" {
+		t.Errorf("port override mapping wrong: %+v", po)
+	}
+	if po.Autoneg == nil || !*po.Autoneg {
+		t.Errorf("autoneg should map to &true, got %v", po.Autoneg)
+	}
+	if len(po.ExcludedNetworkConfIDs) != 1 || po.ExcludedNetworkConfIDs[0] != "net-mgmt" {
+		t.Errorf("excluded_network_ids mapping wrong: %v", po.ExcludedNetworkConfIDs)
+	}
+	// Unset optionals stay nil so a per-port merge preserves the controller's value.
+	if po.Speed != nil || po.STPPortMode != nil || po.PortSecurityMACAddress != nil {
+		t.Errorf("unset optionals must be nil: speed=%v stp=%v macs=%v", po.Speed, po.STPPortMode, po.PortSecurityMACAddress)
+	}
+
+	// from-direction: build the map for the managed key (5) only, ignoring port 9.
+	built := buildPortOverridesMap(ctx, []unifi.PortOverride{
+		{PortIdx: 5, Name: "camera", PoEMode: "auto"},
+		{PortIdx: 9, Name: "other"},
+	}, []int{5}, nil, &diags)
+	if diags.HasError() {
+		t.Fatalf("buildPortOverridesMap: %v", diags)
+	}
+	if _, ok := built.Elements()["5"]; !ok {
+		t.Errorf("managed port 5 missing from built map: %v", built)
+	}
+	if _, ok := built.Elements()["9"]; ok {
+		t.Errorf("unmanaged port 9 must not leak into state: %v", built)
+	}
+
+	// A managed port the controller hasn't echoed yet is kept via the fallback
+	// (the just-written desired value), so it can't vanish post-apply.
+	kept := buildPortOverridesMap(ctx, nil, []int{5}, []unifi.PortOverride{{PortIdx: 5, Name: "camera"}}, &diags)
+	if _, ok := kept.Elements()["5"]; !ok {
+		t.Errorf("declared port 5 should be kept via fallback, got %v", kept)
+	}
+
+	// On Read (nil fallback), a managed port the controller no longer has is dropped.
+	gone := buildPortOverridesMap(ctx, []unifi.PortOverride{{PortIdx: 9}}, []int{5}, nil, &diags)
+	if _, ok := gone.Elements()["5"]; ok {
+		t.Errorf("port 5 absent on the controller (no fallback) should drop from the map, got %v", gone)
+	}
+}
+
+func TestUnionInts(t *testing.T) {
+	got := unionInts([]int{3, 1, 2}, []int{2, 5})
+	want := []int{1, 2, 3, 5}
+	if len(got) != len(want) {
+		t.Fatalf("unionInts len = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("unionInts[%d] = %d, want %d (full %v)", i, got[i], want[i], got)
+		}
 	}
 }

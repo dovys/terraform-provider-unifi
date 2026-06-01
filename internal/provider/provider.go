@@ -224,6 +224,7 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewFirewallRuleResource,
 		NewDHCPReservationResource,
 		NewPortProfileResource,
+		NewDeviceResource,
 	}
 }
 
@@ -234,6 +235,7 @@ func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewNetworksDataSource,
 		NewSiteDataSource,
 		NewApplicationInfoDataSource,
+		NewDeviceDataSource,
 	}
 }
 

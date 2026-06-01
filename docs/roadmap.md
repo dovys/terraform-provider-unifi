@@ -39,8 +39,9 @@ A resource is checkable only when it meets the Definition of Done ([development.
       capability-aware `router`, `Configure` capability probe, CI + release tooling — **P0**
 - [x] network, wan, dns_record (v2); data sources network/networks, site, application_info — **P1**
       (`site` *resource* deferred: `/cmd/sitemgr` write shapes need a multi-site controller to verify)
-- [ ] device (single adopt+configure resource w/ port map), port_profile, wlan, ap_group,
-      firewall_rule, firewall_group, dhcp_reservation — **P2**
+- [x] device (single adopt+configure resource w/ port map) + data source, port_profile, wlan,
+      ap_group, firewall_rule, firewall_group, dhcp_reservation — **P2**
+      (device adopt/forget + config write are HIL-unverified; the read shape is recon-confirmed — see `TODO.md`)
 - [ ] user_group, radius_profile, radius_account, wlan_group, static_route, port_forward,
       dynamic_dns, firewall_zone, firewall_policy, traffic_rule, traffic_route, setting_* — **P3**
 - [ ] vpn_server, vpn_client, bgp, device_port (optional) — **P4**

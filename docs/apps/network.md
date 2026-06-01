@@ -74,10 +74,10 @@ Delete = revert-to-default or no-op; Read never 404s. Single-ownership enforced 
 ## Data sources
 
 `unifi_network_site`, `unifi_network_network` + `unifi_network_networks`, `unifi_network_wlan`,
-`unifi_network_ap_group`, `unifi_network_device` + `unifi_network_devices`, `unifi_network_port_profile`,
+`unifi_network_ap_group`, `unifi_network_device`, `unifi_network_port_profile`,
 `unifi_network_firewall_group`, `unifi_network_user_group`, `unifi_network_radius_profile`,
 `unifi_network_radius_account`, `unifi_network_dns_record`, `unifi_network_application_info`. (Also ships
-`device(s)`, `wlan`, `firewall_group`, and `user_group` data sources.)
+`device`, `wlan`, `firewall_group`, and `user_group` data sources.)
 
 ## Not modeled
 

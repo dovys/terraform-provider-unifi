@@ -18,16 +18,25 @@ rig (HIL) exists. Open items:
   (`all`/`native`/`customize`/`disabled`), `poe_mode` (`auto`/`pasv24`/
   `passthrough`/`off`), and `op`/dot1x once a profile can be created.
 - **Device adoption / forget verbs.** All 5 live devices are already adopted
-  (`adopted=true`), so the adopt and forget write paths are unverified — confirm
-  the exact command endpoint (`/cmd/devmgr` `adopt`/`force-provision` vs
-  `/api/.../devices/...`) and the forget verb against a pending/adoptable device.
+  (`adopted=true`), so the adopt and forget write paths in `unifi_network_device`
+  are unverified — confirm the exact command (`/cmd/devmgr` `adopt` vs
+  `force-provision`, and `delete-device` for forget) against a pending/adoptable
+  device, including how long adoption takes and whether a config PUT can follow
+  immediately.
+- **Device config write (`PUT /rest/device/<id>`).** The device *read* shape
+  (`/stat/device`: `name`, `led_override`(+color/brightness), `mgmt_network_id`,
+  `port_overrides`, telemetry) is now recon-confirmed, but the *write* is not: the
+  recon session is read-only, so verify that a partial PUT merges top-level fields
+  server-side (we never send the whole document) and that `port_overrides` is
+  replace-semantics (the resource rebuilds the full array via per-port merge).
 - **Device `state` enum.** Only `state=1` (connected) is observable live; the
   other states (provisioning, upgrading, disconnected, heartbeat-missed, …) and
   their integer values need confirming before any state-dependent logic.
-- **`port_overrides` write effects.** PoE mode changes, port-profile binding
-  (`portconf_id`), and port enable/disable can be modeled from the read shape but
-  their write behavior (and the device-doc GET-merge-PUT round-trip) can't be
-  validated without a managed switch under test.
+- **`port_overrides` `portconf_id` / `poe_mode`.** These two per-port keys are
+  standard documented fields but were **not set on any live override** (the recon
+  network binds no port profiles and uses default PoE), so their exact key names
+  and accepted values are unconfirmed. The rest of the `port_overrides` field set
+  and types are recon-confirmed.
 
 ## Import UX: friendlier keys than the controller `_id`
 

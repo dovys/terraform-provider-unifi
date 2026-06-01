@@ -88,6 +88,15 @@ type Client interface {
 	UpdatePortProfile(ctx context.Context, p *PortProfile) (*PortProfile, error)
 	DeletePortProfile(ctx context.Context, id string) error
 
+	// Devices (legacy /stat/device read, /rest/device config write, /cmd/devmgr
+	// adopt/forget) — backs unifi_network_device and data.unifi_network_device.
+	ListDevices(ctx context.Context) ([]Device, error)
+	GetDevice(ctx context.Context, id string) (*Device, error)
+	GetDeviceByMAC(ctx context.Context, mac string) (*Device, error)
+	UpdateDevice(ctx context.Context, d *Device, ownedPortIdx []int) (*Device, error)
+	AdoptDevice(ctx context.Context, mac string) error
+	ForgetDevice(ctx context.Context, mac string) error
+
 	// Local DNS (v2 static-dns) — backs unifi_network_dns_record.
 	ListDNSRecords(ctx context.Context) ([]StaticDNSRecord, error)
 	GetDNSRecord(ctx context.Context, id string) (*StaticDNSRecord, error)

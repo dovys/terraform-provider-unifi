@@ -43,3 +43,17 @@ output "controller_version" {
 output "integration_writes_supported" {
   value = data.unifi_network_application_info.this.integration_writes
 }
+
+# Look up a device by MAC (or by id) to reference its telemetry without managing
+# it — e.g. to read an access point's current IP or firmware version.
+data "unifi_network_device" "ap" {
+  mac = "00:11:22:33:44:66"
+}
+
+output "ap_ip" {
+  value = data.unifi_network_device.ap.ip
+}
+
+output "ap_version" {
+  value = data.unifi_network_device.ap.version
+}
