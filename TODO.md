@@ -34,3 +34,29 @@ reads back as `null`, which fails the post-apply consistency check. Decide the
 general approach (per-field empty-write allow-list, or always-emit owned keys)
 once empty-string writes are confirmed acceptable per field on a live controller.
 See `docs/roadmap.md` open question #9.
+
+## Decide whether to keep the Integration (official) API at all
+
+The provider currently does dual auth: an Integration `X-API-KEY` session and a
+local-admin `username`+`password` (cookie+CSRF) session, with the router
+preferring the official Integration API where firmware supports a write and
+falling back to legacy/v2 otherwise (invariant #2). In practice the Integration
+API is **very limited** — most meaningful writes (networkconf, wlanconf, port
+profiles, firewall, …) only exist on the legacy/v2 surfaces, so a local admin
+account is effectively required for anything beyond reads. The API key buys us
+little today: a bit of read coverage (`/sites`, `application-info`) and local
+DNS routing that still falls back to v2.
+
+Decide whether the Integration path earns its complexity:
+- **Keep it** — the one-line-routing-change promise (invariant #2) is real and
+  cheap to retain; new official writes land with zero resource edits as Ubiquiti
+  expands the Integration API. The cost is a second transport + the capability
+  gating to maintain.
+- **Drop it** — make `username`+`password` the sole auth, delete the
+  `integration` transport / `X-API-KEY` config / router backend-flip machinery,
+  and simplify the docs and capability model. Re-add later if/when the official
+  API covers enough writes to matter.
+
+If we keep it, document plainly that the API key is optional and read-only-ish
+today (so users don't expect it to unlock writes). Revisit once we know how much
+of Phase 2/3 the Integration API can actually serve.
