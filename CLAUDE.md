@@ -44,7 +44,7 @@ Three surfaces: **Integration v1** (`/integration/v1`, `X-API-KEY`, firmware-gat
 zone-firewall, traffic, static-dns, ap-groups — note the **v2 write contract** in architecture.md).
 Client = `Client` interface + `integration`/`classic` transports (classic handles CSRF + ~2h JWT
 re-auth) + `router` + `capabilities` (version, feature flags, site name↔UUID). **Protect** reuses the
-same client + console key under `/proxy/protect/...` (see [docs/protect.md](docs/protect.md)). Cloud
+same client + console key under `/proxy/protect/...` (see [docs/apps/protect.md](docs/apps/protect.md)). Cloud
 Site Manager API out of scope.
 
 ## Resource recipe
@@ -57,7 +57,7 @@ Site Manager API out of scope.
    import key + state `id`.
 5. Example `.tf` + `import.sh`; `go generate`.
 6. Tests to the Definition of Done.
-7. Update `docs/resources.md` + `docs/roadmap.md` checklist.
+7. Update `docs/apps/network.md` + `docs/roadmap.md` checklist.
 
 ## Definition of Done
 Routes via `Client` · schema per recipe · unit tests (serialization/validators/plan-modifiers) ·

@@ -15,7 +15,7 @@ network to a clean plan (where instances exist) and pass CI.
 - **2 — Devices, ports, firewall, reservations:** `unifi_network_device` (adopt-if-needed + configure,
   port map; read-only `data.unifi_network_device`), `unifi_network_port_profile`; `unifi_network_wlan`, `unifi_network_ap_group`;
   `unifi_network_firewall_rule` (+ uniqueness guard), `unifi_network_firewall_group`; `unifi_network_dhcp_reservation`.
-  Import all 5 devices, 3 WLANs, 8 rules, 8 reservations.
+  Import the live devices, WLANs, firewall rules, and reservations clean.
 - **3 — Parity & long tail:** `user_group`, `radius_profile`/`radius_account`, `wlan_group`;
   `static_route`, `port_forward`, `dynamic_dns`; zone firewall (`firewall_zone`/`firewall_policy`),
   `traffic_rule`/`traffic_route` (tested on HIL); `setting_*` + generic `unifi_network_setting`.
@@ -26,7 +26,7 @@ network to a clean plan (where instances exist) and pass CI.
   doorbell fields feature-flag-gated; read-only `data.unifi_protect_camera`), `unifi_protect_light`/`_sensor`/`_chime`/`_viewer`,
   `unifi_protect_liveview`, `unifi_protect_nvr_settings`. Device config via official PATCH (Protect 5.3+);
   zones/NVR/users via legacy `/proxy/protect/api/`. **HIL-only** (not in the Docker controller). See
-  [protect.md](protect.md).
+  [apps/protect.md](apps/protect.md).
 
 ## Coverage checklist
 

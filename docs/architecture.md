@@ -18,7 +18,7 @@ firmware falls back to legacy/v2 automatically.
 
 **UniFi Protect** (cameras, doorbells, …) is **in scope** under the `unifi_protect_*` namespace — it
 reuses this client and the **same console API key** under `/proxy/protect/...` (analogous Integration
-+ legacy surfaces; see [protect.md](protect.md)). Out of scope: the cloud **Site Manager API**
++ legacy surfaces; see [apps/protect.md](apps/protect.md)). Out of scope: the cloud **Site Manager API**
 (`api.ui.com`, read-only) and the other UniFi OS apps (Access/Talk/Connect/InnerSpace) for now.
 
 ## 2. Client

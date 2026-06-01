@@ -53,7 +53,7 @@ locally reasonable, the sum betraying the design. This is the contract that keep
    for partly-owned docs); document the import key + state `id`.
 5. Example `.tf` + `import.sh`; `go generate` docs; state backend + hardware/firmware caveats.
 6. Tests to the Definition of Done.
-7. Update [resources.md](resources.md) + the [roadmap.md](roadmap.md) checklist.
+7. Update [apps/network.md](apps/network.md) + the [roadmap.md](roadmap.md) checklist.
 
 ## Definition of Done
 
@@ -70,7 +70,7 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 ## Long-horizon cadence
 
 - **Per release:** run the live-network import as a smoke test (owner opt-in) — the truest regression.
-- **Quarterly:** regenerate the local network fixture, diff against [my-network.md](my-network.md);
-  new paths/shapes become roadmap items.
+- **Quarterly:** regenerate the local network fixture; anything new it surfaces (API paths, object
+  shapes, resource types) becomes a roadmap item.
 - **Capability watch:** when a Network version moves a write onto Integration, flip the routing policy
   + flag (invariant 2). Backend migrations stay invisible to users (no schema change / forced recreate).

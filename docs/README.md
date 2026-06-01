@@ -10,11 +10,10 @@ later) — against the latest UniFi APIs. Resources are **app-namespaced** (`uni
 | Doc | Covers |
 |-----|--------|
 | [architecture.md](architecture.md) | API surfaces, hybrid client, auth, per-resource backend routing, capability gating, safety. |
-| [resources.md](resources.md) | **Network** app resource & data-source catalog: the resource design and what we don't model. |
-| [protect.md](protect.md) | **Protect** app: cameras, doorbells, lights, sensors, chimes, viewers, liveviews, NVR settings — shares the client & key. |
+| [apps/network.md](apps/network.md) | **Network** app resource & data-source catalog: the resource design and what we don't model. |
+| [apps/protect.md](apps/protect.md) | **Protect** app: cameras, doorbells, lights, sensors, chimes, viewers, liveviews, NVR settings — shares the client & key. |
 | [devices-and-ports.md](devices-and-ports.md) | The device model (one adopt-and-configure resource + data source) and per-port config. |
 | [flows.md](flows.md) | Operator runbooks: add a device, VLAN, DHCP reservation, firewall rule, WLAN, import. |
-| [my-network.md](my-network.md) | The live network (a local, gitignored fixture) → coverage map, drift, migration order. |
 | [testing.md](testing.md) | Tiered tests: unit + Docker controller + gated hardware-in-the-loop. |
 | [development.md](development.md) | The long-term charter: invariants, the per-resource recipe, Definition of Done, docs hygiene. Condensed in [`CLAUDE.md`](../CLAUDE.md). |
 | [roadmap.md](roadmap.md) | Phases, coverage checklist, open questions. |
@@ -41,5 +40,5 @@ later) — against the latest UniFi APIs. Resources are **app-namespaced** (`uni
 - Client/end-user device inventory, presence, or blocking.
 - Cloud **Site Manager API** (`api.ui.com`, read-only).
 - The other UniFi OS apps — **Access, Talk, Connect, InnerSpace** — future `unifi_<app>_*` namespaces,
-  not in initial scope. (**Protect is in scope** — see [protect.md](protect.md).)
+  not in initial scope. (**Protect is in scope** — see [apps/protect.md](apps/protect.md).)
 - Drop-in state compatibility with existing third-party UniFi providers.

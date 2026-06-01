@@ -1,6 +1,6 @@
 # Operator flows
 
-End-to-end flows that define the expected UX; schemas in [resources.md](resources.md) must make
+End-to-end flows that define the expected UX; schemas in [apps/network.md](apps/network.md) must make
 them this clean.
 
 ## A — Join & configure a new device
@@ -86,4 +86,6 @@ hardware (see [testing.md](testing.md)).
    everything else stores the controller `_id`. Each resource's docs state its import key.
 4. `plan` until empty — and a **second** consecutive plan is also empty (the round-trip bar).
 
-Full dependency-ordered import plan: [my-network.md](my-network.md).
+Dependency order for importing a whole site: networks (LANs → WANs) → user_groups + ap_groups →
+wlans → devices → firewall_groups → firewall_rules → dhcp_reservations → dns_record → radius_profile
++ settings. The site is "fully managed" when `plan` over the whole config is empty.

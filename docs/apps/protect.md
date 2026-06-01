@@ -2,7 +2,7 @@
 
 Protect is a second UniFi OS app on the same console, so it reuses the **same client, host, and
 console API key** as Network — no new credentials. Resources are namespaced `unifi_protect_*`
-(see [README.md](README.md) app-namespacing). This is **Phase 5** ([roadmap.md](roadmap.md)); it
+(see [../README.md](../README.md) app-namespacing). This is **Phase 5** ([../roadmap.md](../roadmap.md)); it
 ships after the Network app is published.
 
 We model **infrastructure** (the cameras/sensors/NVR and their persistent config), not runtime media.
@@ -18,13 +18,13 @@ Analogous to Network's three surfaces, under `/proxy/protect/...`:
 | **WebSocket** | `/proxy/protect/ws/updates` | cookie | Live event stream. **Not used by the provider** — Terraform manages config, not an event feed. |
 
 The classic session (CSRF + ~2h JWT re-auth, local-admin requirement) is exactly the one in
-[architecture.md §3](architecture.md); Protect adds no new auth.
+[../architecture.md §3](../architecture.md); Protect adds no new auth.
 
 ## Resources
 
 Same device shape as Network — a single adopt-and-configure resource (plus an optional read-only
 data source) — because a camera is adopted hardware with mutable config (see
-[devices-and-ports.md](devices-and-ports.md) for the rationale).
+[../devices-and-ports.md](../devices-and-ports.md) for the rationale).
 
 | Resource | Backend | Notes |
 |----------|:------:|-------|
@@ -40,7 +40,7 @@ data source) — because a camera is adopted hardware with mutable config (see
 **Doorbells are cameras.** There is no separate doorbell device type; a doorbell is a camera whose
 `feature_flags.is_doorbell` is true. The doorbell-only attributes above are validated/sent **only**
 when that flag is set (plan-time diagnostic otherwise) — same capability-gating pattern as Network
-([architecture.md §5](architecture.md)).
+([../architecture.md §5](../architecture.md)).
 
 **Detection zones** (per-camera motion/smart-detect regions) live only in the legacy `/bootstrap`
 camera doc. If modeled, they're a nested attribute on `unifi_protect_camera` written via the legacy
@@ -62,4 +62,4 @@ app**, and there's no Protect simulator — so unlike Network there is no Tier-2
 runs against real Protect hardware (a console + one camera, ideally one doorbell for the flag-gated
 fields) on the self-hosted runner. Unit tests still cover model (de)serialization, the PATCH
 merge-and-mask logic, and the doorbell feature-flag gating. The testing matrix
-([testing.md](testing.md)) states this gap plainly — no claimed-but-absent coverage.
+([../testing.md](../testing.md)) states this gap plainly — no claimed-but-absent coverage.
