@@ -3,12 +3,12 @@
 page_title: "unifi_network_port_profile Resource - unifi"
 subcategory: ""
 description: |-
-  A UniFi switch-port profile (portconf, legacy /rest) — a reusable port configuration (VLAN behavior, PoE, port security, STP, 802.1X, rate limiting) applied to switch ports.
+  A UniFi switch-port profile (portconf) — a reusable port configuration (VLAN behavior, PoE, port security, STP, 802.1X, rate limiting) you assign to switch ports instead of editing each one. Port profiles predate the controller's v2 API and are served on the legacy /rest/portconf surface (there is no v2 equivalent on current firmware).
 ---
 
 # unifi_network_port_profile (Resource)
 
-A UniFi switch-port profile (`portconf`, legacy `/rest`) — a reusable port configuration (VLAN behavior, PoE, port security, STP, 802.1X, rate limiting) applied to switch ports.
+A UniFi switch-port profile (`portconf`) — a reusable port configuration (VLAN behavior, PoE, port security, STP, 802.1X, rate limiting) you assign to switch ports instead of editing each one. Port profiles predate the controller's v2 API and are served on the legacy `/rest/portconf` surface (there is no v2 equivalent on current firmware).
 
 
 
@@ -17,33 +17,33 @@ A UniFi switch-port profile (`portconf`, legacy `/rest`) — a reusable port con
 
 ### Required
 
-- `name` (String) Profile name.
+- `name` (String) Profile name (shown in the UniFi Port Manager).
 
 ### Optional
 
-- `autoneg` (Boolean) Auto-negotiate link speed/duplex.
-- `dot1x_ctrl` (String) 802.1X control mode (e.g. `auto`, `force_authorized`, `force_unauthorized`, `mac_based`).
-- `dot1x_idle_timeout` (Number) 802.1X idle timeout (seconds).
-- `egress_rate_limit_enabled` (Boolean) Enable an egress rate limit.
-- `egress_rate_limit_kbps` (Number) Egress rate limit in kbps (when enabled).
-- `excluded_network_ids` (Set of String) Tagged networks (`unifi_network_network` ids) to exclude when `tagged_vlan_mgmt = custom`.
-- `forward` (String) VLAN behavior: `all`, `native` (untagged only), `customize` (native + selected tagged), or `disabled`.
-- `full_duplex` (Boolean) Forced full duplex (when `autoneg = false`).
-- `isolation` (Boolean) Isolate this port from other isolated ports.
-- `lldpmed_enabled` (Boolean) Enable LLDP-MED.
-- `multicast_router_mode` (String) Multicast router mode.
-- `native_network_id` (String) Untagged/native network (`unifi_network_network` id).
-- `op_mode` (String) Port operation mode (e.g. `switch`, `mirror`, `aggregate`).
-- `poe_mode` (String) Power over Ethernet: typically `auto`, `pasv24` (passive 24V), `passthrough`, or `off` (varies by switch model).
-- `port_keepalive_enabled` (Boolean) Enable port keep-alive.
-- `port_security_enabled` (Boolean) Restrict the port to specific MAC addresses.
-- `port_security_mac_addresses` (Set of String) Allowed MAC addresses when `port_security_enabled = true`.
-- `speed` (Number) Forced link speed in Mbps (when `autoneg = false`).
-- `stp_bpdu_guard` (Boolean) Enable BPDU guard.
-- `stp_edge_state` (String) STP edge-port state (e.g. `auto`, `enabled`, `disabled`).
-- `stp_port_mode` (Boolean) Participate in spanning tree.
-- `tagged_vlan_mgmt` (String) Tagged-VLAN handling: `auto`, `block_all`, or `custom` (use `excluded_network_ids`).
-- `voice_network_id` (String) Voice VLAN network (`unifi_network_network` id).
+- `autoneg` (Boolean) Auto-negotiate link speed and duplex (the normal default). Set `false` to force `speed`/`full_duplex`.
+- `dot1x_ctrl` (String) 802.1X port access control: `force_authorized` (always open — the default), `auto` (require RADIUS authentication before the port forwards), `force_unauthorized` (always blocked), `mac_based` (authenticate each MAC individually, for devices that can't speak 802.1X), or `multi_host` (authenticate once, then allow other devices — e.g. PCs behind a VoIP phone).
+- `dot1x_idle_timeout` (Number) Seconds of inactivity before an authenticated 802.1X session is cleared.
+- `egress_rate_limit_enabled` (Boolean) Cap the port's outbound (egress) throughput at `egress_rate_limit_kbps`.
+- `egress_rate_limit_kbps` (Number) Egress (outbound) rate limit in kbps, applied when `egress_rate_limit_enabled = true`.
+- `excluded_network_ids` (Set of String) Tagged networks (`unifi_network_network` ids) to **block** on the trunk when `tagged_vlan_mgmt = custom`; every other VLAN is allowed through.
+- `forward` (String) VLAN forwarding mode for the port: `all` (trunk — carries every VLAN), `native` (access port — the untagged `native_network_id` only), `customize` (trunk carrying the native VLAN plus a chosen set of tagged VLANs, refined by `tagged_vlan_mgmt`/`excluded_network_ids`), or `disabled` (the port is administratively shut).
+- `full_duplex` (Boolean) Force full-duplex (rather than half-duplex) when `autoneg = false`.
+- `isolation` (Boolean) Port isolation: isolated ports can't talk to each other (only to uplinks). Use for untrusted guest/IoT ports.
+- `lldpmed_enabled` (Boolean) Advertise LLDP-MED so VoIP phones auto-discover their voice VLAN and QoS policy.
+- `multicast_router_mode` (String) How the port treats multicast-router (IGMP/MLD querier) traffic for multicast snooping.
+- `native_network_id` (String) Native (untagged) network (`unifi_network_network` id): frames arriving without a VLAN tag are placed on this network, and this network egresses untagged. On an access port it's the port's VLAN.
+- `op_mode` (String) Port operation mode: `switch` (normal switching, the default), `mirror` (SPAN — copy traffic to this port for packet capture), or `aggregate` (LACP link aggregation across multiple ports).
+- `poe_mode` (String) How the port supplies Power over Ethernet: `auto` (negotiate active PoE — 802.3af/at/bt — per the connected device), `pasv24` (always-on passive 24V, for legacy gear; only on switches that support it), `passthrough` (re-output the switch's own input PoE, on passthrough-capable models), or `off` (no power). Available values depend on the switch model.
+- `port_keepalive_enabled` (Boolean) Send link keep-alives on the port (helps some powered devices stay linked).
+- `port_security_enabled` (Boolean) Lock the port to a fixed MAC allow-list (`port_security_mac_addresses`); frames from other source MACs are dropped.
+- `port_security_mac_addresses` (Set of String) MAC addresses allowed on the port when `port_security_enabled = true`.
+- `speed` (Number) Forced link speed in Mbps (e.g. `10`, `100`, `1000`) when `autoneg = false`.
+- `stp_bpdu_guard` (Boolean) BPDU guard: shut the port if it receives a spanning-tree BPDU — protects an edge/access port against a rogue switch or accidental loop.
+- `stp_edge_state` (String) Edge-port (PortFast) behavior — skip STP listening/learning and forward immediately on link-up: `auto`, `enabled`, or `disabled`.
+- `stp_port_mode` (Boolean) Include the port in Spanning Tree (STP/RSTP) loop prevention.
+- `tagged_vlan_mgmt` (String) Which tagged VLANs the port trunks: `auto` (Allow All — every VLAN created in UniFi), `block_all` (Access Port — only the untagged `native_network_id` passes), or `custom` (trunk all VLANs *except* those listed in `excluded_network_ids`).
+- `voice_network_id` (String) Voice VLAN network (`unifi_network_network` id): a second tagged VLAN for VoIP phones, advertised to them via LLDP-MED so voice traffic is separated from the data VLAN.
 
 ### Read-Only
 
