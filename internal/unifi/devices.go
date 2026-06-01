@@ -60,31 +60,42 @@ type PortOverride struct {
 	Name       string `json:"name,omitempty"`
 	PoEMode    string `json:"poe_mode,omitempty"` // auto | pasv24 | passthrough | off
 
-	Forward                string   `json:"forward,omitempty"`
-	NativeNetworkConfID    string   `json:"native_networkconf_id,omitempty"`
-	TaggedVLANMgmt         string   `json:"tagged_vlan_mgmt,omitempty"`
-	ExcludedNetworkConfIDs []string `json:"excluded_networkconf_ids,omitempty"`
-	VoiceNetworkConfID     string   `json:"voice_networkconf_id,omitempty"`
+	// VLAN: Forward is the port's mode ("all" trunk / "native" access / "customize"
+	// selective trunk / "disabled"); NativeNetworkConfID is the untagged VLAN;
+	// TaggedVLANMgmt picks the trunked VLANs ("auto" all / "block_all" access /
+	// "custom" all-except-ExcludedNetworkConfIDs); VoiceNetworkConfID is the VoIP VLAN.
+	Forward                string   `json:"forward,omitempty"`                  // all | native | customize | disabled
+	NativeNetworkConfID    string   `json:"native_networkconf_id,omitempty"`    // untagged/native network (networkconf _id)
+	TaggedVLANMgmt         string   `json:"tagged_vlan_mgmt,omitempty"`         // auto (allow all) | block_all (access) | custom
+	ExcludedNetworkConfIDs []string `json:"excluded_networkconf_ids,omitempty"` // VLANs to block on the trunk when TaggedVLANMgmt=custom
+	VoiceNetworkConfID     string   `json:"voice_networkconf_id,omitempty"`     // voice VLAN (networkconf _id)
 
-	Autoneg    *bool `json:"autoneg,omitempty"`
-	Speed      *int  `json:"speed,omitempty"`
-	FullDuplex *bool `json:"full_duplex,omitempty"`
+	// Link: force Speed/FullDuplex when Autoneg is off.
+	Autoneg    *bool `json:"autoneg,omitempty"`     // auto-negotiate speed/duplex
+	Speed      *int  `json:"speed,omitempty"`       // forced link speed (Mbps) when autoneg off
+	FullDuplex *bool `json:"full_duplex,omitempty"` // forced full duplex when autoneg off
 
-	Isolation              *bool    `json:"isolation,omitempty"`
-	PortSecurityEnabled    *bool    `json:"port_security_enabled,omitempty"`
-	PortSecurityMACAddress []string `json:"port_security_mac_address,omitempty"`
-	Dot1XCtrl              string   `json:"dot1x_ctrl,omitempty"`
-	Dot1XIdleTimeout       *int     `json:"dot1x_idle_timeout,omitempty"`
-	EgressRateLimitEnabled *bool    `json:"egress_rate_limit_kbps_enabled,omitempty"`
-	EgressRateLimitKbps    *int     `json:"egress_rate_limit_kbps,omitempty"`
+	// Security/control: Isolation blocks inter-port traffic for untrusted ports;
+	// Dot1XCtrl is 802.1X access control (force_authorized default | auto require
+	// RADIUS | force_unauthorized | mac_based | multi_host); EgressRateLimit* caps
+	// outbound throughput.
+	Isolation              *bool    `json:"isolation,omitempty"`                      // isolate from other isolated ports
+	PortSecurityEnabled    *bool    `json:"port_security_enabled,omitempty"`          // lock to the MAC allow-list
+	PortSecurityMACAddress []string `json:"port_security_mac_address,omitempty"`      // allowed MACs when port security on
+	Dot1XCtrl              string   `json:"dot1x_ctrl,omitempty"`                     // auto | force_authorized | force_unauthorized | mac_based | multi_host
+	Dot1XIdleTimeout       *int     `json:"dot1x_idle_timeout,omitempty"`             // seconds before an authed 802.1X session is cleared
+	EgressRateLimitEnabled *bool    `json:"egress_rate_limit_kbps_enabled,omitempty"` // attr name drops the `_kbps_` infix
+	EgressRateLimitKbps    *int     `json:"egress_rate_limit_kbps,omitempty"`         // egress cap in kbps when enabled
 
-	STPPortMode  *bool  `json:"stp_port_mode,omitempty"`
-	STPBPDUGuard *bool  `json:"stp_bpdu_guard_enabled,omitempty"`
-	STPEdgeState string `json:"stp_edge_state,omitempty"`
+	// Spanning tree: STPBPDUGuard shuts the port on a received BPDU (rogue-switch/
+	// loop protection); STPEdgeState is PortFast-style edge behavior.
+	STPPortMode  *bool  `json:"stp_port_mode,omitempty"`          // participate in STP/RSTP
+	STPBPDUGuard *bool  `json:"stp_bpdu_guard_enabled,omitempty"` // shut the port on a received BPDU
+	STPEdgeState string `json:"stp_edge_state,omitempty"`         // auto | enabled | disabled (edge/PortFast)
 
-	LLDPMEDEnabled      *bool  `json:"lldpmed_enabled,omitempty"`
-	PortKeepaliveOn     *bool  `json:"port_keepalive_enabled,omitempty"`
-	MulticastRouterMode string `json:"multicast_router_mode,omitempty"`
+	LLDPMEDEnabled      *bool  `json:"lldpmed_enabled,omitempty"`        // advertise LLDP-MED (VoIP voice-VLAN/QoS auto-config)
+	PortKeepaliveOn     *bool  `json:"port_keepalive_enabled,omitempty"` // link keep-alives
+	MulticastRouterMode string `json:"multicast_router_mode,omitempty"`  // multicast-router (IGMP/MLD querier) handling
 }
 
 // ListDevices returns every device on the site (legacy /stat/device).
