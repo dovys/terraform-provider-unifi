@@ -181,3 +181,29 @@ func TestFirewallRule_Wire(t *testing.T) {
 		t.Errorf("state_new=&false should marshal to state_new:false; got %v (present=%v)", v, ok)
 	}
 }
+
+func TestUser_Wire(t *testing.T) {
+	// A reservation: mac + use_fixedip + fixed_ip ride along; telemetry/optional
+	// fields stay off so GET-merge-PUT leaves the controller's value.
+	on := true
+	m := toMap(t, User{MAC: "aa:bb:cc:dd:ee:01", UseFixedIP: &on, FixedIP: "10.0.0.10", NetworkID: "net1"})
+	if m["mac"] != "aa:bb:cc:dd:ee:01" || m["use_fixedip"] != true || m["fixed_ip"] != "10.0.0.10" {
+		t.Errorf("reservation fields wrong: %v", m)
+	}
+	for _, k := range []string{"_id", "site_id", "name", "local_dns_record", "local_dns_record_enabled", "hostname"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// A revert PUT carries use_fixedip=false but NOT mac (omitempty), so the
+	// merge can't clobber the controller's stored MAC.
+	off := false
+	m = toMap(t, User{ID: "u1", UseFixedIP: &off})
+	if v, ok := m["use_fixedip"]; !ok || v != false {
+		t.Errorf("use_fixedip=&false should marshal to false; got %v (present=%v)", v, ok)
+	}
+	if _, ok := m["mac"]; ok {
+		t.Errorf("empty mac must be omitted so a revert PUT preserves it; got %v", m["mac"])
+	}
+}

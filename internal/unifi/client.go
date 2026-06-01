@@ -73,6 +73,14 @@ type Client interface {
 	UpdateFirewallRule(ctx context.Context, r *FirewallRule) (*FirewallRule, error)
 	DeleteFirewallRule(ctx context.Context, id string) error
 
+	// Clients (legacy /rest/user) — the one client touchpoint, backing
+	// unifi_network_dhcp_reservation (find-or-create by MAC).
+	ListUsers(ctx context.Context) ([]User, error)
+	GetUser(ctx context.Context, id string) (*User, error)
+	GetUserByMAC(ctx context.Context, mac string) (*User, error)
+	CreateUser(ctx context.Context, u *User) (*User, error)
+	UpdateUser(ctx context.Context, u *User) (*User, error)
+
 	// Local DNS (v2 static-dns) — backs unifi_network_dns_record.
 	ListDNSRecords(ctx context.Context) ([]StaticDNSRecord, error)
 	GetDNSRecord(ctx context.Context, id string) (*StaticDNSRecord, error)
