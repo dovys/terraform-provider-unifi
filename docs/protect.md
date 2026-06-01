@@ -22,14 +22,14 @@ The classic session (CSRF + ~2h JWT re-auth, local-admin requirement) is exactly
 
 ## Resources
 
-Same device shape as Network — read / adopt / configure split — because a camera is adopted hardware
-with mutable config (see [devices-and-ports.md](devices-and-ports.md) for the rationale).
+Same device shape as Network — a single adopt-and-configure resource (plus an optional read-only
+data source) — because a camera is adopted hardware with mutable config (see
+[devices-and-ports.md](devices-and-ports.md) for the rationale).
 
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `data.unifi_protect_camera` | legacy `/bootstrap` → I | Read-only inventory: state, model, firmware, `feature_flags`, RTSP availability. |
-| `unifi_protect_camera_adoption` | I adopt / legacy | Adopt↔forget a camera, keyed by MAC. Destroy forgets (guard with `prevent_destroy`). |
-| `unifi_protect_camera` | **I PATCH** (GET-merge-PATCH) | Config overlay: `name`, `osd` (on-screen text/flags), `recording_settings` (mode/retention), `smart_detect` (person/vehicle/package), `mic_volume`, `video_mode`, `hdr`, `ir_led`. **Doorbell fields gated by `feature_flags.is_doorbell`:** `lcd_message`, `chime_duration`, `ring_settings`. |
+| `unifi_protect_camera` | I adopt + **PATCH** (GET-merge-PATCH) | One resource per camera, keyed by MAC: adopts if pending, then manages config — `name`, `osd` (on-screen text/flags), `recording_settings` (mode/retention), `smart_detect` (person/vehicle/package), `mic_volume`, `video_mode`, `hdr`, `ir_led`; **doorbell fields gated by `feature_flags.is_doorbell`:** `lcd_message`, `chime_duration`, `ring_settings`. Computed telemetry exposed. Destroy reverts config; `forget_on_destroy` opts into forget. |
+| `data.unifi_protect_camera` | legacy `/bootstrap` → I | Read-only lookup for an unmanaged camera: state, model, firmware, `feature_flags`, RTSP availability. |
 | `unifi_protect_light` | I PATCH | Floodlight: brightness, PIR sensitivity, light-on-motion schedule. |
 | `unifi_protect_sensor` | I PATCH | UP-Sense: motion/temperature/humidity/leak thresholds, mount type. |
 | `unifi_protect_chime` | I PATCH | Chime: volume, paired doorbell associations, ringtones. |

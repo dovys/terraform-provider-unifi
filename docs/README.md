@@ -12,7 +12,7 @@ later) — against the latest UniFi APIs. Resources are **app-namespaced** (`uni
 | [architecture.md](architecture.md) | API surfaces, hybrid client, auth, per-resource backend routing, capability gating, safety. |
 | [resources.md](resources.md) | **Network** app resource & data-source catalog: the resource design and what we don't model. |
 | [protect.md](protect.md) | **Protect** app: cameras, doorbells, lights, sensors, chimes, viewers, liveviews, NVR settings — shares the client & key. |
-| [devices-and-ports.md](devices-and-ports.md) | The device model (data source + adoption + configuration) and per-port config. |
+| [devices-and-ports.md](devices-and-ports.md) | The device model (one adopt-and-configure resource + data source) and per-port config. |
 | [flows.md](flows.md) | Operator runbooks: add a device, VLAN, DHCP reservation, firewall rule, WLAN, import. |
 | [my-network.md](my-network.md) | The live network (a local, gitignored fixture) → coverage map, drift, migration order. |
 | [testing.md](testing.md) | Tiered tests: unit + Docker controller + gated hardware-in-the-loop. |
@@ -28,7 +28,8 @@ later) — against the latest UniFi APIs. Resources are **app-namespaced** (`uni
   Dual auth; a **local admin account is effectively required** today.
 - **Coverage:** comprehensive — everything in the live network, plus first-class per-switch-port
   config.
-- **Devices:** modeled as `data.unifi_network_device` + `unifi_network_device_adoption` + `unifi_network_device_configuration`.
+- **Devices:** one `unifi_network_device` resource that adopts-if-needed and configures (plus a
+  read-only `data.unifi_network_device`); destroy reverts config and never forgets unless opted in.
   Client/end-user devices are **not** modeled — except fixed-IP DHCP reservations
   (`unifi_network_dhcp_reservation`).
 - **Framework:** `terraform-plugin-framework` (protocol v6), Go, hand-written typed client.

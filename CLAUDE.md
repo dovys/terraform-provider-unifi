@@ -15,9 +15,10 @@ clean-room, Registry `dovys/unifi`. Resources are **app-namespaced**: `unifi_net
    New Integration write later = one-line routing change, zero resource edits.
 3. **Capability-gate, don't assume firmware.** Missing capability → plan-time diagnostic (via
    `ModifyPlan`/`ValidateConfig`), never a raw 4xx.
-4. **Safe by default.** Devices split: `data.unifi_network_device` + `unifi_network_device_adoption` (destroy forgets
-   — guard with `prevent_destroy`) + `unifi_network_device_configuration` (destroy reverts overlay).
-   `attr_no_delete` → import/update-only, destroy = no-op state removal. Immutables `RequiresReplace`.
+4. **Safe by default.** One `unifi_network_device` resource adopts-if-needed + configures (+ read-only
+   `data.unifi_network_device`); **destroy reverts config, never forgets** unless `forget_on_destroy=true`
+   (guard with `prevent_destroy`). `attr_no_delete` → import/update-only, destroy = no-op state removal.
+   Immutables `RequiresReplace`.
 5. **Model infrastructure, not clients.** Only client touchpoint: `unifi_network_dhcp_reservation`
    (fixed-IP, find-or-create by MAC).
 6. **Read reconciles** (Computed vs configured; normalize; remove-on-404); `UseStateForUnknown` only

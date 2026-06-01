@@ -7,16 +7,12 @@ them this clean.
 
 1. Rack/power it so it reaches the controller → appears **pending** within ~1 min.
 2. Read its MAC from the label.
-3. Declare adoption + configuration:
+3. Declare one device resource:
    ```hcl
-   resource "unifi_network_device_adoption" "office_switch" {
+   resource "unifi_network_device" "office_switch" {
      mac               = "00:00:5e:00:53:03"   # example MAC (RFC 7042) — use the one on the label
      wait_for_adoption = "5m"
-     lifecycle { prevent_destroy = true }   # destroying this forgets the device
-   }
-   resource "unifi_network_device_configuration" "office_switch" {
-     device_id = unifi_network_device_adoption.office_switch.device_id
-     name      = "Office Switch"
+     name              = "Office Switch"
      port_overrides = {
        "1" = { name = "Uplink",   native_network_id = unifi_network_network.mgmt.id }
        "2" = { name = "Desk PoE", native_network_id = unifi_network_network.trusted.id, poe_mode = "auto" }
@@ -26,9 +22,9 @@ them this clean.
 4. `apply` → adopts, waits for provisioned, then GET-merge-PUTs name + ports.
 
 Variations: `wait_for_adoption = "10m"` lets you apply before powering on; default `0` errors if
-undiscovered (so success means real hardware). To skip TF-driven adoption, point `device_id` at
-`data.unifi_network_device.x.id`. Removing the configuration reverts the overlay (non-destructive); removing
-the adoption forgets the device.
+undiscovered (so success means real hardware). Destroying the resource reverts the config and leaves
+the device adopted; add `forget_on_destroy = true` (guard with `prevent_destroy`) only if you want
+destroy to forget it. To reference a device without managing it, use `data.unifi_network_device`.
 
 ## B — Add a VLAN
 ```hcl
@@ -82,10 +78,9 @@ hardware (see [testing.md](testing.md)).
 2. Write the resource block to match current config.
 3. `terraform import`:
    ```
-   terraform import unifi_network_network.mgmt                 0123456789abcdef01234567   # state id = _id (example)
-   terraform import unifi_network_device_adoption.gateway      00:00:5e:00:53:01          # MAC-keyed (example MAC)
-   terraform import unifi_network_device_configuration.gateway 00:00:5e:00:53:01
-   terraform import unifi_network_dns_record.host1             89abcdef0123456789abcdef
+   terraform import unifi_network_network.mgmt   0123456789abcdef01234567   # state id = _id (example)
+   terraform import unifi_network_device.gateway 00:00:5e:00:53:01          # MAC-keyed (example MAC)
+   terraform import unifi_network_dns_record.host1 89abcdef0123456789abcdef
    ```
    MAC-keyed resources store the MAC as state `id` and resolve MAC→`_id` via custom `ImportState`;
    everything else stores the controller `_id`. Each resource's docs state its import key.

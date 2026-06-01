@@ -12,8 +12,8 @@ network to a clean plan (where instances exist) and pass CI.
   `tfplugindocs`/`goreleaser`/manifest/`GNUmakefile`; **initial commit** (also unblocks web `/ultraplan`).
 - **1 — Core networking (v0.1):** `unifi_network_network`, `unifi_network_wan`, `unifi_network_dns_record` (v2), `site`;
   data sources `network` + `networks`, `site`, `application_info`. Import live VLANs + WANs + DNS clean.
-- **2 — Devices, ports, firewall, reservations:** `data.unifi_network_device` + `unifi_network_device_adoption` +
-  `unifi_network_device_configuration` (port map), `unifi_network_port_profile`; `unifi_network_wlan`, `unifi_network_ap_group`;
+- **2 — Devices, ports, firewall, reservations:** `unifi_network_device` (adopt-if-needed + configure,
+  port map; read-only `data.unifi_network_device`), `unifi_network_port_profile`; `unifi_network_wlan`, `unifi_network_ap_group`;
   `unifi_network_firewall_rule` (+ uniqueness guard), `unifi_network_firewall_group`; `unifi_network_dhcp_reservation`.
   Import all 5 devices, 3 WLANs, 8 rules, 8 reservations.
 - **3 — Parity & long tail:** `user_group`, `radius_profile`/`radius_account`, `wlan_group`;
@@ -22,8 +22,8 @@ network to a clean plan (where instances exist) and pass CI.
 - **4 — Publish:** `vpn_server`/`vpn_client`/`bgp`; optional standalone `unifi_network_device_port` (per-device
   mutex) if demanded; examples + `templates/`; Registry publish; flip public.
 - **5 — Protect app (`unifi_protect_*`):** reuse the existing client + console key under
-  `/proxy/protect/...`. `data.unifi_protect_camera` + `unifi_protect_camera_adoption` + `unifi_protect_camera`
-  (cameras + doorbells; doorbell fields feature-flag-gated), `unifi_protect_light`/`_sensor`/`_chime`/`_viewer`,
+  `/proxy/protect/...`. `unifi_protect_camera` (adopt-if-needed + configure; cameras + doorbells,
+  doorbell fields feature-flag-gated; read-only `data.unifi_protect_camera`), `unifi_protect_light`/`_sensor`/`_chime`/`_viewer`,
   `unifi_protect_liveview`, `unifi_protect_nvr_settings`. Device config via official PATCH (Protect 5.3+);
   zones/NVR/users via legacy `/proxy/protect/api/`. **HIL-only** (not in the Docker controller). See
   [protect.md](protect.md).
@@ -33,12 +33,12 @@ network to a clean plan (where instances exist) and pass CI.
 A resource is checkable only when it meets the Definition of Done ([development.md](development.md)).
 
 - [ ] network, wan, dns_record (v2), site — **P1**
-- [ ] device (data + adoption + configuration w/ port map), port_profile, wlan, ap_group,
+- [ ] device (single adopt+configure resource w/ port map), port_profile, wlan, ap_group,
       firewall_rule, firewall_group, dhcp_reservation — **P2**
 - [ ] user_group, radius_profile, radius_account, wlan_group, static_route, port_forward,
       dynamic_dns, firewall_zone, firewall_policy, traffic_rule, traffic_route, setting_* — **P3**
 - [ ] vpn_server, vpn_client, bgp, device_port (optional) — **P4**
-- [ ] protect_camera (data + adoption + configuration), protect_light, protect_sensor, protect_chime,
+- [ ] protect_camera (single adopt+configure resource), protect_light, protect_sensor, protect_chime,
       protect_viewer, protect_liveview, protect_nvr_settings — **P5**
 
 ## Open questions (don't block design)

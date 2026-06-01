@@ -16,11 +16,12 @@ locally reasonable, the sum betraying the design. This is the contract that keep
    evolution.
 3. **Capability-gate, don't assume firmware.** Missing capability → plan-time diagnostic, never a
    raw 4xx mid-apply.
-4. **Safe by default; danger is isolated + guarded.** Only `unifi_network_device_adoption` destroy is
-   destructive (forget). `attr_no_delete` objects are import/update-only. Immutables `RequiresReplace`.
+4. **Safe by default; danger is isolated + guarded.** `unifi_network_device` destroy reverts config and
+   keeps the device adopted; forgetting needs `forget_on_destroy = true`. `attr_no_delete` objects are
+   import/update-only. Immutables `RequiresReplace`.
 5. **Read reconciles, it doesn't blind-overwrite.** Refresh Computed; reconcile configured only when
    canonically different (normalize on read); remove-on-404. `UseStateForUnknown` only on
-   post-create-immutable values. Telemetry lives on data sources.
+   post-create-immutable values. Telemetry is **Computed-only** (so it never diffs).
 6. **The live network is the bar.** Every resource round-trips the real objects from the live
    network to a clean plan (and a second empty plan).
 7. **Comprehensive coverage is a floor.** Model the full UniFi Network feature surface; design

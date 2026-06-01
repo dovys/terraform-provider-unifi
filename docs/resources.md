@@ -29,12 +29,11 @@ Protect is in [protect.md](protect.md). Singular resources; plural for collectio
 ### Devices & ports (see [devices-and-ports.md](devices-and-ports.md))
 | Resource | Backend | Live | Notes |
 |----------|:------:|:----:|-------|
-| `unifi_network_device_adoption` | L / I adopt | 5 | Adopt↔forget, keyed by MAC. Destroy forgets (guarded). |
-| `unifi_network_device_configuration` | L (GET-merge-PUT) | 5 | Config overlay: `name`, `led_override`, `mgmt_network_id`, `port_overrides` (**Map keyed by port number**). Owned-field allowlist. |
+| `unifi_network_device` | L (GET-merge-PUT) + I adopt | 5 | One resource per device, keyed by MAC: adopts if pending, manages config (`name`, `led_override`, `mgmt_network_id`, `port_overrides` — **Map keyed by port number**; owned-field allowlist), exposes computed telemetry. Destroy reverts config; `forget_on_destroy` opts into forget. |
 | `unifi_network_port_profile` | L | 0 | Reusable `portconf`, referenced by `port_overrides[*].port_profile_id`. |
 
-Device telemetry/existence is the read-only `data.unifi_network_device`. No standalone per-port resource
-(the device-doc write would race); ports are managed inline as a map.
+There's also a read-only `data.unifi_network_device` for referencing a device you don't manage. No
+standalone per-port resource (the device-doc write would race); ports are managed inline as a map.
 
 ### Firewall & traffic
 | Resource | Backend | Live | Notes |
@@ -88,8 +87,8 @@ Delete = revert-to-default or no-op; Read never 404s. Single-ownership enforced 
 
 ## Coverage & deliberate design choices
 
-Built for the full feature surface, with intentional shapes: `device` → data + adoption +
-configuration (inline port map); per-client config → `unifi_network_dhcp_reservation`; `dns_record` → v2;
+Built for the full feature surface, with intentional shapes: `device` → one adopt-and-configure
+resource + read-only data source (inline port map); per-client config → `unifi_network_dhcp_reservation`; `dns_record` → v2;
 `setting` → typed + generic; `rule_index` allows the controller's full range. Also modeled:
 `user_group`, `ap_group`, `wlan_group`, `firewall_zone`, `firewall_policy`, `traffic_rule`, and richer
 data sources. `bgp`/`vpn_*` are later-phase.

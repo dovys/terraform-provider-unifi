@@ -46,9 +46,7 @@ we may clean-room codegen that surface.
 | networks/VLANs, WAN | integration `GET /networks` → legacy | **legacy** `/rest/networkconf` |
 | WLAN, WLAN group | legacy `/rest/wlanconf`, `/rest/wlangroup` | legacy |
 | AP group | **v2** `/apgroups` | **v2** |
-| device (read) | legacy `/stat/device` → `data.unifi_network_device` | — |
-| device adoption | legacy `/stat/device` | integration `POST /devices/adopt` **or** legacy `/cmd/devmgr` |
-| device config + ports | legacy `/stat/device` | **legacy** `PUT /rest/device/<id>` (GET-merge-PUT, owned fields) |
+| device (adopt + config + ports) | legacy `/stat/device` (+ read-only `data.unifi_network_device`) | adopt: integration `POST /devices/adopt` **or** legacy `/cmd/devmgr`; config: **legacy** `PUT /rest/device/<id>` (GET-merge-PUT, owned fields) |
 | port profile | legacy `/rest/portconf` | legacy |
 | firewall group/rule (classic) | legacy `/rest/firewallgroup`,`/rest/firewallrule` | legacy |
 | firewall zone/policy, traffic rule/route | **v2** | **v2** |
@@ -112,10 +110,10 @@ surfaces) and the two are never mixed.
 ## 6. Safety / footgun prevention
 
 1. **No silent re-creates** — immutable fields use `RequiresReplace()`.
-2. **Danger isolated + guarded** — only `unifi_network_device_adoption` destroy forgets a device (guard with
-   `prevent_destroy`); `unifi_network_device_configuration` destroy reverts its overlay. `attr_no_delete`
-   objects (default network/WLAN group/user group) are import/update-only; destroy = no-op state
-   removal, not a hard error.
+2. **Danger isolated + guarded** — `unifi_network_device` destroy **reverts config and keeps the device
+   adopted**; forgetting requires `forget_on_destroy = true` (guard with `prevent_destroy`).
+   `attr_no_delete` objects (default network/WLAN group/user group) are import/update-only; destroy =
+   no-op state removal, not a hard error.
 3. **Capability gating** turns 4xx into plan-time diagnostics (§5).
 4. **Validators mirror the controller** — e.g. firewall `rule_index` allows the full range
    (migrated classic rules land in a high band like 20000+) with a plan-time duplicate-index guard.
