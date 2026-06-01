@@ -11,6 +11,15 @@ network surface is feature-complete._
 
 ### Added
 
+- **Phase 3 — Parity & long tail.** Filling out the remaining configurable
+  object types:
+  - `unifi_network_user_group` — a bandwidth/QoS group (`usergroup`, legacy
+    `/rest`) that caps the up/down rate (kbps) of the clients assigned to it.
+    Rate caps are `Optional+Computed` (omit, or set `0`, for unlimited).
+    GET-merge-PUT preserves controller-managed fields. The controller's
+    protected default group (`attr_no_delete`) is destroy-as-state-removal,
+    never a real delete. Imports by `_id`.
+
 - **Phase 2 — Wi-Fi.** SSIDs and the AP groups they broadcast on:
   - `unifi_network_wlan` — a Wi-Fi network/SSID (`wlanconf`, legacy `/rest`),
     modeling the configurable surface: security suite (`open`/`wpapsk`/`wpaeap`)

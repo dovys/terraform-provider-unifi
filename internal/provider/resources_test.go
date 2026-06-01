@@ -42,7 +42,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -694,6 +694,54 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 	// An unset optional string reads back null.
 	if !out.VoiceNetworkID.IsNull() {
 		t.Errorf("unset voice_network_id should read back null, got %v", out.VoiceNetworkID)
+	}
+}
+
+func TestUserGroup_RoundTrip(t *testing.T) {
+	// Config → wire: a capped group. Both rate fields ride along (including an
+	// explicit 0, the controller's unlimited sentinel).
+	m := &userGroupResourceModel{
+		ID:             types.StringNull(),
+		Name:           types.StringValue("Capped"),
+		QOSRateMaxUp:   types.Int64Value(5000),
+		QOSRateMaxDown: types.Int64Value(0),
+	}
+	g := m.toUserGroup()
+	if g.Name != "Capped" {
+		t.Errorf("name mapping wrong: %+v", g)
+	}
+	if g.QOSRateMaxUp == nil || *g.QOSRateMaxUp != 5000 {
+		t.Errorf("qos_rate_max_up should map to &5000, got %v", g.QOSRateMaxUp)
+	}
+	if g.QOSRateMaxDown == nil || *g.QOSRateMaxDown != 0 {
+		t.Errorf("explicit 0 must map to &0 (not nil), got %v", g.QOSRateMaxDown)
+	}
+
+	// An unconfigured cap stays nil so GET-merge-PUT leaves the controller's value.
+	m.QOSRateMaxUp = types.Int64Null()
+	if g := m.toUserGroup(); g.QOSRateMaxUp != nil {
+		t.Errorf("null qos_rate_max_up must map to nil, got %v", g.QOSRateMaxUp)
+	}
+
+	// Wire → state.
+	var out userGroupResourceModel
+	up, down := 10000, 20000
+	out.fromUserGroup(&unifi.UserGroup{ID: "ug9", Name: "Renamed", QOSRateMaxUp: &up, QOSRateMaxDown: &down})
+	if out.ID.ValueString() != "ug9" || out.Name.ValueString() != "Renamed" {
+		t.Errorf("fromUserGroup wrong: %+v", out)
+	}
+	if out.QOSRateMaxUp.ValueInt64() != 10000 || out.QOSRateMaxDown.ValueInt64() != 20000 {
+		t.Errorf("rate round-trip wrong: up=%v down=%v", out.QOSRateMaxUp, out.QOSRateMaxDown)
+	}
+	if out.AttrNoDelete.ValueBool() {
+		t.Errorf("attr_no_delete should read back false when the controller omits it, got true")
+	}
+
+	// The protected default group reads attr_no_delete = true (destroy → no-op).
+	protected := true
+	out.fromUserGroup(&unifi.UserGroup{ID: "default", Name: "Default", AttrNoDelete: &protected})
+	if !out.AttrNoDelete.ValueBool() {
+		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}
 }
 
