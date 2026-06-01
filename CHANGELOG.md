@@ -30,4 +30,11 @@ follows [Keep a Changelog](https://keepachangelog.com/); releases are tagged
     GitHub Actions for build/lint/unit plus a gated Docker-controller acceptance
     harness and an HIL stub.
 
+- **Toolchain & repo hardening.** Go floor raised to **1.26.3** (CI runs the
+  latest stable Go); dependencies updated to latest. The lint job builds
+  golangci-lint from source (`install-mode: goinstall`) so its Go always
+  satisfies the module directive. `main` is protected: PRs required, the
+  build/lint/unit checks are mandatory before merge, and merged branches
+  auto-delete.
+
 No resources or data sources yet — those begin in Phase 1 (core networking).

@@ -44,10 +44,13 @@ jobs:
           go-version: 'stable'
           cache: true
       # golangci-lint refuses to run when its build Go is older than the module's
-      # go directive; v2.12.2 is built with go1.26 (>= our 1.25.8 floor).
+      # go directive (go 1.26.3). install-mode goinstall builds golangci-lint
+      # from source with the setup-go toolchain (latest stable, >= our floor),
+      # so the binary's Go always satisfies the directive.
       - uses: golangci/golangci-lint-action@v7
         with:
           version: v2.12.2
+          install-mode: goinstall
 
   unit:
     name: unit tests

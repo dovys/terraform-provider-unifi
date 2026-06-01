@@ -49,6 +49,8 @@ provider "unifi" {
 
 ## Development
 
+Requires **Go 1.26.3+** (the `go.mod` floor); CI always runs the latest stable Go.
+
 ```bash
 make build   # go install
 make test    # unit tests (no controller)
