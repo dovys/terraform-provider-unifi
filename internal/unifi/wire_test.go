@@ -234,6 +234,71 @@ func TestUserGroup_Wire(t *testing.T) {
 	}
 }
 
+func TestRadiusProfile_Wire(t *testing.T) {
+	// name always rides along; the optional scalars/pointers are omitempty so a
+	// minimal profile leaves the controller's defaults untouched. The two server
+	// lists are NON-omitempty (full-replace), so they always appear.
+	m := toMap(t, RadiusProfile{Name: "Corp"})
+	if m["name"] != "Corp" {
+		t.Errorf("name = %v, want Corp", m["name"])
+	}
+	for _, k := range []string{"auth_servers", "acct_servers"} {
+		if _, ok := m[k]; !ok {
+			t.Errorf("full-replace list %q must always be present (non-omitempty); got %v", k, m)
+		}
+	}
+	for _, k := range []string{"_id", "site_id", "use_usg_auth_server", "use_usg_acct_server", "interim_update_enabled", "interim_update_interval", "vlan_enabled", "vlan_wlan_mode", "attr_no_delete", "attr_no_edit"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// A populated profile: the nested server object carries ip/port/x_secret, and
+	// an explicit false on the gateway toggle is sent (distinct from unset).
+	f := false
+	m = toMap(t, RadiusProfile{
+		Name:             "Corp",
+		AuthServers:      []RadiusServer{{IP: "10.0.0.9", Port: 1812, XSecret: "s"}},
+		AcctServers:      []RadiusServer{},
+		UseUSGAuthServer: &f,
+	})
+	servers, ok := m["auth_servers"].([]any)
+	if !ok || len(servers) != 1 {
+		t.Fatalf("auth_servers should be a 1-element list; got %v", m["auth_servers"])
+	}
+	s := servers[0].(map[string]any)
+	if s["ip"] != "10.0.0.9" || s["port"] != float64(1812) || s["x_secret"] != "s" {
+		t.Errorf("nested server wrong: %v", s)
+	}
+	if acct, ok := m["acct_servers"].([]any); !ok || len(acct) != 0 {
+		t.Errorf("explicit empty acct_servers should marshal to []; got %v", m["acct_servers"])
+	}
+	if v, ok := m["use_usg_auth_server"]; !ok || v != false {
+		t.Errorf("use_usg_auth_server=&false should marshal to false; got %v (present=%v)", v, ok)
+	}
+}
+
+func TestRadiusAccount_Wire(t *testing.T) {
+	// name always rides along; password/tunnel/vlan are omitempty so a minimal
+	// account stays minimal.
+	m := toMap(t, RadiusAccount{Name: "alice"})
+	if m["name"] != "alice" {
+		t.Errorf("name = %v, want alice", m["name"])
+	}
+	for _, k := range []string{"_id", "site_id", "x_password", "tunnel_type", "tunnel_medium_type", "vlan"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// A dynamic-VLAN account: password + tunnel attrs + vlan ride along.
+	tt, tm := 13, 6
+	m = toMap(t, RadiusAccount{Name: "alice", XPassword: "pw", TunnelType: &tt, TunnelMediumType: &tm, VLAN: "30"})
+	if m["x_password"] != "pw" || m["tunnel_type"] != float64(13) || m["vlan"] != "30" {
+		t.Errorf("account fields wrong: %v", m)
+	}
+}
+
 func TestPortProfile_Wire(t *testing.T) {
 	// name always rides along; the scalar optionals are omitempty so GET-merge-PUT
 	// leaves the controller's value untouched.

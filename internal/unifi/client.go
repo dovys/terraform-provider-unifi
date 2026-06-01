@@ -107,6 +107,20 @@ type Client interface {
 	UpdateUserGroup(ctx context.Context, g *UserGroup) (*UserGroup, error)
 	DeleteUserGroup(ctx context.Context, id string) error
 
+	// RADIUS profiles (legacy /rest/radiusprofile) — backs unifi_network_radius_profile.
+	ListRadiusProfiles(ctx context.Context) ([]RadiusProfile, error)
+	GetRadiusProfile(ctx context.Context, id string) (*RadiusProfile, error)
+	CreateRadiusProfile(ctx context.Context, p *RadiusProfile) (*RadiusProfile, error)
+	UpdateRadiusProfile(ctx context.Context, p *RadiusProfile) (*RadiusProfile, error)
+	DeleteRadiusProfile(ctx context.Context, id string) error
+
+	// RADIUS accounts (legacy /rest/account) — backs unifi_network_radius_account.
+	ListRadiusAccounts(ctx context.Context) ([]RadiusAccount, error)
+	GetRadiusAccount(ctx context.Context, id string) (*RadiusAccount, error)
+	CreateRadiusAccount(ctx context.Context, a *RadiusAccount) (*RadiusAccount, error)
+	UpdateRadiusAccount(ctx context.Context, a *RadiusAccount) (*RadiusAccount, error)
+	DeleteRadiusAccount(ctx context.Context, id string) error
+
 	// Sites.
 	ListSites(ctx context.Context) ([]Site, error)
 	CreateSite(ctx context.Context, description string) (*LegacySite, error)
