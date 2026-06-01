@@ -1,8 +1,9 @@
 # CLAUDE.md — terraform-provider-unifi
 
 Always-loaded operating instructions. Condensed form of [`docs/development.md`](docs/development.md);
-read that + [`docs/architecture.md`](docs/architecture.md) before coding. **Status: design phase — no
-code yet.** Full design in [`docs/`](docs/README.md).
+read that + [`docs/architecture.md`](docs/architecture.md) before coding. **Status: in development —
+Phase 0 base (provider scaffold + `internal/unifi` client) landed; resources build per
+[`docs/roadmap.md`](docs/roadmap.md).** Full design in [`docs/`](docs/README.md).
 
 A Terraform provider for **UniFi OS** (Network + Protect today; Access/others later), latest APIs,
 clean-room, Registry `dovys/unifi`. Resources are **app-namespaced**: `unifi_network_*`, `unifi_protect_*`, ….

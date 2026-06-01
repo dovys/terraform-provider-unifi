@@ -1,0 +1,8 @@
+# Keep golangci-lint v2's default set (errcheck, govet, ineffassign, staticcheck,
+# unused) and add a spelling check. Formatting (gofmt -s) is enforced by the
+# `build` CI job, not here.
+version: "2"
+
+linters:
+  enable:
+    - misspell

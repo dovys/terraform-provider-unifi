@@ -1,0 +1,75 @@
+name: acceptance
+
+# Acceptance tests are expensive and need a controller, so they are manual
+# (and optionally nightly). Tier 2 runs against the Docker controller (legacy +
+# v2 surfaces); Tier 3 runs against real gear / UniFi OS Server on a self-hosted
+# runner (Integration writes, radios). See docs/testing.md.
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: 'Which tier to run'
+        type: choice
+        default: tier2
+        options: [tier2, tier3]
+  schedule:
+    - cron: '0 6 * * *' # nightly Tier 2
+
+permissions:
+  contents: read
+
+jobs:
+  tier2-docker:
+    name: Tier 2 — Docker controller (legacy/v2)
+    if: github.event_name == 'schedule' || github.event.inputs.tier == 'tier2'
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      controller:
+        image: lscr.io/linuxserver/unifi-network-application:latest
+        env:
+          PUID: '1000'
+          PGID: '1000'
+          MONGO_HOST: mongo
+          MONGO_PORT: '27017'
+          MONGO_DBNAME: unifi
+        ports:
+          - 8443:8443
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - name: Wait for controller
+        run: |
+          for i in $(seq 1 60); do
+            if curl -ksf https://localhost:8443/status >/dev/null; then
+              echo "controller is up"; exit 0
+            fi
+            sleep 5
+          done
+          echo "controller did not become ready"; exit 1
+      # NOTE: bootstrapping a headless local admin + enabling simulation mode,
+      # and the acceptance tests themselves, land with Phase 1 resources. Until
+      # then this job validates that the controller harness boots.
+      - name: Acceptance tests
+        env:
+          TF_ACC: '1'
+          UNIFI_HOST: https://localhost:8443
+          UNIFI_INSECURE: 'true'
+        run: go test ./... -timeout 60m
+
+  tier3-hil:
+    name: Tier 3 — hardware-in-the-loop (stub)
+    if: github.event.inputs.tier == 'tier3'
+    # Requires a self-hosted runner with UniFi OS Server or real gear.
+    # Labelled here; enable the runner before dispatching tier3.
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Tier 3 (HIL) runs on a self-hosted runner with real UniFi gear."
+          echo "Wired up alongside Integration-API resources; see docs/testing.md."

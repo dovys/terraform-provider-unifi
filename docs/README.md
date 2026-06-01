@@ -1,7 +1,8 @@
 # terraform-provider-unifi — Design Docs
 
-> **Status: design / planning. No provider code exists yet.** These docs describe the **current
-> intended design** (not its history). Implementation starts after review.
+> **Status: in development.** Phase 0 (the base — provider scaffold + `internal/unifi` client:
+> transports, router, capabilities, `Configure` probe) has landed; resources are built phase by phase
+> ([roadmap.md](roadmap.md)). These docs describe the **current intended design** (not its history).
 
 Manages a **UniFi OS** console as code — **Network** and **Protect** today (Access and the other apps
 later) — against the latest UniFi APIs. Resources are **app-namespaced** (`unifi_network_*`,

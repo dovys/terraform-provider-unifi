@@ -32,6 +32,8 @@ network to a clean plan (where instances exist) and pass CI.
 
 A resource is checkable only when it meets the Definition of Done ([development.md](development.md)).
 
+- [x] base: provider scaffold, dual-auth client (legacy/v2/Integration transports behind `Client`),
+      capability-aware `router`, `Configure` capability probe, CI + release tooling — **P0**
 - [ ] network, wan, dns_record (v2), site — **P1**
 - [ ] device (single adopt+configure resource w/ port map), port_profile, wlan, ap_group,
       firewall_rule, firewall_group, dhcp_reservation — **P2**

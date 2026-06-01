@@ -1,0 +1,61 @@
+name: test
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build & vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go build ./...
+      - run: go vet ./...
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -s -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "These files are not gofmt-ed:"; echo "$unformatted"
+            echo "Run: gofmt -s -w ."
+            exit 1
+          fi
+
+  lint:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.1.6
+
+  unit:
+    name: unit tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go test ./... -timeout 120s -coverprofile=coverage.out
+      - run: go tool cover -func=coverage.out | tail -1
