@@ -3,8 +3,14 @@
 # WAN uplinks are fixed in hardware: IMPORT the existing WAN/WAN2 and manage
 # their config, don't create them. The `import` blocks bring them into state on
 # the next `terraform apply` (Terraform 1.5+; see
-# https://spacelift.io/blog/terraform-import-block). Replace the ids with your
-# controller's networkconf `_id`s — find them with the data sources in ../data.
+# https://spacelift.io/blog/terraform-import-block).
+#
+# Each import `id` is the WAN's controller object id (`_id`, a 24-char hex
+# string). Two ways to find it:
+#   * run the example in ../data and read its `network_ids` output — a
+#     name => id map — and copy the value for "WAN" / "WAN2"; or
+#   * in the UniFi Network app open Settings → Internet → the WAN, and copy the
+#     trailing segment of the browser URL (…/settings/internet/<id>).
 #
 # wan-dhcp.tf / wan-pppoe.tf / wan-static.tf are alternatives for the same
 # primary uplink — apply the one that matches your ISP.

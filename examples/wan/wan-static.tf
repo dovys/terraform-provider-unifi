@@ -1,8 +1,12 @@
 # Static-IP WAN — an ISP-assigned fixed address.
 #
 # WAN uplinks are fixed in hardware: IMPORT the existing WAN and manage its
-# config rather than creating it. Replace the id with your controller's
-# networkconf `_id` (find it with the data sources in ../data).
+# config rather than creating it (Terraform 1.5+).
+#
+# The import `id` is the WAN's controller object id (`_id`, a 24-char hex
+# string): run the example in ../data and read its `network_ids` output (a
+# name => id map), or open Settings → Internet → the WAN in the UniFi app and
+# copy the trailing segment of the browser URL (…/settings/internet/<id>).
 #
 # wan-dhcp.tf / wan-pppoe.tf / wan-static.tf are alternatives for the same
 # primary uplink — apply the one that matches your ISP.

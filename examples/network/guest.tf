@@ -9,8 +9,12 @@
 # The main LAN usually already exists as the controller's built-in "Default"
 # network — import it rather than creating a duplicate (Terraform 1.5+; see
 # https://spacelift.io/blog/terraform-import-block). The guest and cameras VLANs
-# below are new, so they're created normally. Replace the id with your
-# controller's networkconf `_id` (find it with the data sources in ../data).
+# below are new, so they're created normally.
+#
+# The import `id` is the network's controller object id (`_id`, a 24-char hex
+# string): run the example in ../data and read its `network_ids` output (a
+# name => id map, e.g. the value for "Default"), or open Settings → Networks →
+# the network in the UniFi app and copy the trailing segment of the browser URL.
 import {
   to = unifi_network_network.main
   id = "661f3a9c2b4d5e0012ab34cd"

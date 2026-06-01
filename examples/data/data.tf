@@ -17,6 +17,14 @@ output "network_names" {
   value = [for n in data.unifi_network_networks.all.networks : n.name]
 }
 
+# Network name => controller id. These ids are what go in an `import {}` block's
+# `id` for unifi_network_network and unifi_network_wan (WANs are networkconf
+# documents too, so they appear here). Run `terraform apply` and read this
+# output, then copy the id you need.
+output "network_ids" {
+  value = { for n in data.unifi_network_networks.all.networks : n.name => n.id }
+}
+
 # Resolve the configured site (or pass `name` for another slug) to its UUID.
 data "unifi_network_site" "current" {}
 
