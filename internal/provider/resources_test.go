@@ -42,7 +42,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -742,6 +742,107 @@ func TestUserGroup_RoundTrip(t *testing.T) {
 	out.fromUserGroup(&unifi.UserGroup{ID: "default", Name: "Default", AttrNoDelete: &protected})
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default group")
+	}
+}
+
+func TestRadiusProfile_RoundTrip(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	authServers, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: radiusServerAttrTypes}, []radiusServerObject{
+		{IP: types.StringValue("10.0.0.9"), Port: types.Int64Value(1812), XSecret: types.StringValue("s3cret")},
+	})
+	diags.Append(d...)
+	if diags.HasError() {
+		t.Fatalf("building auth_servers: %v", diags)
+	}
+
+	m := &radiusProfileResourceModel{
+		ID:               types.StringNull(),
+		Name:             types.StringValue("Corp"),
+		AuthServers:      authServers,
+		AcctServers:      types.ListNull(types.ObjectType{AttrTypes: radiusServerAttrTypes}),
+		UseUSGAuthServer: types.BoolValue(false),
+		VLANWLANMode:     types.StringValue("optional"),
+	}
+	p := m.toRadiusProfile(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toRadiusProfile diags: %v", diags)
+	}
+	if p.Name != "Corp" || p.VLANWLANMode != "optional" {
+		t.Errorf("scalar mapping wrong: %+v", p)
+	}
+	if len(p.AuthServers) != 1 || p.AuthServers[0].IP != "10.0.0.9" || p.AuthServers[0].Port != 1812 || p.AuthServers[0].XSecret != "s3cret" {
+		t.Errorf("auth_servers mapping wrong: %+v", p.AuthServers)
+	}
+	// A null server list maps to a non-nil empty slice (full-replace clears it).
+	if p.AcctServers == nil || len(p.AcctServers) != 0 {
+		t.Errorf("null acct_servers must map to a non-nil empty slice, got %v", p.AcctServers)
+	}
+	if p.UseUSGAuthServer == nil || *p.UseUSGAuthServer {
+		t.Errorf("use_usg_auth_server should map to &false, got %v", p.UseUSGAuthServer)
+	}
+
+	// Wire → state.
+	var out radiusProfileResourceModel
+	out.fromRadiusProfile(ctx, &unifi.RadiusProfile{
+		ID: "rp9", Name: "Corp",
+		AuthServers: []unifi.RadiusServer{{IP: "10.0.0.9", Port: 1812, XSecret: "s3cret"}},
+		AcctServers: []unifi.RadiusServer{},
+	}, &diags)
+	if out.ID.ValueString() != "rp9" || out.Name.ValueString() != "Corp" {
+		t.Errorf("fromRadiusProfile wrong: %+v", out)
+	}
+	var servers []radiusServerObject
+	out.AuthServers.ElementsAs(ctx, &servers, false)
+	if len(servers) != 1 || servers[0].IP.ValueString() != "10.0.0.9" || servers[0].XSecret.ValueString() != "s3cret" {
+		t.Errorf("auth_servers round-trip wrong: %+v", servers)
+	}
+	// An empty controller list reads back as a non-null empty list (Computed).
+	if out.AcctServers.IsNull() || len(out.AcctServers.Elements()) != 0 {
+		t.Errorf("empty acct_servers should be a non-null empty list, got %v", out.AcctServers)
+	}
+	if out.AttrNoDelete.ValueBool() {
+		t.Errorf("attr_no_delete should read back false when omitted, got true")
+	}
+
+	// The protected default profile reads attr_no_delete = true.
+	protected := true
+	out.fromRadiusProfile(ctx, &unifi.RadiusProfile{ID: "default", Name: "Default", AttrNoDelete: &protected}, &diags)
+	if !out.AttrNoDelete.ValueBool() {
+		t.Errorf("attr_no_delete should round-trip true for the protected default profile")
+	}
+}
+
+func TestRadiusAccount_RoundTrip(t *testing.T) {
+	m := &radiusAccountResourceModel{
+		ID:               types.StringNull(),
+		Name:             types.StringValue("alice"),
+		Password:         types.StringValue("pw"),
+		TunnelType:       types.Int64Value(13),
+		TunnelMediumType: types.Int64Value(6),
+		VLAN:             types.StringValue("30"),
+	}
+	a := m.toRadiusAccount()
+	if a.Name != "alice" || a.XPassword != "pw" || a.VLAN != "30" {
+		t.Errorf("scalar mapping wrong: %+v", a)
+	}
+	if a.TunnelType == nil || *a.TunnelType != 13 || a.TunnelMediumType == nil || *a.TunnelMediumType != 6 {
+		t.Errorf("tunnel attrs mapping wrong: %+v", a)
+	}
+
+	// Write-only password: a read that doesn't echo it keeps the configured value.
+	out := radiusAccountResourceModel{Password: types.StringValue("keep-me")}
+	out.fromRadiusAccount(&unifi.RadiusAccount{ID: "ac9", Name: "alice", VLAN: "30"})
+	if out.ID.ValueString() != "ac9" {
+		t.Errorf("id round-trip wrong: %q", out.ID.ValueString())
+	}
+	if out.Password.ValueString() != "keep-me" {
+		t.Errorf("write-only password should be preserved on read, got %q", out.Password.ValueString())
+	}
+	// An unset tunnel attr reads back null, not 0.
+	if !out.TunnelType.IsNull() {
+		t.Errorf("unset tunnel_type should read back null, got %v", out.TunnelType)
 	}
 }
 

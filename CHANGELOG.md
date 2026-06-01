@@ -19,6 +19,20 @@ network surface is feature-complete._
     GET-merge-PUT preserves controller-managed fields. The controller's
     protected default group (`attr_no_delete`) is destroy-as-state-removal,
     never a real delete. Imports by `_id`.
+  - `unifi_network_radius_profile` — a RADIUS profile (`radiusprofile`, legacy
+    `/rest`) for WPA-Enterprise/802.1X: ordered `auth_servers`/`acct_servers`
+    lists (`{ip, port, x_secret}`, full-replace so removing a server drops it;
+    `x_secret` is `Sensitive`), the gateway built-in toggles
+    (`use_usg_auth_server`/`use_usg_acct_server`), accounting interim updates,
+    and RADIUS-assigned-VLAN behavior. GET-merge-PUT preserves controller-managed
+    fields; the protected default profile is destroy-as-state-removal. Imports
+    by `_id`.
+  - `unifi_network_radius_account` — a RADIUS user (`account`, legacy `/rest`)
+    served by the gateway's built-in server: username + write-only `password`
+    (`x_password`) and the dynamic-VLAN tunnel attributes (`tunnel_type`,
+    `tunnel_medium_type`, `vlan`). Modeled from documented behavior — the field
+    set is **HIL-unverified** (no live RADIUS users to confirm against; see
+    `TODO.md`). Imports by `_id`.
 
 - **Phase 2 — Wi-Fi.** SSIDs and the AP groups they broadcast on:
   - `unifi_network_wlan` — a Wi-Fi network/SSID (`wlanconf`, legacy `/rest`),

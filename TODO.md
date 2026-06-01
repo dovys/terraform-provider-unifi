@@ -37,6 +37,29 @@ rig (HIL) exists. Open items:
   network binds no port profiles and uses default PoE), so their exact key names
   and accepted values are unconfirmed. The rest of the `port_overrides` field set
   and types are recon-confirmed.
+- **RADIUS account (`/rest/account`) field set.** The live site has **zero**
+  RADIUS users, so `unifi_network_radius_account` is modeled from documented
+  controller behavior: `name`, `x_password`, and the dynamic-VLAN tunnel attrs
+  (`tunnel_type`, `tunnel_medium_type`, `vlan`). Confirm the exact keys, whether
+  `x_password` is echoed back on read (assumed write-only → preserved from
+  config), and the accepted tunnel values once an account can be created.
+- **RADIUS profile (`radiusprofile`) write-only fields.** The default profile
+  confirmed `name`, `auth_servers[]{ip,port,x_secret}`, `acct_servers`,
+  `use_usg_auth_server`, `attr_no_edit/attr_no_delete`. The added
+  `use_usg_acct_server`, `interim_update_enabled`/`interim_update_interval`,
+  `vlan_enabled`, and `vlan_wlan_mode` (`disabled`/`optional`/`required`) are
+  documented but were not present on the default profile — confirm their exact
+  key names/enums once a profile can be written, and whether `x_secret` is
+  echoed (the round-trip currently assumes it is, unlike a write-only secret).
+
+## Cross-resource wiring follow-ups
+
+- **`unifi_network_wlan` → RADIUS profile.** A `wpaeap` SSID needs a
+  `radiusprofile_id` to bind to a `unifi_network_radius_profile`; the WLAN
+  resource exposes `radius_mac_auth_enabled`/`radius_das_enabled` but **not** the
+  profile reference yet. Add `radiusprofile_id` to `unifi_network_wlan` (and the
+  wired 802.1X port profile binding) so the RADIUS profiles are actually
+  referenceable from config.
 
 ## Import UX: friendlier keys than the controller `_id`
 
