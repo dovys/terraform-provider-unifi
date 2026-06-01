@@ -1,6 +1,7 @@
 # Device management use case: adopt-if-needed, then configure a switch — its
-# name, status LED, and a couple of ports. One port is pinned to the IoT access
-# profile from port-profile.tf; another has PoE cut for a non-powered device.
+# name, status LED, and a few ports. One port is pinned to the IoT access
+# profile from port-profile.tf; one is moved to a different VLAN inline (no
+# profile); another has PoE cut for a non-powered device.
 #
 # The device must already be visible to the controller (adopted, or pending
 # adoption — i.e. broadcasting). Terraform adopts it if needed, then applies the
@@ -20,6 +21,16 @@ resource "unifi_network_device" "garage_switch" {
     # Port 5: pin to the reusable IoT access profile (see port-profile.tf).
     "5" = {
       port_profile_id = unifi_network_port_profile.iot_access.id
+    }
+    # Port 7: move a single port to the IoT VLAN inline — an access port
+    # untagged on IoT, no tagged VLANs — without defining a reusable profile.
+    # Use this for a one-off; reach for a port_profile when several ports share
+    # the same policy.
+    "7" = {
+      name              = "Thermostat"
+      forward           = "native"
+      native_network_id = unifi_network_network.iot.id
+      tagged_vlan_mgmt  = "block_all"
     }
     # Port 6: a non-PoE appliance — cut power and label the port.
     "6" = {
