@@ -8,7 +8,16 @@ Tracked improvements that aren't blocking a phase. Phase-scoped work lives in
 The live console allows **read-only** recon, so anything that needs a real write
 to hardware — or hardware in a state we don't currently have — is modeled from
 read-only GETs + documented behavior and must be confirmed once a hardware test
-rig (HIL) exists. Open items:
+rig (HIL) exists.
+
+**Clean-room caveat:** for the HIL-unverified resources below, every field
+name/shape must be confirmed against the **actual controller API** (a live GET on
+a populated collection, or official Ubiquiti documentation) — never assumed from
+how a prior third-party provider modeled it. Where the live collection was empty,
+the shapes are a best-effort from the documented API contract and are explicitly
+provisional pending that clean-room verification.
+
+Open items:
 
 - **Port profile (`portconf`) wire shape.** The live site has **zero** custom
   port profiles, so `/rest/portconf` returned nothing to confirm against. The
@@ -88,6 +97,19 @@ rig (HIL) exists. Open items:
   `firewall_policy` once a zone-firewall-enabled controller is available, with a
   `ModifyPlan`/`ValidateConfig` gate that refuses to manage zone resources on a
   classic controller (and vice-versa for `firewall_rule`).
+
+## Settings — model as typed resources (not a generic blob)
+
+Site settings are ≈39 singleton `setting/<key>` documents (`ntp`, `mgmt`, `usg`,
+`guest_access`, `global_switch`, `mdns`, `ips`, `country`, `locale`, …; the
+`super_*` keys are console-internal and out of scope). A generic JSON-blob
+`unifi_network_setting` was **rejected** (2026-06-02) as a smell: it abandons the
+provider's typed-attributes + controller-mirroring-validators philosophy. Model
+the meaningful, user-facing settings as **typed, import/update-only** resources
+(they're singletons — no create/delete; destroy = state removal), each backed by
+`GET-merge-PUT` on `/rest/setting/<key>/<id>` so unmodeled fields survive. Pick
+the user-facing subset; confirm each field set against a live GET. This is a
+dedicated effort (its own phase/PR set), not part of the P3 stack.
 
 ## Cross-resource wiring follow-ups
 

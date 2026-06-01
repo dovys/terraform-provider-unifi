@@ -42,13 +42,17 @@ A resource is checkable only when it meets the Definition of Done ([development.
 - [x] device (single adopt+configure resource w/ port map) + data source, port_profile, wlan,
       ap_group, firewall_rule, firewall_group, dhcp_reservation — **P2**
       (device adopt/forget + config write are HIL-unverified; the read shape is recon-confirmed — see `TODO.md`)
-- [ ] **P3** parity & long tail — in progress:
+- [x] **P3** parity & long tail:
   - [x] user_group, radius_profile, radius_account, static_route, port_forward, dynamic_dns,
         wlan_group, traffic_rule, traffic_route
-  - [ ] setting_*
-  - **deferred:** firewall_zone, firewall_policy — the live controller runs the **classic**
-        firewall, so the zone-based v2 endpoints are empty and the classic-vs-zone capability
-        gate can't be verified; build once a zone-firewall controller is available (see `TODO.md`)
+  - **deferred — settings:** `setting_*` is its own sizable typed surface (≈39 singleton
+        `setting/<key>` docs). A generic JSON-blob `unifi_network_setting` was rejected as a smell
+        (abandons the provider's typed/validated philosophy); the meaningful settings should be
+        modeled as **typed** import/update-only resources in a dedicated effort (see `TODO.md`).
+  - **deferred — zone firewall:** firewall_zone, firewall_policy — the live controller runs the
+        **classic** firewall, so the zone-based v2 endpoints are empty and the classic-vs-zone
+        capability gate can't be verified; build once a zone-firewall controller is available
+        (see `TODO.md`)
 - [ ] vpn_server, vpn_client, bgp, device_port (optional) — **P4**
 - [ ] protect_camera (single adopt+configure resource), protect_light, protect_sensor, protect_chime,
       protect_viewer, protect_liveview, protect_nvr_settings — **P5**
