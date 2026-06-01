@@ -22,8 +22,15 @@ network to a clean plan (where instances exist) and pass CI.
 - **3 — Parity & long tail:** `user_group`, `radius_profile`/`radius_account`, `wlan_group`;
   `static_route`, `port_forward`, `dynamic_dns`; zone firewall (`firewall_zone`/`firewall_policy`),
   `traffic_rule`/`traffic_route` (tested on HIL); `setting_*` + generic `unifi_network_setting`.
-- **4 — Publish:** `vpn_server`/`vpn_client`/`bgp`; optional standalone `unifi_network_device_port` (per-device
-  mutex) if demanded; examples + `templates/`; Registry publish; flip public.
+- **4 — Long tail & release prep:** `vpn_server`/`vpn_client`/`bgp` are **deferred** — live recon found
+  no configured VPN (no `networkconf` VPN `purpose`; the `openvpn`/`ipsec`/`teleport`/
+  `magic_site_to_site_vpn` settings are near-empty global toggles) and **no** BGP REST/v2 surface or
+  `usg` field, so neither has a verifiable instance and no gateway hardware can enable them; modeling
+  them blind would break clean-room (invariant 7). Build once a configured VPN / a BGP-capable gateway
+  is on a HIL rig (see `TODO.md`). The standalone `unifi_network_device_port` resource is **not** built
+  — ports are managed inline via `unifi_network_device.port_overrides` (a per-port resource would race
+  the device write). **Registry publish + flip-public are out of scope** — the repo stays private; the
+  `0.1.0` network release ships as a private git tag + GoReleaser artifacts only, never the Registry.
 - **5 — Protect app (`unifi_protect_*`):** reuse the existing client + console key under
   `/proxy/protect/...`. `unifi_protect_camera` (adopt-if-needed + configure; cameras + doorbells,
   doorbell fields feature-flag-gated; read-only `data.unifi_protect_camera`), `unifi_protect_light`/`_sensor`/`_chime`/`_viewer`,
@@ -53,9 +60,17 @@ A resource is checkable only when it meets the Definition of Done ([development.
         **classic** firewall, so the zone-based v2 endpoints are empty and the classic-vs-zone
         capability gate can't be verified; build once a zone-firewall controller is available
         (see `TODO.md`)
-- [ ] vpn_server, vpn_client, bgp, device_port (optional) — **P4**
-- [ ] protect_camera (single adopt+configure resource), protect_light, protect_sensor, protect_chime,
-      protect_viewer, protect_liveview, protect_nvr_settings — **P5**
+- [x] **P4** long tail & release prep:
+  - **deferred — vpn_server, vpn_client, bgp:** no verifiable live instance (no configured VPN, no BGP
+        surface, no gateway hardware to enable either); build on a HIL rig once available (see `TODO.md`)
+  - **not built — device_port:** ports are managed inline via `unifi_network_device.port_overrides`;
+        a standalone per-port resource would race the device write
+  - **out of scope — Registry publish / flip public:** repo stays private; `0.1.0` is a private tag +
+        GoReleaser artifacts only
+- [ ] **P5/P6** Protect app (`unifi_protect_*`, ships as **0.2.0**): design ([apps/protect.md](apps/protect.md)),
+      then the client/transport base, then `protect_camera` (single adopt+configure resource),
+      `protect_light`, `protect_sensor`, `protect_chime`, `protect_viewer`, `protect_liveview`,
+      `protect_nvr_settings`. Read shapes recon-confirmed against Protect 7.1.69; writes HIL-flagged.
 
 ## Open questions (don't block design)
 

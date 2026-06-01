@@ -97,6 +97,23 @@ Open items:
   `firewall_policy` once a zone-firewall-enabled controller is available, with a
   `ModifyPlan`/`ValidateConfig` gate that refuses to manage zone resources on a
   classic controller (and vice-versa for `firewall_rule`).
+- **VPN server / VPN client (`vpn_server`/`vpn_client`) — deferred (P4).** Live
+  recon found **no** configured VPN: no `networkconf` carries a VPN `purpose`, and
+  the `openvpn`/`ipsec`/`teleport`/`magic_site_to_site_vpn` setting docs are
+  near-empty global toggles (a DH key, an IKEv2 method, an `enabled` flag, a
+  WireGuard keypair) — not the per-VPN field set. The full configurable surface
+  (vpn type, listen port, served subnet/pool, RADIUS binding, WireGuard peers,
+  OpenVPN options, IPsec proposals, site-to-site peer config) is **not
+  discoverable** without a configured instance, and there's no gateway hardware to
+  create one. Determine whether modern UniFi models these as `networkconf`
+  vpn-server/vpn-client purposes or as the per-key settings above (or both), then
+  model the confirmed field set, on a HIL rig with a real VPN configured. Defer
+  until then (invariant 7: live network is the bar — nothing to import clean).
+- **BGP (`bgp`) — deferred (P4).** No REST/v2 endpoint and no `usg` setting field
+  exposes BGP on the live console — UniFi BGP is an FRR-config-file feature on
+  specific gateways (UXG/UDM-SE/EFG), enabled per-gateway, not present here. Find
+  the actual API (config-blob upload vs a typed doc) on a BGP-capable gateway and
+  model it there; deferred until that hardware exists.
 
 ## Settings — model as typed resources (not a generic blob)
 

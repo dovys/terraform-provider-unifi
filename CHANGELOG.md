@@ -11,6 +11,22 @@ network surface is feature-complete._
 
 ### Added
 
+- **Phase 4 — long tail & release prep.** No new resources; the remaining P4
+  candidates are deferred against the live-network bar (invariant 7):
+  - `vpn_server`/`vpn_client` **deferred** — the live console has no configured
+    VPN (no `networkconf` VPN `purpose`; the `openvpn`/`ipsec`/`teleport`/
+    `magic_site_to_site_vpn` settings are near-empty global toggles), so the
+    per-VPN field surface isn't discoverable and there's no gateway hardware to
+    create one. Build on a HIL rig with a real VPN configured (see `TODO.md`).
+  - `bgp` **deferred** — no REST/v2 surface or `usg` field exposes BGP here; it's
+    an FRR-config feature on specific gateways. Build on BGP-capable hardware.
+  - `device_port` **not built** — switch ports are managed inline via
+    `unifi_network_device.port_overrides`; a standalone per-port resource would
+    race the device write.
+  - The Terraform Registry publish + public flip remain **out of scope** (the repo
+    stays private); the `0.1.0` network release is a private git tag + GoReleaser
+    artifacts only.
+
 - **Phase 3 — Parity & long tail.** Filling out the remaining configurable
   object types:
   - `unifi_network_user_group` — a bandwidth/QoS group (`usergroup`, legacy
