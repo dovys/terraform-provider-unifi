@@ -60,7 +60,7 @@ refuses to mix.
 ### Site & settings
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `unifi_network_site` | L | Site CRUD (`/cmd/sitemgr`). |
+| `unifi_network_site` | L | Site CRUD (`/cmd/sitemgr`). *Deferred past P1 — the sitemgr write shapes need a multi-site controller to verify; the read-only `data.unifi_network_site` ships in P1.* |
 | `unifi_network_setting_*` (`mgmt`, `usg`, `guest_access`, `ntp`, `ips`, `country`/`locale`, …) | L | Typed singletons for common keys. |
 | `unifi_network_setting` (generic) | L | Experimental escape hatch: `key` + normalized-JSON `value` for untyped keys. |
 

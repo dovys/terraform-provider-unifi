@@ -51,11 +51,13 @@ func TestDeriveFlags(t *testing.T) {
 		if f.IntegrationWrites != c.want {
 			t.Errorf("v=%s IntegrationWrites=%v, want %v", c.v, f.IntegrationWrites, c.want)
 		}
-		if f.IntegrationDNSPolicies != c.want {
-			t.Errorf("v=%s IntegrationDNSPolicies=%v, want %v", c.v, f.IntegrationDNSPolicies, c.want)
+		// Integration DNS isn't implemented yet, so it stays off regardless of
+		// firmware and local DNS stays on v2.
+		if f.IntegrationDNSPolicies {
+			t.Errorf("v=%s IntegrationDNSPolicies=true, want false (not implemented yet)", c.v)
 		}
-		if f.StaticDNSOnV2() == c.want {
-			t.Errorf("v=%s StaticDNSOnV2=%v, want %v (inverse of DNS policies)", c.v, f.StaticDNSOnV2(), !c.want)
+		if !f.StaticDNSOnV2() {
+			t.Errorf("v=%s StaticDNSOnV2=false, want true (local DNS stays on v2)", c.v)
 		}
 	}
 }

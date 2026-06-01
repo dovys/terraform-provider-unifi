@@ -47,8 +47,14 @@ func TestNewClient_Success(t *testing.T) {
 	if got := c.Capabilities().VersionRaw; got != "10.4.57" {
 		t.Errorf("VersionRaw = %q, want 10.4.57", got)
 	}
-	if got := c.Router().Backend(OpLocalDNS); got != BackendIntegration {
-		t.Errorf("local DNS backend = %s, want integration (10.4.57)", got)
+	// Local DNS stays on v2 even on 10.4.57: the Integration dns/policies write
+	// path isn't implemented yet (deriveFlags keeps IntegrationDNSPolicies off).
+	if got := c.Router().Backend(OpLocalDNS); got != BackendV2 {
+		t.Errorf("local DNS backend = %s, want v2 (Integration DNS not implemented)", got)
+	}
+	// Firmware-gated writes that ARE wired (adoption) route to Integration at 10.4.57.
+	if got := c.Router().Backend(OpDeviceAdopt); got != BackendIntegration {
+		t.Errorf("device adopt backend = %s, want integration (10.4.57)", got)
 	}
 }
 

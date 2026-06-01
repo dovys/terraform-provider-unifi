@@ -214,12 +214,21 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 // Resources registers the provider's managed resources. Populated per phase.
 func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewNetworkResource,
+		NewWANResource,
+		NewDNSRecordResource,
+	}
 }
 
 // DataSources registers the provider's data sources. Populated per phase.
 func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewNetworkDataSource,
+		NewNetworksDataSource,
+		NewSiteDataSource,
+		NewApplicationInfoDataSource,
+	}
 }
 
 // describeClientError maps a NewClient error to a user-facing diagnostic

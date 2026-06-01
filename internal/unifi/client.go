@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/transport"
 )
 
@@ -37,6 +38,27 @@ type Client interface {
 	// SiteID returns the Integration UUID for the configured site, or "" if the
 	// Integration API was unavailable or the slug was not found.
 	SiteID() string
+
+	// Networks (networkconf) — backs unifi_network_network and unifi_network_wan.
+	ListNetworks(ctx context.Context) ([]models.NetworkConf, error)
+	GetNetwork(ctx context.Context, id string) (*models.NetworkConf, error)
+	CreateNetwork(ctx context.Context, n *models.NetworkConf) (*models.NetworkConf, error)
+	UpdateNetwork(ctx context.Context, n *models.NetworkConf) (*models.NetworkConf, error)
+	DeleteNetwork(ctx context.Context, id string) error
+
+	// Local DNS (v2 static-dns) — backs unifi_network_dns_record.
+	ListDNSRecords(ctx context.Context) ([]models.StaticDNSRecord, error)
+	GetDNSRecord(ctx context.Context, id string) (*models.StaticDNSRecord, error)
+	CreateDNSRecord(ctx context.Context, r *models.StaticDNSRecord) (*models.StaticDNSRecord, error)
+	UpdateDNSRecord(ctx context.Context, r *models.StaticDNSRecord) (*models.StaticDNSRecord, error)
+	DeleteDNSRecord(ctx context.Context, id string) error
+
+	// Sites & application info.
+	ListSites(ctx context.Context) ([]models.Site, error)
+	CreateSite(ctx context.Context, description string) (*models.LegacySite, error)
+	UpdateSite(ctx context.Context, legacyID, description string) error
+	DeleteSite(ctx context.Context, legacyID string) error
+	GetApplicationInfo(ctx context.Context) (*models.ApplicationInfo, error)
 }
 
 type client struct {

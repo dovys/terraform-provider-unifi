@@ -58,8 +58,12 @@ func deriveFlags(v *version.Version) FeatureFlags {
 	}
 	writes := v.GreaterThanOrEqual(integrationWriteFloor)
 	return FeatureFlags{
-		IntegrationWrites:      writes,
-		IntegrationDNSPolicies: writes,
+		IntegrationWrites: writes,
+		// Local DNS stays on v2 /static-dns: the Integration dns/policies write
+		// path is not implemented yet, so firmware support alone must not flip
+		// OpLocalDNS to Integration. Enabling this is a one-line change here
+		// once that path lands (invariant #2).
+		IntegrationDNSPolicies: false,
 	}
 }
 

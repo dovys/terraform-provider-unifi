@@ -9,9 +9,12 @@ network to a clean plan (where instances exist) and pass CI.
 - **0 — Bootstrap:** scaffold (`terraform-provider-scaffolding-framework`, protocol v6); `internal/unifi`
   skeleton (`Client`, `classic` + `integration` transports, `router`, `capabilities`); provider
   config + auth + `Configure` probe; CI (unit + Docker-controller harness + stub HIL job);
-  `tfplugindocs`/`goreleaser`/manifest/`GNUmakefile`; **initial commit** (also unblocks web `/ultraplan`).
-- **1 — Core networking (v0.1):** `unifi_network_network`, `unifi_network_wan`, `unifi_network_dns_record` (v2), `site`;
+  `tfplugindocs`/`goreleaser`/manifest/`Makefile`; **initial commit** (also unblocks web `/ultraplan`).
+- **1 — Core networking (v0.1):** `unifi_network_network`, `unifi_network_wan`, `unifi_network_dns_record` (v2);
   data sources `network` + `networks`, `site`, `application_info`. Import live VLANs + WANs + DNS clean.
+  The `unifi_network_site` **resource** is deferred past P1: its `/cmd/sitemgr` write shapes can't be verified
+  against the single-site fixture (recipe step 1) — the read-only `site` data source ships now; the client
+  carries the sitemgr write methods for when a multi-site controller is available.
 - **2 — Devices, ports, firewall, reservations:** `unifi_network_device` (adopt-if-needed + configure,
   port map; read-only `data.unifi_network_device`), `unifi_network_port_profile`; `unifi_network_wlan`, `unifi_network_ap_group`;
   `unifi_network_firewall_rule` (+ uniqueness guard), `unifi_network_firewall_group`; `unifi_network_dhcp_reservation`.
@@ -34,7 +37,8 @@ A resource is checkable only when it meets the Definition of Done ([development.
 
 - [x] base: provider scaffold, dual-auth client (legacy/v2/Integration transports behind `Client`),
       capability-aware `router`, `Configure` capability probe, CI + release tooling — **P0**
-- [ ] network, wan, dns_record (v2), site — **P1**
+- [x] network, wan, dns_record (v2); data sources network/networks, site, application_info — **P1**
+      (`site` *resource* deferred: `/cmd/sitemgr` write shapes need a multi-site controller to verify)
 - [ ] device (single adopt+configure resource w/ port map), port_profile, wlan, ap_group,
       firewall_rule, firewall_group, dhcp_reservation — **P2**
 - [ ] user_group, radius_profile, radius_account, wlan_group, static_route, port_forward,
@@ -57,3 +61,11 @@ A resource is checkable only when it meets the Definition of Done ([development.
    which device-config writes (if any) the official Integration v1 covers vs legacy PATCH.
 8. **DHCP reservation wire shape** — confirm the raw `user` field is `fixedip` (one word) and that a
    fixed-IP write requires an accompanying `network_id`, before freezing the model.
+9. **Clearing owned `omitempty` fields on GET-merge-PUT.** `structToRawMap` drops zero-valued owned
+   fields, so the overlay can *set* but not *clear* a previously-set value by emitting `""` (affects
+   shrinking `dhcp_dns`/`dns_servers` and clearing `domain_name`). Optional+Computed hides this for the
+   common case (removing from config keeps the controller value); a full clear needs confirming on a
+   live controller that empty-string writes are accepted per field before emitting them.
+10. **WAN field mutability.** Whether `wan_type` (dhcp↔pppoe↔static) and `network_group` (WAN↔WAN2) are
+    editable in place or need `RequiresReplace` — confirm against a live controller before adding plan
+    modifiers (network `purpose` is known-immutable and already `RequiresReplace`).
