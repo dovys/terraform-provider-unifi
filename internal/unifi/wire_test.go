@@ -358,6 +358,35 @@ func TestPortForward_Wire(t *testing.T) {
 	}
 }
 
+func TestDynamicDNS_Wire(t *testing.T) {
+	// Every field is omitempty (no non-omitempty key), so an empty struct sends
+	// nothing; a populated one sends exactly the set keys.
+	m := toMap(t, DynamicDNS{})
+	for _, k := range []string{"_id", "site_id", "service", "host_name", "server", "login", "x_password", "interface"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	m = toMap(t, DynamicDNS{Service: "dyndns", HostName: "home.example.com", Login: "u", XPassword: "pw", Interface: "wan"})
+	if m["service"] != "dyndns" || m["host_name"] != "home.example.com" || m["x_password"] != "pw" {
+		t.Errorf("ddns fields wrong: %v", m)
+	}
+}
+
+func TestWLANGroup_Wire(t *testing.T) {
+	// name always rides along; the protection flags are omitempty.
+	m := toMap(t, WLANGroup{Name: "Guest APs"})
+	if m["name"] != "Guest APs" {
+		t.Errorf("name = %v, want Guest APs", m["name"])
+	}
+	for _, k := range []string{"_id", "site_id", "attr_no_delete", "attr_no_edit"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+}
+
 func TestPortProfile_Wire(t *testing.T) {
 	// name always rides along; the scalar optionals are omitempty so GET-merge-PUT
 	// leaves the controller's value untouched.

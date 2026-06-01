@@ -135,6 +135,20 @@ type Client interface {
 	UpdatePortForward(ctx context.Context, p *PortForward) (*PortForward, error)
 	DeletePortForward(ctx context.Context, id string) error
 
+	// Dynamic DNS (legacy /rest/dynamicdns) — backs unifi_network_dynamic_dns.
+	ListDynamicDNS(ctx context.Context) ([]DynamicDNS, error)
+	GetDynamicDNS(ctx context.Context, id string) (*DynamicDNS, error)
+	CreateDynamicDNS(ctx context.Context, d *DynamicDNS) (*DynamicDNS, error)
+	UpdateDynamicDNS(ctx context.Context, d *DynamicDNS) (*DynamicDNS, error)
+	DeleteDynamicDNS(ctx context.Context, id string) error
+
+	// WLAN groups (legacy /rest/wlangroup) — backs unifi_network_wlan_group.
+	ListWLANGroups(ctx context.Context) ([]WLANGroup, error)
+	GetWLANGroup(ctx context.Context, id string) (*WLANGroup, error)
+	CreateWLANGroup(ctx context.Context, g *WLANGroup) (*WLANGroup, error)
+	UpdateWLANGroup(ctx context.Context, g *WLANGroup) (*WLANGroup, error)
+	DeleteWLANGroup(ctx context.Context, id string) error
+
 	// Sites.
 	ListSites(ctx context.Context) ([]Site, error)
 	CreateSite(ctx context.Context, description string) (*LegacySite, error)
