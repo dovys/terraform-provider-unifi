@@ -6,3 +6,9 @@ version: "2"
 linters:
   enable:
     - misspell
+  settings:
+    misspell:
+      # `dynamicdns` is the controller's REST type (the `/rest/dynamicdns` doc),
+      # not a misspelling of "dynamics".
+      ignore-rules:
+        - dynamicdns
