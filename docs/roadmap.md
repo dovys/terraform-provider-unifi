@@ -31,11 +31,14 @@ network to a clean plan (where instances exist) and pass CI.
   — ports are managed inline via `unifi_network_device.port_overrides` (a per-port resource would race
   the device write). **Registry publish + flip-public are out of scope** — the repo stays private; the
   `0.1.0` network release ships as a private git tag + GoReleaser artifacts only, never the Registry.
-- **5 — Protect app (`unifi_protect_*`):** reuse the existing client + console key under
-  `/proxy/protect/...`. `unifi_protect_camera` (adopt-if-needed + configure; cameras + doorbells,
-  doorbell fields feature-flag-gated; read-only `data.unifi_protect_camera`), `unifi_protect_light`/`_sensor`/`_chime`/`_viewer`,
-  `unifi_protect_liveview`, `unifi_protect_nvr_settings`. Device config via official PATCH (Protect 5.3+);
-  zones/NVR/users via legacy `/proxy/protect/api/`. **HIL-only** (not in the Docker controller). See
+- **5 — Protect app (`unifi_protect_*`, ships as 0.2.0):** the private REST API the web UI uses
+  (`/proxy/protect/api/...`) over the **same cookie session** as Network — one session, **no `api_key`**;
+  the official Integration API is too limited for completeness, and per the either-or-per-resource rule
+  Protect commits to private REST (Integration stays a permitted-but-unused option, so invariant 2 holds).
+  Field schemas come from the **reverse-engineering** workstream ([reverse-engineering.md](reverse-engineering.md)),
+  not yet modeled. Resources: `unifi_protect_camera` (configure-existing + adopt-if-needed [HIL]; doorbells
+  are cameras; read-only `data.unifi_protect_camera`), `_light`/`_sensor`/`_chime`/`_viewer`, `_liveview`
+  (CRUD), `_nvr_settings` (singleton). **HIL-only writes** (no Protect in the Docker controller). See
   [apps/protect.md](apps/protect.md).
 
 ## Coverage checklist
@@ -67,10 +70,11 @@ A resource is checkable only when it meets the Definition of Done ([development.
         a standalone per-port resource would race the device write
   - **out of scope — Registry publish / flip public:** repo stays private; `0.1.0` is a private tag +
         GoReleaser artifacts only
-- [ ] **P5/P6** Protect app (`unifi_protect_*`, ships as **0.2.0**): design ([apps/protect.md](apps/protect.md)),
-      then the client/transport base, then `protect_camera` (single adopt+configure resource),
+- [ ] **P5/P6** Protect app (`unifi_protect_*`, ships as **0.2.0**): design ([apps/protect.md](apps/protect.md))
+      + the **reverse-engineering** workstream ([reverse-engineering.md](reverse-engineering.md)), then the
+      private-REST client/transport base over the cookie session (no `api_key`), then `protect_camera`,
       `protect_light`, `protect_sensor`, `protect_chime`, `protect_viewer`, `protect_liveview`,
-      `protect_nvr_settings`. Read shapes recon-confirmed against Protect 7.1.69; writes HIL-flagged.
+      `protect_nvr_settings`. Field schemas come from RE (private `/proxy/protect/api`); writes HIL-flagged.
 
 ## Open questions (don't block design)
 
