@@ -41,7 +41,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -415,5 +415,140 @@ func TestAPGroup_RoundTrip(t *testing.T) {
 	out.fromAPGroup(&unifi.APGroup{ID: "default", Name: "All APs", AttrNoDelete: &protected})
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default group")
+	}
+}
+
+func TestFirewallGroup_RoundTrip(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	// A null members set serializes as an explicit empty array (non-omitempty).
+	m := &firewallGroupResourceModel{
+		ID:      types.StringNull(),
+		Name:    types.StringValue("Servers"),
+		Type:    types.StringValue("address-group"),
+		Members: types.SetNull(types.StringType),
+	}
+	g := m.toFirewallGroup(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toFirewallGroup diags: %v", diags)
+	}
+	if g.Name != "Servers" || g.GroupType != "address-group" || g.GroupMembers == nil || len(g.GroupMembers) != 0 {
+		t.Errorf("null members must become an empty (non-nil) slice: %+v", g)
+	}
+
+	m.Members = sliceToStringSet([]string{"10.0.0.10", "10.0.0.0/24"})
+	g = m.toFirewallGroup(ctx, &diags)
+	if len(g.GroupMembers) != 2 {
+		t.Errorf("members mapping wrong: %v", g.GroupMembers)
+	}
+
+	var out firewallGroupResourceModel
+	out.fromFirewallGroup(&unifi.FirewallGroup{ID: "fg5", Name: "Ports", GroupType: "port-group", GroupMembers: []string{"443"}})
+	if out.ID.ValueString() != "fg5" || out.Type.ValueString() != "port-group" {
+		t.Errorf("fromFirewallGroup wrong: %+v", out)
+	}
+	var members []string
+	out.Members.ElementsAs(ctx, &members, false)
+	if len(members) != 1 || members[0] != "443" {
+		t.Errorf("members round-trip wrong: %v", members)
+	}
+}
+
+func TestFirewallRule_RoundTrip(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	m := &firewallRuleResourceModel{
+		ID:                  types.StringNull(),
+		Name:                types.StringValue("block-iot-to-lan"),
+		Enabled:             types.BoolValue(true),
+		Ruleset:             types.StringValue("LAN_IN"),
+		RuleIndex:           types.Int64Value(20010),
+		Action:              types.StringValue("drop"),
+		Protocol:            types.StringValue("all"),
+		Logging:             types.BoolValue(true),
+		StateNew:            types.BoolValue(true),
+		SrcFirewallGroupIDs: sliceToStringSet([]string{"fg-iot"}),
+		DstNetworkID:        types.StringValue("net-lan"),
+		// leave the rest null
+		ProtocolV6:          types.StringNull(),
+		ProtocolExcepted:    types.BoolNull(),
+		ICMPTypename:        types.StringNull(),
+		IPSec:               types.StringNull(),
+		StateEstablished:    types.BoolNull(),
+		StateRelated:        types.BoolNull(),
+		StateInvalid:        types.BoolNull(),
+		SrcAddress:          types.StringNull(),
+		SrcPort:             types.StringNull(),
+		SrcNetworkID:        types.StringNull(),
+		SrcNetworkType:      types.StringNull(),
+		DstAddress:          types.StringNull(),
+		DstPort:             types.StringNull(),
+		DstNetworkType:      types.StringNull(),
+		DstFirewallGroupIDs: types.SetNull(types.StringType),
+		SettingPreference:   types.StringNull(),
+	}
+	r := m.toFirewallRule(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toFirewallRule diags: %v", diags)
+	}
+	if r.Name != "block-iot-to-lan" || r.Ruleset != "LAN_IN" || r.Action != "drop" {
+		t.Errorf("scalar mapping wrong: %+v", r)
+	}
+	if r.RuleIndex == nil || *r.RuleIndex != 20010 {
+		t.Errorf("rule_index mapping wrong: %v", r.RuleIndex)
+	}
+	if r.Enabled == nil || !*r.Enabled || r.StateNew == nil || !*r.StateNew {
+		t.Errorf("bool mapping wrong: enabled=%v state_new=%v", r.Enabled, r.StateNew)
+	}
+	// Unset optionals stay nil/empty so GET-merge-PUT leaves the controller's value.
+	if r.SrcAddress != "" || r.ProtocolExcepted != nil || r.DstFirewallGroupIDs != nil {
+		t.Errorf("unset optionals must be empty/nil: src_address=%q excepted=%v dst_groups=%v", r.SrcAddress, r.ProtocolExcepted, r.DstFirewallGroupIDs)
+	}
+	if len(r.SrcFirewallGroupIDs) != 1 || r.SrcFirewallGroupIDs[0] != "fg-iot" {
+		t.Errorf("src_firewall_group_ids mapping wrong: %v", r.SrcFirewallGroupIDs)
+	}
+	if r.DstNetworkConfID != "net-lan" {
+		t.Errorf("dst_network_id mapping wrong: %q", r.DstNetworkConfID)
+	}
+
+	var out firewallRuleResourceModel
+	idx := 20010
+	out.fromFirewallRule(&unifi.FirewallRule{
+		ID: "fr9", Name: "block-iot-to-lan", Ruleset: "LAN_IN", RuleIndex: &idx, Action: "drop",
+		Enabled: boolPtrLit(true), SettingPreference: "manual", DstNetworkConfID: "net-lan",
+	})
+	if out.ID.ValueString() != "fr9" || out.RuleIndex.ValueInt64() != 20010 || out.SettingPreference.ValueString() != "manual" {
+		t.Errorf("fromFirewallRule wrong: %+v", out)
+	}
+	// An unset optional reads back null, not "".
+	if !out.SrcAddress.IsNull() {
+		t.Errorf("unset src_address should read back null, got %v", out.SrcAddress)
+	}
+}
+
+func TestRuleIndexConflict(t *testing.T) {
+	i1, i2 := 20000, 20001
+	rules := []unifi.FirewallRule{
+		{ID: "a", Name: "first", Ruleset: "LAN_IN", RuleIndex: &i1},
+		{ID: "b", Name: "second", Ruleset: "LAN_IN", RuleIndex: &i2},
+		{ID: "c", Name: "wan", Ruleset: "WAN_IN", RuleIndex: &i1},
+	}
+	// Same ruleset + index as an existing different rule → conflict.
+	if name, conflict := ruleIndexConflict(rules, "LAN_IN", 20000, ""); !conflict || name != "first" {
+		t.Errorf("expected conflict with %q, got name=%q conflict=%v", "first", name, conflict)
+	}
+	// Same index but different ruleset → no conflict.
+	if _, conflict := ruleIndexConflict(rules, "WAN_OUT", 20000, ""); conflict {
+		t.Errorf("different ruleset must not conflict")
+	}
+	// Updating the same rule (selfID excluded) → no conflict.
+	if _, conflict := ruleIndexConflict(rules, "LAN_IN", 20000, "a"); conflict {
+		t.Errorf("self must be excluded from the uniqueness check")
+	}
+	// A free index → no conflict.
+	if _, conflict := ruleIndexConflict(rules, "LAN_IN", 20099, ""); conflict {
+		t.Errorf("free index must not conflict")
 	}
 }

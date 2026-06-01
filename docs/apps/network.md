@@ -42,8 +42,8 @@ standalone per-port resource (the device-doc write would race); ports are manage
 ### Firewall & traffic
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `unifi_network_firewall_rule` | L | Classic rule. `rule_index` full range 0–99999 + plan-time uniqueness guard. Don't normalize controller-authored names. |
-| `unifi_network_firewall_group` | L | Address/port groups. |
+| `unifi_network_firewall_rule` | L (GET-merge-PUT) | Classic rule. `rule_index` validated `>= 0` (permissive) + apply-time uniqueness guard within a ruleset. Source/dest by address, port, network, or firewall group; connection-state match. Don't normalize controller-authored names. |
+| `unifi_network_firewall_group` | L (GET-merge-PUT) | Address/port groups (`address-group`/`port-group`/`ipv6-address-group`); immutable `type`; sends explicit empty `group_members`. |
 | `unifi_network_firewall_zone` / `unifi_network_firewall_policy` | V2 | Zone-based model (with ordering). |
 | `unifi_network_traffic_rule` / `unifi_network_traffic_route` | V2 | App/category rules; policy routing. |
 

@@ -26,9 +26,21 @@ network surface is feature-complete._
     sending an explicit empty `device_macs` array so clearing members empties the
     group. The controller's protected default group (`attr_no_delete`) is
     destroy-as-state-removal, never a real delete. Imports by `_id`.
+  - `unifi_network_firewall_group` — a reusable address/port group
+    (`firewallgroup`, legacy `/rest`): `address-group`, `port-group`, or
+    `ipv6-address-group`. Sends an explicit empty `group_members` array so a
+    group can be emptied; `type` is immutable. Imports by `_id`.
+  - `unifi_network_firewall_rule` — a classic firewall rule (`firewallrule`,
+    legacy `/rest`): ruleset/chain, evaluation index, action, protocol,
+    source/destination addresses, ports, networks and firewall groups, and
+    connection-state matching. The provider rejects a `rule_index` already used
+    within the same ruleset (uniqueness guard). GET-merge-PUT preserves
+    controller-managed fields. Imports by `_id`.
   - Examples: a smart-home scenario (`examples/network/wifi.tf`) with a WPA3-only
     home SSID, a WPA2/WPA3 guest SSID, and a 2.4 GHz IoT SSID bound to the
-    networks in `guest.tf`; passphrases via `Sensitive` variables.
+    networks in `guest.tf`; plus `examples/network/firewall.tf` blocking the IoT
+    VLAN from the trusted LAN via a firewall group + rule. Passphrases via
+    `Sensitive` variables.
 
 ## [0.0.1]
 
