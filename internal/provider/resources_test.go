@@ -41,7 +41,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -572,5 +572,40 @@ func TestRuleIndexConflict(t *testing.T) {
 	// A free index → no conflict.
 	if _, conflict := ruleIndexConflict(rules, "LAN_IN", 20099, ""); conflict {
 		t.Errorf("free index must not conflict")
+	}
+}
+
+func TestDHCPReservation_RoundTrip(t *testing.T) {
+	m := &dhcpReservationResourceModel{
+		ID:                    types.StringNull(),
+		MAC:                   types.StringValue("AA:BB:CC:DD:EE:01"), // mixed case
+		IPAddress:             types.StringValue("10.0.0.10"),
+		NetworkID:             types.StringValue("net1"),
+		Name:                  types.StringValue("nas"),
+		LocalDNSRecord:        types.StringNull(),
+		LocalDNSRecordEnabled: types.BoolNull(),
+	}
+	u := m.toUser()
+	if u.MAC != "aa:bb:cc:dd:ee:01" {
+		t.Errorf("mac should be lower-cased on the wire, got %q", u.MAC)
+	}
+	if u.UseFixedIP == nil || !*u.UseFixedIP {
+		t.Errorf("toUser must always assert use_fixedip=true for a reservation")
+	}
+	if u.FixedIP != "10.0.0.10" || u.NetworkID != "net1" || u.Name != "nas" {
+		t.Errorf("scalar mapping wrong: %+v", u)
+	}
+
+	// fromUser must NOT overwrite mac (immutable key, controller lowercases it),
+	// so a mixed-case config doesn't churn.
+	m.fromUser(&unifi.User{ID: "u9", MAC: "aa:bb:cc:dd:ee:01", FixedIP: "10.0.0.10", Hostname: "nas", NetworkID: "net1"})
+	if m.ID.ValueString() != "u9" {
+		t.Errorf("id round-trip wrong: %q", m.ID.ValueString())
+	}
+	if m.MAC.ValueString() != "AA:BB:CC:DD:EE:01" {
+		t.Errorf("fromUser must preserve the configured mac, got %q", m.MAC.ValueString())
+	}
+	if m.Hostname.ValueString() != "nas" {
+		t.Errorf("hostname should round-trip, got %q", m.Hostname.ValueString())
 	}
 }

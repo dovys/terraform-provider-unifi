@@ -36,11 +36,17 @@ network surface is feature-complete._
     connection-state matching. The provider rejects a `rule_index` already used
     within the same ruleset (uniqueness guard). GET-merge-PUT preserves
     controller-managed fields. Imports by `_id`.
-  - Examples: a smart-home scenario (`examples/network/wifi.tf`) with a WPA3-only
-    home SSID, a WPA2/WPA3 guest SSID, and a 2.4 GHz IoT SSID bound to the
-    networks in `guest.tf`; plus `examples/network/firewall.tf` blocking the IoT
-    VLAN from the trusted LAN via a firewall group + rule. Passphrases via
-    `Sensitive` variables.
+  - `unifi_network_dhcp_reservation` — a DHCP fixed-IP reservation (legacy
+    `/rest/user`), the one client-level object the provider manages. Find-or-create
+    by MAC (attaches to a client the controller already tracks); `terraform
+    destroy` clears the reservation rather than deleting the client record. Models
+    the address, network, alias, and an optional local-DNS companion record.
+    Imports by MAC (or `_id`).
+  - Examples (all under `examples/network/`): a smart-home scenario (`wifi.tf`)
+    with a WPA3-only home SSID, a WPA2/WPA3 guest SSID, and a 2.4 GHz IoT SSID
+    bound to the networks in `guest.tf`; `firewall.tf` blocking the IoT VLAN from
+    the trusted LAN via a firewall group + rule; `reservation.tf` pinning a NAS;
+    and the per-ISP WAN configs. Passphrases/secrets via `Sensitive` variables.
 
 ## [0.0.1]
 

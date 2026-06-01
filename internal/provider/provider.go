@@ -222,6 +222,7 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewAPGroupResource,
 		NewFirewallGroupResource,
 		NewFirewallRuleResource,
+		NewDHCPReservationResource,
 	}
 }
 

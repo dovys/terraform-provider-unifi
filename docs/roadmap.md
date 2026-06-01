@@ -59,15 +59,13 @@ A resource is checkable only when it meets the Definition of Done ([development.
 7. **Protect (P5):** exact PATCH field set per device type + which need legacy `/bootstrap` fallback;
    whether detection **zones** are in initial scope; confirm doorbell `feature_flags` names; confirm
    which device-config writes (if any) the official Integration v1 covers vs legacy PATCH.
-8. **DHCP reservation wire shape** — confirm the raw `user` field is `fixedip` (one word) and that a
-   fixed-IP write requires an accompanying `network_id`, before freezing the model.
-9. **Clearing owned `omitempty` fields on GET-merge-PUT.** `structToRawMap` drops zero-valued owned
+8. **Clearing owned `omitempty` fields on GET-merge-PUT.** `structToRawMap` drops zero-valued owned
    fields, so the overlay can *set* but not *clear* a plain `string`/`*bool` value by emitting its zero
    (affects clearing `domain_name`, `dhcp_gateway`, etc.). The DNS-slot lists (`dhcp_dns`/`dns_servers`/
    `ipv6_dns_servers`) are already handled — those slots are `*string`, so a shrunk list writes a non-nil
    `&""` to overwrite the freed slot. Optional+Computed hides the remaining cases for the common path
    (removing from config keeps the controller value); a full clear of the other fields needs confirming
    on a live controller that empty-string writes are accepted per field before emitting them.
-10. **WAN field mutability.** Whether `wan_type` (dhcp↔pppoe↔static) and `network_group` (WAN↔WAN2) are
+9. **WAN field mutability.** Whether `wan_type` (dhcp↔pppoe↔static) and `network_group` (WAN↔WAN2) are
     editable in place or need `RequiresReplace` — confirm against a live controller before adding plan
     modifiers (network `purpose` is known-immutable and already `RequiresReplace`).
