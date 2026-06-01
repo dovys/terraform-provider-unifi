@@ -208,6 +208,32 @@ func TestUser_Wire(t *testing.T) {
 	}
 }
 
+func TestUserGroup_Wire(t *testing.T) {
+	// name always rides along; the rate caps and attr_no_delete are omitempty so a
+	// minimal group (no caps) leaves the controller's defaults untouched.
+	m := toMap(t, UserGroup{Name: "Default"})
+	if m["name"] != "Default" {
+		t.Errorf("name = %v, want Default", m["name"])
+	}
+	for _, k := range []string{"_id", "site_id", "qos_rate_max_up", "qos_rate_max_down", "attr_no_delete"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// A capped group sends both rate fields, including an explicit 0 (the
+	// controller's unlimited sentinel is distinct from unset).
+	zero := 0
+	up := 5000
+	m = toMap(t, UserGroup{Name: "Capped", QOSRateMaxUp: &up, QOSRateMaxDown: &zero})
+	if m["qos_rate_max_up"] != float64(5000) {
+		t.Errorf("qos_rate_max_up = %v, want 5000", m["qos_rate_max_up"])
+	}
+	if v, ok := m["qos_rate_max_down"]; !ok || v != float64(0) {
+		t.Errorf("qos_rate_max_down=&0 should marshal to 0; got %v (present=%v)", v, ok)
+	}
+}
+
 func TestPortProfile_Wire(t *testing.T) {
 	// name always rides along; the scalar optionals are omitempty so GET-merge-PUT
 	// leaves the controller's value untouched.

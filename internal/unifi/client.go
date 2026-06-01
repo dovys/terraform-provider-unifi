@@ -100,6 +100,13 @@ type Client interface {
 	UpdateDNSRecord(ctx context.Context, r *StaticDNSRecord) (*StaticDNSRecord, error)
 	DeleteDNSRecord(ctx context.Context, id string) error
 
+	// User groups (legacy /rest/usergroup) — backs unifi_network_user_group.
+	ListUserGroups(ctx context.Context) ([]UserGroup, error)
+	GetUserGroup(ctx context.Context, id string) (*UserGroup, error)
+	CreateUserGroup(ctx context.Context, g *UserGroup) (*UserGroup, error)
+	UpdateUserGroup(ctx context.Context, g *UserGroup) (*UserGroup, error)
+	DeleteUserGroup(ctx context.Context, id string) error
+
 	// Sites.
 	ListSites(ctx context.Context) ([]Site, error)
 	CreateSite(ctx context.Context, description string) (*LegacySite, error)
