@@ -236,6 +236,20 @@ func TestConversionHelpers(t *testing.T) {
 	if sliceToStringList([]string{"a"}).IsNull() {
 		t.Error("sliceToStringList non-empty should not be null")
 	}
+
+	// sliceToStringSet distinguishes nil (field absent → null) from a non-nil
+	// empty slice (controller returned `[]` → empty set), so an attribute
+	// configured as `[]` reads back as `[]` and survives the consistency check.
+	if !sliceToStringSet(nil).IsNull() {
+		t.Error("sliceToStringSet(nil) should be null")
+	}
+	emptySet := sliceToStringSet([]string{})
+	if emptySet.IsNull() || len(emptySet.Elements()) != 0 {
+		t.Errorf("sliceToStringSet([]) should be a non-null empty set, got %v", emptySet)
+	}
+	if sliceToStringSet([]string{"a"}).IsNull() {
+		t.Error("sliceToStringSet non-empty should not be null")
+	}
 }
 
 func boolPtrLit(b bool) *bool { return &b }
@@ -447,6 +461,14 @@ func TestFirewallGroup_RoundTrip(t *testing.T) {
 	out.fromFirewallGroup(&unifi.FirewallGroup{ID: "fg5", Name: "Ports", GroupType: "port-group", GroupMembers: []string{"443"}})
 	if out.ID.ValueString() != "fg5" || out.Type.ValueString() != "port-group" {
 		t.Errorf("fromFirewallGroup wrong: %+v", out)
+	}
+
+	// An empty group (controller echoes `[]`) must read back as an empty set, not
+	// null — otherwise a `members = []` config trips the post-apply consistency check.
+	var empty firewallGroupResourceModel
+	empty.fromFirewallGroup(&unifi.FirewallGroup{ID: "fg6", Name: "Empty", GroupType: "address-group", GroupMembers: []string{}})
+	if empty.Members.IsNull() || len(empty.Members.Elements()) != 0 {
+		t.Errorf("empty group members should be a non-null empty set, got %v", empty.Members)
 	}
 	var members []string
 	out.Members.ElementsAs(ctx, &members, false)

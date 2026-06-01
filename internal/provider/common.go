@@ -126,9 +126,13 @@ func stringSetToSlice(ctx context.Context, s types.Set, diags *diag.Diagnostics)
 	return out
 }
 
-// sliceToStringSet builds a framework set of strings (null when empty).
+// sliceToStringSet builds a framework set of strings. A nil slice (the field was
+// absent on the wire) maps to null; a non-nil empty slice (the controller
+// returned an explicit `[]`) maps to an empty set — so an attribute configured
+// as `[]` reads back as `[]`, not null, and doesn't trip the post-apply
+// consistency check.
 func sliceToStringSet(items []string) types.Set {
-	if len(items) == 0 {
+	if items == nil {
 		return types.SetNull(types.StringType)
 	}
 	elems := make([]attr.Value, 0, len(items))
