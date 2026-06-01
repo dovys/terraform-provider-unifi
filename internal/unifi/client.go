@@ -45,6 +45,20 @@ type Client interface {
 	UpdateNetwork(ctx context.Context, n *NetworkConf) (*NetworkConf, error)
 	DeleteNetwork(ctx context.Context, id string) error
 
+	// WLANs (wlanconf) — backs unifi_network_wlan.
+	ListWLANs(ctx context.Context) ([]WLANConf, error)
+	GetWLAN(ctx context.Context, id string) (*WLANConf, error)
+	CreateWLAN(ctx context.Context, w *WLANConf) (*WLANConf, error)
+	UpdateWLAN(ctx context.Context, w *WLANConf) (*WLANConf, error)
+	DeleteWLAN(ctx context.Context, id string) error
+
+	// AP groups (v2 apgroups) — backs unifi_network_ap_group.
+	ListAPGroups(ctx context.Context) ([]APGroup, error)
+	GetAPGroup(ctx context.Context, id string) (*APGroup, error)
+	CreateAPGroup(ctx context.Context, g *APGroup) (*APGroup, error)
+	UpdateAPGroup(ctx context.Context, g *APGroup) (*APGroup, error)
+	DeleteAPGroup(ctx context.Context, id string) error
+
 	// Local DNS (v2 static-dns) — backs unifi_network_dns_record.
 	ListDNSRecords(ctx context.Context) ([]StaticDNSRecord, error)
 	GetDNSRecord(ctx context.Context, id string) (*StaticDNSRecord, error)
