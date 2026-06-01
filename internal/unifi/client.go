@@ -121,6 +121,20 @@ type Client interface {
 	UpdateRadiusAccount(ctx context.Context, a *RadiusAccount) (*RadiusAccount, error)
 	DeleteRadiusAccount(ctx context.Context, id string) error
 
+	// Static routes (legacy /rest/routing) — backs unifi_network_static_route.
+	ListStaticRoutes(ctx context.Context) ([]StaticRoute, error)
+	GetStaticRoute(ctx context.Context, id string) (*StaticRoute, error)
+	CreateStaticRoute(ctx context.Context, r *StaticRoute) (*StaticRoute, error)
+	UpdateStaticRoute(ctx context.Context, r *StaticRoute) (*StaticRoute, error)
+	DeleteStaticRoute(ctx context.Context, id string) error
+
+	// Port forwards (legacy /rest/portforward) — backs unifi_network_port_forward.
+	ListPortForwards(ctx context.Context) ([]PortForward, error)
+	GetPortForward(ctx context.Context, id string) (*PortForward, error)
+	CreatePortForward(ctx context.Context, p *PortForward) (*PortForward, error)
+	UpdatePortForward(ctx context.Context, p *PortForward) (*PortForward, error)
+	DeletePortForward(ctx context.Context, id string) error
+
 	// Sites.
 	ListSites(ctx context.Context) ([]Site, error)
 	CreateSite(ctx context.Context, description string) (*LegacySite, error)

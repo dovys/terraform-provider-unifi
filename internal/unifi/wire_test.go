@@ -299,6 +299,65 @@ func TestRadiusAccount_Wire(t *testing.T) {
 	}
 }
 
+func TestStaticRoute_Wire(t *testing.T) {
+	// name always rides along; every optional string/pointer is omitempty so a
+	// minimal route leaves the controller's defaults untouched.
+	m := toMap(t, StaticRoute{Name: "to-lab"})
+	if m["name"] != "to-lab" {
+		t.Errorf("name = %v, want to-lab", m["name"])
+	}
+	for _, k := range []string{"_id", "site_id", "enabled", "type", "static-route_network", "static-route_nexthop", "static-route_distance", "static-route_type", "static-route_interface"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// A nexthop route: the hyphenated controller keys and an explicit distance 0
+	// (a valid admin distance, distinct from unset) ride along.
+	zero := 0
+	on := true
+	m = toMap(t, StaticRoute{
+		Name: "to-lab", Enabled: &on, Type: "static-route",
+		Network: "192.168.50.0/24", NextHop: "10.0.0.254", RouteType: "nexthop-route", Distance: &zero,
+	})
+	if m["static-route_network"] != "192.168.50.0/24" || m["static-route_nexthop"] != "10.0.0.254" {
+		t.Errorf("route keys wrong: %v", m)
+	}
+	if m["type"] != "static-route" || m["static-route_type"] != "nexthop-route" {
+		t.Errorf("type discriminators wrong: %v", m)
+	}
+	if v, ok := m["static-route_distance"]; !ok || v != float64(0) {
+		t.Errorf("distance=&0 should marshal to 0; got %v (present=%v)", v, ok)
+	}
+}
+
+func TestPortForward_Wire(t *testing.T) {
+	// name always rides along; the optional scalars/pointers are omitempty.
+	m := toMap(t, PortForward{Name: "https"})
+	if m["name"] != "https" {
+		t.Errorf("name = %v, want https", m["name"])
+	}
+	for _, k := range []string{"_id", "site_id", "enabled", "pfwd_interface", "proto", "src", "dst_port", "fwd", "fwd_port", "log"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// A populated rule: an explicit false log is sent (distinct from unset).
+	f := false
+	on := true
+	m = toMap(t, PortForward{
+		Name: "https", Enabled: &on, PfwdInterface: "wan", Proto: "tcp",
+		DstPort: "443", Fwd: "10.0.0.5", FwdPort: "443", Log: &f,
+	})
+	if m["dst_port"] != "443" || m["fwd"] != "10.0.0.5" || m["proto"] != "tcp" {
+		t.Errorf("forward fields wrong: %v", m)
+	}
+	if v, ok := m["log"]; !ok || v != false {
+		t.Errorf("log=&false should marshal to false; got %v (present=%v)", v, ok)
+	}
+}
+
 func TestPortProfile_Wire(t *testing.T) {
 	// name always rides along; the scalar optionals are omitempty so GET-merge-PUT
 	// leaves the controller's value untouched.
