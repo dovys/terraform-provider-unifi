@@ -46,6 +46,9 @@ func TestIntegration_APIErrorOnNon2xx(t *testing.T) {
 	if apiErr.Surface != "integration" {
 		t.Errorf("surface = %q, want integration", apiErr.Surface)
 	}
+	if apiErr.Message != "not found" {
+		t.Errorf("message = %q, want %q (extracted from integration error envelope)", apiErr.Message, "not found")
+	}
 }
 
 func TestIntegration_429Retry(t *testing.T) {

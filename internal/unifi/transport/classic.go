@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -101,19 +100,17 @@ func (c *Classic) loginLocked(ctx context.Context) error {
 
 	// CSRF: prefer the response header, fall back to the TOKEN JWT claim.
 	c.csrf = firstHeader(resp.Header, "X-Updated-Csrf-Token", "X-Csrf-Token")
-	c.readTokenCookie() // always sets exp; sets csrf only if the header was empty
+	c.readTokenCookie(resp) // always sets exp; sets csrf only if the header was empty
 	c.loggedIn = true
 	return nil
 }
 
-// readTokenCookie reads the TOKEN cookie from the jar and extracts exp (always)
-// and the CSRF token (only when not already taken from a response header).
-func (c *Classic) readTokenCookie() {
-	u, err := url.Parse(c.baseURL)
-	if err != nil || c.http.Jar == nil {
-		return
-	}
-	for _, ck := range c.http.Jar.Cookies(u) {
+// readTokenCookie extracts exp (always) and the CSRF token (only when not
+// already taken from a response header) from the TOKEN cookie on the login
+// response. Reading directly from the response's Set-Cookie — rather than the
+// jar — avoids depending on the cookie's Path matching the base URL.
+func (c *Classic) readTokenCookie(resp *http.Response) {
+	for _, ck := range resp.Cookies() {
 		if ck.Name != "TOKEN" {
 			continue
 		}

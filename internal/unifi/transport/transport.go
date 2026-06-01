@@ -97,6 +97,13 @@ func extractMessage(body []byte) string {
 	if err := json.Unmarshal(body, &legacy); err == nil && legacy.Meta.Msg != "" {
 		return legacy.Meta.Msg
 	}
+	// Integration v1 error shape: {"statusCode":…,"statusName":…,"message":…}.
+	var generic struct {
+		Message string `json:"message"`
+	}
+	if err := json.Unmarshal(body, &generic); err == nil && generic.Message != "" {
+		return generic.Message
+	}
 	s := strings.TrimSpace(string(body))
 	if len(s) > 240 {
 		s = s[:240] + "…"

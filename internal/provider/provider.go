@@ -115,10 +115,14 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	// Provider config must be known at configure time (not derived during apply).
 	for name, unknown := range map[string]bool{
-		"host":     data.Host.IsUnknown(),
-		"api_key":  data.APIKey.IsUnknown(),
-		"username": data.Username.IsUnknown(),
-		"password": data.Password.IsUnknown(),
+		"host":           data.Host.IsUnknown(),
+		"api_key":        data.APIKey.IsUnknown(),
+		"username":       data.Username.IsUnknown(),
+		"password":       data.Password.IsUnknown(),
+		"site":           data.Site.IsUnknown(),
+		"allow_insecure": data.AllowInsecure.IsUnknown(),
+		"timeout":        data.Timeout.IsUnknown(),
+		"max_retries":    data.MaxRetries.IsUnknown(),
 	} {
 		if unknown {
 			resp.Diagnostics.AddAttributeError(path.Root(name),
@@ -150,7 +154,7 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	}
 
 	maxRetries := 3
-	if !data.MaxRetries.IsNull() {
+	if !data.MaxRetries.IsNull() && !data.MaxRetries.IsUnknown() {
 		maxRetries = int(data.MaxRetries.ValueInt64())
 	} else if v := strings.TrimSpace(os.Getenv("UNIFI_MAX_RETRIES")); v != "" {
 		n, err := strconv.Atoi(v)
