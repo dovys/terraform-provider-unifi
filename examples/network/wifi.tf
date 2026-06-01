@@ -1,10 +1,12 @@
-# Wi-Fi use case: a WPA2/WPA3 home SSID on the main LAN and an isolated guest
-# SSID on the guest VLAN — both bound to the networks defined in guest.tf.
+# Wi-Fi use case: three SSIDs for a smart home, bound to the networks defined in
+# guest.tf —
+#   - "MySmartHome"       WPA3-only on the main LAN (2.4 + 5 GHz)
+#   - "MySmartHome Guest" WPA2/WPA3 transition on the isolated guest VLAN
+#   - "MySmartHome IoT"   WPA2 on 2.4 GHz only, on the isolated IoT VLAN
 #
-# Keep the passphrase out of version control: read it from a variable (set via
-# TF_VAR_wifi_passphrase or a .tfvars file you don't commit) rather than
-# hard-coding it here.
-variable "wifi_passphrase" {
+# Keep passphrases out of version control: read them from variables (set via
+# TF_VAR_* or an uncommitted .tfvars file) rather than hard-coding them here.
+variable "home_passphrase" {
   type      = string
   sensitive = true
 }
@@ -14,40 +16,63 @@ variable "guest_passphrase" {
   sensitive = true
 }
 
-# Main home Wi-Fi: WPA2/WPA3 transition mode, on the untagged main LAN, 2.4 +
-# 5 GHz. Protected Management Frames are required for WPA3.
+variable "iot_passphrase" {
+  type      = string
+  sensitive = true
+}
+
+# Main home Wi-Fi: WPA3-only (no WPA2 fallback), which requires Protected
+# Management Frames. Modern phones and laptops support this; fall back to the
+# guest/IoT SSIDs for older gear. Broadcasts on both bands.
 resource "unifi_network_wlan" "home" {
-  name       = "Home"
+  name       = "MySmartHome"
   network_id = unifi_network_network.main.id
 
   security        = "wpapsk"
-  passphrase      = var.wifi_passphrase
+  passphrase      = var.home_passphrase
   wpa3_support    = true
-  wpa3_transition = true
-  pmf_mode        = "optional"
+  wpa3_transition = false # WPA3-only
+  pmf_mode        = "required"
 
   bands = ["2g", "5g"]
 }
 
-# Guest Wi-Fi: WPA2-only on the guest VLAN, with client-to-client isolation and
-# the guest policy applied. 5 GHz only to keep the band clear for the home SSID.
+# Guest Wi-Fi: WPA2/WPA3 transition mode so older guest devices still connect,
+# on the guest VLAN with client-to-client isolation and the guest policy.
 resource "unifi_network_wlan" "guest" {
-  name       = "Guest"
+  name       = "MySmartHome Guest"
   network_id = unifi_network_network.guest.id
 
-  security   = "wpapsk"
-  passphrase = var.guest_passphrase
+  security        = "wpapsk"
+  passphrase      = var.guest_passphrase
+  wpa3_support    = true
+  wpa3_transition = true
+  pmf_mode        = "optional"
 
   is_guest     = true
   l2_isolation = true
 
-  bands = ["5g"]
+  bands = ["2g", "5g"]
 }
 
-# Optional: broadcast the home SSID only on a named subset of APs. The default
-# AP group (every adopted AP) is controller-managed and protected — create a new
-# group when you want to limit coverage, then reference it from the SSID's
-# `ap_group_ids`.
+# IoT Wi-Fi: plain WPA2 on 2.4 GHz only — most smart-home gadgets are 2.4 GHz and
+# don't speak WPA3. Bound to the isolated IoT VLAN, with client isolation so a
+# compromised gadget can't reach the rest of the network.
+resource "unifi_network_wlan" "iot" {
+  name       = "MySmartHome IoT"
+  network_id = unifi_network_network.iot.id
+
+  security   = "wpapsk"
+  passphrase = var.iot_passphrase
+
+  l2_isolation = true
+
+  bands = ["2g"]
+}
+
+# Optional: broadcast an SSID only on a named subset of APs. The default AP group
+# (every adopted AP) is controller-managed and protected — create a new group to
+# limit coverage, then set the SSID's `ap_group_ids`.
 #
 # resource "unifi_network_ap_group" "downstairs" {
 #   name        = "Downstairs"
