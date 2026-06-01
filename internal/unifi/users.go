@@ -31,8 +31,8 @@ type User struct {
 	Hostname string `json:"hostname,omitempty"` // DHCP-reported hostname (read-only)
 }
 
-// User CRUD (legacy /rest/user; router OpFirewallClassic shares the classic
-// backend). Update is GET-merge-PUT so controller-managed client fields survive.
+// User CRUD (legacy /rest/user; router OpDHCPReservation → classic backend).
+// Update is GET-merge-PUT so controller-managed client fields survive.
 
 func (c *client) ListUsers(ctx context.Context) ([]User, error) {
 	return legacyList[User](ctx, c, userType)

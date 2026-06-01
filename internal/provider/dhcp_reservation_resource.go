@@ -78,6 +78,7 @@ func (r *dhcpReservationResource) Schema(_ context.Context, _ resource.SchemaReq
 			},
 			"local_dns_record": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Optional local DNS name resolving to the reserved IP (e.g. `nas.lan`).",
 			},
 			"local_dns_record_enabled": schema.BoolAttribute{
@@ -170,9 +171,11 @@ func (r *dhcpReservationResource) Delete(ctx context.Context, req resource.Delet
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// Safe by default: clear the reservation, don't delete the client record.
+	// Safe by default: clear the reservation, don't delete the client record. If
+	// the client record is already gone, the reservation is gone too — treat that
+	// as success rather than failing the destroy.
 	off := false
-	if _, err := r.client.UpdateUser(ctx, &unifi.User{ID: state.ID.ValueString(), UseFixedIP: &off}); err != nil {
+	if _, err := r.client.UpdateUser(ctx, &unifi.User{ID: state.ID.ValueString(), UseFixedIP: &off}); err != nil && !isNotFoundErr(err) {
 		resp.Diagnostics.AddError("Failed to clear DHCP reservation", err.Error())
 	}
 }
@@ -182,6 +185,8 @@ func (r *dhcpReservationResource) Delete(ctx context.Context, req resource.Delet
 func (r *dhcpReservationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	var u *unifi.User
 	var err error
+	// A controller _id is a 24-char hex Mongo ObjectID (no colons); a MAC always
+	// has colons — so a ":" cleanly disambiguates the two import forms.
 	if strings.Contains(req.ID, ":") {
 		u, err = r.client.GetUserByMAC(ctx, req.ID)
 	} else {
@@ -215,7 +220,7 @@ func (m *dhcpReservationResourceModel) fromUser(u *unifi.User) {
 	m.ID = types.StringValue(u.ID)
 	// mac is the immutable key — keep the configured/imported value rather than
 	// the controller's echo (it lowercases, which would churn an upper-case config).
-	m.IPAddress = strToStateOptional(u.FixedIP)
+	m.IPAddress = types.StringValue(u.FixedIP) // Required: always a concrete value, never null
 	m.NetworkID = strToStateOptional(u.NetworkID)
 	m.Name = strToStateOptional(u.Name)
 	m.Hostname = strToStateOptional(u.Hostname)
