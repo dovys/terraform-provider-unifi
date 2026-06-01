@@ -84,8 +84,8 @@ type PortProfile struct {
 	MulticastRouterMode string `json:"multicast_router_mode,omitempty"`  // multicast-router (IGMP/MLD querier) handling
 }
 
-// Port profile CRUD (legacy /rest/portconf; router OpPortProfile → classic
-// backend). Update is GET-merge-PUT so controller-managed fields survive.
+// Port profile CRUD (legacy /rest/portconf). Update is GET-merge-PUT so
+// controller-managed fields survive.
 //
 // On why legacy and not v2: portconf predates the v2 API and has no v2 endpoint
 // on current firmware. Probing a live console (read-only) for the obvious v2
@@ -93,7 +93,6 @@ type PortProfile struct {
 // /port-overrides, /profiles, … — every one 404s, while /rest/portconf returns
 // the documents. The v2 surface covers only the newer feature areas (clients,
 // traffic, zone firewall, ap-groups, static-dns); port config stays on /rest.
-// Recheck on future firmware: if a v2 write lands, it's a one-line router change.
 
 func (c *client) ListPortProfiles(ctx context.Context) ([]PortProfile, error) {
 	return legacyList[PortProfile](ctx, c, portConfType)

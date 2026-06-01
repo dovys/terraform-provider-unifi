@@ -7,7 +7,7 @@ network to a clean plan (where instances exist) and pass CI.
 ## Phases
 
 - **0 — Bootstrap:** scaffold (`terraform-provider-scaffolding-framework`, protocol v6); `internal/unifi`
-  skeleton (`Client`, `classic` + `integration` transports, `router`, `capabilities`); provider
+  skeleton (`Client`, `classic` cookie+CSRF transport over legacy + v2, `capabilities`); provider
   config + auth + `Configure` probe; CI (unit + Docker-controller harness + stub HIL job);
   `tfplugindocs`/`goreleaser`/manifest/`Makefile`; **initial commit** (also unblocks web `/ultraplan`).
 - **1 — Core networking (v0.1):** `unifi_network_network`, `unifi_network_wan`, `unifi_network_dns_record` (v2);
@@ -35,8 +35,8 @@ network to a clean plan (where instances exist) and pass CI.
 
 A resource is checkable only when it meets the Definition of Done ([development.md](development.md)).
 
-- [x] base: provider scaffold, dual-auth client (legacy/v2/Integration transports behind `Client`),
-      capability-aware `router`, `Configure` capability probe, CI + release tooling — **P0**
+- [x] base: provider scaffold, `classic` cookie+CSRF client (legacy + v2 behind `Client`),
+      `Configure` capability probe, CI + release tooling — **P0**
 - [x] network, wan, dns_record (v2); data sources network/networks, site, application_info — **P1**
       (`site` *resource* deferred: `/cmd/sitemgr` write shapes need a multi-site controller to verify)
 - [x] device (single adopt+configure resource w/ port map) + data source, port_profile, wlan,
@@ -50,23 +50,20 @@ A resource is checkable only when it meets the Definition of Done ([development.
 
 ## Open questions (don't block design)
 
-1. **OpenAPI for Integration v1?** If the console serves a spec, clean-room codegen that surface.
-2. **Exact adoption/forget verbs** (`/cmd/devmgr` vs `/devices/adopt`) + device **state enum**.
-3. **Integration write availability per firmware** — which version flips each write on.
-4. **CSRF source across firmwares** (header vs JWT claim); validate **`exp`-driven** re-auth (read the
+1. **Exact adoption/forget verbs** (`/cmd/devmgr` `adopt`/`delete-device`) + device **state enum**.
+2. **CSRF source across firmwares** (header vs JWT claim); validate **`exp`-driven** re-auth (read the
    token's `exp`, don't hard-code 2h).
-5. **Self-hosted/HIL runner setup** + documenting what the Docker tier can't cover.
-6. **Which settings keys to type first** (likely `mgmt`, `usg`, `guest_access`, `ntp`, `country`, `ips`).
-7. **Protect (P5):** exact PATCH field set per device type + which need legacy `/bootstrap` fallback;
-   whether detection **zones** are in initial scope; confirm doorbell `feature_flags` names; confirm
-   which device-config writes (if any) the official Integration v1 covers vs legacy PATCH.
-8. **Clearing owned `omitempty` fields on GET-merge-PUT.** `structToRawMap` drops zero-valued owned
+3. **Self-hosted/HIL runner setup** + documenting what the Docker tier can't cover.
+4. **Which settings keys to type first** (likely `mgmt`, `usg`, `guest_access`, `ntp`, `country`, `ips`).
+5. **Protect (P5):** exact PATCH field set per device type + which need a legacy `/bootstrap` fallback;
+   whether detection **zones** are in initial scope; confirm doorbell `feature_flags` names.
+6. **Clearing owned `omitempty` fields on GET-merge-PUT.** `structToRawMap` drops zero-valued owned
    fields, so the overlay can *set* but not *clear* a plain `string`/`*bool` value by emitting its zero
    (affects clearing `domain_name`, `dhcp_gateway`, etc.). The DNS-slot lists (`dhcp_dns`/`dns_servers`/
    `ipv6_dns_servers`) are already handled — those slots are `*string`, so a shrunk list writes a non-nil
    `&""` to overwrite the freed slot. Optional+Computed hides the remaining cases for the common path
    (removing from config keeps the controller value); a full clear of the other fields needs confirming
    on a live controller that empty-string writes are accepted per field before emitting them.
-9. **WAN field mutability.** Whether `wan_type` (dhcp↔pppoe↔static) and `network_group` (WAN↔WAN2) are
+7. **WAN field mutability.** Whether `wan_type` (dhcp↔pppoe↔static) and `network_group` (WAN↔WAN2) are
     editable in place or need `RequiresReplace` — confirm against a live controller before adding plan
     modifiers (network `purpose` is known-immutable and already `RequiresReplace`).

@@ -34,9 +34,9 @@ func testAccPreCheck(t *testing.T) {
 			t.Fatalf("%s must be set for acceptance tests (see docs/testing.md)", env)
 		}
 	}
-	// Either a local admin (username+password) or an API key is required.
-	if os.Getenv("UNIFI_USERNAME") == "" && os.Getenv("UNIFI_API_KEY") == "" {
-		t.Fatal("set UNIFI_USERNAME/UNIFI_PASSWORD (local admin) and/or UNIFI_API_KEY for acceptance tests")
+	// A local admin (username+password) is required.
+	if os.Getenv("UNIFI_USERNAME") == "" || os.Getenv("UNIFI_PASSWORD") == "" {
+		t.Fatal("set UNIFI_USERNAME and UNIFI_PASSWORD (a local UniFi OS admin) for acceptance tests")
 	}
 }
 
@@ -50,7 +50,6 @@ func sweepClient() (unifi.Client, error) {
 		Host:          host,
 		Username:      os.Getenv("UNIFI_USERNAME"),
 		Password:      os.Getenv("UNIFI_PASSWORD"),
-		APIKey:        os.Getenv("UNIFI_API_KEY"),
 		Site:          envOr("UNIFI_SITE", "default"),
 		AllowInsecure: strings.EqualFold(os.Getenv("UNIFI_INSECURE"), "true") || os.Getenv("UNIFI_INSECURE") == "1",
 	})

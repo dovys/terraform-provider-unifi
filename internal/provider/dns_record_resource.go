@@ -47,8 +47,7 @@ func (r *dnsRecordResource) Metadata(_ context.Context, req resource.MetadataReq
 
 func (r *dnsRecordResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "A local DNS record. Served from the v2 `/static-dns` surface today; routing moves to the " +
-			"Integration DNS surface on newer firmware with no schema change.",
+		MarkdownDescription: "A local DNS record, served from the v2 `/static-dns` surface.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

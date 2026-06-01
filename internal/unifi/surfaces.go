@@ -28,16 +28,6 @@ type LegacyMeta struct {
 // OK reports whether the legacy call succeeded.
 func (m LegacyMeta) OK() bool { return m.RC == "ok" }
 
-// IntegrationPage is one page of an Integration v1 list response:
-// {"offset":0,"limit":25,"count":1,"totalCount":1,"data":[...]}.
-type IntegrationPage[T any] struct {
-	Offset     int `json:"offset"`
-	Limit      int `json:"limit"`
-	Count      int `json:"count"`
-	TotalCount int `json:"totalCount"`
-	Data       []T `json:"data"`
-}
-
 // ErrNotFound is returned by typed Get/Update/Delete methods when the object is
 // absent. Resources translate it into remove-from-state on Read (invariant 5).
 var ErrNotFound = errors.New("object not found")
@@ -206,55 +196,4 @@ func v2Decode[T any](ctx context.Context, c *client, method, suffix string, body
 		return fmt.Errorf("decode v2 %s %s: %w", method, suffix, err)
 	}
 	return nil
-}
-
-// --- Integration v1 surface (/proxy/network/integration/v1/<path>) ---
-
-// integrationList pages through an Integration list endpoint and returns all
-// items. limit follows the controller's page size.
-func integrationListAll[T any](ctx context.Context, c *client, suffix string) ([]T, error) {
-	if c.integration == nil {
-		return nil, &ConfigError{Msg: "this operation requires an api_key (Integration API)"}
-	}
-	var all []T
-	offset := 0
-	for {
-		sep := "?"
-		if strings.Contains(suffix, "?") {
-			sep = "&"
-		}
-		path := integrationPath(fmt.Sprintf("%s%soffset=%d&limit=200", suffix, sep, offset))
-		resp, err := c.integration.Do(ctx, http.MethodGet, path, nil)
-		if err != nil {
-			return nil, err
-		}
-		var page IntegrationPage[T]
-		if err := json.Unmarshal(resp.Body, &page); err != nil {
-			return nil, fmt.Errorf("decode integration %s: %w", suffix, err)
-		}
-		all = append(all, page.Data...)
-		offset += len(page.Data)
-		if len(page.Data) == 0 || offset >= page.TotalCount {
-			break
-		}
-	}
-	return all, nil
-}
-
-func integrationGet[T any](ctx context.Context, c *client, suffix string) (*T, error) {
-	if c.integration == nil {
-		return nil, &ConfigError{Msg: "this operation requires an api_key (Integration API)"}
-	}
-	resp, err := c.integration.Do(ctx, http.MethodGet, integrationPath(suffix), nil)
-	if err != nil {
-		if isNotFound(err) {
-			return nil, ErrNotFound
-		}
-		return nil, err
-	}
-	var out T
-	if err := json.Unmarshal(resp.Body, &out); err != nil {
-		return nil, fmt.Errorf("decode integration %s: %w", suffix, err)
-	}
-	return &out, nil
 }

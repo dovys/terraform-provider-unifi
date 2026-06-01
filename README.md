@@ -10,15 +10,13 @@ app-namespaced (`unifi_network_*`, `unifi_protect_*`, …). Built clean-room.
 
 ## How it connects
 
-A single console exposes three HTTP surfaces (official Integration v1, the
-legacy REST API, and the newer v2 API). The provider hides that behind one
-client: it prefers the official API where firmware supports a write and falls
-back to legacy/v2 otherwise, with no change to your configuration. Details in
-[`docs/architecture.md`](docs/architecture.md).
+The provider talks to a console over one cookie+CSRF session (a local admin
+account), spanning the legacy REST API and the newer v2 API — each resource
+targets whichever surface owns its object, with no change to your configuration.
+Details in [`docs/architecture.md`](docs/architecture.md).
 
-A **local UniFi OS admin account** is effectively required (cloud/SSO accounts
-that force 2FA are rejected with a clear message). An **Integration API key** is
-optional and unlocks the official API where available.
+A **local UniFi OS admin account** is required (cloud/SSO accounts that force
+2FA are rejected with a clear message).
 
 ```hcl
 terraform {
@@ -31,7 +29,6 @@ provider "unifi" {
   host     = "https://192.0.2.1" # or UNIFI_HOST
   username = var.unifi_username  # local admin; or UNIFI_USERNAME
   password = var.unifi_password  # or UNIFI_PASSWORD
-  api_key  = var.unifi_api_key   # optional; or UNIFI_API_KEY
 
   allow_insecure = true # consoles ship self-signed certs on local IPs
 }
@@ -41,7 +38,6 @@ provider "unifi" {
 |---------|-----|-------|
 | `host` | `UNIFI_HOST` | Console URL/host; a bare host is assumed `https://`. |
 | `username` + `password` | `UNIFI_USERNAME` / `UNIFI_PASSWORD` | Local UniFi OS admin. |
-| `api_key` | `UNIFI_API_KEY` | Integration key — console-wide, owner-level. Sensitive. |
 | `site` | `UNIFI_SITE` | Site slug; defaults to `default`. |
 | `allow_insecure` | `UNIFI_INSECURE` | Skip TLS verification. |
 | `timeout` | `UNIFI_TIMEOUT` | Per-request timeout (Go duration, default `60s`). |

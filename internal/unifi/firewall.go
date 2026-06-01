@@ -66,8 +66,8 @@ type FirewallRule struct {
 	DstFirewallGroupIDs []string `json:"dst_firewallgroup_ids,omitempty"`
 }
 
-// Firewall group CRUD (legacy /rest/firewallgroup; router OpFirewallClassic).
-// Update is GET-merge-PUT so controller-managed fields survive.
+// Firewall group CRUD (legacy /rest/firewallgroup). Update is GET-merge-PUT so
+// controller-managed fields survive.
 
 func (c *client) ListFirewallGroups(ctx context.Context) ([]FirewallGroup, error) {
 	return legacyList[FirewallGroup](ctx, c, firewallGroupType)
@@ -92,7 +92,7 @@ func (c *client) DeleteFirewallGroup(ctx context.Context, id string) error {
 	return legacyDelete(ctx, c, firewallGroupType, id)
 }
 
-// Firewall rule CRUD (legacy /rest/firewallrule; router OpFirewallClassic).
+// Firewall rule CRUD (legacy /rest/firewallrule).
 
 func (c *client) ListFirewallRules(ctx context.Context) ([]FirewallRule, error) {
 	return legacyList[FirewallRule](ctx, c, firewallRuleType)

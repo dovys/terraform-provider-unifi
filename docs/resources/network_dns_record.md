@@ -3,12 +3,12 @@
 page_title: "unifi_network_dns_record Resource - unifi"
 subcategory: ""
 description: |-
-  A local DNS record. Served from the v2 /static-dns surface today; routing moves to the Integration DNS surface on newer firmware with no schema change.
+  A local DNS record, served from the v2 /static-dns surface.
 ---
 
 # unifi_network_dns_record (Resource)
 
-A local DNS record. Served from the v2 `/static-dns` surface today; routing moves to the Integration DNS surface on newer firmware with no schema change.
+A local DNS record, served from the v2 `/static-dns` surface.
 
 
 

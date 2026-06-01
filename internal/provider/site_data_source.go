@@ -43,7 +43,7 @@ func (d *siteDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Integration site UUID.",
+				MarkdownDescription: "Controller site id (`_id`).",
 			},
 			"display_name": schema.StringAttribute{
 				Computed:            true,
@@ -81,11 +81,11 @@ func (d *siteDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 	for _, s := range sites {
-		if s.InternalReference == slug {
+		if s.Name == slug {
 			model.Name = types.StringValue(slug)
 			model.ID = types.StringValue(s.ID)
-			model.DisplayName = types.StringValue(s.Name)
-			model.InternalReference = types.StringValue(s.InternalReference)
+			model.DisplayName = types.StringValue(s.Desc)
+			model.InternalReference = types.StringValue(s.Name)
 			resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 			return
 		}

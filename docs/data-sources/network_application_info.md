@@ -3,12 +3,12 @@
 page_title: "unifi_network_application_info Data Source - unifi"
 subcategory: ""
 description: |-
-  Detected UniFi Network application info and capabilities, from the Configure-time probe.
+  Detected UniFi Network application info, from the Configure-time probe.
 ---
 
 # unifi_network_application_info (Data Source)
 
-Detected UniFi Network application info and capabilities, from the Configure-time probe.
+Detected UniFi Network application info, from the Configure-time probe.
 
 
 
@@ -17,6 +17,4 @@ Detected UniFi Network application info and capabilities, from the Configure-tim
 
 ### Read-Only
 
-- `integration_writes` (Boolean) Whether the firmware supports Integration API writes (version floor met).
-- `site_id` (String) Integration UUID of the configured site (empty if the Integration API was unavailable).
 - `version` (String) Detected Network application version (e.g. `10.4.57`).

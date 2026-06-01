@@ -25,23 +25,19 @@ output "network_ids" {
   value = { for n in data.unifi_network_networks.all.networks : n.name => n.id }
 }
 
-# Resolve the configured site (or pass `name` for another slug) to its UUID.
+# Resolve the configured site (or pass `name` for another slug) to its id.
 data "unifi_network_site" "current" {}
 
-output "site_uuid" {
+output "site_id" {
   value = data.unifi_network_site.current.id
 }
 
-# Read the detected controller version and capabilities (from the
-# Configure-time probe) — useful for gating configuration on firmware support.
+# Read the detected controller version (from the Configure-time probe) — useful
+# for gating configuration on firmware support.
 data "unifi_network_application_info" "this" {}
 
 output "controller_version" {
   value = data.unifi_network_application_info.this.version
-}
-
-output "integration_writes_supported" {
-  value = data.unifi_network_application_info.this.integration_writes
 }
 
 # Look up a device by MAC (or by id) to reference its telemetry without managing

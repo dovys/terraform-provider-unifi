@@ -91,15 +91,13 @@ First development release: the provider base and the core of the network app.
     dual-WAN load-balance role + weight + failover priority, smart-queue QoS,
     advertised ISP bandwidth, MAC clone, VLAN tag, and IPv6 delegation.
   - `unifi_network_dns_record` — local DNS records via the v2 `/static-dns`
-    surface (A/AAAA/CNAME/MX/TXT/SRV/NS). Routing flips to the Integration DNS
-    surface on supporting firmware with no schema change (invariant #2);
-    until that path is implemented the router keeps local DNS on v2.
+    surface (A/AAAA/CNAME/MX/TXT/SRV/NS).
   - Data sources: `unifi_network_network` (look up by `id` or `name`),
-    `unifi_network_networks` (list), `unifi_network_site` (slug → UUID), and
-    `unifi_network_application_info` (probed version + capability flags).
-  - The `Client` gained typed networkconf, static-DNS, and site/application-info
-    methods, with legacy-envelope/v2-bare-JSON/Integration-paging helpers and a
-    shared `ErrNotFound` mapped to remove-from-state on Read.
+    `unifi_network_networks` (list), `unifi_network_site` (slug → site), and
+    `unifi_network_application_info` (probed controller version).
+  - The `Client` gained typed networkconf, static-DNS, and site methods, with
+    legacy-envelope and v2-bare-JSON helpers and a shared `ErrNotFound` mapped to
+    remove-from-state on Read.
   - Unit tests (client CRUD over `httptest` incl. the GET-merge-PUT and v2
     write-contract assertions, model wire shapes, schema validation, conversion
     round-trips) and Tier-2 acceptance tests (create → update → import → destroy
@@ -113,21 +111,17 @@ First development release: the provider base and the core of the network app.
 
 - **Phase 0 — base / bootstrap.** The provider scaffold and client foundation:
   - `terraform-plugin-framework` provider (Terraform protocol v6) with a
-    configuration schema (`host`, `api_key`, `username`, `password`, `site`,
+    configuration schema (`host`, `username`, `password`, `site`,
     `allow_insecure`, `timeout`, `max_retries`) and environment-variable
     fallbacks for each.
-  - Dual authentication: a local-admin cookie+CSRF session (`classic`
-    transport, with `exp`-driven re-auth and a clear 2FA/cloud-account error)
-    and an Integration `X-API-KEY` session (`integration` transport). Both honor
-    HTTP 429 with `Retry-After` backoff.
-  - A hybrid `internal/unifi` client: the legacy, v2, and Integration surfaces
-    sit behind a single `Client` interface, with a capability-aware `router`
-    that picks the backend per operation (so a future Integration write is a
-    one-line routing change).
+  - A local-admin cookie+CSRF session (`classic` transport, with `exp`-driven
+    re-auth and a clear 2FA/cloud-account error), honoring HTTP 429 with
+    `Retry-After` backoff.
+  - The `internal/unifi` client: the legacy `/rest` and v2 surfaces — both over
+    the single classic session — sit behind one `Client` interface, each method
+    targeting its surface directly via the `legacy*`/`v2*` helpers.
   - A `Configure`-time capability probe: Network application version detection
-    (legacy `/stat/sysinfo`, with an Integration `application-info` fallback),
-    the site name↔UUID map (Integration `/sites`, matched on
-    `internalReference`), and version-derived feature flags.
+    from legacy `/stat/sysinfo`.
   - Build & release tooling: `Makefile`, GoReleaser config, Terraform
     Registry manifest, `tfplugindocs` tool dependency, golangci-lint config, and
     GitHub Actions for build/lint/unit plus a gated Docker-controller acceptance

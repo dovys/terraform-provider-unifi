@@ -22,9 +22,7 @@ type applicationInfoDataSource struct {
 }
 
 type applicationInfoDataSourceModel struct {
-	Version           types.String `tfsdk:"version"`
-	IntegrationWrites types.Bool   `tfsdk:"integration_writes"`
-	SiteID            types.String `tfsdk:"site_id"`
+	Version types.String `tfsdk:"version"`
 }
 
 func (d *applicationInfoDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -33,19 +31,11 @@ func (d *applicationInfoDataSource) Metadata(_ context.Context, req datasource.M
 
 func (d *applicationInfoDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Detected UniFi Network application info and capabilities, from the Configure-time probe.",
+		MarkdownDescription: "Detected UniFi Network application info, from the Configure-time probe.",
 		Attributes: map[string]schema.Attribute{
 			"version": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Detected Network application version (e.g. `10.4.57`).",
-			},
-			"integration_writes": schema.BoolAttribute{
-				Computed:            true,
-				MarkdownDescription: "Whether the firmware supports Integration API writes (version floor met).",
-			},
-			"site_id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Integration UUID of the configured site (empty if the Integration API was unavailable).",
 			},
 		},
 	}
@@ -60,9 +50,7 @@ func (d *applicationInfoDataSource) Configure(_ context.Context, req datasource.
 func (d *applicationInfoDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
 	caps := d.client.Capabilities()
 	model := applicationInfoDataSourceModel{
-		Version:           types.StringValue(caps.VersionRaw),
-		IntegrationWrites: types.BoolValue(caps.Flags.IntegrationWrites),
-		SiteID:            types.StringValue(d.client.SiteID()),
+		Version: types.StringValue(caps.VersionRaw),
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }

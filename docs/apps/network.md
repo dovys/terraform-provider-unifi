@@ -5,22 +5,22 @@ Network feature surface, plus first-class per-port config. Resources are app-nam
 `unifi_<app>_<resource>`; the parallel Protect app is in [protect.md](protect.md). Singular resources;
 plural for collection data sources.
 
-Client, auth, and per-resource backend routing live in [../architecture.md](../architecture.md);
+Client, auth, and the per-resource surface map live in [../architecture.md](../architecture.md);
 device/port internals in [../devices-and-ports.md](../devices-and-ports.md); operator runbooks in
 [../flows.md](../flows.md).
 
-**Backend:** `L`=legacy `/rest`, `V2`=`/v2/api/site`, `I`=Integration.
+**Surface:** `L`=legacy `/rest`, `V2`=`/v2/api/site` — both over the same cookie+CSRF session.
 
 ## Resources
 
 ### Networking
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `unifi_network_network` | L (I read) | LAN/VLAN/guest/vlan-only; exposes the full **`purpose`** set + DHCP/DNS/IPv6/IGMP/mDNS. Rejects `purpose=wan`; omitting `purpose` lets the controller default it (to `corporate`) rather than the provider hardcoding it. |
+| `unifi_network_network` | L | LAN/VLAN/guest/vlan-only; exposes the full **`purpose`** set + DHCP/DNS/IPv6/IGMP/mDNS. Rejects `purpose=wan`; omitting `purpose` lets the controller default it (to `corporate`) rather than the provider hardcoding it. |
 | `unifi_network_wan` | L | WAN uplink (pppoe/dhcp/static), load-balance, bandwidth. Same `networkconf` object, `purpose=wan` only. |
 | `unifi_network_static_route` | L | Static route. |
 | `unifi_network_port_forward` | L | DNAT. |
-| `unifi_network_dns_record` | V2 (→ I) | Local DNS via v2 `/static-dns` today; routing flips to Integration `dns/policies` once firmware supports it — no schema change (invariant #2). |
+| `unifi_network_dns_record` | V2 | Local DNS via v2 `/static-dns`. |
 | `unifi_network_dynamic_dns` | L | DDNS client. |
 
 ### Wireless

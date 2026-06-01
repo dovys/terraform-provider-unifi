@@ -1,81 +1,72 @@
 # Architecture: API surfaces, client, auth & safety
 
-## 1. Three API surfaces
+## 1. Two API surfaces, one session
 
-A UniFi OS console exposes three HTTP surfaces behind one host. Paths below are verbatim from the
-live controller (captured in the local network fixture's `meta.api_surfaces`).
+The provider uses two HTTP surfaces behind one host, both authenticated by a single cookie+CSRF
+session (a local UniFi OS admin). Paths below are verbatim from the live controller (captured in the
+local network fixture's `meta.api_surfaces`).
 
 | Surface | Base path | Envelope | Auth | Role |
 |---------|-----------|----------|------|------|
-| **Integration v1** | `/proxy/network/integration/v1/...` | `{offset,limit,count,totalCount,data[]}` | `X-API-KEY` | Official, typed, paginated. Writes are **firmware-gated** (networks/WLANs/zone-firewall/ACL/DNS/vouchers/adoption on 10.1.84+); read-mostly on older firmware. The owner's box runs **Network 10.4.57**, so these writes are live there. |
-| **Legacy REST** | `/proxy/network/api/s/<site>/rest/<type>`, `/stat/...`, `/cmd/...` | `{meta:{rc},data:[]}` | cookie + CSRF | Internal API; **widest write surface**. Reverse-engineered, version-unstable. |
+| **Legacy REST** | `/proxy/network/api/s/<site>/rest/<type>`, `/stat/...`, `/cmd/...`, `/self/...` | `{meta:{rc},data:[]}` | cookie + CSRF | Internal API; **widest write surface**. Reverse-engineered, version-unstable. |
 | **v2** | `/proxy/network/v2/api/site/<site>/<path>` | bare JSON | cookie + CSRF | Newer: zone firewall, traffic rules/routes, static-DNS, AP groups. |
 
-**Official-where-capable, legacy/v2 fallback.** The router prefers Integration when capability
-detection says the firmware supports a write, else legacy/v2 — with no resource-code change. The
-owner's box runs Network 10.4.57 (≥ 10.1.84), so Integration writes are available there; older
-firmware falls back to legacy/v2 automatically.
+**One classic session covers both.** v2 is not a separate transport or auth — it's the same cookie
+session, a different URL prefix. Most writes are legacy REST (the widest, most stable surface); v2
+owns only the newer feature areas above. Each typed `Client` method targets its surface directly via
+the `legacy*`/`v2*` helpers — there is no per-operation router.
+
+The console's official **Integration v1** API (`/integration/v1`, `X-API-KEY`) is **out of scope**:
+it is firmware-gated, read-mostly on the writes the provider needs, and would add a second auth
+mechanism and a routing layer for little gain — a local admin session reaches everything. Also out of
+scope: the cloud **Site Manager API** (`api.ui.com`, read-only).
 
 **UniFi Protect** (cameras, doorbells, …) is **in scope** under the `unifi_protect_*` namespace — it
-reuses this client and the **same console API key** under `/proxy/protect/...` (analogous Integration
-+ legacy surfaces; see [apps/protect.md](apps/protect.md)). Out of scope: the cloud **Site Manager API**
-(`api.ui.com`, read-only) and the other UniFi OS apps (Access/Talk/Connect/InnerSpace) for now.
+reuses this client and console session under `/proxy/protect/...` (see [apps/protect.md](apps/protect.md)).
+The other UniFi OS apps (Access/Talk/Connect/InnerSpace) are out of scope for now.
 
 ## 2. Client
 
 ```
 internal/unifi/
 ├── client.go        // Client interface: typed methods per logical operation
-├── router.go        // picks backend per operation (policy table + capabilities)
 ├── transport/
-│   ├── integration.go  // X-API-KEY → /integration/v1
 │   └── classic.go      // cookie+CSRF → /rest (legacy) AND /v2; handles re-auth
-├── surfaces.go      // legacy/v2/integration request helpers + wire envelopes
+├── surfaces.go      // legacy + v2 request helpers + wire envelopes
 ├── networks.go      // NetworkConf struct + network CRUD
 ├── dns.go           // StaticDNSRecord struct + local-DNS CRUD
-├── sites.go         // Site/LegacySite/ApplicationInfo + site CRUD
-└── capabilities.go  // version detection, feature flags, site name↔UUID map
+├── sites.go         // Site/LegacySite + site CRUD
+└── capabilities.go  // controller version detection
 ```
 
 Request/response structs live beside the methods that use them (no separate `models` package).
 
-Resources call `Client` methods only — never a transport — so the backend split is invisible to
-resource code and a future Integration write is a one-line routing change. Client is hand-written
-and typed (no generated MPL dependency); if the console serves an OpenAPI spec for `/integration/v1`
-we may clean-room codegen that surface.
+Resources call `Client` methods only — never a transport. Each method picks its surface (legacy
+`/rest` or v2) directly through the `legacy*`/`v2*` helpers in `surfaces.go`. Client is hand-written
+and typed (no generated MPL dependency).
 
-### Per-resource backend routing
+### Per-resource surface
 
 | Resource | Read | Write |
 |----------|------|-------|
-| networks/VLANs, WAN | integration `GET /networks` → legacy | **legacy** `/rest/networkconf` |
+| networks/VLANs, WAN | legacy `/rest/networkconf` | **legacy** `/rest/networkconf` |
 | WLAN, WLAN group | legacy `/rest/wlanconf`, `/rest/wlangroup` | legacy |
 | AP group | **v2** `/apgroups` | **v2** |
-| device (adopt + config + ports) | legacy `/stat/device` (+ read-only `data.unifi_network_device`) | adopt: integration `POST /devices/adopt` **or** legacy `/cmd/devmgr`; config: **legacy** `PUT /rest/device/<id>` (GET-merge-PUT, owned fields) |
+| device (adopt + config + ports) | legacy `/stat/device` (+ read-only `data.unifi_network_device`) | adopt: legacy `/cmd/devmgr`; config: **legacy** `PUT /rest/device/<id>` (GET-merge-PUT, owned fields) |
 | port profile | legacy `/rest/portconf` | legacy |
 | firewall group/rule (classic) | legacy `/rest/firewallgroup`,`/rest/firewallrule` | legacy |
 | firewall zone/policy, traffic rule/route | **v2** | **v2** |
 | static route, port forward, dynamic DNS | legacy `/rest/{routing,portforward,dynamicdns}` | legacy |
-| local DNS | **v2** `/static-dns` (→ integration `dns/policies` on 10.1+) | **v2** `/static-dns` today; flips to **integration** `/sites/{id}/dns/policies` once firmware supports it (invariant #2) |
+| local DNS | **v2** `/static-dns` | **v2** `/static-dns` |
 | radius profile/account, user group | legacy `/rest/{radiusprofile,account,usergroup}` | legacy |
 | DHCP reservation | legacy `/rest/user` (use_fixedip) | **legacy** |
 | settings (per key) | legacy `/rest/setting` | legacy |
-| sites | integration `GET /sites` | legacy `/cmd/sitemgr` |
-| vouchers | integration `/hotspot/vouchers` | integration |
+| sites | legacy `/self/sites` | legacy `/cmd/sitemgr` |
 
 ## 3. Authentication
 
-Accepts either or both credential sets; a **local admin account** (not SSO/cloud) is effectively
-required today.
-
-| Credential | Enables |
-|------------|---------|
-| `api_key` (`X-API-KEY`) | Integration v1 — UniFi Network → Settings → Control Plane → Integrations |
-| `username` + `password` | Legacy + v2 — a local UniFi OS account |
-
-The `api_key` is **console-wide and owner-level**: one key authorizes every app (Network **and**
-Protect) and can't be permission-scoped — treat it as admin-equivalent (it's `Sensitive`; keep it in
-a secrets store).
+A **local UniFi OS admin account** (not SSO/cloud) is required: `username` + `password` authorize the
+single cookie+CSRF session that serves both the legacy and v2 surfaces.
 
 **Classic session lifecycle (specified, not "transparent"):**
 - `POST /api/auth/login` → `TOKEN` cookie (JWT; **~2h default — read the `exp` claim, don't hard-code
@@ -86,9 +77,9 @@ a secrets store).
 - **Reject cloud/2FA accounts clearly:** cloud accounts force MFA; 2FA returns HTTP `499`
   (`api.err.Ubic2faTokenRequired`) → emit "use a local admin account", not a raw error.
 
-**Provider schema:** `host`, `api_key` (sensitive), `username`, `password` (sensitive), `site`
-(default `"default"`), `allow_insecure`, `timeout`, `max_retries`. Env fallbacks for each
-(`UNIFI_HOST`, `UNIFI_API_KEY`, …). Connectivity + capability detection run in `Configure`.
+**Provider schema:** `host`, `username`, `password` (sensitive), `site` (default `"default"`),
+`allow_insecure`, `timeout`, `max_retries`. Env fallbacks for each (`UNIFI_HOST`, `UNIFI_USERNAME`,
+`UNIFI_PASSWORD`, …). Connectivity + capability detection run in `Configure`.
 
 ## 4. v2 write contract
 
@@ -106,16 +97,12 @@ Every v2 model has a unit test asserting the wire bytes.
 ## 5. Capability & version gating
 
 `Configure` builds a cached `capabilities` struct:
-- **Version from legacy `/stat/sysinfo`** (always present with classic auth) — not
-  `/integration/v1/application-info`, which 404s pre-9.3.
-- **Site name↔UUID map** via `GET /integration/v1/sites` (Integration keys sites by UUID, legacy/v2
-  by name `default`, legacy objects by Mongo `_id` — three namespaces; match on `internalReference`,
-  which is `"default"`, not `name` `"Default"`).
-- Feature flags (`IntegrationWritesNetworks`, `HasZoneFirewall`, `StaticDNSOnV2`, …).
+- **Version from legacy `/stat/sysinfo`** (always present with classic auth).
 
-Resources surface capability errors at **plan time** via `ModifyPlan`/`ValidateConfig` reading the
-cached flags — never a raw 4xx mid-apply. Classic vs. zone firewall is detected (counts across both
-surfaces) and the two are never mixed.
+Future capability bits (e.g. classic-vs-zone firewall mode) are detected lazily by the resources that
+need them — counts across both surfaces — not precomputed here. Resources surface capability errors at
+**plan time** via `ModifyPlan`/`ValidateConfig` (a typed `CapabilityError` → diagnostic) — never a raw
+4xx mid-apply. Classic vs. zone firewall is detected this way and the two are never mixed.
 
 ## 6. Safety / footgun prevention
 

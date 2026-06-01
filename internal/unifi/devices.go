@@ -299,8 +299,7 @@ func idEq(raw json.RawMessage, id string) bool {
 
 // AdoptDevice asks the controller to adopt a pending device by MAC
 // (`/cmd/devmgr` `adopt`). HIL-unverified: the recon network had no adoptable
-// device. The router prefers the Integration adopt write on supporting firmware
-// (OpDeviceAdopt); until that path is wired this uses the legacy command.
+// device.
 func (c *client) AdoptDevice(ctx context.Context, mac string) error {
 	_, err := c.devmgr(ctx, map[string]any{"cmd": "adopt", "mac": strings.ToLower(mac)})
 	return err

@@ -17,8 +17,6 @@ func consoleServer(t *testing.T) *httptest.Server {
 			w.WriteHeader(http.StatusOK)
 		case "/proxy/network/api/s/default/stat/sysinfo":
 			_, _ = w.Write([]byte(`{"meta":{"rc":"ok"},"data":[{"version":"10.4.57"}]}`))
-		case "/proxy/network/integration/v1/sites":
-			_, _ = w.Write([]byte(`{"data":[{"id":"uuid-1","internalReference":"default","name":"Default"}]}`))
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -33,7 +31,6 @@ func TestNewClient_Success(t *testing.T) {
 		Host:     srv.URL,
 		Username: "admin",
 		Password: "pw",
-		APIKey:   "k",
 	})
 	if err != nil {
 		t.Fatalf("NewClient: %v", err)
@@ -41,20 +38,8 @@ func TestNewClient_Success(t *testing.T) {
 	if c.Site() != "default" {
 		t.Errorf("Site() = %q, want default", c.Site())
 	}
-	if c.SiteID() != "uuid-1" {
-		t.Errorf("SiteID() = %q, want uuid-1", c.SiteID())
-	}
 	if got := c.Capabilities().VersionRaw; got != "10.4.57" {
 		t.Errorf("VersionRaw = %q, want 10.4.57", got)
-	}
-	// Local DNS stays on v2 even on 10.4.57: the Integration dns/policies write
-	// path isn't implemented yet (deriveFlags keeps IntegrationDNSPolicies off).
-	if got := c.Router().Backend(OpLocalDNS); got != BackendV2 {
-		t.Errorf("local DNS backend = %s, want v2 (Integration DNS not implemented)", got)
-	}
-	// Firmware-gated writes that ARE wired (adoption) route to Integration at 10.4.57.
-	if got := c.Router().Backend(OpDeviceAdopt); got != BackendIntegration {
-		t.Errorf("device adopt backend = %s, want integration (10.4.57)", got)
 	}
 }
 
@@ -62,7 +47,7 @@ func TestNewClient_DefaultsSiteWhenEmpty(t *testing.T) {
 	srv := consoleServer(t)
 	defer srv.Close()
 
-	c, err := NewClient(context.Background(), Config{Host: srv.URL, Username: "admin", Password: "pw", APIKey: "k"})
+	c, err := NewClient(context.Background(), Config{Host: srv.URL, Username: "admin", Password: "pw"})
 	if err != nil {
 		t.Fatalf("NewClient: %v", err)
 	}

@@ -31,15 +31,13 @@ func TestProviderSchema(t *testing.T) {
 		t.Fatalf("schema diagnostics: %v", resp.Diagnostics)
 	}
 	attrs := resp.Schema.Attributes
-	for _, name := range []string{"host", "api_key", "username", "password", "site", "allow_insecure", "timeout", "max_retries"} {
+	for _, name := range []string{"host", "username", "password", "site", "allow_insecure", "timeout", "max_retries"} {
 		if _, ok := attrs[name]; !ok {
 			t.Errorf("schema missing attribute %q", name)
 		}
 	}
-	for _, name := range []string{"api_key", "password"} {
-		if a, ok := attrs[name]; ok && !a.IsSensitive() {
-			t.Errorf("attribute %q is not marked Sensitive", name)
-		}
+	if a, ok := attrs["password"]; ok && !a.IsSensitive() {
+		t.Errorf("attribute %q is not marked Sensitive", "password")
 	}
 }
 

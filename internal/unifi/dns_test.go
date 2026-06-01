@@ -87,23 +87,3 @@ func TestDNSRecordCRUD(t *testing.T) {
 		t.Fatalf("DeleteDNSRecord: %v", err)
 	}
 }
-
-// When firmware would route local DNS to Integration, the client must refuse
-// with a CapabilityError rather than silently misbehaving — the path is not
-// implemented yet (deriveFlags keeps IntegrationDNSPolicies false today, so we
-// force the router into that state to exercise the guard).
-func TestDNSRecord_IntegrationGuard(t *testing.T) {
-	mux := http.NewServeMux()
-	c, srv := newTestClient(t, mux)
-	defer srv.Close()
-
-	// Swap in a router whose flags route OpLocalDNS to Integration.
-	cl := c.(*client)
-	cl.router = NewRouter(FeatureFlags{IntegrationWrites: true, IntegrationDNSPolicies: true})
-
-	_, err := cl.CreateDNSRecord(context.Background(), &StaticDNSRecord{Key: "x", RecordType: "A", Value: "1.2.3.4"})
-	var capErr *CapabilityError
-	if !errors.As(err, &capErr) {
-		t.Fatalf("CreateDNSRecord err = %v, want *CapabilityError", err)
-	}
-}

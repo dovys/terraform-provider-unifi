@@ -43,7 +43,6 @@ func New(version string) func() provider.Provider {
 // providerModel mirrors the provider configuration block.
 type providerModel struct {
 	Host          types.String `tfsdk:"host"`
-	APIKey        types.String `tfsdk:"api_key"`
 	Username      types.String `tfsdk:"username"`
 	Password      types.String `tfsdk:"password"`
 	Site          types.String `tfsdk:"site"`
@@ -60,25 +59,18 @@ func (p *UnifiProvider) Metadata(_ context.Context, _ provider.MetadataRequest, 
 func (p *UnifiProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manage a UniFi OS console (Network app today; Protect later) as code. " +
-			"Connects to a single console over its local API surfaces. A local UniFi OS admin " +
-			"account is effectively required; an Integration API key unlocks the official API where " +
-			"firmware supports it.",
+			"Connects to a single console over its local API using a local UniFi OS admin " +
+			"account (username + password).",
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
 				Optional: true,
 				MarkdownDescription: "Console base URL or host, e.g. `https://192.0.2.1` or `unifi.example.com`. " +
 					"A bare host is assumed `https://`. Env: `UNIFI_HOST`.",
 			},
-			"api_key": schema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
-				MarkdownDescription: "Integration API key (Network → Settings → Control Plane → Integrations). " +
-					"Console-wide and owner-level — treat as admin-equivalent. Env: `UNIFI_API_KEY`.",
-			},
 			"username": schema.StringAttribute{
 				Optional: true,
 				MarkdownDescription: "Local UniFi OS admin username (not a cloud/SSO account). " +
-					"Required together with `password`. Env: `UNIFI_USERNAME`.",
+					"Required, together with `password`. Env: `UNIFI_USERNAME`.",
 			},
 			"password": schema.StringAttribute{
 				Optional:            true,
@@ -116,7 +108,6 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	// Provider config must be known at configure time (not derived during apply).
 	for name, unknown := range map[string]bool{
 		"host":           data.Host.IsUnknown(),
-		"api_key":        data.APIKey.IsUnknown(),
 		"username":       data.Username.IsUnknown(),
 		"password":       data.Password.IsUnknown(),
 		"site":           data.Site.IsUnknown(),
@@ -135,7 +126,6 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	}
 
 	host := stringWithEnv(data.Host, "UNIFI_HOST")
-	apiKey := stringWithEnv(data.APIKey, "UNIFI_API_KEY")
 	username := stringWithEnv(data.Username, "UNIFI_USERNAME")
 	password := stringWithEnv(data.Password, "UNIFI_PASSWORD")
 	site := stringWithEnvDefault(data.Site, "UNIFI_SITE", "default")
@@ -171,13 +161,10 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		resp.Diagnostics.AddAttributeError(path.Root("host"),
 			"Missing host", "Set `host` or the UNIFI_HOST environment variable (e.g. https://192.0.2.1).")
 	}
-	if (username == "") != (password == "") {
-		resp.Diagnostics.AddError("Incomplete credentials",
-			"`username` and `password` must be set together (a local UniFi OS admin account).")
-	}
-	if username == "" && password == "" && apiKey == "" {
+	if username == "" || password == "" {
 		resp.Diagnostics.AddError("Missing credentials",
-			"Provide `username`+`password` (a local UniFi OS admin) and/or `api_key`.")
+			"Set `username` and `password` to a local UniFi OS admin account "+
+				"(Settings → Admins → add a local-only admin). Env: `UNIFI_USERNAME` / `UNIFI_PASSWORD`.")
 	}
 	if resp.Diagnostics.HasError() {
 		return
@@ -185,7 +172,6 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	client, err := unifi.NewClient(ctx, unifi.Config{
 		Host:          host,
-		APIKey:        apiKey,
 		Username:      username,
 		Password:      password,
 		Site:          site,
@@ -201,11 +187,8 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	caps := client.Capabilities()
 	tflog.Info(ctx, "configured UniFi provider", map[string]any{
-		"site":                  client.Site(),
-		"site_id":               client.SiteID(),
-		"version":               caps.VersionRaw,
-		"integration_writes":    caps.Flags.IntegrationWrites,
-		"integration_available": client.Router().IntegrationAvailable(),
+		"site":    client.Site(),
+		"version": caps.VersionRaw,
 	})
 
 	resp.ResourceData = client

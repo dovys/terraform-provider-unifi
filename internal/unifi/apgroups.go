@@ -23,8 +23,8 @@ type APGroup struct {
 	AttrHiddenID string   `json:"attr_hidden_id,omitempty"` // controller-internal stable key (e.g. "default")
 }
 
-// AP group CRUD (v2 /apgroups; router OpAPGroup). Like the v2 static-DNS
-// surface: bare JSON, list-and-filter for GET-by-id, _id in URL+body on PUT.
+// AP group CRUD (v2 /apgroups). Like the v2 static-DNS surface: bare JSON,
+// list-and-filter for GET-by-id, _id in URL+body on PUT.
 
 func (c *client) ListAPGroups(ctx context.Context) ([]APGroup, error) {
 	var out []APGroup

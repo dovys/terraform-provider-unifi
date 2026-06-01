@@ -136,9 +136,9 @@ type WANProviderCapabilities struct {
 }
 
 // Network CRUD. The networkconf doc backs both unifi_network_network and
-// unifi_network_wan; routing is legacy REST for both read and write
-// (router OpNetworkRead/OpNetworkWrite). Update is GET-merge-PUT so
-// controller-managed fields (attr_hidden_id, networkgroup, …) survive.
+// unifi_network_wan; both read and write use legacy REST. Update is
+// GET-merge-PUT so controller-managed fields (attr_hidden_id, networkgroup, …)
+// survive.
 
 func (c *client) ListNetworks(ctx context.Context) ([]NetworkConf, error) {
 	return legacyList[NetworkConf](ctx, c, networkconfType)

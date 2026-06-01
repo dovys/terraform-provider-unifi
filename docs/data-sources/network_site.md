@@ -22,5 +22,5 @@ Look up a UniFi site by its slug (internal reference). Defaults to the provider'
 ### Read-Only
 
 - `display_name` (String) Human-readable site name (e.g. `Default`).
-- `id` (String) Integration site UUID.
+- `id` (String) Controller site id (`_id`).
 - `internal_reference` (String) Site slug used by the legacy/v2 surfaces.

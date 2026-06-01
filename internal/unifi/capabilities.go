@@ -12,104 +12,33 @@ import (
 
 // Sysinfo is the subset of the object returned by legacy GET /stat/sysinfo that
 // the provider needs. The Network application version lives here and is present
-// whenever the classic (cookie) session is authenticated — unlike the
-// Integration application-info endpoint, which 404s on older firmware
-// (architecture.md §5).
+// whenever the classic (cookie) session is authenticated.
 type Sysinfo struct {
 	Version string `json:"version"`
 	Build   string `json:"build,omitempty"`
 	Name    string `json:"name,omitempty"`
 }
 
-// integrationWriteFloor is the conservative Network version at or above which
-// the Integration v1 API accepts writes (networks/WLANs/zone-firewall/ACL/DNS/
-// vouchers/adoption). Below it Integration is read-mostly and the router falls
-// back to legacy/v2. Refined per-write as firmware behavior is confirmed
-// (roadmap open question #3).
-var integrationWriteFloor = version.Must(version.NewVersion("10.1.84"))
-
-// FeatureFlags are the capability bits the router consults. They are derived
-// from the detected version here; the classic-vs-zone firewall mode is detected
-// lazily by firewall resources from object counts (architecture.md §5), not in
-// this struct.
-type FeatureFlags struct {
-	// IntegrationWrites is true when firmware accepts Integration v1 writes
-	// (the firmware floor is met).
-	IntegrationWrites bool
-	// IntegrationDNSPolicies routes local DNS to Integration dns/policies
-	// instead of v2 /static-dns.
-	IntegrationDNSPolicies bool
-}
-
-// StaticDNSOnV2 reports whether local DNS still uses the v2 /static-dns surface
-// (the inverse of IntegrationDNSPolicies).
-func (f FeatureFlags) StaticDNSOnV2() bool { return !f.IntegrationDNSPolicies }
-
-// Capabilities is the cached result of the Configure-time probe.
+// Capabilities is the cached result of the Configure-time probe. It carries the
+// detected Network application version, which future resources gate on (e.g.
+// the classic-vs-zone firewall mode); that lazy, count-based detection lives in
+// the firewall resources, not here (architecture.md §5).
 type Capabilities struct {
 	// Version is the parsed Network application version (nil if undetected or
 	// unparseable; VersionRaw still carries the reported string).
 	Version *version.Version
 	// VersionRaw is the version string as the controller reported it.
 	VersionRaw string
-	// Sites maps a site slug (internalReference, e.g. "default") to its
-	// Integration UUID and display name. Empty if the Integration API was
-	// unavailable at Configure time.
-	Sites map[string]Site
-	// Flags are the derived routing capability bits.
-	Flags FeatureFlags
 }
 
-// deriveFlags computes routing flags from a detected version. An undetected
-// version (nil) yields the conservative all-false set: legacy/v2 everywhere.
-func deriveFlags(v *version.Version) FeatureFlags {
-	if v == nil {
-		return FeatureFlags{}
+// probe runs the Configure-time capability detection over the classic session:
+// it reads the controller version from legacy /stat/sysinfo.
+func probe(ctx context.Context, classic *transport.Classic, site string) (*Capabilities, error) {
+	v, raw, err := fetchVersionLegacy(ctx, classic, site)
+	if err != nil {
+		return nil, fmt.Errorf("detect controller version: %w", err)
 	}
-	writes := v.GreaterThanOrEqual(integrationWriteFloor)
-	return FeatureFlags{
-		IntegrationWrites: writes,
-		// Local DNS stays on v2 /static-dns: the Integration dns/policies write
-		// path is not implemented yet, so firmware support alone must not flip
-		// OpLocalDNS to Integration. Enabling this is a one-line change here
-		// once that path lands (invariant #2).
-		IntegrationDNSPolicies: false,
-	}
-}
-
-// probe runs the Configure-time capability detection. classic and integration
-// may be nil if the matching credentials were not supplied; probe uses whatever
-// is available and leaves undetermined fields zero.
-func probe(ctx context.Context, classic *transport.Classic, integration *transport.Integration, site string) (*Capabilities, error) {
-	caps := &Capabilities{Sites: map[string]Site{}}
-
-	if classic != nil {
-		v, raw, err := fetchVersionLegacy(ctx, classic, site)
-		if err != nil {
-			return nil, fmt.Errorf("detect controller version: %w", err)
-		}
-		caps.Version, caps.VersionRaw = v, raw
-	}
-
-	if integration != nil {
-		sites, err := fetchSites(ctx, integration)
-		if err != nil {
-			return nil, fmt.Errorf("list sites (integration): %w", err)
-		}
-		for _, s := range sites {
-			caps.Sites[s.InternalReference] = s
-		}
-		// If classic was absent, fall back to integration application-info for
-		// the version (404s pre-9.3 — tolerated, leaving Version nil).
-		if caps.Version == nil {
-			if v, raw, ok := fetchVersionIntegration(ctx, integration); ok {
-				caps.Version, caps.VersionRaw = v, raw
-			}
-		}
-	}
-
-	caps.Flags = deriveFlags(caps.Version)
-	return caps, nil
+	return &Capabilities{Version: v, VersionRaw: raw}, nil
 }
 
 func fetchVersionLegacy(ctx context.Context, c *transport.Classic, site string) (*version.Version, string, error) {
@@ -127,39 +56,8 @@ func fetchVersionLegacy(ctx context.Context, c *transport.Classic, site string) 
 	raw := env.Data[0].Version
 	v, err := version.NewVersion(raw)
 	if err != nil {
-		// Present but unparseable: keep the raw string, leave parsed nil so
-		// flags stay conservative.
+		// Present but unparseable: keep the raw string, leave parsed nil.
 		return nil, raw, nil
 	}
 	return v, raw, nil
-}
-
-func fetchSites(ctx context.Context, i *transport.Integration) ([]Site, error) {
-	resp, err := i.Do(ctx, "GET", integrationPath("sites"), nil)
-	if err != nil {
-		return nil, err
-	}
-	var page IntegrationPage[Site]
-	if err := json.Unmarshal(resp.Body, &page); err != nil {
-		return nil, fmt.Errorf("decode sites: %w", err)
-	}
-	return page.Data, nil
-}
-
-func fetchVersionIntegration(ctx context.Context, i *transport.Integration) (*version.Version, string, bool) {
-	resp, err := i.Do(ctx, "GET", integrationPath("application-info"), nil)
-	if err != nil {
-		return nil, "", false
-	}
-	var info struct {
-		ApplicationVersion string `json:"applicationVersion"`
-	}
-	if err := json.Unmarshal(resp.Body, &info); err != nil || info.ApplicationVersion == "" {
-		return nil, "", false
-	}
-	v, err := version.NewVersion(info.ApplicationVersion)
-	if err != nil {
-		return nil, info.ApplicationVersion, true
-	}
-	return v, info.ApplicationVersion, true
 }

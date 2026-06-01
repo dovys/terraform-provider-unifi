@@ -9,11 +9,12 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 
 ## Invariants (don't violate without an explicit, reviewed decision)
 
-1. **Resources call the `Client` interface, never a transport.** All routing lives in `router.go` —
-   so moving an op onto the Integration API is a one-line change, zero resource edits.
-2. **Backend choice is data, not destiny.** New Integration write → flip the routing policy +
-   capability flag; never rename or re-architect the resource. Schema stays stable across the API's
-   evolution.
+1. **Resources call the `Client` interface, never a transport.** Each typed client method targets its
+   surface (legacy `/rest` or v2) directly via the `legacy*`/`v2*` helpers in `surfaces.go`; both run
+   over one cookie+CSRF session. There is no per-op router and no Integration/X-API-KEY surface.
+2. **Surface choice is an implementation detail.** Moving a resource between legacy and v2 (or a new
+   firmware moving an object's wire shape) changes only the client method — never rename or
+   re-architect the resource. Schema stays stable across the API's evolution.
 3. **Capability-gate, don't assume firmware.** Missing capability → plan-time diagnostic, never a
    raw 4xx mid-apply.
 4. **Safe by default; danger is isolated + guarded.** `unifi_network_device` destroy reverts config and
@@ -41,8 +42,8 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 
 ## Resource recipe (every resource, same way)
 
-1. Confirm backend + shape against the live network fixture (and UniFi OS Server if needed); add
-   the `router.go` policy entry.
+1. Confirm the surface (legacy `/rest` vs v2) + wire shape against the live network fixture (and
+   UniFi OS Server if needed).
 2. Typed structs beside their client methods in `internal/unifi` (e.g. `NetworkConf` in `networks.go`,
    `StaticDNSRecord` in `dns.go`) — no separate `models` package, and no `map[string]any` except the
    generic `unifi_network_setting` and raw passthrough of unmodeled fields in GET-merge-PUT. v2 writes
@@ -61,7 +62,7 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 
 ## Definition of Done
 
-- [ ] Routes via `Client`; routing policy + capability flag set.
+- [ ] Routes via `Client`; targets the correct surface (legacy `/rest` or v2).
 - [ ] Schema per recipe; immutables `RequiresReplace`; secrets `Sensitive`.
 - [ ] Unit tests: serialization (`httptest`), validators, plan modifiers.
 - [ ] Acceptance test: create → update → import (`ImportStateVerify`) → destroy, clean intermediate
@@ -76,5 +77,5 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 - **Per release:** run the live-network import as a smoke test (owner opt-in) — the truest regression.
 - **Quarterly:** regenerate the local network fixture; anything new it surfaces (API paths, object
   shapes, resource types) becomes a roadmap item.
-- **Capability watch:** when a Network version moves a write onto Integration, flip the routing policy
-  + flag (invariant 2). Backend migrations stay invisible to users (no schema change / forced recreate).
+- **Capability watch:** when a Network version changes an object's surface or wire shape, update the
+  client method only (invariant 2). Such migrations stay invisible to users (no schema change / forced recreate).

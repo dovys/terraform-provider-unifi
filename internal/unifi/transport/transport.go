@@ -1,11 +1,10 @@
-// Package transport implements the HTTP surfaces of a UniFi OS console. Two
-// transports cover the three surfaces: Classic carries the cookie+CSRF session
-// shared by the legacy REST and v2 surfaces; Integration carries the X-API-KEY
-// session for Integration v1. Envelope unwrapping is the caller's job — the
-// three surfaces use different envelopes.
+// Package transport implements the HTTP surface of a UniFi OS console. The
+// Classic transport carries the cookie+CSRF session shared by the legacy REST
+// (`/api/s/<site>/...`) and v2 (`/v2/api/site/<site>/...`) surfaces. Envelope
+// unwrapping is the caller's job — the two surfaces use different envelopes.
 //
 // Resource code never imports this package (development.md invariant 1); it
-// reaches these transports only through the unifi.Client interface.
+// reaches the transport only through the unifi.Client interface.
 package transport
 
 import (
@@ -33,7 +32,7 @@ func (r *Response) IsSuccess() bool { return r.StatusCode >= 200 && r.StatusCode
 
 // APIError is returned for a non-2xx response from a UniFi surface.
 type APIError struct {
-	Surface    string // "integration" or "classic"
+	Surface    string // "classic"
 	Method     string
 	Path       string
 	StatusCode int
@@ -97,7 +96,7 @@ func extractMessage(body []byte) string {
 	if err := json.Unmarshal(body, &legacy); err == nil && legacy.Meta.Msg != "" {
 		return legacy.Meta.Msg
 	}
-	// Integration v1 error shape: {"statusCode":…,"statusName":…,"message":…}.
+	// Generic error shape some endpoints use: {"message":…}.
 	var generic struct {
 		Message string `json:"message"`
 	}

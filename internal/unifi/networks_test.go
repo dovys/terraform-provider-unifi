@@ -18,9 +18,6 @@ func registerProbe(mux *http.ServeMux) {
 	mux.HandleFunc("/proxy/network/api/s/default/stat/sysinfo", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(`{"meta":{"rc":"ok"},"data":[{"version":"10.4.57"}]}`))
 	})
-	mux.HandleFunc("/proxy/network/integration/v1/sites", func(w http.ResponseWriter, _ *http.Request) {
-		_, _ = w.Write([]byte(`{"data":[{"id":"uuid-1","internalReference":"default","name":"Default"}]}`))
-	})
 }
 
 func newTestClient(t *testing.T, mux *http.ServeMux) (Client, *httptest.Server) {
@@ -28,7 +25,7 @@ func newTestClient(t *testing.T, mux *http.ServeMux) (Client, *httptest.Server) 
 	registerProbe(mux)
 	srv := httptest.NewServer(mux)
 	c, err := NewClient(context.Background(), Config{
-		Host: srv.URL, Username: "admin", Password: "pw", APIKey: "k",
+		Host: srv.URL, Username: "admin", Password: "pw",
 	})
 	if err != nil {
 		srv.Close()
@@ -127,21 +124,16 @@ func TestListNetworks(t *testing.T) {
 	}
 }
 
-func TestListSitesAndAppInfo(t *testing.T) {
+func TestListSites(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/proxy/network/integration/v1/application-info", func(w http.ResponseWriter, _ *http.Request) {
-		_, _ = w.Write([]byte(`{"applicationVersion":"10.4.57"}`))
+	mux.HandleFunc("/proxy/network/api/self/sites", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"meta":{"rc":"ok"},"data":[{"_id":"s1","name":"default","desc":"Default"}]}`))
 	})
 	c, srv := newTestClient(t, mux)
 	defer srv.Close()
-	ctx := context.Background()
 
-	sites, err := c.ListSites(ctx)
-	if err != nil || len(sites) != 1 || sites[0].InternalReference != "default" {
+	sites, err := c.ListSites(context.Background())
+	if err != nil || len(sites) != 1 || sites[0].Name != "default" || sites[0].Desc != "Default" {
 		t.Fatalf("ListSites = %+v, err %v", sites, err)
-	}
-	info, err := c.GetApplicationInfo(ctx)
-	if err != nil || info.ApplicationVersion != "10.4.57" {
-		t.Fatalf("GetApplicationInfo = %+v, err %v", info, err)
 	}
 }

@@ -12,10 +12,4 @@ func TestPathBuilders(t *testing.T) {
 	if got := v2Path("default", "static-dns"); got != "/proxy/network/v2/api/site/default/static-dns" {
 		t.Errorf("v2Path = %q", got)
 	}
-	if got := integrationPath("sites"); got != "/proxy/network/integration/v1/sites" {
-		t.Errorf("integrationPath = %q", got)
-	}
-	if got := integrationPath("/sites"); got != "/proxy/network/integration/v1/sites" {
-		t.Errorf("integrationPath (leading slash) = %q", got)
-	}
 }

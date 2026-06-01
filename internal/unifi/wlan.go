@@ -112,8 +112,8 @@ type PrivatePresharedKey struct {
 	NetworkConfID string `json:"networkconf_id,omitempty"` // VLAN/network clients using this key land on
 }
 
-// WLAN CRUD (legacy /rest/wlanconf; router OpWLANRead/OpWLANWrite). Update is
-// GET-merge-PUT so controller-managed fields survive.
+// WLAN CRUD (legacy /rest/wlanconf). Update is GET-merge-PUT so
+// controller-managed fields survive.
 
 func (c *client) ListWLANs(ctx context.Context) ([]WLANConf, error) {
 	return legacyList[WLANConf](ctx, c, wlanconfType)

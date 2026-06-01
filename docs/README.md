@@ -1,8 +1,8 @@
 # terraform-provider-unifi — Design Docs
 
 > **Status: in development.** Phase 0 (the base — provider scaffold + `internal/unifi` client:
-> transports, router, capabilities, `Configure` probe) has landed; resources are built phase by phase
-> ([roadmap.md](roadmap.md)). These docs describe the **current intended design** (not its history).
+> classic cookie+CSRF transport, capabilities, `Configure` probe) has landed; resources are built
+> phase by phase ([roadmap.md](roadmap.md)). These docs describe the **current intended design** (not its history).
 
 Manages a **UniFi OS** console as code — **Network** and **Protect** today (Access and the other apps
 later) — against the latest UniFi APIs. Resources are **app-namespaced** (`unifi_network_*`,
@@ -10,9 +10,9 @@ later) — against the latest UniFi APIs. Resources are **app-namespaced** (`uni
 
 | Doc | Covers |
 |-----|--------|
-| [architecture.md](architecture.md) | API surfaces, hybrid client, auth, per-resource backend routing, capability gating, safety. |
+| [architecture.md](architecture.md) | API surfaces, client, auth, the per-resource surface map, capability gating, safety. |
 | [apps/network.md](apps/network.md) | **Network** app resource & data-source catalog: the resource design and what we don't model. |
-| [apps/protect.md](apps/protect.md) | **Protect** app: cameras, doorbells, lights, sensors, chimes, viewers, liveviews, NVR settings — shares the client & key. |
+| [apps/protect.md](apps/protect.md) | **Protect** app: cameras, doorbells, lights, sensors, chimes, viewers, liveviews, NVR settings — shares the client & session. |
 | [devices-and-ports.md](devices-and-ports.md) | The device model (one adopt-and-configure resource + data source) and per-port config. |
 | [flows.md](flows.md) | Operator runbooks: add a device, VLAN, DHCP reservation, firewall rule, WLAN, import. |
 | [testing.md](testing.md) | Tiered tests: unit + Docker controller + gated hardware-in-the-loop. |
@@ -22,10 +22,10 @@ later) — against the latest UniFi APIs. Resources are **app-namespaced** (`uni
 ## Decisions
 
 - **App-namespaced resources** — `unifi_network_*`, `unifi_protect_*`, … One provider and **one
-  console API key** serve every app (mirrors AWS/Google service prefixing).
-- **API: official-where-capable, legacy/v2 fallback.** The router prefers the Integration API
-  (`/integration/v1`) when firmware supports the write, else legacy `/rest/` + v2 (`/v2/api/site`).
-  Dual auth; a **local admin account is effectively required** today.
+  console session** serve every app (mirrors AWS/Google service prefixing).
+- **API: one cookie+CSRF session over legacy `/rest/` + v2 (`/v2/api/site`).** Each resource targets
+  whichever surface owns its object. A **local admin account is required**; the Integration/X-API-KEY
+  surface is out of scope.
 - **Coverage:** comprehensive — everything in the live network, plus first-class per-switch-port
   config.
 - **Devices:** one `unifi_network_device` resource that adopts-if-needed and configures (plus a
@@ -33,7 +33,7 @@ later) — against the latest UniFi APIs. Resources are **app-namespaced** (`uni
   Client/end-user devices are **not** modeled — except fixed-IP DHCP reservations
   (`unifi_network_dhcp_reservation`).
 - **Framework:** `terraform-plugin-framework` (protocol v6), Go, hand-written typed client.
-- **Testing:** unit + Docker controller (legacy/v2) + gated self-hosted/HIL (Integration & radios).
+- **Testing:** unit + Docker controller (legacy/v2) + gated self-hosted/HIL (real radios & hardware verbs).
 - **Distribution:** private → public; Registry `dovys/unifi`; MIT.
 
 ## Non-goals

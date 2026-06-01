@@ -6,9 +6,9 @@ controller covers the legacy + v2 surfaces where ~all writes live.
 
 | Tier | Runs | Controller | Auth | Covers |
 |------|------|:----------:|------|--------|
-| **Unit** | every PR | none | — | router/capability logic, model (de)serialization (`httptest`), validators, plan modifiers, the **v2 write contract**. Most bugs live here. |
+| **Unit** | every PR | none | — | capability logic, model (de)serialization (`httptest`), validators, plan modifiers, the **v2 write contract**. Most bugs live here. |
 | **Acceptance (legacy/v2)** | merge / nightly | `linuxserver/unifi-network-application` (Docker) | classic | networks, WAN, firewall (classic), routing, port profiles, devices + port overrides, reservations, user groups, RADIUS, DNS. The bulk. |
-| **Integration + HIL** | gated `workflow_dispatch` / self-hosted | UniFi OS Server (VM) or real gear | dual | Integration-API writes, real radios (WLAN broadcasting), zone-firewall enforcement, firmware quirks the Docker controller can't reproduce. |
+| **HIL** | gated `workflow_dispatch` / self-hosted | UniFi OS Server (VM) or real gear | classic | Real radios (WLAN broadcasting), device adoption/forget, zone-firewall enforcement, firmware quirks the Docker controller can't reproduce. |
 
 ## Tier 2 (workhorse)
 
@@ -27,17 +27,16 @@ the firmware floor.
 ## Tier 3 (gated)
 
 A self-hosted runner with UniFi OS Server on a systemd VM, or real hardware (disposable gateway +
-AP). The **only** place that exercises Integration writes, real radios, zone-firewall enforcement,
-and firmware-specific behavior (e.g. local DNS moving from v2 `/static-dns` to Integration
-`dns/policies` as firmware advances). It's also
+AP). The **only** place that exercises real radios, device adoption/forget, zone-firewall
+enforcement, and firmware-specific behavior the Docker controller can't reproduce. It's also
 where the operator's **own live console** — captured as a local, gitignored fixture, never
 committed — is imported end-to-end to a clean (and second consecutive empty) plan: the truest
 regression.
 
 ## Honesty rule
 
-The matrix states plainly that **Tier 2 does not cover the Integration API or several v2 firmware
-quirks** — those are Tier 3 only. No claimed-but-absent coverage.
+The matrix states plainly that **Tier 2 does not cover real radios, hardware adoption, or several v2
+firmware quirks** — those are Tier 3 only. No claimed-but-absent coverage.
 
 ## "Tested" for a resource
 

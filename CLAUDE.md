@@ -9,11 +9,13 @@ A Terraform provider for **UniFi OS** (Network + Protect today; Access/others la
 clean-room, Registry `dovys/unifi`. Resources are **app-namespaced**: `unifi_network_*`, `unifi_protect_*`, ….
 
 ## Invariants (don't violate without an explicit, reviewed decision)
-1. **Resources call the `internal/unifi` `Client` interface — never an HTTP transport.** Routing
-   lives in `router.go`.
-2. **Official-where-capable, legacy/v2 fallback.** Router prefers Integration when firmware supports
-   the write, else legacy/v2. Dual auth; a **local admin account is effectively required** today.
-   New Integration write later = one-line routing change, zero resource edits.
+1. **Resources call the `internal/unifi` `Client` interface — never an HTTP transport.** Each typed
+   client method targets its surface directly (`legacy*` / `v2*` helpers in `surfaces.go`); there is
+   no per-op router.
+2. **One cookie+CSRF session over legacy `/rest` + v2.** A **local admin account (username+password)
+   is required.** Most writes are legacy REST (widest, most stable); v2 carries the newer
+   zone-firewall / traffic / static-DNS / AP-group surfaces — same session, different URL prefix. No
+   Integration/X-API-KEY surface.
 3. **Capability-gate, don't assume firmware.** Missing capability → plan-time diagnostic (via
    `ModifyPlan`/`ValidateConfig`), never a raw 4xx.
 4. **Safe by default.** One `unifi_network_device` resource adopts-if-needed + configures (+ read-only
@@ -29,9 +31,10 @@ clean-room, Registry `dovys/unifi`. Resources are **app-namespaced**: `unifi_net
    range); secrets `Sensitive`.
 
 ## Hard "don'ts"
-❌ HTTP from resource code. ❌ `map[string]any` schemas (except generic `unifi_network_setting` + raw
-passthrough in GET-merge-PUT). ❌ client/end-user device modeling. ❌ reused provider/client source.
-❌ whole-document PUT (GET-merge-PUT owned fields only). ❌ List for keyed collections (use Map/Set).
+❌ HTTP from resource code. ❌ Integration/X-API-KEY surface (single classic session only).
+❌ `map[string]any` schemas (except generic `unifi_network_setting` + raw passthrough in GET-merge-PUT).
+❌ client/end-user device modeling. ❌ reused provider/client source. ❌ whole-document PUT
+(GET-merge-PUT owned fields only). ❌ List for keyed collections (use Map/Set).
 ❌ `UseStateForUnknown` on controller-mutable fields. ❌ over-tight validators.
 
 ## Docs hygiene
@@ -40,16 +43,16 @@ not recorded** — no superseded-decision archive, no "previously we considered�
 invariant: update the docs in-PR + `CHANGELOG` + explain in the PR description.
 
 ## Architecture
-Three surfaces: **Integration v1** (`/integration/v1`, `X-API-KEY`, firmware-gated writes),
-**legacy** (`/api/s/<site>/rest`, cookie+CSRF, widest writes), **v2** (`/v2/api/site`, cookie+CSRF:
-zone-firewall, traffic, static-dns, ap-groups — note the **v2 write contract** in architecture.md).
-Client = `Client` interface + `integration`/`classic` transports (classic handles CSRF + ~2h JWT
-re-auth) + `router` + `capabilities` (version, feature flags, site name↔UUID). **Protect** reuses the
-same client + console key under `/proxy/protect/...` (see [docs/apps/protect.md](docs/apps/protect.md)). Cloud
-Site Manager API out of scope.
+Two surfaces, one session: **legacy** (`/api/s/<site>/rest` + `/stat` + `/cmd`, the widest, most
+stable writes) and **v2** (`/v2/api/site`: zone-firewall, traffic, static-dns, ap-groups — note the
+**v2 write contract** in architecture.md). Both run over the **classic** cookie+CSRF transport
+(handles CSRF + ~2h JWT re-auth). Client = `Client` interface + `classic` transport + `surfaces.go`
+(`legacy*`/`v2*` helpers) + `capabilities` (controller version). **Protect** reuses the same client +
+console key under `/proxy/protect/...` (see [docs/apps/protect.md](docs/apps/protect.md)). The
+Integration/X-API-KEY and Cloud Site Manager APIs are out of scope.
 
 ## Resource recipe
-1. Confirm backend/shape against the live network fixture; add `router.go` entry.
+1. Confirm the surface (legacy `/rest` vs v2) and wire shape against the live network fixture.
 2. Typed structs beside their client methods in `internal/unifi` (e.g. `NetworkConf` in `networks.go`,
    `StaticDNSRecord` in `dns.go`) — minimal structs for v2 writes. No separate `models` package.
 3. Schema: nested attributes; Map/Set keyed by natural key (not List); `Optional+Computed`;
@@ -73,10 +76,10 @@ example + generated docs · checklist updated.
 ```bash
 make build       # go install
 make test        # unit (no controller)
-make testacc     # TF_ACC=1 go test ./... -timeout 60m  (Docker controller; HIL for Integration)
+make testacc     # TF_ACC=1 go test ./... -timeout 60m  (Docker controller; HIL for hardware verbs)
 go generate ./...; golangci-lint run; goreleaser release --clean
 ```
-Acceptance env: `UNIFI_HOST/USERNAME/PASSWORD/API_KEY/SITE/INSECURE`. Never against production —
+Acceptance env: `UNIFI_HOST/USERNAME/PASSWORD/SITE/INSECURE`. Never against production —
 tiered tests in [`docs/testing.md`](docs/testing.md) (UniFi OS Server can't run in hosted CI).
 
 ## Conventions
