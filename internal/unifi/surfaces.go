@@ -167,6 +167,25 @@ func legacyGetMerged(ctx context.Context, c *client, typ, id string) (map[string
 	return items[0], nil
 }
 
+// legacyMergePut performs the GET-merge-PUT update for a partly-owned legacy doc:
+// fetch the existing document as a raw field map, overlay the owned (omitempty)
+// fields of owned, and PUT the result back. Controller-managed and unmodeled
+// fields survive untouched (invariant: never whole-document PUT).
+func legacyMergePut[T any](ctx context.Context, c *client, typ, id string, owned any) (*T, error) {
+	existing, err := legacyGetMerged(ctx, c, typ, id)
+	if err != nil {
+		return nil, err
+	}
+	fields, err := structToRawMap(owned)
+	if err != nil {
+		return nil, err
+	}
+	for k, v := range fields {
+		existing[k] = v
+	}
+	return legacyPut[T](ctx, c, typ, id, existing)
+}
+
 // --- v2 surface (/proxy/network/v2/api/site/<site>/<path>) — bare JSON ---
 
 func v2Decode[T any](ctx context.Context, c *client, method, suffix string, body any, out *T) error {

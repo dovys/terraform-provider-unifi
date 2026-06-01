@@ -137,3 +137,47 @@ func TestAPGroup_Wire(t *testing.T) {
 		}
 	}
 }
+
+func TestFirewallGroup_Wire(t *testing.T) {
+	// group_members is non-omitempty: an empty group still sends [].
+	m := toMap(t, FirewallGroup{Name: "Servers", GroupType: "address-group", GroupMembers: []string{}})
+	if m["name"] != "Servers" || m["group_type"] != "address-group" {
+		t.Errorf("name/group_type wrong: %v", m)
+	}
+	if v, ok := m["group_members"]; !ok {
+		t.Errorf("group_members must always be sent (non-omitempty); got %v", m)
+	} else if arr, ok := v.([]any); !ok || len(arr) != 0 {
+		t.Errorf("group_members should marshal to []; got %v", v)
+	}
+	if _, ok := m["_id"]; ok {
+		t.Errorf("unset _id must be omitted; got %v", m["_id"])
+	}
+}
+
+func TestFirewallRule_Wire(t *testing.T) {
+	// A minimal rule: required fields ride along; every optional pointer/string is
+	// omitempty so GET-merge-PUT leaves the controller's value.
+	idx := 20000
+	m := toMap(t, FirewallRule{Name: "block", Ruleset: "LAN_IN", RuleIndex: &idx, Action: "drop"})
+	if m["name"] != "block" || m["ruleset"] != "LAN_IN" || m["action"] != "drop" || m["rule_index"] != float64(20000) {
+		t.Errorf("required fields wrong: %v", m)
+	}
+	for _, k := range []string{
+		"_id", "site_id", "enabled", "protocol", "logging", "ipsec",
+		"state_new", "src_address", "dst_port", "src_firewallgroup_ids", "setting_preference",
+	} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// Explicit false on a state pointer must be sent (distinct from unset).
+	f := false
+	m = toMap(t, FirewallRule{Name: "x", Ruleset: "LAN_IN", RuleIndex: &idx, Action: "accept", Logging: &f, StateNew: &f})
+	if v, ok := m["logging"]; !ok || v != false {
+		t.Errorf("logging=&false should marshal to logging:false; got %v (present=%v)", v, ok)
+	}
+	if v, ok := m["state_new"]; !ok || v != false {
+		t.Errorf("state_new=&false should marshal to state_new:false; got %v (present=%v)", v, ok)
+	}
+}

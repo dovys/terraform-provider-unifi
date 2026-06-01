@@ -131,18 +131,7 @@ func (c *client) UpdateWLAN(ctx context.Context, w *WLANConf) (*WLANConf, error)
 	if w.ID == "" {
 		return nil, fmt.Errorf("UpdateWLAN: missing id")
 	}
-	existing, err := legacyGetMerged(ctx, c, wlanconfType, w.ID)
-	if err != nil {
-		return nil, err
-	}
-	owned, err := structToRawMap(w)
-	if err != nil {
-		return nil, err
-	}
-	for k, v := range owned {
-		existing[k] = v
-	}
-	return legacyPut[WLANConf](ctx, c, wlanconfType, w.ID, existing)
+	return legacyMergePut[WLANConf](ctx, c, wlanconfType, w.ID, w)
 }
 
 func (c *client) DeleteWLAN(ctx context.Context, id string) error {

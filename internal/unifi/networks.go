@@ -156,18 +156,7 @@ func (c *client) UpdateNetwork(ctx context.Context, n *NetworkConf) (*NetworkCon
 	if n.ID == "" {
 		return nil, fmt.Errorf("UpdateNetwork: missing id")
 	}
-	existing, err := legacyGetMerged(ctx, c, networkconfType, n.ID)
-	if err != nil {
-		return nil, err
-	}
-	owned, err := structToRawMap(n)
-	if err != nil {
-		return nil, err
-	}
-	for k, v := range owned {
-		existing[k] = v
-	}
-	return legacyPut[NetworkConf](ctx, c, networkconfType, n.ID, existing)
+	return legacyMergePut[NetworkConf](ctx, c, networkconfType, n.ID, n)
 }
 
 func (c *client) DeleteNetwork(ctx context.Context, id string) error {

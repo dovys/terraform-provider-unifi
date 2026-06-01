@@ -59,6 +59,20 @@ type Client interface {
 	UpdateAPGroup(ctx context.Context, g *APGroup) (*APGroup, error)
 	DeleteAPGroup(ctx context.Context, id string) error
 
+	// Firewall (classic /rest/firewallgroup + /rest/firewallrule) — backs
+	// unifi_network_firewall_group and unifi_network_firewall_rule.
+	ListFirewallGroups(ctx context.Context) ([]FirewallGroup, error)
+	GetFirewallGroup(ctx context.Context, id string) (*FirewallGroup, error)
+	CreateFirewallGroup(ctx context.Context, g *FirewallGroup) (*FirewallGroup, error)
+	UpdateFirewallGroup(ctx context.Context, g *FirewallGroup) (*FirewallGroup, error)
+	DeleteFirewallGroup(ctx context.Context, id string) error
+
+	ListFirewallRules(ctx context.Context) ([]FirewallRule, error)
+	GetFirewallRule(ctx context.Context, id string) (*FirewallRule, error)
+	CreateFirewallRule(ctx context.Context, r *FirewallRule) (*FirewallRule, error)
+	UpdateFirewallRule(ctx context.Context, r *FirewallRule) (*FirewallRule, error)
+	DeleteFirewallRule(ctx context.Context, id string) error
+
 	// Local DNS (v2 static-dns) — backs unifi_network_dns_record.
 	ListDNSRecords(ctx context.Context) ([]StaticDNSRecord, error)
 	GetDNSRecord(ctx context.Context, id string) (*StaticDNSRecord, error)
