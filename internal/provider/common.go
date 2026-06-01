@@ -142,3 +142,32 @@ func sliceToStringSet(items []string) types.Set {
 	s, _ := types.SetValue(types.StringType, elems)
 	return s
 }
+
+// intSetToSlice decodes a framework set of Int64 into a []int (nil for a
+// null/unknown set), the int analogue of stringSetToSlice.
+func intSetToSlice(ctx context.Context, s types.Set, diags *diag.Diagnostics) []int {
+	if s.IsNull() || s.IsUnknown() {
+		return nil
+	}
+	var vals []int64
+	diags.Append(s.ElementsAs(ctx, &vals, false)...)
+	out := make([]int, 0, len(vals))
+	for _, v := range vals {
+		out = append(out, int(v))
+	}
+	return out
+}
+
+// sliceToIntSet builds a framework set of Int64, mirroring sliceToStringSet's
+// nil→null / non-nil-empty→empty-set distinction.
+func sliceToIntSet(items []int) types.Set {
+	if items == nil {
+		return types.SetNull(types.Int64Type)
+	}
+	elems := make([]attr.Value, 0, len(items))
+	for _, n := range items {
+		elems = append(elems, types.Int64Value(int64(n)))
+	}
+	s, _ := types.SetValue(types.Int64Type, elems)
+	return s
+}

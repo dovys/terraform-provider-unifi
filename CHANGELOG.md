@@ -53,6 +53,21 @@ network surface is feature-complete._
     older SSID-grouping unit that predates AP groups. Only `name` is configurable
     (confirmed live); the controller's protected default group
     (`attr_no_delete`) is destroy-as-state-removal. Imports by `_id`.
+  - `unifi_network_traffic_rule` — a traffic-management rule (v2 `trafficrules`):
+    `BLOCK`/`ALLOW`/`SPEED_LIMIT` traffic matched by destination (`INTERNET`,
+    `DOMAIN`, `IP`, `REGION`, `APP`, `APP_CATEGORY`) for a set of `target_devices`
+    (all clients / a client MAC / a network), with a nested `bandwidth_limit` for
+    speed limits. v2 write contract (`_id` in URL + body). Field set
+    **HIL-unverified** (no live rules; see `TODO.md`). Imports by `_id`.
+  - `unifi_network_traffic_route` — a policy route (v2 `trafficroutes`): send
+    traffic matched by destination (`DOMAIN`/`IP`/`REGION`/`INTERNET`) out a
+    specific interface/VPN (`network_id`) for a set of `target_devices`, with an
+    optional `kill_switch_enabled`. Field set **HIL-unverified** (no live routes;
+    see `TODO.md`). Imports by `_id`.
+  - The zone-based firewall resources (`firewall_zone`/`firewall_policy`) are
+    **deferred**: the test controller runs the classic firewall, so the v2 zone
+    endpoints are empty and the classic-vs-zone capability gate can't be verified
+    (see `TODO.md`).
 
 - **Phase 2 — Wi-Fi.** SSIDs and the AP groups they broadcast on:
   - `unifi_network_wlan` — a Wi-Fi network/SSID (`wlanconf`, legacy `/rest`),

@@ -72,6 +72,23 @@ rig (HIL) exists. Open items:
   `x_password` is echoed on read (assumed write-only → preserved from config),
   and the `interface` values once a config can be created.
 
+- **Traffic rules/routes (v2 `trafficrules`/`trafficroutes`) field set.** The
+  live site has **zero** traffic rules and routes (endpoints valid, empty), so
+  `unifi_network_traffic_rule`/`unifi_network_traffic_route` are modeled from
+  documented v2 behavior. Confirm: the `matching_target`/`action` enums; whether
+  `domains` is a list of strings or of `{domain, ports, port_ranges}` objects (we
+  use strings); the `target_devices` entry shape (`type`/`client_mac`/
+  `network_id`); the `bandwidth_limit` keys; and whether a `schedule` object is
+  required (deferred — not modeled yet). Also confirm `traffic_route.network_id`
+  is the right field for the egress interface/VPN.
+- **Zone-based firewall (v2 `firewall/zone` + `firewall-policies`) — deferred.**
+  The live controller runs the **classic** firewall, so the zone endpoints return
+  empty and the classic-vs-zone capability gate (the controller runs one model or
+  the other, never both) can't be designed/verified. Build `firewall_zone` +
+  `firewall_policy` once a zone-firewall-enabled controller is available, with a
+  `ModifyPlan`/`ValidateConfig` gate that refuses to manage zone resources on a
+  classic controller (and vice-versa for `firewall_rule`).
+
 ## Cross-resource wiring follow-ups
 
 - **`unifi_network_wlan` → RADIUS profile.** A `wpaeap` SSID needs a

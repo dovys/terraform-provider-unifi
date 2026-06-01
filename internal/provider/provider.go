@@ -215,6 +215,8 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewPortForwardResource,
 		NewDynamicDNSResource,
 		NewWLANGroupResource,
+		NewTrafficRuleResource,
+		NewTrafficRouteResource,
 	}
 }
 
