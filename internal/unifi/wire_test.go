@@ -207,3 +207,44 @@ func TestUser_Wire(t *testing.T) {
 		t.Errorf("empty mac must be omitted so a revert PUT preserves it; got %v", m["mac"])
 	}
 }
+
+func TestPortProfile_Wire(t *testing.T) {
+	// name always rides along; the scalar optionals are omitempty so GET-merge-PUT
+	// leaves the controller's value untouched.
+	m := toMap(t, PortProfile{Name: "Trunk", Forward: "all"})
+	if m["name"] != "Trunk" || m["forward"] != "all" {
+		t.Errorf("name/forward wrong: %v", m)
+	}
+	for _, k := range []string{
+		"_id", "site_id", "poe_mode", "autoneg", "speed", "stp_port_mode",
+		"stp_edge_state", "native_networkconf_id", "multicast_router_mode",
+	} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// The two owned lists are NON-omitempty: an explicit empty set must serialize
+	// to [] so a merge-PUT clears the value (mirrors FirewallGroup.GroupMembers).
+	m = toMap(t, PortProfile{Name: "x", ExcludedNetworkConfIDs: []string{}, PortSecurityMACAddress: []string{}})
+	for _, k := range []string{"excluded_networkconf_ids", "port_security_mac_address"} {
+		v, ok := m[k]
+		if !ok {
+			t.Errorf("owned list %q must always be sent; got absent", k)
+			continue
+		}
+		if arr, ok := v.([]any); !ok || len(arr) != 0 {
+			t.Errorf("empty owned list %q should marshal to []; got %v", k, v)
+		}
+	}
+
+	// Explicit false on a bool pointer must be sent (distinct from unset).
+	f := false
+	m = toMap(t, PortProfile{Name: "x", Autoneg: &f, STPPortMode: &f})
+	if v, ok := m["autoneg"]; !ok || v != false {
+		t.Errorf("autoneg=&false should marshal to false; got %v (present=%v)", v, ok)
+	}
+	if v, ok := m["stp_port_mode"]; !ok || v != false {
+		t.Errorf("stp_port_mode=&false should marshal to false; got %v (present=%v)", v, ok)
+	}
+}

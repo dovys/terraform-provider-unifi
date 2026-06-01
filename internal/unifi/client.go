@@ -81,6 +81,13 @@ type Client interface {
 	CreateUser(ctx context.Context, u *User) (*User, error)
 	UpdateUser(ctx context.Context, u *User) (*User, error)
 
+	// Port profiles (legacy /rest/portconf) — backs unifi_network_port_profile.
+	ListPortProfiles(ctx context.Context) ([]PortProfile, error)
+	GetPortProfile(ctx context.Context, id string) (*PortProfile, error)
+	CreatePortProfile(ctx context.Context, p *PortProfile) (*PortProfile, error)
+	UpdatePortProfile(ctx context.Context, p *PortProfile) (*PortProfile, error)
+	DeletePortProfile(ctx context.Context, id string) error
+
 	// Local DNS (v2 static-dns) — backs unifi_network_dns_record.
 	ListDNSRecords(ctx context.Context) ([]StaticDNSRecord, error)
 	GetDNSRecord(ctx context.Context, id string) (*StaticDNSRecord, error)

@@ -41,7 +41,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -607,5 +607,91 @@ func TestDHCPReservation_RoundTrip(t *testing.T) {
 	}
 	if m.Hostname.ValueString() != "nas" {
 		t.Errorf("hostname should round-trip, got %q", m.Hostname.ValueString())
+	}
+}
+
+func TestPortProfile_RoundTrip(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	m := &portProfileResourceModel{
+		ID:                 types.StringNull(),
+		Name:               types.StringValue("Trunk"),
+		Forward:            types.StringValue("customize"),
+		NativeNetworkID:    types.StringValue("net-mgmt"),
+		TaggedVLANMgmt:     types.StringValue("custom"),
+		ExcludedNetworkIDs: sliceToStringSet([]string{"net-iot"}),
+		POEMode:            types.StringValue("auto"),
+		Autoneg:            types.BoolValue(false),
+		Speed:              types.Int64Value(1000),
+		STPPortMode:        types.BoolValue(false),
+		// leave the rest null so GET-merge-PUT preserves the controller's value
+		VoiceNetworkID:           types.StringNull(),
+		FullDuplex:               types.BoolNull(),
+		OpMode:                   types.StringNull(),
+		PortSecurityEnabled:      types.BoolNull(),
+		PortSecurityMACAddresses: types.SetNull(types.StringType),
+		Dot1XCtrl:                types.StringNull(),
+		Dot1XIdleTimeout:         types.Int64Null(),
+		Isolation:                types.BoolNull(),
+		EgressRateLimitEnabled:   types.BoolNull(),
+		EgressRateLimitKbps:      types.Int64Null(),
+		STPBPDUGuard:             types.BoolNull(),
+		STPEdgeState:             types.StringNull(),
+		LLDPMEDEnabled:           types.BoolNull(),
+		PortKeepaliveEnabled:     types.BoolNull(),
+		MulticastRouterMode:      types.StringNull(),
+	}
+	p := m.toPortProfile(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toPortProfile diags: %v", diags)
+	}
+	if p.Name != "Trunk" || p.Forward != "customize" || p.NativeNetworkConfID != "net-mgmt" {
+		t.Errorf("scalar mapping wrong: %+v", p)
+	}
+	// Explicit false on autoneg must be a non-nil *bool so the merge writes it.
+	if p.Autoneg == nil || *p.Autoneg != false || p.STPPortMode == nil || *p.STPPortMode != false {
+		t.Errorf("explicit false bool must be non-nil: autoneg=%v stp_port_mode=%v", p.Autoneg, p.STPPortMode)
+	}
+	if p.Speed == nil || *p.Speed != 1000 {
+		t.Errorf("speed mapping wrong: %v", p.Speed)
+	}
+	if len(p.ExcludedNetworkConfIDs) != 1 || p.ExcludedNetworkConfIDs[0] != "net-iot" {
+		t.Errorf("excluded_network_ids mapping wrong: %v", p.ExcludedNetworkConfIDs)
+	}
+	// Unset scalar optionals stay nil/empty so the merge-PUT leaves the controller's value.
+	if p.FullDuplex != nil || p.Dot1XCtrl != "" {
+		t.Errorf("unset scalar optionals must be empty/nil: full_duplex=%v dot1x=%q", p.FullDuplex, p.Dot1XCtrl)
+	}
+	// The owned MAC list, unset (null config), must send a concrete empty slice
+	// (not nil) so an explicit `[]` clears it on the wire instead of reading null.
+	if p.PortSecurityMACAddress == nil || len(p.PortSecurityMACAddress) != 0 {
+		t.Errorf("owned port_security_mac_address must be a non-nil empty slice when unset, got %v", p.PortSecurityMACAddress)
+	}
+
+	// An explicit empty exclusion set must reach the wire as a concrete empty slice.
+	m.ExcludedNetworkIDs = sliceToStringSet([]string{})
+	if cleared := m.toPortProfile(ctx, &diags); cleared.ExcludedNetworkConfIDs == nil || len(cleared.ExcludedNetworkConfIDs) != 0 {
+		t.Errorf("explicit empty excluded_network_ids must marshal as []; got %v", cleared.ExcludedNetworkConfIDs)
+	}
+
+	var out portProfileResourceModel
+	out.fromPortProfile(&unifi.PortProfile{
+		ID: "pc7", Name: "Uplink", Forward: "all", POEMode: "passthrough",
+		Autoneg: boolPtrLit(true), ExcludedNetworkConfIDs: []string{},
+	})
+	if out.ID.ValueString() != "pc7" || out.Forward.ValueString() != "all" || out.POEMode.ValueString() != "passthrough" {
+		t.Errorf("fromPortProfile wrong: %+v", out)
+	}
+	if out.Autoneg.IsNull() || !out.Autoneg.ValueBool() {
+		t.Errorf("autoneg should round-trip true, got %v", out.Autoneg)
+	}
+	// An explicit empty array reads back as a non-null empty set.
+	if out.ExcludedNetworkIDs.IsNull() || len(out.ExcludedNetworkIDs.Elements()) != 0 {
+		t.Errorf("empty excluded_network_ids should be a non-null empty set, got %v", out.ExcludedNetworkIDs)
+	}
+	// An unset optional string reads back null.
+	if !out.VoiceNetworkID.IsNull() {
+		t.Errorf("unset voice_network_id should read back null, got %v", out.VoiceNetworkID)
 	}
 }

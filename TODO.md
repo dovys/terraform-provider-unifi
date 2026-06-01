@@ -3,6 +3,32 @@
 Tracked improvements that aren't blocking a phase. Phase-scoped work lives in
 [`docs/roadmap.md`](docs/roadmap.md); cross-cutting polish lives here.
 
+## Verify against hardware
+
+The live console allows **read-only** recon, so anything that needs a real write
+to hardware — or hardware in a state we don't currently have — is modeled from
+read-only GETs + documented behavior and must be confirmed once a hardware test
+rig (HIL) exists. Open items:
+
+- **Port profile (`portconf`) wire shape.** The live site has **zero** custom
+  port profiles, so `/rest/portconf` returned nothing to confirm against. The
+  `unifi_network_port_profile` fields are modeled from the confirmed
+  `port_overrides` field set (which shares `portconf`'s schema) plus documented
+  enums. Verify the exact accepted values for `forward`
+  (`all`/`native`/`customize`/`disabled`), `poe_mode` (`auto`/`pasv24`/
+  `passthrough`/`off`), and `op`/dot1x once a profile can be created.
+- **Device adoption / forget verbs.** All 5 live devices are already adopted
+  (`adopted=true`), so the adopt and forget write paths are unverified — confirm
+  the exact command endpoint (`/cmd/devmgr` `adopt`/`force-provision` vs
+  `/api/.../devices/...`) and the forget verb against a pending/adoptable device.
+- **Device `state` enum.** Only `state=1` (connected) is observable live; the
+  other states (provisioning, upgrading, disconnected, heartbeat-missed, …) and
+  their integer values need confirming before any state-dependent logic.
+- **`port_overrides` write effects.** PoE mode changes, port-profile binding
+  (`portconf_id`), and port enable/disable can be modeled from the read shape but
+  their write behavior (and the device-doc GET-merge-PUT round-trip) can't be
+  validated without a managed switch under test.
+
 ## Import UX: friendlier keys than the controller `_id`
 
 Importing `unifi_network_network` / `unifi_network_wan` (and future

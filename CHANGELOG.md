@@ -42,11 +42,20 @@ network surface is feature-complete._
     destroy` clears the reservation rather than deleting the client record. Models
     the address, network, alias, and an optional local-DNS companion record.
     Imports by MAC (or `_id`).
+  - `unifi_network_port_profile` — a reusable switch-port profile (`portconf`,
+    legacy `/rest`): VLAN behavior (`forward`, native/voice network, tagged-VLAN
+    management with per-network exclusions), PoE mode, link (autoneg/speed/duplex),
+    port security and 802.1X, egress rate limiting, STP (port mode, BPDU guard,
+    edge state), LLDP-MED, and multicast routing. GET-merge-PUT preserves
+    controller-managed fields. Imports by `_id`. (Enum values for `forward`/
+    `poe_mode`/`dot1x_ctrl` are modeled from documented behavior pending
+    hardware verification — see `TODO.md`.)
   - Examples (all under `examples/network/`): a smart-home scenario (`wifi.tf`)
     with a WPA3-only home SSID, a WPA2/WPA3 guest SSID, and a 2.4 GHz IoT SSID
     bound to the networks in `guest.tf`; `firewall.tf` blocking the IoT VLAN from
     the trusted LAN via a firewall group + rule; `reservation.tf` pinning a NAS;
-    and the per-ISP WAN configs. Passphrases/secrets via `Sensitive` variables.
+    `port-profile.tf` with an IoT-access and an AP-trunk port profile; and the
+    per-ISP WAN configs. Passphrases/secrets via `Sensitive` variables.
 
 ## [0.0.1]
 
