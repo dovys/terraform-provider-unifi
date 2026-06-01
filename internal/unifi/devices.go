@@ -14,7 +14,10 @@ const deviceType = "device"
 // legacy `/stat/device` list (rich: telemetry + the full config document);
 // config writes go to `/rest/device/<_id>` as a partial PUT — the controller
 // merges the top-level fields server-side, so we send only the owned ones and
-// never a whole document. `port_overrides`, though, is a single array field with
+// never a whole document. (The modern v2 `/v2/api/site/<site>/device` endpoint
+// the UI port view loads carries live `port_table` state but deliberately omits
+// `port_overrides`, so it's a display/telemetry source, not a config source —
+// confirmed against a live USW/UCG; we stay on `/stat/device` + `/rest/device`.) `port_overrides`, though, is a single array field with
 // replace semantics, so UpdateDevice rebuilds the full array: it overlays the
 // owned per-port fields onto each existing override (preserving unmodeled keys
 // like `setting_preference`) and leaves undeclared ports untouched.
