@@ -4,9 +4,9 @@
 # config rather than creating it (Terraform 1.5+).
 #
 # The import `id` is the WAN's controller object id (`_id`, a 24-char hex
-# string): run the example in ../data and read its `network_ids` output (a
-# name => id map), or open Settings → Internet → the WAN in the UniFi app and
-# copy the trailing segment of the browser URL (…/settings/internet/<id>).
+# string). The UniFi UI doesn't show it — discover it by running the example in
+# ../data and reading its `network_ids` output (a name => id map of every
+# network, WANs included), then copy the value for your WAN.
 #
 # wan-dhcp.tf / wan-pppoe.tf / wan-static.tf are alternatives for the same
 # primary uplink — apply the one that matches your ISP.

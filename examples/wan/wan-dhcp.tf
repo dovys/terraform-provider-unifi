@@ -6,11 +6,11 @@
 # https://spacelift.io/blog/terraform-import-block).
 #
 # Each import `id` is the WAN's controller object id (`_id`, a 24-char hex
-# string). Two ways to find it:
-#   * run the example in ../data and read its `network_ids` output — a
-#     name => id map — and copy the value for "WAN" / "WAN2"; or
-#   * in the UniFi Network app open Settings → Internet → the WAN, and copy the
-#     trailing segment of the browser URL (…/settings/internet/<id>).
+# string). The UniFi UI doesn't show it, so discover it with the data sources:
+# run the example in ../data and read its `network_ids` output — a name => id
+# map of every network (WANs included) — and copy the value for your WAN. (For
+# scripting, GET /proxy/network/api/s/<site>/rest/networkconf returns each
+# object's `_id` too.)
 #
 # wan-dhcp.tf / wan-pppoe.tf / wan-static.tf are alternatives for the same
 # primary uplink — apply the one that matches your ISP.

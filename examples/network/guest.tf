@@ -12,9 +12,9 @@
 # below are new, so they're created normally.
 #
 # The import `id` is the network's controller object id (`_id`, a 24-char hex
-# string): run the example in ../data and read its `network_ids` output (a
-# name => id map, e.g. the value for "Default"), or open Settings → Networks →
-# the network in the UniFi app and copy the trailing segment of the browser URL.
+# string). The UniFi UI doesn't show it — discover it by running the example in
+# ../data and reading its `network_ids` output (a name => id map), then copy the
+# value for "Default".
 import {
   to = unifi_network_network.main
   id = "661f3a9c2b4d5e0012ab34cd"
