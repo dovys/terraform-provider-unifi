@@ -9,6 +9,27 @@ follows [Keep a Changelog](https://keepachangelog.com/); releases are tagged
 _Network app build-out continues; the next tagged release is **0.1.0** once the
 network surface is feature-complete._
 
+### Added
+
+- **Phase 2 — Wi-Fi.** SSIDs and the AP groups they broadcast on:
+  - `unifi_network_wlan` — a Wi-Fi network/SSID (`wlanconf`, legacy `/rest`),
+    modeling the configurable surface: security suite (`open`/`wpapsk`/`wpaeap`)
+    with WPA3 + Protected-Management-Frames refinement, the network/VLAN it
+    bridges onto, AP groups and bands, MAC filtering, minimum data rates
+    (2.4/5 GHz), DTIM, fast roaming, multicast/broadcast handling, and guest
+    policies. Updates are GET-merge-PUT so controller-managed fields (inter-AP
+    key, per-client PSKs, schedules) are preserved. The `passphrase` is
+    `Sensitive` and write-preserved when the controller echoes it empty. Imports
+    by `_id`.
+  - `unifi_network_ap_group` — the named set of APs a WLAN broadcasts on (v2
+    `/apgroups`), honoring the v2 write contract (`_id` in URL and body) and
+    sending an explicit empty `device_macs` array so clearing members empties the
+    group. The controller's protected default group (`attr_no_delete`) is
+    destroy-as-state-removal, never a real delete. Imports by `_id`.
+  - Examples: a smart-home scenario (`examples/network/wifi.tf`) with a WPA3-only
+    home SSID, a WPA2/WPA3 guest SSID, and a 2.4 GHz IoT SSID bound to the
+    networks in `guest.tf`; passphrases via `Sensitive` variables.
+
 ## [0.0.1]
 
 First development release: the provider base and the core of the network app.

@@ -25,4 +25,5 @@ A UniFi AP group — a named set of access points a `unifi_network_wlan` can bro
 
 ### Read-Only
 
+- `attr_no_delete` (Boolean) Whether the controller protects this group from deletion (the built-in default group covering every adopted AP). When `true`, `terraform destroy` removes the resource from state without deleting the group on the controller.
 - `id` (String) Controller object ID (`_id`). Import key.

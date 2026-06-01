@@ -43,7 +43,7 @@ A UniFi Wi-Fi network/SSID (`wlanconf`). Models the configurable surface: securi
 - `mlo_enabled` (Boolean) Wi-Fi 7 multi-link operation.
 - `network_id` (String) ID of the network/VLAN (`unifi_network_network`) this SSID bridges onto.
 - `no_2ghz_oui` (Boolean) Steer known 5 GHz-capable clients off 2.4 GHz.
-- `passphrase` (String, Sensitive) WPA pre-shared key (for `security = wpapsk`).
+- `passphrase` (String, Sensitive) WPA pre-shared key (for `security = wpapsk`). The controller echoes it on read, so it is also Computed: unset for `open`/`wpaeap` SSIDs it reads back as the controller's value (empty).
 - `pmf_mode` (String) Protected Management Frames: `disabled`, `optional`, or `required`.
 - `proxy_arp` (Boolean) Answer ARP on behalf of clients.
 - `radius_mac_auth_enabled` (Boolean) MAC-based RADIUS authentication.

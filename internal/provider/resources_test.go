@@ -401,9 +401,19 @@ func TestAPGroup_RoundTrip(t *testing.T) {
 	if out.ID.ValueString() != "ag5" || out.Name.ValueString() != "All APs" {
 		t.Errorf("fromAPGroup wrong: %+v", out)
 	}
+	if out.AttrNoDelete.ValueBool() {
+		t.Errorf("attr_no_delete should read back false when the controller omits it, got true")
+	}
 	var macs []string
 	out.DeviceMACs.ElementsAs(ctx, &macs, false)
 	if len(macs) != 1 || macs[0] != "aa:bb:cc:00:11:22" {
 		t.Errorf("device_macs round-trip wrong: %v", macs)
+	}
+
+	// The protected default group reads attr_no_delete = true (destroy → no-op).
+	protected := true
+	out.fromAPGroup(&unifi.APGroup{ID: "default", Name: "All APs", AttrNoDelete: &protected})
+	if !out.AttrNoDelete.ValueBool() {
+		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}
 }

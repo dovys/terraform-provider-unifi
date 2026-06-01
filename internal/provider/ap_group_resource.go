@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -27,9 +28,10 @@ type apGroupResource struct {
 }
 
 type apGroupResourceModel struct {
-	ID         types.String `tfsdk:"id"`          // controller _id; import key (computed)
-	Name       types.String `tfsdk:"name"`        // display name (required)
-	DeviceMACs types.Set    `tfsdk:"device_macs"` // APs in the group (MAC addresses)
+	ID           types.String `tfsdk:"id"`             // controller _id; import key (computed)
+	Name         types.String `tfsdk:"name"`           // display name (required)
+	DeviceMACs   types.Set    `tfsdk:"device_macs"`    // APs in the group (MAC addresses)
+	AttrNoDelete types.Bool   `tfsdk:"attr_no_delete"` // controller-protected (the default group); computed
 }
 
 func (r *apGroupResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -55,6 +57,13 @@ func (r *apGroupResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:            true,
 				ElementType:         types.StringType,
 				MarkdownDescription: "MAC addresses of the access points in this group. Empty groups are allowed.",
+			},
+			"attr_no_delete": schema.BoolAttribute{
+				Computed: true,
+				MarkdownDescription: "Whether the controller protects this group from deletion (the built-in default " +
+					"group covering every adopted AP). When `true`, `terraform destroy` removes the resource from " +
+					"state without deleting the group on the controller.",
+				PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
 			},
 		},
 	}
@@ -121,6 +130,12 @@ func (r *apGroupResource) Delete(ctx context.Context, req resource.DeleteRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	// Safe by default: the controller-protected default group can't be deleted —
+	// drop it from state and leave it on the controller rather than issuing a
+	// DELETE the controller would reject.
+	if state.AttrNoDelete.ValueBool() {
+		return
+	}
 	if err := r.client.DeleteAPGroup(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete AP group", err.Error())
 	}
@@ -146,4 +161,5 @@ func (m *apGroupResourceModel) fromAPGroup(g *unifi.APGroup) {
 	m.ID = types.StringValue(g.ID)
 	m.Name = types.StringValue(g.Name)
 	m.DeviceMACs = sliceToStringSet(g.DeviceMACs)
+	m.AttrNoDelete = types.BoolValue(g.AttrNoDelete != nil && *g.AttrNoDelete)
 }

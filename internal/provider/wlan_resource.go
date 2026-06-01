@@ -126,8 +126,9 @@ func (r *wlanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"wpa_mode": optStr("WPA cipher/mode (e.g. `wpa2`, `wpa3`)."),
 			"passphrase": schema.StringAttribute{
 				Optional:            true,
+				Computed:            true,
 				Sensitive:           true,
-				MarkdownDescription: "WPA pre-shared key (for `security = wpapsk`).",
+				MarkdownDescription: "WPA pre-shared key (for `security = wpapsk`). The controller echoes it on read, so it is also Computed: unset for `open`/`wpaeap` SSIDs it reads back as the controller's value (empty).",
 			},
 			"wpa3_support":      optBool("Offer WPA3 alongside WPA2."),
 			"wpa3_transition":   optBool("WPA2/WPA3 transition mode."),
@@ -291,6 +292,9 @@ func (m *wlanResourceModel) toWLANConf(ctx context.Context, diags *diag.Diagnost
 		RADIUSMACAuthEnabled:  boolPtr(m.RADIUSMACAuthEnabled),
 		Hotspot2confEnabled:   boolPtr(m.Hotspot2Enabled),
 	}
+	// Leave these slices nil when the config is null so GET-merge-PUT preserves
+	// the controller's bands/groups/filter rather than clearing them (the fields
+	// are omitempty — a nil slice is dropped from the overlay).
 	if b := stringSetToSlice(ctx, m.Bands, diags); b != nil {
 		w.WLANBands = b
 	}
@@ -311,10 +315,15 @@ func (m *wlanResourceModel) fromWLANConf(w *unifi.WLANConf) {
 	m.SettingPreference = types.StringValue(w.SettingPreference)
 	m.Security = types.StringValue(w.Security)
 	m.WPAMode = types.StringValue(w.WPAMode)
-	// passphrase is write-preserving: keep the configured value when the
-	// controller echoes nothing; otherwise adopt what it returns.
-	if w.XPassphrase != "" {
+	// passphrase is Optional+Computed and write-preserving. Adopt the controller's
+	// value when it echoes one; if it echoes empty, keep the configured/prior key
+	// rather than wiping it, and fall back to "" only when nothing was set (so a
+	// Computed value is always known after apply — never unknown/null).
+	switch {
+	case w.XPassphrase != "":
 		m.Passphrase = types.StringValue(w.XPassphrase)
+	case m.Passphrase.IsNull() || m.Passphrase.IsUnknown():
+		m.Passphrase = types.StringValue("")
 	}
 	m.WPA3Support = boolToState(w.WPA3Support)
 	m.WPA3Transition = boolToState(w.WPA3Transition)

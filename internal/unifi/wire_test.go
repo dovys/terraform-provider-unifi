@@ -91,3 +91,49 @@ func TestWANProviderCapabilities_Wire(t *testing.T) {
 		t.Errorf("unset download must be omitted; got %v", caps["download_kilobits_per_second"])
 	}
 }
+
+func TestWLANConf_Wire(t *testing.T) {
+	// A minimal SSID: only name (non-omitempty) goes on the wire; every optional
+	// pointer/string/slice stays off so GET-merge-PUT keeps the controller's value.
+	m := toMap(t, WLANConf{Name: "Home"})
+	if m["name"] != "Home" {
+		t.Errorf("name = %v, want Home", m["name"])
+	}
+	for _, k := range []string{
+		"_id", "site_id", "enabled", "networkconf_id", "security", "x_passphrase",
+		"wpa3_support", "wlan_bands", "ap_group_ids", "mac_filter_enabled", "is_guest", "group_rekey",
+	} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+
+	// Explicit false on a pointer field must be sent (distinct from unset).
+	f := false
+	m = toMap(t, WLANConf{Name: "Home", Enabled: &f, HideSSID: &f})
+	if v, ok := m["enabled"]; !ok || v != false {
+		t.Errorf("enabled=&false should marshal to enabled:false; got %v (present=%v)", v, ok)
+	}
+	if v, ok := m["hide_ssid"]; !ok || v != false {
+		t.Errorf("hide_ssid=&false should marshal to hide_ssid:false; got %v (present=%v)", v, ok)
+	}
+}
+
+func TestAPGroup_Wire(t *testing.T) {
+	// device_macs is intentionally non-omitempty: an empty group still sends [] so
+	// clearing the members actually empties the group. Everything else is omitempty.
+	m := toMap(t, APGroup{Name: "Upstairs", DeviceMACs: []string{}})
+	if m["name"] != "Upstairs" {
+		t.Errorf("name = %v, want Upstairs", m["name"])
+	}
+	if v, ok := m["device_macs"]; !ok {
+		t.Errorf("device_macs must always be sent (non-omitempty); got %v", m)
+	} else if arr, ok := v.([]any); !ok || len(arr) != 0 {
+		t.Errorf("device_macs should marshal to []; got %v", v)
+	}
+	for _, k := range []string{"_id", "site_id", "for_wlanconf", "attr_no_delete", "attr_hidden_id"} {
+		if _, ok := m[k]; ok {
+			t.Errorf("unset key %q must be omitted; got %v", k, m[k])
+		}
+	}
+}
