@@ -52,6 +52,19 @@ rig (HIL) exists. Open items:
   key names/enums once a profile can be written, and whether `x_secret` is
   echoed (the round-trip currently assumes it is, unlike a write-only secret).
 
+- **Static route (`/rest/routing`) field set.** The live site has **zero**
+  static routes, so `unifi_network_static_route` is modeled from documented
+  behavior: `type: "static-route"` with the hyphenated `static-route_network`/
+  `_nexthop`/`_distance`/`_type`/`_interface` keys. Confirm the exact keys, the
+  `static-route_type` enum (`nexthop-route`/`interface-route`/`blackhole`), the
+  `interface` values, and the default `distance` once a route can be created.
+- **Port forward (`/rest/portforward`) field set.** The live site has **zero**
+  port-forward rules, so `unifi_network_port_forward` is modeled from documented
+  behavior: `name`, `enabled`, `pfwd_interface` (`wan`/`wan2`/`both`), `proto`
+  (`tcp_udp`/`tcp`/`udp`), `src`, `dst_port`, `fwd`, `fwd_port`, `log`. Confirm
+  the keys/enums and whether `fwd_port` truly defaults to `dst_port` server-side
+  once a rule can be created.
+
 ## Cross-resource wiring follow-ups
 
 - **`unifi_network_wlan` → RADIUS profile.** A `wpaeap` SSID needs a

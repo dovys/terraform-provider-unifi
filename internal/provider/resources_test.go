@@ -42,7 +42,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account", "unifi_network_static_route", "unifi_network_port_forward"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -843,6 +843,84 @@ func TestRadiusAccount_RoundTrip(t *testing.T) {
 	// An unset tunnel attr reads back null, not 0.
 	if !out.TunnelType.IsNull() {
 		t.Errorf("unset tunnel_type should read back null, got %v", out.TunnelType)
+	}
+}
+
+func TestStaticRoute_RoundTrip(t *testing.T) {
+	m := &staticRouteResourceModel{
+		ID:        types.StringNull(),
+		Name:      types.StringValue("to-lab"),
+		Enabled:   types.BoolValue(true),
+		Network:   types.StringValue("192.168.50.0/24"),
+		RouteType: types.StringValue("nexthop-route"),
+		NextHop:   types.StringValue("10.0.0.254"),
+		Distance:  types.Int64Value(1),
+		Interface: types.StringNull(),
+	}
+	rt := m.toStaticRoute()
+	if rt.Name != "to-lab" || rt.Network != "192.168.50.0/24" || rt.NextHop != "10.0.0.254" {
+		t.Errorf("scalar mapping wrong: %+v", rt)
+	}
+	// The client always stamps the controller's discriminator.
+	if rt.Type != "static-route" {
+		t.Errorf("type should be stamped static-route, got %q", rt.Type)
+	}
+	if rt.Enabled == nil || !*rt.Enabled || rt.Distance == nil || *rt.Distance != 1 {
+		t.Errorf("enabled/distance mapping wrong: %v / %v", rt.Enabled, rt.Distance)
+	}
+
+	var out staticRouteResourceModel
+	out.fromStaticRoute(&unifi.StaticRoute{
+		ID: "rt9", Name: "to-lab", Enabled: boolPtrLit(false), Network: "192.168.50.0/24",
+		RouteType: "blackhole",
+	})
+	if out.ID.ValueString() != "rt9" || out.RouteType.ValueString() != "blackhole" {
+		t.Errorf("fromStaticRoute wrong: %+v", out)
+	}
+	if out.Enabled.ValueBool() {
+		t.Errorf("enabled should round-trip false")
+	}
+	// An unset optional reads back null, not "".
+	if !out.NextHop.IsNull() {
+		t.Errorf("unset next_hop should read back null, got %v", out.NextHop)
+	}
+}
+
+func TestPortForward_RoundTrip(t *testing.T) {
+	m := &portForwardResourceModel{
+		ID:              types.StringNull(),
+		Name:            types.StringValue("https"),
+		Enabled:         types.BoolValue(true),
+		Interface:       types.StringValue("wan"),
+		Protocol:        types.StringValue("tcp"),
+		Source:          types.StringValue("any"),
+		DestinationPort: types.StringValue("443"),
+		ForwardIP:       types.StringValue("10.0.0.5"),
+		ForwardPort:     types.StringValue("8443"),
+		Log:             types.BoolValue(false),
+	}
+	pf := m.toPortForward()
+	if pf.Name != "https" || pf.PfwdInterface != "wan" || pf.Proto != "tcp" {
+		t.Errorf("scalar mapping wrong: %+v", pf)
+	}
+	if pf.DstPort != "443" || pf.Fwd != "10.0.0.5" || pf.FwdPort != "8443" {
+		t.Errorf("forward fields mapping wrong: %+v", pf)
+	}
+	if pf.Enabled == nil || !*pf.Enabled || pf.Log == nil || *pf.Log {
+		t.Errorf("enabled/log mapping wrong: %v / %v", pf.Enabled, pf.Log)
+	}
+
+	var out portForwardResourceModel
+	out.fromPortForward(&unifi.PortForward{
+		ID: "pf9", Name: "https", Enabled: boolPtrLit(true), PfwdInterface: "both",
+		Proto: "tcp_udp", DstPort: "443", Fwd: "10.0.0.5",
+	})
+	if out.ID.ValueString() != "pf9" || out.Interface.ValueString() != "both" || out.Protocol.ValueString() != "tcp_udp" {
+		t.Errorf("fromPortForward wrong: %+v", out)
+	}
+	// An unset optional reads back null.
+	if !out.ForwardPort.IsNull() {
+		t.Errorf("unset forward_port should read back null, got %v", out.ForwardPort)
 	}
 }
 

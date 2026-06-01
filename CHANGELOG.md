@@ -33,6 +33,17 @@ network surface is feature-complete._
     `tunnel_medium_type`, `vlan`). Modeled from documented behavior — the field
     set is **HIL-unverified** (no live RADIUS users to confirm against; see
     `TODO.md`). Imports by `_id`.
+  - `unifi_network_static_route` — a gateway static route (`routing`, legacy
+    `/rest`): a destination `network` reached via a `next_hop` gateway
+    (`nexthop-route`), out an `interface` (`interface-route`), or dropped
+    (`blackhole`), with an administrative `distance`. GET-merge-PUT preserves
+    controller-managed fields. Field set **HIL-unverified** (no live routes; see
+    `TODO.md`). Imports by `_id`.
+  - `unifi_network_port_forward` — a destination-NAT rule (`portforward`, legacy
+    `/rest`): forward a WAN `destination_port` to an internal `forward_ip`/
+    `forward_port`, scoped by `interface` (`wan`/`wan2`/`both`), `protocol`, and
+    a `source` filter. GET-merge-PUT preserves controller-managed fields. Field
+    set **HIL-unverified** (no live rules; see `TODO.md`). Imports by `_id`.
 
 - **Phase 2 — Wi-Fi.** SSIDs and the AP groups they broadcast on:
   - `unifi_network_wlan` — a Wi-Fi network/SSID (`wlanconf`, legacy `/rest`),

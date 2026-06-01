@@ -211,6 +211,8 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewUserGroupResource,
 		NewRadiusProfileResource,
 		NewRadiusAccountResource,
+		NewStaticRouteResource,
+		NewPortForwardResource,
 	}
 }
 

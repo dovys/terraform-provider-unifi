@@ -43,9 +43,9 @@ A resource is checkable only when it meets the Definition of Done ([development.
       ap_group, firewall_rule, firewall_group, dhcp_reservation — **P2**
       (device adopt/forget + config write are HIL-unverified; the read shape is recon-confirmed — see `TODO.md`)
 - [ ] **P3** parity & long tail — in progress:
-  - [x] user_group, radius_profile, radius_account
-  - [ ] wlan_group, static_route, port_forward, dynamic_dns, firewall_zone, firewall_policy,
-        traffic_rule, traffic_route, setting_*
+  - [x] user_group, radius_profile, radius_account, static_route, port_forward
+  - [ ] wlan_group, dynamic_dns, firewall_zone, firewall_policy, traffic_rule, traffic_route,
+        setting_*
 - [ ] vpn_server, vpn_client, bgp, device_port (optional) — **P4**
 - [ ] protect_camera (single adopt+configure resource), protect_light, protect_sensor, protect_chime,
       protect_viewer, protect_liveview, protect_nvr_settings — **P5**
