@@ -9,8 +9,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 )
+
+// sp returns a pointer to s — for building wire fixtures with *string slots.
+func sp(s string) *string { return &s }
+
+// derefStr returns the pointed-to string, or "" for a nil pointer.
+func derefStr(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
+}
 
 // TestProviderSchemasValidate drives the full GetProviderSchema RPC, which runs
 // the framework's schema validation across the provider, every resource, and
@@ -69,8 +80,8 @@ func TestNetworkConf_RoundTrip(t *testing.T) {
 	if conf.VLAN == nil || *conf.VLAN != 30 || conf.VLANEnabled == nil || !*conf.VLANEnabled {
 		t.Errorf("VLAN mapping wrong: VLAN=%v Enabled=%v", conf.VLAN, conf.VLANEnabled)
 	}
-	if conf.DHCPDDNS1 != "1.1.1.1" || conf.DHCPDDNS2 != "8.8.8.8" {
-		t.Errorf("dhcp dns mapping wrong: %q %q", conf.DHCPDDNS1, conf.DHCPDDNS2)
+	if derefStr(conf.DHCPDDNS1) != "1.1.1.1" || derefStr(conf.DHCPDDNS2) != "8.8.8.8" {
+		t.Errorf("dhcp dns mapping wrong: %v %v", conf.DHCPDDNS1, conf.DHCPDDNS2)
 	}
 	if conf.DHCPDDNSEnabled == nil || !*conf.DHCPDDNSEnabled {
 		t.Errorf("DHCPDDNSEnabled should be true when servers are set")
@@ -87,9 +98,9 @@ func TestNetworkConf_RoundTrip(t *testing.T) {
 	on := true
 	vid := 40
 	var out networkResourceModel
-	out.fromNetworkConf(&models.NetworkConf{
+	out.fromNetworkConf(&unifi.NetworkConf{
 		ID: "net9", Name: "guests", Purpose: "guest", NetworkGroup: "LAN",
-		VLANEnabled: &on, VLAN: &vid, DHCPDDNS1: "9.9.9.9",
+		VLANEnabled: &on, VLAN: &vid, DHCPDDNS1: sp("9.9.9.9"),
 	})
 	if out.ID.ValueString() != "net9" || out.VLANID.ValueInt64() != 40 || out.NetworkGroup.ValueString() != "LAN" {
 		t.Errorf("fromNetworkConf wrong: %+v", out)
@@ -111,7 +122,7 @@ func TestWANConf_RoundTrip(t *testing.T) {
 		WANType:          types.StringValue("dhcp"),
 		NetworkGroup:     types.StringValue("WAN"),
 		Enabled:          types.BoolValue(true),
-		DNSServers:       sliceToStringList([]string{"1.1.1.1"}),
+		DNSServers:       sliceToStringList([]string{"1.1.1.1", "8.8.8.8"}),
 		LoadBalanceType:  types.StringNull(),
 		UploadKilobits:   types.Int64Value(1000),
 		DownloadKilobits: types.Int64Value(50000),
@@ -123,19 +134,29 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	if conf.Purpose != "wan" {
 		t.Errorf("purpose = %q, want wan", conf.Purpose)
 	}
-	if conf.WANDNSPreference != "manual" || conf.WANDNS1 != "1.1.1.1" {
-		t.Errorf("manual DNS mapping wrong: pref=%q dns1=%q", conf.WANDNSPreference, conf.WANDNS1)
+	if conf.WANDNSPreference != "manual" || derefStr(conf.WANDNS1) != "1.1.1.1" || derefStr(conf.WANDNS2) != "8.8.8.8" {
+		t.Errorf("manual DNS mapping wrong: pref=%q dns1=%v dns2=%v", conf.WANDNSPreference, conf.WANDNS1, conf.WANDNS2)
 	}
 	if conf.WANProviderCapabilities == nil || conf.WANProviderCapabilities.UploadKilobitsPerSecond == nil ||
 		*conf.WANProviderCapabilities.UploadKilobitsPerSecond != 1000 {
 		t.Errorf("provider caps wrong: %+v", conf.WANProviderCapabilities)
 	}
 
-	// No DNS servers → automatic.
+	// Narrowing the list to one server must explicitly clear the freed slot
+	// (non-nil &"") so GET-merge-PUT overwrites the stale wan_dns2 rather than
+	// leaving it — otherwise the controller echoes a perpetual extra server.
+	m.DNSServers = sliceToStringList([]string{"1.1.1.1"})
+	conf = m.toNetworkConf(ctx, &diags)
+	if derefStr(conf.WANDNS1) != "1.1.1.1" || conf.WANDNS2 == nil || *conf.WANDNS2 != "" {
+		t.Errorf("narrowed DNS must clear slot 2: dns1=%v dns2=%v", conf.WANDNS1, conf.WANDNS2)
+	}
+
+	// A null list (unconfigured) is left untouched — the controller keeps its
+	// own preference rather than being forced to auto.
 	m.DNSServers = sliceToStringList(nil)
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.WANDNSPreference != "auto" || conf.WANDNS1 != "" {
-		t.Errorf("auto DNS mapping wrong: pref=%q dns1=%q", conf.WANDNSPreference, conf.WANDNS1)
+	if conf.WANDNSPreference != "" || conf.WANDNS1 != nil {
+		t.Errorf("null DNS must not touch the slots: pref=%q dns1=%v", conf.WANDNSPreference, conf.WANDNS1)
 	}
 
 	// Only upload set: download must round-trip back to null (not 0), or the
@@ -181,7 +202,7 @@ func TestDNSRecord_RoundTrip(t *testing.T) {
 
 	var out dnsRecordResourceModel
 	ttl := 300
-	out.fromRecord(&models.StaticDNSRecord{ID: "d1", Key: "k", RecordType: "CNAME", Value: "t", Enabled: boolPtrLit(false), TTL: &ttl})
+	out.fromRecord(&unifi.StaticDNSRecord{ID: "d1", Key: "k", RecordType: "CNAME", Value: "t", Enabled: boolPtrLit(false), TTL: &ttl})
 	if out.ID.ValueString() != "d1" || out.Type.ValueString() != "CNAME" || out.TTL.ValueInt64() != 300 {
 		t.Errorf("fromRecord wrong: %+v", out)
 	}
@@ -254,7 +275,7 @@ func TestWAN_PPPoEStaticAndSecrets(t *testing.T) {
 
 	// Write-only password: a read that doesn't echo it must keep the prior value.
 	out := wanResourceModel{PPPoEPassword: types.StringValue("keep-me")}
-	out.fromNetworkConf(&models.NetworkConf{Name: "wan", WANType: "pppoe", WANUsername: "u"})
+	out.fromNetworkConf(&unifi.NetworkConf{Name: "wan", WANType: "pppoe", WANUsername: "u"})
 	if out.PPPoEPassword.ValueString() != "keep-me" {
 		t.Errorf("write-only password should be preserved on read, got %q", out.PPPoEPassword.ValueString())
 	}

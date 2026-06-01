@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 )
 
 // Sites & application info.
@@ -16,19 +14,47 @@ import (
 // the single-site fixture, so the site resource is acceptance-tested against a
 // multi-site controller (Tier 2/3), not unit-asserted here.
 
-func (c *client) ListSites(ctx context.Context) ([]models.Site, error) {
-	return integrationListAll[models.Site](ctx, c, "sites")
+// Site is an Integration v1 site object (GET /integration/v1/sites).
+//
+// Three namespaces name the same site: the Integration API keys by UUID (ID),
+// legacy/v2 key by the slug in InternalReference (e.g. "default"), and Name is
+// the human label ("Default"). The provider matches on InternalReference
+// (architecture.md §5).
+type Site struct {
+	ID                string `json:"id"`
+	InternalReference string `json:"internalReference"`
+	Name              string `json:"name"`
 }
 
-func (c *client) GetApplicationInfo(ctx context.Context) (*models.ApplicationInfo, error) {
-	return integrationGet[models.ApplicationInfo](ctx, c, "application-info")
+// LegacySite is the object the legacy `/cmd/sitemgr` returns for add-site:
+// Name is the slug (the v2/legacy site key, == Site.InternalReference) and Desc
+// is the human display name. ID is the Mongo `_id` used by delete/update-site.
+type LegacySite struct {
+	ID   string `json:"_id"`
+	Name string `json:"name"`
+	Desc string `json:"desc"`
 }
 
-func (c *client) sitemgr(ctx context.Context, body map[string]any) ([]models.LegacySite, error) {
-	return legacyData[models.LegacySite](ctx, c, http.MethodPost, legacyPath(c.cfg.Site, "cmd/sitemgr"), body)
+// ApplicationInfo is the Integration v1 `/application-info` response. Present
+// on Network 9.3+ (404s below). Used by the data source and as a version
+// fallback when only the Integration API key is configured.
+type ApplicationInfo struct {
+	ApplicationVersion string `json:"applicationVersion"`
 }
 
-func (c *client) CreateSite(ctx context.Context, description string) (*models.LegacySite, error) {
+func (c *client) ListSites(ctx context.Context) ([]Site, error) {
+	return integrationListAll[Site](ctx, c, "sites")
+}
+
+func (c *client) GetApplicationInfo(ctx context.Context) (*ApplicationInfo, error) {
+	return integrationGet[ApplicationInfo](ctx, c, "application-info")
+}
+
+func (c *client) sitemgr(ctx context.Context, body map[string]any) ([]LegacySite, error) {
+	return legacyData[LegacySite](ctx, c, http.MethodPost, legacyPath(c.cfg.Site, "cmd/sitemgr"), body)
+}
+
+func (c *client) CreateSite(ctx context.Context, description string) (*LegacySite, error) {
 	items, err := c.sitemgr(ctx, map[string]any{"cmd": "add-site", "desc": description})
 	if err != nil {
 		return nil, err

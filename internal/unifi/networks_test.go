@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 )
 
 // registerProbe wires the auth + capability-probe endpoints NewClient needs.
@@ -73,7 +71,7 @@ func TestNetworkCRUD_AndGetMergePUT(t *testing.T) {
 	defer srv.Close()
 	ctx := context.Background()
 
-	created, err := c.CreateNetwork(ctx, &models.NetworkConf{Name: "trusted", Purpose: "corporate"})
+	created, err := c.CreateNetwork(ctx, &NetworkConf{Name: "trusted", Purpose: "corporate"})
 	if err != nil {
 		t.Fatalf("CreateNetwork: %v", err)
 	}
@@ -81,7 +79,7 @@ func TestNetworkCRUD_AndGetMergePUT(t *testing.T) {
 		t.Errorf("created id = %q, want net1", created.ID)
 	}
 
-	if _, err := c.UpdateNetwork(ctx, &models.NetworkConf{ID: "net1", Name: "trusted2", Purpose: "corporate"}); err != nil {
+	if _, err := c.UpdateNetwork(ctx, &NetworkConf{ID: "net1", Name: "trusted2", Purpose: "corporate"}); err != nil {
 		t.Fatalf("UpdateNetwork: %v", err)
 	}
 	// GET-merge-PUT must preserve the unmodeled field and overwrite the owned one.

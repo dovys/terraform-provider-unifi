@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 )
 
 var (
@@ -171,8 +170,8 @@ func (r *dnsRecordResource) ImportState(ctx context.Context, req resource.Import
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *dnsRecordResourceModel) toRecord() *models.StaticDNSRecord {
-	return &models.StaticDNSRecord{
+func (m *dnsRecordResourceModel) toRecord() *unifi.StaticDNSRecord {
+	return &unifi.StaticDNSRecord{
 		ID:         m.ID.ValueString(),
 		Key:        m.Name.ValueString(),
 		RecordType: strOrEmpty(m.Type),
@@ -185,7 +184,7 @@ func (m *dnsRecordResourceModel) toRecord() *models.StaticDNSRecord {
 	}
 }
 
-func (m *dnsRecordResourceModel) fromRecord(rec *models.StaticDNSRecord) {
+func (m *dnsRecordResourceModel) fromRecord(rec *unifi.StaticDNSRecord) {
 	m.ID = types.StringValue(rec.ID)
 	m.Name = types.StringValue(rec.Key)
 	m.Type = types.StringValue(rec.RecordType)

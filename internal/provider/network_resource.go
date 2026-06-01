@@ -11,13 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 )
 
 var (
@@ -119,10 +117,12 @@ func (r *networkResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"purpose": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				Default:             stringdefault.StaticString("corporate"),
-				MarkdownDescription: "Network purpose: `corporate` (a routed LAN/VLAN), `guest`, or `vlan-only` (L2 VLAN, no gateway). Immutable — changing it forces replacement.",
+				MarkdownDescription: "Network purpose: `corporate` (a routed LAN/VLAN), `guest`, or `vlan-only` (L2 VLAN, no gateway). Defaults to `corporate` on the controller when unset. Immutable — changing it forces replacement.",
 				Validators:          []validator.String{stringvalidator.OneOf("corporate", "guest", "vlan-only")},
-				PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"network_group":      schema.StringAttribute{Computed: true, MarkdownDescription: "Controller network group (e.g. `LAN`)."},
 			"setting_preference": schema.StringAttribute{Computed: true, MarkdownDescription: "Controller auto/manual settings toggle (read-only)."},
@@ -272,8 +272,8 @@ func (r *networkResource) ImportState(ctx context.Context, req resource.ImportSt
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *networkResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *models.NetworkConf {
-	conf := &models.NetworkConf{
+func (m *networkResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *unifi.NetworkConf {
+	conf := &unifi.NetworkConf{
 		ID:                    m.ID.ValueString(),
 		Name:                  m.Name.ValueString(),
 		Purpose:               strOrEmpty(m.Purpose),
@@ -334,25 +334,22 @@ func (m *networkResourceModel) toNetworkConf(ctx context.Context, diags *diag.Di
 		conf.VLANEnabled = &disabled
 	}
 
-	dns := stringListToSlice(ctx, m.DHCPDNS, diags)
-	enabled := len(dns) > 0
-	conf.DHCPDDNSEnabled = &enabled
-	for i, s := range dns {
-		switch i {
-		case 0:
-			conf.DHCPDDNS1 = s
-		case 1:
-			conf.DHCPDDNS2 = s
-		case 2:
-			conf.DHCPDDNS3 = s
-		case 3:
-			conf.DHCPDDNS4 = s
-		}
+	// Only touch the DHCP DNS slots when the list is configured. When set, write
+	// every owned slot (freed ones as "") so shrinking the list clears the
+	// trailing slot on GET-merge-PUT instead of leaving it stale.
+	if !m.DHCPDNS.IsNull() && !m.DHCPDNS.IsUnknown() {
+		dns := stringListToSlice(ctx, m.DHCPDNS, diags)
+		enabled := len(dns) > 0
+		conf.DHCPDDNSEnabled = &enabled
+		conf.DHCPDDNS1 = dnsSlotPtr(dns, 0)
+		conf.DHCPDDNS2 = dnsSlotPtr(dns, 1)
+		conf.DHCPDDNS3 = dnsSlotPtr(dns, 2)
+		conf.DHCPDDNS4 = dnsSlotPtr(dns, 3)
 	}
 	return conf
 }
 
-func (m *networkResourceModel) fromNetworkConf(conf *models.NetworkConf) {
+func (m *networkResourceModel) fromNetworkConf(conf *unifi.NetworkConf) {
 	m.ID = types.StringValue(conf.ID)
 	m.Name = types.StringValue(conf.Name)
 	m.Purpose = types.StringValue(conf.Purpose)
@@ -412,11 +409,5 @@ func (m *networkResourceModel) fromNetworkConf(conf *models.NetworkConf) {
 		m.VLANID = types.Int64Null()
 	}
 
-	var dns []string
-	for _, s := range []string{conf.DHCPDDNS1, conf.DHCPDDNS2, conf.DHCPDDNS3, conf.DHCPDDNS4} {
-		if s != "" {
-			dns = append(dns, s)
-		}
-	}
-	m.DHCPDNS = sliceToStringList(dns)
+	m.DHCPDNS = sliceToStringList(dnsSlots(conf.DHCPDDNS1, conf.DHCPDDNS2, conf.DHCPDDNS3, conf.DHCPDDNS4))
 }

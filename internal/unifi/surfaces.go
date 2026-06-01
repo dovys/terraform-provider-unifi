@@ -8,9 +8,35 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/transport"
 )
+
+// LegacyEnvelope wraps every legacy REST/stat response:
+// {"meta":{"rc":"ok"},"data":[...]}.
+type LegacyEnvelope[T any] struct {
+	Meta LegacyMeta `json:"meta"`
+	Data []T        `json:"data"`
+}
+
+// LegacyMeta is the status block on a legacy response. RC is "ok" on success;
+// on failure it is "error" and Msg carries the controller's reason.
+type LegacyMeta struct {
+	RC  string `json:"rc"`
+	Msg string `json:"msg,omitempty"`
+}
+
+// OK reports whether the legacy call succeeded.
+func (m LegacyMeta) OK() bool { return m.RC == "ok" }
+
+// IntegrationPage is one page of an Integration v1 list response:
+// {"offset":0,"limit":25,"count":1,"totalCount":1,"data":[...]}.
+type IntegrationPage[T any] struct {
+	Offset     int `json:"offset"`
+	Limit      int `json:"limit"`
+	Count      int `json:"count"`
+	TotalCount int `json:"totalCount"`
+	Data       []T `json:"data"`
+}
 
 // ErrNotFound is returned by typed Get/Update/Delete methods when the object is
 // absent. Resources translate it into remove-from-state on Read (invariant 5).
@@ -69,7 +95,7 @@ func legacyData[T any](ctx context.Context, c *client, method, path string, body
 		}
 		return nil, err
 	}
-	var env models.LegacyEnvelope[T]
+	var env LegacyEnvelope[T]
 	if err := json.Unmarshal(resp.Body, &env); err != nil {
 		return nil, fmt.Errorf("decode legacy %s %s: %w", method, path, err)
 	}
@@ -183,7 +209,7 @@ func integrationListAll[T any](ctx context.Context, c *client, suffix string) ([
 		if err != nil {
 			return nil, err
 		}
-		var page models.IntegrationPage[T]
+		var page IntegrationPage[T]
 		if err := json.Unmarshal(resp.Body, &page); err != nil {
 			return nil, fmt.Errorf("decode integration %s: %w", suffix, err)
 		}

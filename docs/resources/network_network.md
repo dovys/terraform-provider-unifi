@@ -87,7 +87,7 @@ resource "unifi_network_network" "cameras" {
 - `lte_failover_enabled` (Boolean) Whether this is the LTE failover LAN.
 - `mdns_enabled` (Boolean) Whether multicast DNS (mDNS) reflection is enabled.
 - `nat_enabled` (Boolean) Whether the network is NATed (`is_nat`).
-- `purpose` (String) Network purpose: `corporate` (a routed LAN/VLAN), `guest`, or `vlan-only` (L2 VLAN, no gateway). Immutable — changing it forces replacement.
+- `purpose` (String) Network purpose: `corporate` (a routed LAN/VLAN), `guest`, or `vlan-only` (L2 VLAN, no gateway). Defaults to `corporate` on the controller when unset. Immutable — changing it forces replacement.
 - `subnet` (String) Gateway IP + prefix in CIDR, e.g. `192.0.2.1/24`. Not used by `vlan-only` networks.
 - `upnp_enabled` (Boolean) Whether UPnP is enabled on this LAN.
 - `vlan_id` (Number) 802.1Q VLAN ID (2–4094). Omit for an untagged network.

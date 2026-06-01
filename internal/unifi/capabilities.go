@@ -7,9 +7,19 @@ import (
 
 	"github.com/hashicorp/go-version"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/transport"
 )
+
+// Sysinfo is the subset of the object returned by legacy GET /stat/sysinfo that
+// the provider needs. The Network application version lives here and is present
+// whenever the classic (cookie) session is authenticated — unlike the
+// Integration application-info endpoint, which 404s on older firmware
+// (architecture.md §5).
+type Sysinfo struct {
+	Version string `json:"version"`
+	Build   string `json:"build,omitempty"`
+	Name    string `json:"name,omitempty"`
+}
 
 // integrationWriteFloor is the conservative Network version at or above which
 // the Integration v1 API accepts writes (networks/WLANs/zone-firewall/ACL/DNS/
@@ -45,7 +55,7 @@ type Capabilities struct {
 	// Sites maps a site slug (internalReference, e.g. "default") to its
 	// Integration UUID and display name. Empty if the Integration API was
 	// unavailable at Configure time.
-	Sites map[string]models.Site
+	Sites map[string]Site
 	// Flags are the derived routing capability bits.
 	Flags FeatureFlags
 }
@@ -71,7 +81,7 @@ func deriveFlags(v *version.Version) FeatureFlags {
 // may be nil if the matching credentials were not supplied; probe uses whatever
 // is available and leaves undetermined fields zero.
 func probe(ctx context.Context, classic *transport.Classic, integration *transport.Integration, site string) (*Capabilities, error) {
-	caps := &Capabilities{Sites: map[string]models.Site{}}
+	caps := &Capabilities{Sites: map[string]Site{}}
 
 	if classic != nil {
 		v, raw, err := fetchVersionLegacy(ctx, classic, site)
@@ -107,7 +117,7 @@ func fetchVersionLegacy(ctx context.Context, c *transport.Classic, site string) 
 	if err != nil {
 		return nil, "", err
 	}
-	var env models.LegacyEnvelope[models.Sysinfo]
+	var env LegacyEnvelope[Sysinfo]
 	if err := json.Unmarshal(resp.Body, &env); err != nil {
 		return nil, "", fmt.Errorf("decode sysinfo: %w", err)
 	}
@@ -124,12 +134,12 @@ func fetchVersionLegacy(ctx context.Context, c *transport.Classic, site string) 
 	return v, raw, nil
 }
 
-func fetchSites(ctx context.Context, i *transport.Integration) ([]models.Site, error) {
+func fetchSites(ctx context.Context, i *transport.Integration) ([]Site, error) {
 	resp, err := i.Do(ctx, "GET", integrationPath("sites"), nil)
 	if err != nil {
 		return nil, err
 	}
-	var page models.IntegrationPage[models.Site]
+	var page IntegrationPage[Site]
 	if err := json.Unmarshal(resp.Body, &page); err != nil {
 		return nil, fmt.Errorf("decode sites: %w", err)
 	}

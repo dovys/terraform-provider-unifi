@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 )
 
 var (
@@ -254,8 +253,8 @@ func (r *wanResource) ImportState(ctx context.Context, req resource.ImportStateR
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *models.NetworkConf {
-	conf := &models.NetworkConf{
+func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *unifi.NetworkConf {
+	conf := &unifi.NetworkConf{
 		ID:                    m.ID.ValueString(),
 		Name:                  m.Name.ValueString(),
 		Purpose:               "wan",
@@ -305,34 +304,36 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 		conf.WANVLANEnabled = &off
 	}
 
-	// IPv4 DNS: any server → manual, else auto.
-	dns := stringListToSlice(ctx, m.DNSServers, diags)
-	if len(dns) > 0 {
-		conf.WANDNSPreference = "manual"
-		conf.WANDNS1 = dns[0]
-		if len(dns) > 1 {
-			conf.WANDNS2 = dns[1]
+	// IPv4 DNS: any server → manual, else auto. Only touch the slots when the
+	// list is configured; write both owned slots (freed ones as "") so dropping
+	// the second server clears wan_dns2 on GET-merge-PUT.
+	if !m.DNSServers.IsNull() && !m.DNSServers.IsUnknown() {
+		dns := stringListToSlice(ctx, m.DNSServers, diags)
+		if len(dns) > 0 {
+			conf.WANDNSPreference = "manual"
+		} else {
+			conf.WANDNSPreference = "auto"
 		}
-	} else {
-		conf.WANDNSPreference = "auto"
+		conf.WANDNS1 = dnsSlotPtr(dns, 0)
+		conf.WANDNS2 = dnsSlotPtr(dns, 1)
 	}
 
 	// IPv6 DNS: same shape.
-	dns6 := stringListToSlice(ctx, m.IPv6DNSServers, diags)
-	if len(dns6) > 0 {
-		conf.WANIPv6DNSPreference = "manual"
-		conf.WANIPv6DNS1 = dns6[0]
-		if len(dns6) > 1 {
-			conf.WANIPv6DNS2 = dns6[1]
+	if !m.IPv6DNSServers.IsNull() && !m.IPv6DNSServers.IsUnknown() {
+		dns6 := stringListToSlice(ctx, m.IPv6DNSServers, diags)
+		if len(dns6) > 0 {
+			conf.WANIPv6DNSPreference = "manual"
+		} else {
+			conf.WANIPv6DNSPreference = "auto"
 		}
-	} else {
-		conf.WANIPv6DNSPreference = "auto"
+		conf.WANIPv6DNS1 = dnsSlotPtr(dns6, 0)
+		conf.WANIPv6DNS2 = dnsSlotPtr(dns6, 1)
 	}
 
 	up := intPtr(m.UploadKilobits)
 	down := intPtr(m.DownloadKilobits)
 	if up != nil || down != nil {
-		conf.WANProviderCapabilities = &models.WANProviderCapabilities{
+		conf.WANProviderCapabilities = &unifi.WANProviderCapabilities{
 			UploadKilobitsPerSecond:   up,
 			DownloadKilobitsPerSecond: down,
 		}
@@ -340,7 +341,7 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 	return conf
 }
 
-func (m *wanResourceModel) fromNetworkConf(conf *models.NetworkConf) {
+func (m *wanResourceModel) fromNetworkConf(conf *unifi.NetworkConf) {
 	m.ID = types.StringValue(conf.ID)
 	m.Name = types.StringValue(conf.Name)
 	m.WANType = types.StringValue(conf.WANType)
@@ -382,8 +383,18 @@ func (m *wanResourceModel) fromNetworkConf(conf *models.NetworkConf) {
 		m.VLANID = types.Int64Null()
 	}
 
-	m.DNSServers = sliceToStringList(dnsSlots(conf.WANDNS1, conf.WANDNS2))
-	m.IPv6DNSServers = sliceToStringList(dnsSlots(conf.WANIPv6DNS1, conf.WANIPv6DNS2))
+	// Only surface manual DNS as managed values; in "auto" the controller may
+	// hold DHCP-learned servers in these slots that we must not adopt.
+	if conf.WANDNSPreference == "manual" {
+		m.DNSServers = sliceToStringList(dnsSlots(conf.WANDNS1, conf.WANDNS2))
+	} else {
+		m.DNSServers = sliceToStringList(nil)
+	}
+	if conf.WANIPv6DNSPreference == "manual" {
+		m.IPv6DNSServers = sliceToStringList(dnsSlots(conf.WANIPv6DNS1, conf.WANIPv6DNS2))
+	} else {
+		m.IPv6DNSServers = sliceToStringList(nil)
+	}
 
 	if conf.WANProviderCapabilities != nil {
 		m.UploadKilobits = intToState(conf.WANProviderCapabilities.UploadKilobitsPerSecond)
@@ -394,13 +405,28 @@ func (m *wanResourceModel) fromNetworkConf(conf *models.NetworkConf) {
 	}
 }
 
-// dnsSlots collects the non-empty DNS slot values, preserving order.
-func dnsSlots(vals ...string) []string {
+// dnsSlots collects the non-empty DNS slot values, preserving order. nil and
+// "" slots are skipped — the wire model uses *string so a cleared slot reads
+// back as nil or "".
+func dnsSlots(vals ...*string) []string {
 	var out []string
 	for _, v := range vals {
-		if v != "" {
-			out = append(out, v)
+		if v != nil && *v != "" {
+			out = append(out, *v)
 		}
 	}
 	return out
+}
+
+// dnsSlotPtr returns the i-th DNS server as a pointer, or a pointer to "" when
+// the list has no i-th element. A non-nil &"" overwrites (clears) a freed slot
+// on GET-merge-PUT; a nil pointer would be dropped by omitempty and leave the
+// controller's stale value in place.
+func dnsSlotPtr(vals []string, i int) *string {
+	if i < len(vals) {
+		v := vals[i]
+		return &v
+	}
+	empty := ""
+	return &empty
 }

@@ -16,7 +16,7 @@ device/port internals in [../devices-and-ports.md](../devices-and-ports.md); ope
 ### Networking
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `unifi_network_network` | L (I read) | LAN/VLAN/guest/vlan-only; exposes the full **`purpose`** set + DHCP/DNS/IPv6/IGMP/mDNS. Rejects `purpose=wan`; never hardcodes `purpose=corporate`. |
+| `unifi_network_network` | L (I read) | LAN/VLAN/guest/vlan-only; exposes the full **`purpose`** set + DHCP/DNS/IPv6/IGMP/mDNS. Rejects `purpose=wan`; omitting `purpose` lets the controller default it (to `corporate`) rather than the provider hardcoding it. |
 | `unifi_network_wan` | L | WAN uplink (pppoe/dhcp/static), load-balance, bandwidth. Same `networkconf` object, `purpose=wan` only. |
 | `unifi_network_static_route` | L | Static route. |
 | `unifi_network_port_forward` | L | DNAT. |

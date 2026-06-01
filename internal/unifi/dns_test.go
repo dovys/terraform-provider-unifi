@@ -7,8 +7,6 @@ import (
 	"io"
 	"net/http"
 	"testing"
-
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 )
 
 func bptr(b bool) *bool { return &b }
@@ -46,7 +44,7 @@ func TestDNSRecordCRUD(t *testing.T) {
 	defer srv.Close()
 	ctx := context.Background()
 
-	rec, err := c.CreateDNSRecord(ctx, &models.StaticDNSRecord{
+	rec, err := c.CreateDNSRecord(ctx, &StaticDNSRecord{
 		Key: "a.example.com", RecordType: "A", Value: "10.0.0.5", Enabled: bptr(true),
 	})
 	if err != nil {
@@ -71,7 +69,7 @@ func TestDNSRecordCRUD(t *testing.T) {
 		t.Fatalf("GetDNSRecord(nope) err = %v, want ErrNotFound", err)
 	}
 
-	upd, err := c.UpdateDNSRecord(ctx, &models.StaticDNSRecord{
+	upd, err := c.UpdateDNSRecord(ctx, &StaticDNSRecord{
 		ID: "d1", Key: "a.example.com", RecordType: "A", Value: "10.0.0.9", Enabled: bptr(true),
 	})
 	if err != nil {
@@ -103,7 +101,7 @@ func TestDNSRecord_IntegrationGuard(t *testing.T) {
 	cl := c.(*client)
 	cl.router = NewRouter(FeatureFlags{IntegrationWrites: true, IntegrationDNSPolicies: true})
 
-	_, err := cl.CreateDNSRecord(context.Background(), &models.StaticDNSRecord{Key: "x", RecordType: "A", Value: "1.2.3.4"})
+	_, err := cl.CreateDNSRecord(context.Background(), &StaticDNSRecord{Key: "x", RecordType: "A", Value: "1.2.3.4"})
 	var capErr *CapabilityError
 	if !errors.As(err, &capErr) {
 		t.Fatalf("CreateDNSRecord err = %v, want *CapabilityError", err)

@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/models"
 )
 
 var (
@@ -77,7 +76,7 @@ func (d *networkDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	var found *models.NetworkConf
+	var found *unifi.NetworkConf
 	if id != "" {
 		n, err := d.client.GetNetwork(ctx, id)
 		if err != nil {

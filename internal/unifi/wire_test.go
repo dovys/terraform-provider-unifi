@@ -1,4 +1,4 @@
-package models
+package unifi
 
 import (
 	"encoding/json"
