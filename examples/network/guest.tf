@@ -1,10 +1,10 @@
 # Guest network use case: a trusted main LAN plus an isolated guest network on
 # its own VLAN, each with its own DHCP scope.
 #
-# Wi-Fi SSIDs attach to these networks with a future `unifi_network_wlan`
-# resource (a later phase) — e.g. a "Home" SSID on unifi_network_network.main
-# and a captive-portal "Guest" SSID on unifi_network_network.guest. Today this
-# models the networks and VLANs the SSIDs will bind to.
+# Wi-Fi SSIDs attach to these networks via `unifi_network_wlan` (see wifi.tf in
+# this directory) — a "Home" SSID on unifi_network_network.main and a guest SSID
+# on unifi_network_network.guest. This file models the networks and VLANs the
+# SSIDs bind to.
 
 # The main LAN usually already exists as the controller's built-in "Default"
 # network — import it rather than creating a duplicate (Terraform 1.5+; see

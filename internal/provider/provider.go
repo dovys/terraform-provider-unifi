@@ -218,6 +218,8 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewNetworkResource,
 		NewWANResource,
 		NewDNSRecordResource,
+		NewWLANResource,
+		NewAPGroupResource,
 	}
 }
 

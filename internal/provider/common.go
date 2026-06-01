@@ -113,3 +113,28 @@ func sliceToStringList(items []string) types.List {
 	l, _ := types.ListValue(types.StringType, elems)
 	return l
 }
+
+// stringSetToSlice reads a framework set of strings into a Go slice. Sets model
+// unordered collections (MAC lists, band lists, id references) so controller
+// reordering doesn't churn the plan.
+func stringSetToSlice(ctx context.Context, s types.Set, diags *diag.Diagnostics) []string {
+	if s.IsNull() || s.IsUnknown() {
+		return nil
+	}
+	var out []string
+	diags.Append(s.ElementsAs(ctx, &out, false)...)
+	return out
+}
+
+// sliceToStringSet builds a framework set of strings (null when empty).
+func sliceToStringSet(items []string) types.Set {
+	if len(items) == 0 {
+		return types.SetNull(types.StringType)
+	}
+	elems := make([]attr.Value, 0, len(items))
+	for _, s := range items {
+		elems = append(elems, types.StringValue(s))
+	}
+	s, _ := types.SetValue(types.StringType, elems)
+	return s
+}

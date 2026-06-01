@@ -41,7 +41,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -306,5 +306,104 @@ func TestNetwork_DHCPOptionsRoundTrip(t *testing.T) {
 	out.fromNetworkConf(conf)
 	if out.DHCPLeaseTime.ValueInt64() != 86400 || out.DHCPNTPServer1.ValueString() != "10.0.0.1" {
 		t.Errorf("round-trip wrong: %+v", out)
+	}
+}
+
+func TestWLANConf_RoundTrip(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	m := &wlanResourceModel{
+		ID:               types.StringNull(),
+		Name:             types.StringValue("Home"),
+		Enabled:          types.BoolValue(true),
+		NetworkID:        types.StringValue("net1"),
+		Security:         types.StringValue("wpapsk"),
+		WPAMode:          types.StringValue("wpa2"),
+		Passphrase:       types.StringValue("hunter2hunter2"),
+		PMFMode:          types.StringValue("optional"),
+		Bands:            sliceToStringSet([]string{"2g", "5g"}),
+		APGroupIDs:       sliceToStringSet([]string{"ag1"}),
+		APGroupMode:      types.StringValue("all"),
+		MACFilterEnabled: types.BoolValue(true),
+		MACFilterPolicy:  types.StringValue("allow"),
+		MACFilterList:    sliceToStringSet([]string{"aa:bb:cc:00:11:22"}),
+		GroupRekey:       types.Int64Value(3600),
+	}
+	conf := m.toWLANConf(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toWLANConf diags: %v", diags)
+	}
+	if conf.Name != "Home" || conf.Security != "wpapsk" || conf.NetworkConfID != "net1" {
+		t.Errorf("scalar mapping wrong: %+v", conf)
+	}
+	if conf.XPassphrase != "hunter2hunter2" {
+		t.Errorf("passphrase mapping wrong: %q", conf.XPassphrase)
+	}
+	if conf.Enabled == nil || !*conf.Enabled {
+		t.Errorf("enabled should be &true")
+	}
+	if len(conf.WLANBands) != 2 || len(conf.APGroupIDs) != 1 || len(conf.MACFilterList) != 1 {
+		t.Errorf("set mapping wrong: bands=%v aps=%v macs=%v", conf.WLANBands, conf.APGroupIDs, conf.MACFilterList)
+	}
+	if conf.GroupRekey == nil || *conf.GroupRekey != 3600 {
+		t.Errorf("group_rekey mapping wrong: %v", conf.GroupRekey)
+	}
+
+	// Wire → state. The controller commonly echoes an empty x_passphrase on
+	// read; the passphrase must stay whatever the config set rather than wiping.
+	out := *m // carry the configured passphrase
+	out.fromWLANConf(&unifi.WLANConf{
+		ID: "wlan9", Name: "Home", Security: "wpapsk", WPAMode: "wpa2",
+		XPassphrase: "", NetworkConfID: "net1", WLANBands: []string{"2g", "5g"},
+	})
+	if out.ID.ValueString() != "wlan9" {
+		t.Errorf("id round-trip wrong: %q", out.ID.ValueString())
+	}
+	if out.Passphrase.ValueString() != "hunter2hunter2" {
+		t.Errorf("passphrase must be preserved when the controller echoes empty, got %q", out.Passphrase.ValueString())
+	}
+
+	// When the controller does return a passphrase, adopt it.
+	out.fromWLANConf(&unifi.WLANConf{ID: "wlan9", Name: "Home", XPassphrase: "fromserver1234"})
+	if out.Passphrase.ValueString() != "fromserver1234" {
+		t.Errorf("passphrase should adopt the controller value, got %q", out.Passphrase.ValueString())
+	}
+}
+
+func TestAPGroup_RoundTrip(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	// A null device_macs must serialize as an explicit empty array (the field is
+	// non-omitempty), so clearing a group's members actually empties it.
+	m := &apGroupResourceModel{
+		ID:         types.StringNull(),
+		Name:       types.StringValue("Upstairs"),
+		DeviceMACs: types.SetNull(types.StringType),
+	}
+	g := m.toAPGroup(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toAPGroup diags: %v", diags)
+	}
+	if g.Name != "Upstairs" || g.DeviceMACs == nil || len(g.DeviceMACs) != 0 {
+		t.Errorf("null device_macs must become an empty (non-nil) slice: %+v", g.DeviceMACs)
+	}
+
+	m.DeviceMACs = sliceToStringSet([]string{"aa:bb:cc:00:11:22", "de:ad:be:ef:00:01"})
+	g = m.toAPGroup(ctx, &diags)
+	if len(g.DeviceMACs) != 2 {
+		t.Errorf("device_macs mapping wrong: %v", g.DeviceMACs)
+	}
+
+	var out apGroupResourceModel
+	out.fromAPGroup(&unifi.APGroup{ID: "ag5", Name: "All APs", DeviceMACs: []string{"aa:bb:cc:00:11:22"}})
+	if out.ID.ValueString() != "ag5" || out.Name.ValueString() != "All APs" {
+		t.Errorf("fromAPGroup wrong: %+v", out)
+	}
+	var macs []string
+	out.DeviceMACs.ElementsAs(ctx, &macs, false)
+	if len(macs) != 1 || macs[0] != "aa:bb:cc:00:11:22" {
+		t.Errorf("device_macs round-trip wrong: %v", macs)
 	}
 }
