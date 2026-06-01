@@ -51,7 +51,7 @@ we may clean-room codegen that surface.
 | firewall group/rule (classic) | legacy `/rest/firewallgroup`,`/rest/firewallrule` | legacy |
 | firewall zone/policy, traffic rule/route | **v2** | **v2** |
 | static route, port forward, dynamic DNS | legacy `/rest/{routing,portforward,dynamicdns}` | legacy |
-| local DNS | **v2** `/static-dns` | **v2** (⚠ legacy `/rest/dnsrecord` 400s) |
+| local DNS | **v2** `/static-dns` (→ integration `dns/policies` on 10.1+) | **v2** `/static-dns` today; flips to **integration** `/sites/{id}/dns/policies` once firmware supports it (invariant #2) |
 | radius profile/account, user group | legacy `/rest/{radiusprofile,account,usergroup}` | legacy |
 | DHCP reservation | legacy `/rest/user` (use_fixedip) | **legacy** |
 | settings (per key) | legacy `/rest/setting` | legacy |
@@ -68,8 +68,13 @@ required today.
 | `api_key` (`X-API-KEY`) | Integration v1 — UniFi Network → Settings → Control Plane → Integrations |
 | `username` + `password` | Legacy + v2 — a local UniFi OS account |
 
+The `api_key` is **console-wide and owner-level**: one key authorizes every app (Network **and**
+Protect) and can't be permission-scoped — treat it as admin-equivalent (it's `Sensitive`; keep it in
+a secrets store).
+
 **Classic session lifecycle (specified, not "transparent"):**
-- `POST /api/auth/login` → `TOKEN` cookie (JWT, **~2h expiry**); requests proxy under `/proxy/network/...`.
+- `POST /api/auth/login` → `TOKEN` cookie (JWT; **~2h default — read the `exp` claim, don't hard-code
+  the lifetime**); requests proxy under `/proxy/network/...`.
 - CSRF read from the response header (`X-CSRF-Token`/`X-Updated-CSRF-Token`), **falling back to the
   JWT `csrfToken` claim** (some firmwares only surface it there). Mutating requests echo it + cookie.
 - **Re-auth + retry once** on 401/403 (or near `exp`) so a long apply can't die when the token lapses.
@@ -119,5 +124,6 @@ surfaces) and the two are never mixed.
    (migrated classic rules land in a high band like 20000+) with a plan-time duplicate-index guard.
 5. **Read reconciles, never blind-overwrites** — refresh Computed, reconcile configured only when
    canonically different; remove-on-404. `UseStateForUnknown()` only on post-create-immutable values.
-   Telemetry lives on data sources. This makes "a live instance imports to an empty plan" hold.
+   Telemetry is **Computed-only** (refreshed on read, never part of the plan). This makes "a live
+   instance imports to an empty plan" hold.
 6. **429 backoff** (honor `Retry-After`); **secrets `Sensitive`**; **site explicit in the plan**.

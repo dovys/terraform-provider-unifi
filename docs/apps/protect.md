@@ -13,8 +13,8 @@ Analogous to Network's three surfaces, under `/proxy/protect/...`:
 
 | Surface | Base path | Auth | Role |
 |---------|-----------|------|------|
-| **Integration v1** | `/proxy/protect/integration/v1/...` | `X-API-KEY` (same console key) | Official, typed. **PATCH** device config; liveview CRUD. **Protect 5.3+**. The preferred write path. |
-| **Legacy** | `/proxy/protect/api/...` (`/bootstrap`, `/cameras/<id>`, …) | cookie + CSRF (shared classic session) | Widest surface: the full `/bootstrap` document, NVR settings, detection **zones**, users/permissions. Reverse-engineered. |
+| **Integration v1** | `/proxy/protect/integration/v1/...` | `X-API-KEY` (same console key) | Official, typed (**Protect 5.3+**). Read-heavy today plus a few actions and liveview CRUD; device-config write coverage is still growing — prefer it for what it supports. |
+| **Legacy** | `/proxy/protect/api/...` (`/bootstrap`, `/cameras/<id>`, …) | cookie + CSRF (shared classic session) | Widest write surface: device-config **PATCH**, the full `/bootstrap` document, NVR settings, detection **zones**, users/permissions. Reverse-engineered. |
 | **WebSocket** | `/proxy/protect/ws/updates` | cookie | Live event stream. **Not used by the provider** — Terraform manages config, not an event feed. |
 
 The classic session (CSRF + ~2h JWT re-auth, local-admin requirement) is exactly the one in
@@ -28,7 +28,7 @@ data source) — because a camera is adopted hardware with mutable config (see
 
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `unifi_protect_camera` | I adopt + **PATCH** (GET-merge-PATCH) | One resource per camera, keyed by MAC: adopts if pending, then manages config — `name`, `osd` (on-screen text/flags), `recording_settings` (mode/retention), `smart_detect` (person/vehicle/package), `mic_volume`, `video_mode`, `hdr`, `ir_led`; **doorbell fields gated by `feature_flags.is_doorbell`:** `lcd_message`, `chime_duration`, `ring_settings`. Computed telemetry exposed. Destroy reverts config; `forget_on_destroy` opts into forget. |
+| `unifi_protect_camera` | adopt + **PATCH** (GET-merge-PATCH) | One resource per camera, keyed by MAC: adopts if pending, then manages config — `name`, `osd` (on-screen text/flags), `recording_settings` (mode/retention), `smart_detect` (person/vehicle/package), `mic_volume`, `video_mode`, `hdr`, `ir_led`; **doorbell fields gated by `feature_flags.is_doorbell`:** `lcd_message`, `chime_duration`, `ring_settings`. Computed telemetry exposed. Destroy reverts config; `forget_on_destroy` opts into forget. |
 | `data.unifi_protect_camera` | legacy `/bootstrap` → I | Read-only lookup for an unmanaged camera: state, model, firmware, `feature_flags`, RTSP availability. |
 | `unifi_protect_light` | I PATCH | Floodlight: brightness, PIR sensitivity, light-on-motion schedule. |
 | `unifi_protect_sensor` | I PATCH | UP-Sense: motion/temperature/humidity/leak thresholds, mount type. |
@@ -36,6 +36,11 @@ data source) — because a camera is adopted hardware with mutable config (see
 | `unifi_protect_viewer` | I PATCH | Viewport device: the `unifi_protect_liveview` it displays. |
 | `unifi_protect_liveview` | **I CRUD** | Logical multi-camera layout (grid of camera slots). Pure config object — full create/read/update/delete on the Integration API. |
 | `unifi_protect_nvr_settings` | legacy (singleton) | NVR/console-level: recording retention defaults, time-lapse, smart-detect global toggles. One doc, always present → singleton lifecycle (like Network `setting_*`). |
+
+**Write path.** Config writes are **PATCH**. On current Protect that means the legacy private API
+(`/proxy/protect/api/...`); the official Integration v1 is read-dominated today, so the router uses
+Integration for reads and supported actions and falls back to legacy PATCH for device config —
+flipping toward Integration per invariant #2 as its write coverage grows.
 
 **Doorbells are cameras.** There is no separate doorbell device type; a doorbell is a camera whose
 `feature_flags.is_doorbell` is true. The doorbell-only attributes above are validated/sent **only**

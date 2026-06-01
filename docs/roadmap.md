@@ -46,8 +46,12 @@ A resource is checkable only when it meets the Definition of Done ([development.
 1. **OpenAPI for Integration v1?** If the console serves a spec, clean-room codegen that surface.
 2. **Exact adoption/forget verbs** (`/cmd/devmgr` vs `/devices/adopt`) + device **state enum**.
 3. **Integration write availability per firmware** — which version flips each write on.
-4. **CSRF source across firmwares** (header vs JWT claim); validate the ~2h re-auth path.
+4. **CSRF source across firmwares** (header vs JWT claim); validate **`exp`-driven** re-auth (read the
+   token's `exp`, don't hard-code 2h).
 5. **Self-hosted/HIL runner setup** + documenting what the Docker tier can't cover.
 6. **Which settings keys to type first** (likely `mgmt`, `usg`, `guest_access`, `ntp`, `country`, `ips`).
 7. **Protect (P5):** exact PATCH field set per device type + which need legacy `/bootstrap` fallback;
-   whether detection **zones** are in initial scope; confirm doorbell `feature_flags` names.
+   whether detection **zones** are in initial scope; confirm doorbell `feature_flags` names; confirm
+   which device-config writes (if any) the official Integration v1 covers vs legacy PATCH.
+8. **DHCP reservation wire shape** — confirm the raw `user` field is `fixedip` (one word) and that a
+   fixed-IP write requires an accompanying `network_id`, before freezing the model.

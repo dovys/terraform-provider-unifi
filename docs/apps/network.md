@@ -20,7 +20,7 @@ device/port internals in [../devices-and-ports.md](../devices-and-ports.md); ope
 | `unifi_network_wan` | L | WAN uplink (pppoe/dhcp/static), load-balance, bandwidth. Same `networkconf` object, `purpose=wan` only. |
 | `unifi_network_static_route` | L | Static route. |
 | `unifi_network_port_forward` | L | DNAT. |
-| `unifi_network_dns_record` | V2 | Local DNS (`/static-dns`); **not** legacy `/rest/dnsrecord`. |
+| `unifi_network_dns_record` | V2 (→ I) | Local DNS via v2 `/static-dns` today; routing flips to Integration `dns/policies` once firmware supports it — no schema change (invariant #2). |
 | `unifi_network_dynamic_dns` | L | DDNS client. |
 
 ### Wireless

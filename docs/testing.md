@@ -28,7 +28,8 @@ the firmware floor.
 
 A self-hosted runner with UniFi OS Server on a systemd VM, or real hardware (disposable gateway +
 AP). The **only** place that exercises Integration writes, real radios, zone-firewall enforcement,
-and firmware-specific behavior (e.g. legacy `/rest/dnsrecord` 400 → v2 `/static-dns`). It's also
+and firmware-specific behavior (e.g. local DNS moving from v2 `/static-dns` to Integration
+`dns/policies` as firmware advances). It's also
 where the operator's **own live console** — captured as a local, gitignored fixture, never
 committed — is imported end-to-end to a clean (and second consecutive empty) plan: the truest
 regression.
