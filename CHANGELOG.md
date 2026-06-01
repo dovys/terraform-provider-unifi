@@ -41,8 +41,10 @@ First development release: the provider base and the core of the network app.
   - Unit tests (client CRUD over `httptest` incl. the GET-merge-PUT and v2
     write-contract assertions, model wire shapes, schema validation, conversion
     round-trips) and Tier-2 acceptance tests (create → update → import → destroy
-    with a second empty plan, `CheckDestroy`, and `tfacc-` sweepers). Examples
-    and generated registry docs for every resource and data source.
+    with a second empty plan, `CheckDestroy`, and `tfacc-` sweepers).
+    Hand-written real-use-case examples under `examples/` (a guest-network
+    scenario, per-ISP WAN configs using Terraform `import` blocks, local DNS,
+    and data-source lookups), plus generated schema-reference docs.
   - The `unifi_network_site` **resource** is deferred past this phase: its
     `/cmd/sitemgr` write shapes can't be verified against a single-site fixture.
     The client carries the write methods; the read-only data source ships now.

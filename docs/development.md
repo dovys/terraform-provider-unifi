@@ -43,15 +43,19 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 
 1. Confirm backend + shape against the live network fixture (and UniFi OS Server if needed); add
    the `router.go` policy entry.
-2. Typed models in `internal/unifi/models` — no `map[string]any` except the generic `unifi_network_setting`
-   and raw passthrough of unmodeled fields in GET-merge-PUT. v2 writes use minimal structs honoring
-   the [v2 write contract](architecture.md).
+2. Typed structs beside their client methods in `internal/unifi` (e.g. `NetworkConf` in `networks.go`,
+   `StaticDNSRecord` in `dns.go`) — no separate `models` package, and no `map[string]any` except the
+   generic `unifi_network_setting` and raw passthrough of unmodeled fields in GET-merge-PUT. v2 writes
+   use minimal structs honoring the [v2 write contract](architecture.md).
 3. Schema: nested **attributes** (not blocks); Map/Set keyed by a natural key, not List;
    `Optional+Computed` for API-defaulted; `UseStateForUnknown` only on post-create-immutable values;
    `RequiresReplace` immutables; controller-accurate validators; `Sensitive` secrets.
 4. CRUD + ImportState: Read reconciles + removes-on-404; Create/Update match the plan (GET-merge-PUT
    for partly-owned docs); document the import key + state `id`.
-5. Example `.tf` + `import.sh`; `go generate` docs; state backend + hardware/firmware caveats.
+5. Hand-written real-use-case examples in `examples/<use-case>/*.tf` (+ `examples/data/`), not
+   per-resource snippets; use `import {}` blocks for resources you import rather than create (WANs, the
+   Default network). `go generate` produces the schema-reference docs (examples are not template-injected).
+   Note state backend + hardware/firmware caveats.
 6. Tests to the Definition of Done.
 7. Update [apps/network.md](apps/network.md) + the [roadmap.md](roadmap.md) checklist.
 

@@ -30,9 +30,14 @@ internal/unifi/
 ├── transport/
 │   ├── integration.go  // X-API-KEY → /integration/v1
 │   └── classic.go      // cookie+CSRF → /rest (legacy) AND /v2; handles re-auth
-├── models/          // typed request/response structs
+├── surfaces.go      // legacy/v2/integration request helpers + wire envelopes
+├── networks.go      // NetworkConf struct + network CRUD
+├── dns.go           // StaticDNSRecord struct + local-DNS CRUD
+├── sites.go         // Site/LegacySite/ApplicationInfo + site CRUD
 └── capabilities.go  // version detection, feature flags, site name↔UUID map
 ```
+
+Request/response structs live beside the methods that use them (no separate `models` package).
 
 Resources call `Client` methods only — never a transport — so the backend split is invisible to
 resource code and a future Integration write is a one-line routing change. Client is hand-written

@@ -1,11 +1,13 @@
-# A local A record resolved by the console's DNS.
+# Local DNS use cases: records the console resolves for clients on the network.
+
+# An A record for a NAS on the IoT VLAN.
 resource "unifi_network_dns_record" "nas" {
   name  = "nas.lan"
   type  = "A"
   value = "10.0.30.10"
 }
 
-# A CNAME alias.
+# A CNAME alias pointing at it.
 resource "unifi_network_dns_record" "files" {
   name  = "files.lan"
   type  = "CNAME"

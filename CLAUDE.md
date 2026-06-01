@@ -50,13 +50,16 @@ Site Manager API out of scope.
 
 ## Resource recipe
 1. Confirm backend/shape against the live network fixture; add `router.go` entry.
-2. Typed models in `internal/unifi/models` (minimal structs for v2 writes).
+2. Typed structs beside their client methods in `internal/unifi` (e.g. `NetworkConf` in `networks.go`,
+   `StaticDNSRecord` in `dns.go`) — minimal structs for v2 writes. No separate `models` package.
 3. Schema: nested attributes; Map/Set keyed by natural key (not List); `Optional+Computed`;
    `UseStateForUnknown` only on post-create-immutable; `RequiresReplace` immutables; controller-accurate
    validators; `Sensitive`.
 4. CRUD + ImportState: Read reconciles + removes-on-404; GET-merge-PUT for partly-owned docs; document
    import key + state `id`.
-5. Example `.tf` + `import.sh`; `go generate`.
+5. Hand-written real-use-case examples in `examples/<use-case>/*.tf` (+ `examples/data/`), not
+   per-resource snippets; use `import {}` blocks for resources you import rather than create (WANs, the
+   Default network). `go generate` for the schema-reference docs (examples are not template-injected).
 6. Tests to the Definition of Done.
 7. Update `docs/apps/network.md` + `docs/roadmap.md` checklist.
 
