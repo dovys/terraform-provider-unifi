@@ -23,6 +23,10 @@ override.tf.json
 # Live network snapshot — local acceptance fixture only (real MACs/IPs); never commit
 unifi-inventory.json
 
+# Reverse-engineering captures — raw API dumps (real MACs/IPs/secrets); never
+# commit. Redact via scripts/redact-capture.py before sharing (docs/reverse-engineering.md).
+/re-captures/
+
 # Editor / OS
 .DS_Store
 *.swp

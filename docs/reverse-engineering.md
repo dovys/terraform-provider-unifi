@@ -26,8 +26,12 @@ confirmed by observation, it's marked provisional/HIL, never shipped as certain.
 observation over reading source.
 
 **Captures are real network data → never committed.** Redact secrets, passwords/PSKs, API keys, MACs,
-public IPs, and PII; store under the gitignored fixture path (same rule as `unifi-inventory.json`). The
-repo holds *modeled types + tests against redacted fixtures*, never raw dumps.
+public IPs, and PII before anything leaves the box. Pipe every capture through
+[`scripts/redact-capture.py`](../scripts/redact-capture.py) (stdlib-only, `uv run`): it nulls
+secret-named values and masks MAC/IP/email patterns while **keeping field names, enum values, and
+structure** — exactly the shape we model from. Stage raw dumps under the gitignored `re-captures/`
+directory (same rule as `unifi-inventory.json`); the repo holds *modeled types + tests against redacted
+fixtures*, never raw dumps. The redactor is a floor, not a guarantee — eyeball the output before sharing.
 
 ## Access & method order
 
@@ -87,7 +91,12 @@ ps aux | grep -i protect
 #    GET /proxy/protect/api/bootstrap        -> the big doc (nvr, cameras[], lights[], ... + version)
 #    GET /proxy/protect/api/cameras          -> camera list (private shape, cf. the Integration shape)
 #    GET /proxy/protect/api/nvr              -> NVR/console settings
-#    Save each response, then pipe through a redactor (strip secrets/mac/ip/PII) before sharing.
+
+# 3) Redact + stage: run each response through the redactor, into the gitignored re-captures/ dir.
+#    (Masks secrets/MAC/IP/email; keeps field names, enums, structure.)
+mkdir -p re-captures
+uv run scripts/redact-capture.py raw-bootstrap.json > re-captures/protect-bootstrap.json
+#    ...or pipe straight from curl:  <curl …> | uv run scripts/redact-capture.py > re-captures/protect-cameras.json
 ```
 
 Share the **redacted** shapes (types, enums, structure — not values) and I'll model the typed Protect
