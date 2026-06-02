@@ -20,12 +20,13 @@ private repo only.
   reverse-engineered Access spec (`../unifi-specs/access/v4.2.27`) by the shared
   projection (`unifi-specs/tools/access_codegen_spec.py`, reusing the Protect
   closure-trim/hoist/widen transforms). Ships `data.unifi_access_door_group`
-  (look up a door group by `id` or `name`). The **managed**
-  `unifi_access_door_group` resource is implemented and unit-tested but
-  **intentionally not registered yet**: the Access write surface is RE'd from the
-  controller binary and cannot be verified against a live/HIL console this phase
-  (invariant 7), so per the repo's deferral precedent only the read path ships —
-  see `TODO.md` for the verification items that gate re-enabling it.
+  (look up a door group by `id` or `name`) and the managed
+  `unifi_access_door_group` resource (create/update/delete a named set of doors;
+  membership read back from the dedicated `/door_ids` endpoint). door_group is
+  the one Access object the RE'd spec provides a write DTO for; its CRUD paths +
+  `{code,msg,data}` envelope contract are **HIL-unverified** (no live Access
+  console) — see `TODO.md`. Doors, policies, and holidays have no write DTO in the
+  spec and await an RE capture of their controller param types.
 - **UniFi Protect app — first resources on a new substruct client
   (`c.Protect()…`).** The console `unifi.Client` gained a `Protect()` accessor
   exposing the Protect application over the **same cookie session** as Network

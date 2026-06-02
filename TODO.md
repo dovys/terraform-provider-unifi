@@ -228,16 +228,15 @@ general approach (per-field empty-write allow-list, or always-emit owned keys)
 once empty-string writes are confirmed acceptable per field on a live controller.
 See `docs/roadmap.md` open question #6.
 
-## Access (P7): verify the RE'd surface before registering the managed resource
+## Access (P7): verify the RE'd `unifi_access_door_group` write surface on live/HIL
 
 The Access app is modeled from the **reverse-engineered** private web-UI API
 (`../unifi-specs/access/v4.2.27`, derived from the controller Go binary — no
-vendor OpenAPI for this surface). It **cannot be verified against a live console
-this phase** (no Access console; X-API-KEY is Network-only). The substruct client
-and `data.unifi_access_door_group` ship; the managed `unifi_access_door_group`
-resource is written + unit-tested but **not registered** in `provider.go` until
-the following are confirmed against a live/HIL Access console. Each is a one-line
-re-enable once checked:
+vendor OpenAPI for this surface). `unifi_access_door_group` (+ the data source)
+**ships and is registered** — but its write surface **has not been verified
+against a live console** (no Access console; X-API-KEY is Network-only). The
+schema flags it HIL-unverified. Confirm the following against a live/HIL Access
+console and tighten the code where noted:
 
 - **CRUD paths.** Confirm `GET /api/v2/access/door_groups` (list),
   `GET|PUT|DELETE /api/v2/access/door_group/{id}`, `POST /api/v2/access/door_group`
@@ -259,5 +258,20 @@ re-enable once checked:
   be warranted). `floor_ids` is writable in `DoorGroupParams` but has **no read
   path** in the modeled surface, so floor groups are out of scope until a richer
   group-detail read view is found — the resource models door-only groups.
-- **DoD on re-enable.** Acceptance create→update→import→destroy + `CheckDestroy` +
-  `tfacc-` sweeper + a clean second-empty plan, per the standard.
+- **DoD.** Acceptance create→update→import→destroy + `CheckDestroy` + `tfacc-`
+  sweeper + a clean second-empty plan, per the standard (needs a live/HIL console).
+
+### Access P7c — doors, policies, holidays are blocked on spec write DTOs
+
+The RE'd Access spec contains **no** resource-config write DTO for doors,
+policies, or holidays — only read types (`access_co_Door`,
+`access_policy_bo_AccessPolicy`, `holiday_bo_Holiday`, …) and operation params
+(adopt, backup, NFC). `door_group_controller_DoorGroupParams` is the **only**
+controller config-params type in the whole spec. Modeling the others would mean
+guessing a write shape from no-omitempty read types — exactly the plan-unstable,
+unverifiable modeling this repo avoids. Before building them: extend the RE
+capture in `../unifi-specs/access` with the missing controller param types (e.g.
+`holiday_controller_*`, `door_controller_*`, `access_policy_controller_*`), add
+them as projection roots, regenerate `wire`, then model + verify on a live/HIL
+console. (Holidays also lack date-range fields in the current read type; doors
+are largely read-only physical objects; policies are deeply nested.)

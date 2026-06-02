@@ -95,11 +95,15 @@ A resource is checkable only when it meets the Definition of Done ([development.
         `api_key`, console-global); generated `wire` types projected from the RE'd spec via the shared
         `access_codegen_spec.py` (reuses the Protect closure-trim/hoist/widen transforms). Ships
         `data.unifi_access_door_group`.
-  - [ ] **P7b — managed resources (gated on live/HIL verification):** `unifi_access_door_group` is written +
-        unit-tested but **not registered** until a live/HIL Access console confirms the CRUD paths, the
-        envelope success-code set, and the `/door_ids` response shape (see `TODO.md`). Re-enabling is a
-        one-line addition in `provider.go`. Floor groups, doors, policies, and holidays follow once the read
-        surface is confirmed (their `wire` roots are already projected).
+  - [x] **P7b — first managed resource:** `unifi_access_door_group` ships (registered). It is the one Access
+        object the RE'd spec provides a write DTO for (`door_group_controller_DoorGroupParams`); its CRUD
+        paths, the envelope success-code set, and the `/door_ids` response shape remain **HIL-unverified**
+        (see `TODO.md`).
+  - [ ] **P7c — doors, policies, holidays (blocked on spec):** the RE'd Access spec contains **no** write
+        DTO for these (only read types + operation params), so they can't be modeled clean-room without
+        guessing an unverifiable write shape. Blocked until an RE capture adds the controller param types
+        (e.g. `holiday_controller_*`, `access_policy_controller_*`) to `../unifi-specs/access`, then model +
+        verify on a live/HIL console.
 
 ## Open questions (don't block design)
 
