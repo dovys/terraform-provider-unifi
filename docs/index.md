@@ -16,7 +16,7 @@ Manage a UniFi OS console (Network app today; Protect later) as code. Connects t
 
 ### Optional
 
-- `allow_insecure` (Boolean) Skip TLS certificate verification. UniFi consoles ship self-signed certs on local IPs, so this is commonly needed against a LAN console. Defaults to `false`. Env: `UNIFI_INSECURE`.
+- `allow_insecure` (Boolean) Skip TLS certificate verification. UniFi consoles ship self-signed certs on local IPs, so this is commonly needed against a LAN console. Defaults to `false`. Env: `UNIFI_ALLOW_INSECURE`.
 - `host` (String) Console base URL or host, e.g. `https://192.0.2.1` or `unifi.example.com`. A bare host is assumed `https://`. Env: `UNIFI_HOST`.
 - `max_retries` (Number) Number of times to retry a request that returns HTTP 429 (rate limited). Defaults to `3`. Env: `UNIFI_MAX_RETRIES`.
 - `password` (String, Sensitive) Password for `username`. Env: `UNIFI_PASSWORD`.
