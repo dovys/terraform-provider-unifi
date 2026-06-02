@@ -79,30 +79,31 @@ func TestNetworkConf_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toNetworkConf diags: %v", diags)
 	}
-	if conf.VLAN == nil || *conf.VLAN != 30 || conf.VLANEnabled == nil || !*conf.VLANEnabled {
-		t.Errorf("VLAN mapping wrong: VLAN=%v Enabled=%v", conf.VLAN, conf.VLANEnabled)
+	if conf.Vlan == nil || *conf.Vlan != 30 || conf.VlanEnabled == nil || !*conf.VlanEnabled {
+		t.Errorf("VLAN mapping wrong: VLAN=%v Enabled=%v", conf.Vlan, conf.VlanEnabled)
 	}
-	if derefStr(conf.DHCPDDNS1) != "1.1.1.1" || derefStr(conf.DHCPDDNS2) != "8.8.8.8" {
-		t.Errorf("dhcp dns mapping wrong: %v %v", conf.DHCPDDNS1, conf.DHCPDDNS2)
+	if derefStr(conf.DhcpdDns1) != "1.1.1.1" || derefStr(conf.DhcpdDns2) != "8.8.8.8" {
+		t.Errorf("dhcp dns mapping wrong: %v %v", conf.DhcpdDns1, conf.DhcpdDns2)
 	}
-	if conf.DHCPDDNSEnabled == nil || !*conf.DHCPDDNSEnabled {
-		t.Errorf("DHCPDDNSEnabled should be true when servers are set")
+	if conf.DhcpdDnsEnabled == nil || !*conf.DhcpdDnsEnabled {
+		t.Errorf("DhcpdDnsEnabled should be true when servers are set")
 	}
 
 	// No VLAN ID → vlan disabled explicitly (not left nil).
 	m.VLANID = types.Int64Null()
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.VLAN != nil || conf.VLANEnabled == nil || *conf.VLANEnabled {
-		t.Errorf("untagged network: VLAN=%v Enabled=%v, want nil/false", conf.VLAN, conf.VLANEnabled)
+	if conf.Vlan != nil || conf.VlanEnabled == nil || *conf.VlanEnabled {
+		t.Errorf("untagged network: VLAN=%v Enabled=%v, want nil/false", conf.Vlan, conf.VlanEnabled)
 	}
 
 	// Wire → state.
 	on := true
 	vid := 40
+	guestPurpose := wire.NetworkconfPurpose("guest")
 	var out networkResourceModel
-	out.fromNetworkConf(&unifi.NetworkConf{
-		ID: "net9", Name: "guests", Purpose: "guest", NetworkGroup: "LAN",
-		VLANEnabled: &on, VLAN: &vid, DHCPDDNS1: sp("9.9.9.9"),
+	out.fromNetworkConf(&wire.Networkconf{
+		UnderscoreId: sp("net9"), Name: sp("guests"), Purpose: &guestPurpose, Networkgroup: sp("LAN"),
+		VlanEnabled: &on, Vlan: &vid, DhcpdDns1: sp("9.9.9.9"),
 	})
 	if out.ID.ValueString() != "net9" || out.VLANID.ValueInt64() != 40 || out.NetworkGroup.ValueString() != "LAN" {
 		t.Errorf("fromNetworkConf wrong: %+v", out)
@@ -133,15 +134,15 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toNetworkConf diags: %v", diags)
 	}
-	if conf.Purpose != "wan" {
-		t.Errorf("purpose = %q, want wan", conf.Purpose)
+	if string(derefEnum(conf.Purpose)) != "wan" {
+		t.Errorf("purpose = %q, want wan", string(derefEnum(conf.Purpose)))
 	}
-	if conf.WANDNSPreference != "manual" || derefStr(conf.WANDNS1) != "1.1.1.1" || derefStr(conf.WANDNS2) != "8.8.8.8" {
-		t.Errorf("manual DNS mapping wrong: pref=%q dns1=%v dns2=%v", conf.WANDNSPreference, conf.WANDNS1, conf.WANDNS2)
+	if string(derefEnum(conf.WanDnsPreference)) != "manual" || derefStr(conf.WanDns1) != "1.1.1.1" || derefStr(conf.WanDns2) != "8.8.8.8" {
+		t.Errorf("manual DNS mapping wrong: pref=%q dns1=%v dns2=%v", string(derefEnum(conf.WanDnsPreference)), conf.WanDns1, conf.WanDns2)
 	}
-	if conf.WANProviderCapabilities == nil || conf.WANProviderCapabilities.UploadKilobitsPerSecond == nil ||
-		*conf.WANProviderCapabilities.UploadKilobitsPerSecond != 1000 {
-		t.Errorf("provider caps wrong: %+v", conf.WANProviderCapabilities)
+	if conf.WanProviderCapabilities == nil || conf.WanProviderCapabilities.UploadKilobitsPerSecond == nil ||
+		*conf.WanProviderCapabilities.UploadKilobitsPerSecond != 1000 {
+		t.Errorf("provider caps wrong: %+v", conf.WanProviderCapabilities)
 	}
 
 	// Narrowing the list to one server must explicitly clear the freed slot
@@ -149,16 +150,16 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	// leaving it — otherwise the controller echoes a perpetual extra server.
 	m.DNSServers = sliceToStringList([]string{"1.1.1.1"})
 	conf = m.toNetworkConf(ctx, &diags)
-	if derefStr(conf.WANDNS1) != "1.1.1.1" || conf.WANDNS2 == nil || *conf.WANDNS2 != "" {
-		t.Errorf("narrowed DNS must clear slot 2: dns1=%v dns2=%v", conf.WANDNS1, conf.WANDNS2)
+	if derefStr(conf.WanDns1) != "1.1.1.1" || conf.WanDns2 == nil || *conf.WanDns2 != "" {
+		t.Errorf("narrowed DNS must clear slot 2: dns1=%v dns2=%v", conf.WanDns1, conf.WanDns2)
 	}
 
 	// A null list (unconfigured) is left untouched — the controller keeps its
 	// own preference rather than being forced to auto.
 	m.DNSServers = sliceToStringList(nil)
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.WANDNSPreference != "" || conf.WANDNS1 != nil {
-		t.Errorf("null DNS must not touch the slots: pref=%q dns1=%v", conf.WANDNSPreference, conf.WANDNS1)
+	if conf.WanDnsPreference != nil || conf.WanDns1 != nil {
+		t.Errorf("null DNS must not touch the slots: pref=%v dns1=%v", conf.WanDnsPreference, conf.WanDns1)
 	}
 
 	// Only upload set: download must round-trip back to null (not 0), or the
@@ -166,8 +167,8 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	m.UploadKilobits = types.Int64Value(1000)
 	m.DownloadKilobits = types.Int64Null()
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.WANProviderCapabilities == nil || conf.WANProviderCapabilities.DownloadKilobitsPerSecond != nil {
-		t.Errorf("unset download must stay nil on the wire: %+v", conf.WANProviderCapabilities)
+	if conf.WanProviderCapabilities == nil || conf.WanProviderCapabilities.DownloadKilobitsPerSecond != nil {
+		t.Errorf("unset download must stay nil on the wire: %+v", conf.WanProviderCapabilities)
 	}
 	var out wanResourceModel
 	out.fromNetworkConf(conf)
@@ -267,15 +268,15 @@ func TestWAN_PPPoEStaticAndSecrets(t *testing.T) {
 		MACOverride: types.StringValue("02:00:00:00:00:01"),
 	}
 	conf := m.toNetworkConf(ctx, &diags)
-	if conf.WANUsername != "user@isp" || conf.XWANPassword != "s3cret" {
-		t.Errorf("pppoe creds wrong: %q / %q", conf.WANUsername, conf.XWANPassword)
+	if derefStr(conf.WanUsername) != "user@isp" || derefStr(conf.XWanPassword) != "s3cret" {
+		t.Errorf("pppoe creds wrong: %q / %q", derefStr(conf.WanUsername), derefStr(conf.XWanPassword))
 	}
-	if conf.WANPPPoEUsernameEnabled == nil || !*conf.WANPPPoEUsernameEnabled ||
-		conf.WANPPPoEPasswordEnabled == nil || !*conf.WANPPPoEPasswordEnabled {
+	if conf.WanPppoeUsernameEnabled == nil || !*conf.WanPppoeUsernameEnabled ||
+		conf.WanPppoePasswordEnabled == nil || !*conf.WanPppoePasswordEnabled {
 		t.Errorf("pppoe enable flags should be true when creds set")
 	}
-	if conf.MACOverride != "02:00:00:00:00:01" || conf.MACOverrideEnabled == nil || !*conf.MACOverrideEnabled {
-		t.Errorf("mac override should be enabled with value: %+v", conf.MACOverrideEnabled)
+	if derefStr(conf.MacOverride) != "02:00:00:00:00:01" || conf.MacOverrideEnabled == nil || !*conf.MacOverrideEnabled {
+		t.Errorf("mac override should be enabled with value: %+v", conf.MacOverrideEnabled)
 	}
 
 	// Static uplink fields.
@@ -285,13 +286,14 @@ func TestWAN_PPPoEStaticAndSecrets(t *testing.T) {
 		Gateway: types.StringValue("203.0.113.1"),
 	}
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.WANIP != "203.0.113.2" || conf.WANNetmask != "255.255.255.0" || conf.WANGateway != "203.0.113.1" {
+	if derefStr(conf.WanIp) != "203.0.113.2" || derefStr(conf.WanNetmask) != "255.255.255.0" || derefStr(conf.WanGateway) != "203.0.113.1" {
 		t.Errorf("static WAN mapping wrong: %+v", conf)
 	}
 
 	// Write-only password: a read that doesn't echo it must keep the prior value.
+	pppoeType := wire.NetworkconfWanType("pppoe")
 	out := wanResourceModel{PPPoEPassword: types.StringValue("keep-me")}
-	out.fromNetworkConf(&unifi.NetworkConf{Name: "wan", WANType: "pppoe", WANUsername: "u"})
+	out.fromNetworkConf(&wire.Networkconf{Name: sp("wan"), WanType: &pppoeType, WanUsername: sp("u")})
 	if out.PPPoEPassword.ValueString() != "keep-me" {
 		t.Errorf("write-only password should be preserved on read, got %q", out.PPPoEPassword.ValueString())
 	}
@@ -305,17 +307,17 @@ func TestNetwork_DHCPOptionsRoundTrip(t *testing.T) {
 		Name: types.StringValue("lan"), Purpose: types.StringValue("corporate"),
 		DHCPLeaseTime:  types.Int64Value(86400),
 		DHCPNTPEnabled: types.BoolValue(true), DHCPNTPServer1: types.StringValue("10.0.0.1"),
-		DHCPGuardEnabled: types.BoolValue(true), MDNSEnabled: types.BoolValue(true),
+		DHCPGuardEnabled: types.BoolValue(true),
 	}
 	conf := m.toNetworkConf(ctx, &diags)
-	if conf.DHCPDLeaseTime == nil || *conf.DHCPDLeaseTime != 86400 {
-		t.Errorf("lease time wrong: %v", conf.DHCPDLeaseTime)
+	if conf.DhcpdLeasetime == nil || *conf.DhcpdLeasetime != 86400 {
+		t.Errorf("lease time wrong: %v", conf.DhcpdLeasetime)
 	}
-	if conf.DHCPDNTPEnabled == nil || !*conf.DHCPDNTPEnabled || conf.DHCPDNTP1 != "10.0.0.1" {
-		t.Errorf("dhcp ntp wrong: %v / %q", conf.DHCPDNTPEnabled, conf.DHCPDNTP1)
+	if conf.DhcpdNtpEnabled == nil || !*conf.DhcpdNtpEnabled || derefStr(conf.DhcpdNtp1) != "10.0.0.1" {
+		t.Errorf("dhcp ntp wrong: %v / %q", conf.DhcpdNtpEnabled, derefStr(conf.DhcpdNtp1))
 	}
-	if conf.DHCPGuardEnabled == nil || !*conf.DHCPGuardEnabled || conf.MDNSEnabled == nil || !*conf.MDNSEnabled {
-		t.Errorf("guard/mdns flags wrong")
+	if conf.DhcpguardEnabled == nil || !*conf.DhcpguardEnabled {
+		t.Errorf("guard flag wrong")
 	}
 
 	var out networkResourceModel

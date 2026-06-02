@@ -33,7 +33,6 @@ resource "unifi_network_network" "main" {
   dhcp_dns     = ["1.1.1.1", "1.0.0.1"]
 
   igmp_snooping = true
-  mdns_enabled  = true
 }
 
 # Guest network on VLAN 40: internet-only, isolated from the main LAN, with its
@@ -65,6 +64,5 @@ resource "unifi_network_network" "iot" {
   dhcp_stop    = "192.168.50.254"
   dhcp_dns     = ["1.1.1.1"]
 
-  igmp_snooping = true # many IoT devices rely on mDNS/multicast discovery
-  mdns_enabled  = true
+  igmp_snooping = true # many IoT devices rely on multicast discovery
 }

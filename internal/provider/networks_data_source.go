@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 func NewNetworksDataSource() datasource.DataSource { return &networksDataSource{} }
 
 type networksDataSource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type networkSummaryModel struct {
@@ -60,12 +60,12 @@ func (d *networksDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 
 func (d *networksDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		d.client = c
+		d.net = c.Network()
 	}
 }
 
 func (d *networksDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
-	all, err := d.client.ListNetworks(ctx)
+	all, err := d.net.Networks().List(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to list networks", err.Error())
 		return
@@ -74,14 +74,14 @@ func (d *networksDataSource) Read(ctx context.Context, _ datasource.ReadRequest,
 	for i := range all {
 		n := all[i]
 		sum := networkSummaryModel{
-			ID:      types.StringValue(n.ID),
-			Name:    types.StringValue(n.Name),
-			Purpose: types.StringValue(n.Purpose),
-			Subnet:  strToStateOptional(n.IPSubnet),
+			ID:      types.StringValue(deref(n.UnderscoreId)),
+			Name:    types.StringValue(deref(n.Name)),
+			Purpose: types.StringValue(string(derefEnum(n.Purpose))),
+			Subnet:  strToStateOptional(deref(n.IpSubnet)),
 			VLANID:  types.Int64Null(),
 		}
-		if n.VLANEnabled != nil && *n.VLANEnabled && n.VLAN != nil {
-			sum.VLANID = types.Int64Value(int64(*n.VLAN))
+		if n.VlanEnabled != nil && *n.VlanEnabled && n.Vlan != nil {
+			sum.VLANID = types.Int64Value(int64(*n.Vlan))
 		}
 		model.Networks = append(model.Networks, sum)
 	}

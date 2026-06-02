@@ -15,7 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -27,7 +28,7 @@ var (
 func NewNetworkResource() resource.Resource { return &networkResource{} }
 
 type networkResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 // networkResourceModel covers the full LAN/VLAN/guest networkconf surface.
@@ -48,7 +49,6 @@ type networkResourceModel struct {
 	NATEnabled            types.Bool   `tfsdk:"nat_enabled"`             // NAT the subnet (is_nat)
 	InternetAccessEnabled types.Bool   `tfsdk:"internet_access_enabled"` // allow internet egress
 	IGMPSnooping          types.Bool   `tfsdk:"igmp_snooping"`           // IGMP snooping (multicast pruning)
-	MDNSEnabled           types.Bool   `tfsdk:"mdns_enabled"`            // mDNS/Bonjour reflection
 	UPNPEnabled           types.Bool   `tfsdk:"upnp_enabled"`            // UPnP IGD on this LAN
 	DHCPGuardEnabled      types.Bool   `tfsdk:"dhcp_guard_enabled"`      // block rogue DHCP servers
 	AutoScaleEnabled      types.Bool   `tfsdk:"auto_scale_enabled"`      // auto-grow the subnet
@@ -139,7 +139,6 @@ func (r *networkResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"nat_enabled":             optBool("Whether the network is NATed (`is_nat`)."),
 			"internet_access_enabled": optBool("Whether clients on this network may reach the internet."),
 			"igmp_snooping":           optBool("Whether IGMP snooping is enabled."),
-			"mdns_enabled":            optBool("Whether multicast DNS (mDNS) reflection is enabled."),
 			"upnp_enabled":            optBool("Whether UPnP is enabled on this LAN."),
 			"dhcp_guard_enabled":      optBool("Whether rogue-DHCP guarding is enabled."),
 			"auto_scale_enabled":      optBool("Whether the subnet auto-scales."),
@@ -196,7 +195,7 @@ func (r *networkResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 
 func (r *networkResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -210,7 +209,7 @@ func (r *networkResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateNetwork(ctx, conf)
+	created, err := r.net.Networks().Create(ctx, conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create network", err.Error())
 		return
@@ -225,7 +224,7 @@ func (r *networkResource) Read(ctx context.Context, req resource.ReadRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	conf, err := r.client.GetNetwork(ctx, state.ID.ValueString())
+	conf, err := r.net.Networks().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -248,7 +247,7 @@ func (r *networkResource) Update(ctx context.Context, req resource.UpdateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateNetwork(ctx, conf)
+	updated, err := r.net.Networks().Update(ctx, conf)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update network", err.Error())
 		return
@@ -263,7 +262,7 @@ func (r *networkResource) Delete(ctx context.Context, req resource.DeleteRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteNetwork(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.Networks().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete network", err.Error())
 	}
 }
@@ -272,66 +271,65 @@ func (r *networkResource) ImportState(ctx context.Context, req resource.ImportSt
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *networkResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *unifi.NetworkConf {
-	conf := &unifi.NetworkConf{
-		ID:                    m.ID.ValueString(),
-		Name:                  m.Name.ValueString(),
-		Purpose:               strOrEmpty(m.Purpose),
+func (m *networkResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *wire.Networkconf {
+	conf := &wire.Networkconf{
+		UnderscoreId:          strPtrOrNil(m.ID),
+		Name:                  strPtrOrNil(m.Name),
+		Purpose:               (*wire.NetworkconfPurpose)(strPtrOrNil(m.Purpose)),
 		Enabled:               boolPtr(m.Enabled),
-		IPSubnet:              strOrEmpty(m.Subnet),
-		DomainName:            strOrEmpty(m.DomainName),
-		IsNAT:                 boolPtr(m.NATEnabled),
+		IpSubnet:              strPtrOrNil(m.Subnet),
+		DomainName:            strPtrOrNil(m.DomainName),
+		IsNat:                 boolPtr(m.NATEnabled),
 		InternetAccessEnabled: boolPtr(m.InternetAccessEnabled),
-		IGMPSnooping:          boolPtr(m.IGMPSnooping),
-		MDNSEnabled:           boolPtr(m.MDNSEnabled),
-		UPNPLANEnabled:        boolPtr(m.UPNPEnabled),
-		DHCPGuardEnabled:      boolPtr(m.DHCPGuardEnabled),
+		IgmpSnooping:          boolPtr(m.IGMPSnooping),
+		UpnpLanEnabled:        boolPtr(m.UPNPEnabled),
+		DhcpguardEnabled:      boolPtr(m.DHCPGuardEnabled),
 		AutoScaleEnabled:      boolPtr(m.AutoScaleEnabled),
-		LTELANEnabled:         boolPtr(m.LTEFailoverEnabled),
+		LteLanEnabled:         boolPtr(m.LTEFailoverEnabled),
 
-		DHCPDEnabled:           boolPtr(m.DHCPEnabled),
-		DHCPDStart:             strOrEmpty(m.DHCPStart),
-		DHCPDStop:              strOrEmpty(m.DHCPStop),
-		DHCPDLeaseTime:         intPtr(m.DHCPLeaseTime),
-		DHCPDGatewayEnabled:    boolPtr(m.DHCPGatewayEnabled),
-		DHCPDGateway:           strOrEmpty(m.DHCPGateway),
-		DHCPDNTPEnabled:        boolPtr(m.DHCPNTPEnabled),
-		DHCPDNTP1:              strOrEmpty(m.DHCPNTPServer1),
-		DHCPDNTP2:              strOrEmpty(m.DHCPNTPServer2),
-		DHCPDWINSEnabled:       boolPtr(m.DHCPWINSEnabled),
-		DHCPDWINS1:             strOrEmpty(m.DHCPWINSServer1),
-		DHCPDWINS2:             strOrEmpty(m.DHCPWINSServer2),
-		DHCPDTFTPServer:        strOrEmpty(m.DHCPTFTPServer),
-		DHCPDBootEnabled:       boolPtr(m.DHCPBootEnabled),
-		DHCPDBootServer:        strOrEmpty(m.DHCPBootServer),
-		DHCPDBootFilename:      strOrEmpty(m.DHCPBootFilename),
-		DHCPDUnifiController:   strOrEmpty(m.DHCPUnifiController),
-		DHCPDConflictChecking:  boolPtr(m.DHCPConflictChecking),
-		DHCPDTimeOffsetEnabled: boolPtr(m.DHCPTimeOffsetEnabled),
-		DHCPDWPADURL:           strOrEmpty(m.DHCPWPADURL),
-		DHCPRelayEnabled:       boolPtr(m.DHCPRelayEnabled),
+		DhcpdEnabled:           boolPtr(m.DHCPEnabled),
+		DhcpdStart:             strPtrOrNil(m.DHCPStart),
+		DhcpdStop:              strPtrOrNil(m.DHCPStop),
+		DhcpdLeasetime:         intPtr(m.DHCPLeaseTime),
+		DhcpdGatewayEnabled:    boolPtr(m.DHCPGatewayEnabled),
+		DhcpdGateway:           strPtrOrNil(m.DHCPGateway),
+		DhcpdNtpEnabled:        boolPtr(m.DHCPNTPEnabled),
+		DhcpdNtp1:              strPtrOrNil(m.DHCPNTPServer1),
+		DhcpdNtp2:              strPtrOrNil(m.DHCPNTPServer2),
+		DhcpdWinsEnabled:       boolPtr(m.DHCPWINSEnabled),
+		DhcpdWins1:             strPtrOrNil(m.DHCPWINSServer1),
+		DhcpdWins2:             strPtrOrNil(m.DHCPWINSServer2),
+		DhcpdTftpServer:        strPtrOrNil(m.DHCPTFTPServer),
+		DhcpdBootEnabled:       boolPtr(m.DHCPBootEnabled),
+		DhcpdBootServer:        strPtrOrNil(m.DHCPBootServer),
+		DhcpdBootFilename:      strPtrOrNil(m.DHCPBootFilename),
+		DhcpdUnifiController:   strPtrOrNil(m.DHCPUnifiController),
+		DhcpdConflictChecking:  boolPtr(m.DHCPConflictChecking),
+		DhcpdTimeOffsetEnabled: boolPtr(m.DHCPTimeOffsetEnabled),
+		DhcpdWpadUrl:           strPtrOrNil(m.DHCPWPADURL),
+		DhcpRelayEnabled:       boolPtr(m.DHCPRelayEnabled),
 
-		IPv6InterfaceType:           strOrEmpty(m.IPv6InterfaceType),
-		IPv6RAEnabled:               boolPtr(m.IPv6RAEnabled),
-		IPv6RAPriority:              strOrEmpty(m.IPv6RAPriority),
-		IPv6RAPreferredLifetime:     intPtr(m.IPv6RAPreferredLifetime),
-		IPv6PDStart:                 strOrEmpty(m.IPv6PDStart),
-		IPv6PDStop:                  strOrEmpty(m.IPv6PDStop),
-		IPv6ClientAddressAssignment: strOrEmpty(m.IPv6ClientAddressAssignment),
-		DHCPDv6DNSAuto:              boolPtr(m.DHCPv6DNSAuto),
-		DHCPDv6LeaseTime:            intPtr(m.DHCPv6LeaseTime),
-		DHCPDv6Start:                strOrEmpty(m.DHCPv6Start),
-		DHCPDv6Stop:                 strOrEmpty(m.DHCPv6Stop),
+		Ipv6InterfaceType:           (*wire.NetworkconfIpv6InterfaceType)(strPtrOrNil(m.IPv6InterfaceType)),
+		Ipv6RaEnabled:               boolPtr(m.IPv6RAEnabled),
+		Ipv6RaPriority:              (*wire.NetworkconfIpv6RaPriority)(strPtrOrNil(m.IPv6RAPriority)),
+		Ipv6RaPreferredLifetime:     intPtr(m.IPv6RAPreferredLifetime),
+		Ipv6PdStart:                 strPtrOrNil(m.IPv6PDStart),
+		Ipv6PdStop:                  strPtrOrNil(m.IPv6PDStop),
+		Ipv6ClientAddressAssignment: (*wire.NetworkconfIpv6ClientAddressAssignment)(strPtrOrNil(m.IPv6ClientAddressAssignment)),
+		Dhcpdv6DnsAuto:              boolPtr(m.DHCPv6DNSAuto),
+		Dhcpdv6Leasetime:            intPtr(m.DHCPv6LeaseTime),
+		Dhcpdv6Start:                strPtrOrNil(m.DHCPv6Start),
+		Dhcpdv6Stop:                 strPtrOrNil(m.DHCPv6Stop),
 	}
 
 	if !m.VLANID.IsNull() && !m.VLANID.IsUnknown() {
 		v := int(m.VLANID.ValueInt64())
-		conf.VLAN = &v
+		conf.Vlan = &v
 		enabled := true
-		conf.VLANEnabled = &enabled
+		conf.VlanEnabled = &enabled
 	} else {
 		disabled := false
-		conf.VLANEnabled = &disabled
+		conf.VlanEnabled = &disabled
 	}
 
 	// Only touch the DHCP DNS slots when the list is configured. When set, write
@@ -340,74 +338,73 @@ func (m *networkResourceModel) toNetworkConf(ctx context.Context, diags *diag.Di
 	if !m.DHCPDNS.IsNull() && !m.DHCPDNS.IsUnknown() {
 		dns := stringListToSlice(ctx, m.DHCPDNS, diags)
 		enabled := len(dns) > 0
-		conf.DHCPDDNSEnabled = &enabled
-		conf.DHCPDDNS1 = dnsSlotPtr(dns, 0)
-		conf.DHCPDDNS2 = dnsSlotPtr(dns, 1)
-		conf.DHCPDDNS3 = dnsSlotPtr(dns, 2)
-		conf.DHCPDDNS4 = dnsSlotPtr(dns, 3)
+		conf.DhcpdDnsEnabled = &enabled
+		conf.DhcpdDns1 = dnsSlotPtr(dns, 0)
+		conf.DhcpdDns2 = dnsSlotPtr(dns, 1)
+		conf.DhcpdDns3 = dnsSlotPtr(dns, 2)
+		conf.DhcpdDns4 = dnsSlotPtr(dns, 3)
 	}
 	return conf
 }
 
-func (m *networkResourceModel) fromNetworkConf(conf *unifi.NetworkConf) {
-	m.ID = types.StringValue(conf.ID)
-	m.Name = types.StringValue(conf.Name)
-	m.Purpose = types.StringValue(conf.Purpose)
-	m.NetworkGroup = types.StringValue(conf.NetworkGroup)
-	m.SettingPreference = types.StringValue(conf.SettingPreference)
-	m.GatewayType = types.StringValue(conf.GatewayType)
+func (m *networkResourceModel) fromNetworkConf(conf *wire.Networkconf) {
+	m.ID = types.StringValue(deref(conf.UnderscoreId))
+	m.Name = types.StringValue(deref(conf.Name))
+	m.Purpose = types.StringValue(string(derefEnum(conf.Purpose)))
+	m.NetworkGroup = types.StringValue(deref(conf.Networkgroup))
+	m.SettingPreference = types.StringValue(string(derefEnum(conf.SettingPreference)))
+	m.GatewayType = types.StringValue(string(derefEnum(conf.GatewayType)))
 	m.Enabled = boolToState(conf.Enabled)
 
-	m.Subnet = types.StringValue(conf.IPSubnet)
-	m.DomainName = types.StringValue(conf.DomainName)
-	m.NATEnabled = boolToState(conf.IsNAT)
+	m.Subnet = types.StringValue(deref(conf.IpSubnet))
+	m.DomainName = types.StringValue(deref(conf.DomainName))
+	m.NATEnabled = boolToState(conf.IsNat)
 	m.InternetAccessEnabled = boolToState(conf.InternetAccessEnabled)
-	m.IGMPSnooping = boolToState(conf.IGMPSnooping)
-	m.MDNSEnabled = boolToState(conf.MDNSEnabled)
-	m.UPNPEnabled = boolToState(conf.UPNPLANEnabled)
-	m.DHCPGuardEnabled = boolToState(conf.DHCPGuardEnabled)
+	m.IGMPSnooping = boolToState(conf.IgmpSnooping)
+	m.UPNPEnabled = boolToState(conf.UpnpLanEnabled)
+	m.DHCPGuardEnabled = boolToState(conf.DhcpguardEnabled)
 	m.AutoScaleEnabled = boolToState(conf.AutoScaleEnabled)
-	m.LTEFailoverEnabled = boolToState(conf.LTELANEnabled)
+	m.LTEFailoverEnabled = boolToState(conf.LteLanEnabled)
 
-	m.DHCPEnabled = boolToState(conf.DHCPDEnabled)
-	m.DHCPStart = types.StringValue(conf.DHCPDStart)
-	m.DHCPStop = types.StringValue(conf.DHCPDStop)
-	m.DHCPLeaseTime = intToState(conf.DHCPDLeaseTime)
-	m.DHCPGatewayEnabled = boolToState(conf.DHCPDGatewayEnabled)
-	m.DHCPGateway = types.StringValue(conf.DHCPDGateway)
-	m.DHCPNTPEnabled = boolToState(conf.DHCPDNTPEnabled)
-	m.DHCPNTPServer1 = types.StringValue(conf.DHCPDNTP1)
-	m.DHCPNTPServer2 = types.StringValue(conf.DHCPDNTP2)
-	m.DHCPWINSEnabled = boolToState(conf.DHCPDWINSEnabled)
-	m.DHCPWINSServer1 = types.StringValue(conf.DHCPDWINS1)
-	m.DHCPWINSServer2 = types.StringValue(conf.DHCPDWINS2)
-	m.DHCPTFTPServer = types.StringValue(conf.DHCPDTFTPServer)
-	m.DHCPBootEnabled = boolToState(conf.DHCPDBootEnabled)
-	m.DHCPBootServer = types.StringValue(conf.DHCPDBootServer)
-	m.DHCPBootFilename = types.StringValue(conf.DHCPDBootFilename)
-	m.DHCPUnifiController = types.StringValue(conf.DHCPDUnifiController)
-	m.DHCPConflictChecking = boolToState(conf.DHCPDConflictChecking)
-	m.DHCPTimeOffsetEnabled = boolToState(conf.DHCPDTimeOffsetEnabled)
-	m.DHCPWPADURL = types.StringValue(conf.DHCPDWPADURL)
-	m.DHCPRelayEnabled = boolToState(conf.DHCPRelayEnabled)
+	m.DHCPEnabled = boolToState(conf.DhcpdEnabled)
+	m.DHCPStart = types.StringValue(deref(conf.DhcpdStart))
+	m.DHCPStop = types.StringValue(deref(conf.DhcpdStop))
+	m.DHCPLeaseTime = intToState(conf.DhcpdLeasetime)
+	m.DHCPGatewayEnabled = boolToState(conf.DhcpdGatewayEnabled)
+	m.DHCPGateway = types.StringValue(deref(conf.DhcpdGateway))
+	m.DHCPNTPEnabled = boolToState(conf.DhcpdNtpEnabled)
+	m.DHCPNTPServer1 = types.StringValue(deref(conf.DhcpdNtp1))
+	m.DHCPNTPServer2 = types.StringValue(deref(conf.DhcpdNtp2))
+	m.DHCPWINSEnabled = boolToState(conf.DhcpdWinsEnabled)
+	m.DHCPWINSServer1 = types.StringValue(deref(conf.DhcpdWins1))
+	m.DHCPWINSServer2 = types.StringValue(deref(conf.DhcpdWins2))
+	m.DHCPTFTPServer = types.StringValue(deref(conf.DhcpdTftpServer))
+	m.DHCPBootEnabled = boolToState(conf.DhcpdBootEnabled)
+	m.DHCPBootServer = types.StringValue(deref(conf.DhcpdBootServer))
+	m.DHCPBootFilename = types.StringValue(deref(conf.DhcpdBootFilename))
+	m.DHCPUnifiController = types.StringValue(deref(conf.DhcpdUnifiController))
+	m.DHCPConflictChecking = boolToState(conf.DhcpdConflictChecking)
+	m.DHCPTimeOffsetEnabled = boolToState(conf.DhcpdTimeOffsetEnabled)
+	m.DHCPWPADURL = types.StringValue(deref(conf.DhcpdWpadUrl))
+	m.DHCPRelayEnabled = boolToState(conf.DhcpRelayEnabled)
 
-	m.IPv6InterfaceType = types.StringValue(conf.IPv6InterfaceType)
-	m.IPv6RAEnabled = boolToState(conf.IPv6RAEnabled)
-	m.IPv6RAPriority = types.StringValue(conf.IPv6RAPriority)
-	m.IPv6RAPreferredLifetime = intToState(conf.IPv6RAPreferredLifetime)
-	m.IPv6PDStart = types.StringValue(conf.IPv6PDStart)
-	m.IPv6PDStop = types.StringValue(conf.IPv6PDStop)
-	m.IPv6ClientAddressAssignment = types.StringValue(conf.IPv6ClientAddressAssignment)
-	m.DHCPv6DNSAuto = boolToState(conf.DHCPDv6DNSAuto)
-	m.DHCPv6LeaseTime = intToState(conf.DHCPDv6LeaseTime)
-	m.DHCPv6Start = types.StringValue(conf.DHCPDv6Start)
-	m.DHCPv6Stop = types.StringValue(conf.DHCPDv6Stop)
+	m.IPv6InterfaceType = types.StringValue(string(derefEnum(conf.Ipv6InterfaceType)))
+	m.IPv6RAEnabled = boolToState(conf.Ipv6RaEnabled)
+	m.IPv6RAPriority = types.StringValue(string(derefEnum(conf.Ipv6RaPriority)))
+	m.IPv6RAPreferredLifetime = intToState(conf.Ipv6RaPreferredLifetime)
+	m.IPv6PDStart = types.StringValue(deref(conf.Ipv6PdStart))
+	m.IPv6PDStop = types.StringValue(deref(conf.Ipv6PdStop))
+	m.IPv6ClientAddressAssignment = types.StringValue(string(derefEnum(conf.Ipv6ClientAddressAssignment)))
+	m.DHCPv6DNSAuto = boolToState(conf.Dhcpdv6DnsAuto)
+	m.DHCPv6LeaseTime = intToState(conf.Dhcpdv6Leasetime)
+	m.DHCPv6Start = types.StringValue(deref(conf.Dhcpdv6Start))
+	m.DHCPv6Stop = types.StringValue(deref(conf.Dhcpdv6Stop))
 
-	if conf.VLANEnabled != nil && *conf.VLANEnabled && conf.VLAN != nil {
-		m.VLANID = types.Int64Value(int64(*conf.VLAN))
+	if conf.VlanEnabled != nil && *conf.VlanEnabled && conf.Vlan != nil {
+		m.VLANID = types.Int64Value(int64(*conf.Vlan))
 	} else {
 		m.VLANID = types.Int64Null()
 	}
 
-	m.DHCPDNS = sliceToStringList(dnsSlots(conf.DHCPDDNS1, conf.DHCPDDNS2, conf.DHCPDDNS3, conf.DHCPDDNS4))
+	m.DHCPDNS = sliceToStringList(dnsSlots(conf.DhcpdDns1, conf.DhcpdDns2, conf.DhcpdDns3, conf.DhcpdDns4))
 }

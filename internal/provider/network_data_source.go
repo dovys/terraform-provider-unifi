@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -19,7 +20,7 @@ var (
 func NewNetworkDataSource() datasource.DataSource { return &networkDataSource{} }
 
 type networkDataSource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type networkDataSourceModel struct {
@@ -59,7 +60,7 @@ func (d *networkDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 
 func (d *networkDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		d.client = c
+		d.net = c.Network()
 	}
 }
 
@@ -76,22 +77,22 @@ func (d *networkDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	var found *unifi.NetworkConf
+	var found *wire.Networkconf
 	if id != "" {
-		n, err := d.client.GetNetwork(ctx, id)
+		n, err := d.net.Networks().Get(ctx, id)
 		if err != nil {
 			resp.Diagnostics.AddError("Failed to read network", err.Error())
 			return
 		}
 		found = n
 	} else {
-		all, err := d.client.ListNetworks(ctx)
+		all, err := d.net.Networks().List(ctx)
 		if err != nil {
 			resp.Diagnostics.AddError("Failed to list networks", err.Error())
 			return
 		}
 		for i := range all {
-			if all[i].Name == name {
+			if deref(all[i].Name) == name {
 				found = &all[i]
 				break
 			}
@@ -102,13 +103,13 @@ func (d *networkDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		}
 	}
 
-	cfg.ID = types.StringValue(found.ID)
-	cfg.Name = types.StringValue(found.Name)
-	cfg.Purpose = types.StringValue(found.Purpose)
-	cfg.Subnet = strToStateOptional(found.IPSubnet)
-	cfg.NetworkGroup = types.StringValue(found.NetworkGroup)
-	if found.VLANEnabled != nil && *found.VLANEnabled && found.VLAN != nil {
-		cfg.VLANID = types.Int64Value(int64(*found.VLAN))
+	cfg.ID = types.StringValue(deref(found.UnderscoreId))
+	cfg.Name = types.StringValue(deref(found.Name))
+	cfg.Purpose = types.StringValue(string(derefEnum(found.Purpose)))
+	cfg.Subnet = strToStateOptional(deref(found.IpSubnet))
+	cfg.NetworkGroup = types.StringValue(deref(found.Networkgroup))
+	if found.VlanEnabled != nil && *found.VlanEnabled && found.Vlan != nil {
+		cfg.VLANID = types.Int64Value(int64(*found.Vlan))
 	} else {
 		cfg.VLANID = types.Int64Null()
 	}
