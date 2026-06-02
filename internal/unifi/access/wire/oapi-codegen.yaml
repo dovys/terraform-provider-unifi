@@ -1,0 +1,11 @@
+# oapi-codegen config for `go generate` (see gen.go).
+#
+# Types only: models + enum constants. Operations and the ergonomic substruct
+# client are hand-written in the parent `access` package. skip-prune keeps every
+# modeled object's type available for the facade to pick from.
+package: wire
+output: types.gen.go
+generate:
+  models: true
+output-options:
+  skip-prune: true

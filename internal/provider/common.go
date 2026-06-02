@@ -10,17 +10,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/access"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/protect"
 )
 
 // isNotFoundErr reports whether err is a client not-found sentinel, so Read can
 // remove the resource from state (invariant 5: remove-on-404). It matches the
-// console client and both substruct clients (Network, Protect).
+// console client and every substruct client (Network, Protect, Access) — each
+// exposes its own distinct ErrNotFound, so all must be listed here.
 func isNotFoundErr(err error) bool {
 	return errors.Is(err, unifi.ErrNotFound) ||
 		errors.Is(err, network.ErrNotFound) ||
-		errors.Is(err, protect.ErrNotFound)
+		errors.Is(err, protect.ErrNotFound) ||
+		errors.Is(err, access.ErrNotFound)
 }
 
 // clientFromProviderData extracts the configured unifi.Client from the value the
@@ -75,6 +78,13 @@ func intToState(p *int) types.Int64 {
 		return types.Int64Null()
 	}
 	return types.Int64Value(int64(*p))
+}
+
+func int64PtrToState(p *int64) types.Int64 {
+	if p == nil {
+		return types.Int64Null()
+	}
+	return types.Int64Value(*p)
 }
 
 // float64ToState bridges the Protect wire types, which model integer-valued

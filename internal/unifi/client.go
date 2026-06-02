@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/access"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/protect"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/transport"
@@ -51,6 +52,12 @@ type Client interface {
 	// over the private REST API at /proxy/protect/api — the same one cookie
 	// session, no api_key.
 	Protect() *protect.Client
+
+	// Access returns the substruct Access application client
+	// (c.Access().DoorGroups()…). It shares this client's authenticated session
+	// over the private web-UI API at /proxy/access/api — the same one cookie
+	// session, no api_key. Access is console-global (not site-scoped).
+	Access() *access.Client
 
 	// Sites (console-level: /api/self/sites read, /cmd/sitemgr writes).
 	ListSites(ctx context.Context) ([]Site, error)
@@ -115,6 +122,10 @@ func (c *client) Network() *network.Client { return network.New(c.classic, c.cfg
 // Protect builds the substruct Protect client over this client's authenticated
 // classic session — the private REST API at /proxy/protect/api, no api_key.
 func (c *client) Protect() *protect.Client { return protect.New(c.classic) }
+
+// Access builds the substruct Access client over this client's authenticated
+// classic session — the private web-UI API at /proxy/access/api, no api_key.
+func (c *client) Access() *access.Client { return access.New(c.classic) }
 
 func newHTTPClient(cfg Config) *http.Client {
 	timeout := cfg.Timeout
