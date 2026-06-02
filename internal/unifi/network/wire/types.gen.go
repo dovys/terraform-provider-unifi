@@ -658,6 +658,1284 @@ func (e ApiUcoreDevicesUpdateAllErrorCode) Valid() bool {
 	}
 }
 
+// Defines values for ApiUcoreFabricConfigSiteConfigsContentFilterCategories.
+const (
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesADULT                   ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ADULT"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesADVERTISEMENT           ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ADVERTISEMENT"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesALCOHOL                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ALCOHOL"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesANONYMIZERS             ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ANONYMIZERS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesAPIS                    ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "APIS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesART                     ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ART"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesARTIFICIALINTELLIGENCE  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ARTIFICIAL_INTELLIGENCE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesARTSANDCRAFTS           ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ARTS_AND_CRAFTS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesASTROLOGY               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ASTROLOGY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesAUCTIONSANDMARKETPLACES ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "AUCTIONS_AND_MARKETPLACES"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesAUDIOSTREAMING          ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "AUDIO_STREAMING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesBLOGS                   ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "BLOGS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesBODYART                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "BODY_ART"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesBOTNETS                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "BOTNETS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesBUSINESS                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "BUSINESS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCARTOONSANDANIME        ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "CARTOONS_AND_ANIME"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCHAT                    ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "CHAT"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCHILDABUSE              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "CHILD_ABUSE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCIPA                    ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "CIPA"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCLOTHING                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "CLOTHING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCOMICBOOKS              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "COMIC_BOOKS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCOUNTERFEITBRANDS       ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "COUNTERFEIT_BRANDS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCOUPONS                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "COUPONS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCRYPTOCURRENCY          ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "CRYPTOCURRENCY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCRYPTOMINING            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "CRYPTOMINING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDATINGANDRELATIONSHIPS  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "DATING_AND_RELATIONSHIPS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDECEPTIVEADS            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "DECEPTIVE_ADS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDGADOMAINS              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "DGA_DOMAINS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDIGITALPOSTCARDS        ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "DIGITAL_POSTCARDS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDIGITALSAFETY           ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "DIGITAL_SAFETY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDNSTUNNELING            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "DNS_TUNNELING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDRUGS                   ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "DRUGS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesECOMMERCE               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ECOMMERCE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesECONOMYANDFINANCE       ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ECONOMY_AND_FINANCE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesEDUCATION               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "EDUCATION"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesEDUCATIONALINSTITUTIONS ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "EDUCATIONAL_INSTITUTIONS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesEMPTYDOMAINS            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "EMPTY_DOMAINS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesENTERTAINMENT           ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "ENTERTAINMENT"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFAMILY                  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "FAMILY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFASHION                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "FASHION"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFILESHARING             ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "FILE_SHARING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFINEARTS                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "FINE_ARTS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFOODANDDRINK            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "FOOD_AND_DRINK"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFORUMS                  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "FORUMS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesGAMBLING                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "GAMBLING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesGAMING                  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "GAMING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesGOVERNMENT              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "GOVERNMENT"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHACKING                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "HACKING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHATESPEECHANDEXTREMISM  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "HATE_SPEECH_AND_EXTREMISM"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHEALTHANDFITNESS        ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "HEALTH_AND_FITNESS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHOBBIESANDINTERESTS     ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "HOBBIES_AND_INTERESTS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHOMEANDGARDEN           ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "HOME_AND_GARDEN"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHOMEVIDEO               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "HOME_VIDEO"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHUMOR                   ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "HUMOR"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesINCLUSION               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "INCLUSION"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesINSTANTMESSENGERS       ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "INSTANT_MESSENGERS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesINTERNETCALLINGANDVOIP  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "INTERNET_CALLING_AND_VOIP"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesITSERVICES              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "IT_SERVICES"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesJOBSEARCHANDCAREERS     ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "JOB_SEARCH_AND_CAREERS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesLIFESTYLE               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "LIFESTYLE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesLINGERIEANDBIKINI       ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "LINGERIE_AND_BIKINI"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesLOGINSCREENS            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "LOGIN_SCREENS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMAGAZINES               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "MAGAZINES"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMALWARE                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "MALWARE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMEDIAANDFILEHOSTING     ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "MEDIA_AND_FILE_HOSTING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMESSAGING               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "MESSAGING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMISCELLANEOUS           ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "MISCELLANEOUS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMOVIES                  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "MOVIES"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMUSIC                   ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "MUSIC"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesNEWLYDISCOVEREDDOMAINS  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "NEWLY_DISCOVERED_DOMAINS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesNEWLYREGISTEREDDOMAINS  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "NEWLY_REGISTERED_DOMAINS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesNEWSANDMEDIA            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "NEWS_AND_MEDIA"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesNUDITY                  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "NUDITY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPARANORMAL              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PARANORMAL"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPARENTING               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PARENTING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPARKEDDOMAINS           ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PARKED_DOMAINS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPEERTOPEER              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PEER_TO_PEER"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPETS                    ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PETS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPHISHING                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PHISHING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPHOTOGRAPHY             ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PHOTOGRAPHY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPHOTOSHARING            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PHOTO_SHARING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPOLITICS                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "POLITICS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPORNOGRAPHY             ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PORNOGRAPHY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPORTALS                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PORTALS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPRIVATEIPADDRESSES      ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PRIVATE_IP_ADDRESSES"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPROFANITY               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PROFANITY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPROFESSIONALNETWORKING  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "PROFESSIONAL_NETWORKING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesQUESTIONABLEACTIVITIES  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "QUESTIONABLE_ACTIVITIES"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesRADIO                   ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "RADIO"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesREALESTATE              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "REAL_ESTATE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesREDIRECTORS             ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "REDIRECTORS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesRELIGION                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "RELIGION"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSAFEFORKIDS             ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SAFE_FOR_KIDS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSCIENCE                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SCIENCE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSEARCHENGINES           ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SEARCH_ENGINES"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSEXEDUCATION            ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SEX_EDUCATION"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSEXUALITY               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SEXUALITY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSHOPPING                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SHOPPING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSOCIALNETWORKS          ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SOCIAL_NETWORKS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSPACEANDASTRONOMY       ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SPACE_AND_ASTRONOMY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSPAM                    ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SPAM"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSPORTS                  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SPORTS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSPYWARE                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SPYWARE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSWIMSUITS               ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "SWIMSUITS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTECHNOLOGY              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "TECHNOLOGY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTELEVISION              ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "TELEVISION"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTOBACCO                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "TOBACCO"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTRANSLATORS             ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "TRANSLATORS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTRAVEL                  ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "TRAVEL"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesUNREACHABLEDOMAINS      ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "UNREACHABLE_DOMAINS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesUNRELIABLEINFORMATION   ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "UNRELIABLE_INFORMATION"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesVEHICLES                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "VEHICLES"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesVIDEOSTREAMING          ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "VIDEO_STREAMING"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesVIOLENCE                ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "VIOLENCE"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesWEAPONS                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "WEAPONS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesWEATHER                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "WEATHER"
+	ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesWEBMAIL                 ApiUcoreFabricConfigSiteConfigsContentFilterCategories = "WEBMAIL"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsContentFilterCategories enum.
+func (e ApiUcoreFabricConfigSiteConfigsContentFilterCategories) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesADULT:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesADVERTISEMENT:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesALCOHOL:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesANONYMIZERS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesAPIS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesART:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesARTIFICIALINTELLIGENCE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesARTSANDCRAFTS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesASTROLOGY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesAUCTIONSANDMARKETPLACES:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesAUDIOSTREAMING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesBLOGS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesBODYART:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesBOTNETS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesBUSINESS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCARTOONSANDANIME:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCHAT:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCHILDABUSE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCIPA:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCLOTHING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCOMICBOOKS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCOUNTERFEITBRANDS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCOUPONS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCRYPTOCURRENCY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesCRYPTOMINING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDATINGANDRELATIONSHIPS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDECEPTIVEADS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDGADOMAINS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDIGITALPOSTCARDS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDIGITALSAFETY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDNSTUNNELING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesDRUGS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesECOMMERCE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesECONOMYANDFINANCE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesEDUCATION:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesEDUCATIONALINSTITUTIONS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesEMPTYDOMAINS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesENTERTAINMENT:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFAMILY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFASHION:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFILESHARING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFINEARTS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFOODANDDRINK:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesFORUMS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesGAMBLING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesGAMING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesGOVERNMENT:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHACKING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHATESPEECHANDEXTREMISM:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHEALTHANDFITNESS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHOBBIESANDINTERESTS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHOMEANDGARDEN:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHOMEVIDEO:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesHUMOR:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesINCLUSION:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesINSTANTMESSENGERS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesINTERNETCALLINGANDVOIP:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesITSERVICES:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesJOBSEARCHANDCAREERS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesLIFESTYLE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesLINGERIEANDBIKINI:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesLOGINSCREENS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMAGAZINES:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMALWARE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMEDIAANDFILEHOSTING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMESSAGING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMISCELLANEOUS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMOVIES:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesMUSIC:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesNEWLYDISCOVEREDDOMAINS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesNEWLYREGISTEREDDOMAINS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesNEWSANDMEDIA:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesNUDITY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPARANORMAL:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPARENTING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPARKEDDOMAINS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPEERTOPEER:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPETS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPHISHING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPHOTOGRAPHY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPHOTOSHARING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPOLITICS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPORNOGRAPHY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPORTALS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPRIVATEIPADDRESSES:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPROFANITY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesPROFESSIONALNETWORKING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesQUESTIONABLEACTIVITIES:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesRADIO:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesREALESTATE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesREDIRECTORS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesRELIGION:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSAFEFORKIDS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSCIENCE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSEARCHENGINES:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSEXEDUCATION:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSEXUALITY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSHOPPING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSOCIALNETWORKS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSPACEANDASTRONOMY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSPAM:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSPORTS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSPYWARE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesSWIMSUITS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTECHNOLOGY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTELEVISION:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTOBACCO:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTRANSLATORS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesTRAVEL:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesUNREACHABLEDOMAINS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesUNRELIABLEINFORMATION:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesVEHICLES:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesVIDEOSTREAMING:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesVIOLENCE:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesWEAPONS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesWEATHER:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterCategoriesWEBMAIL:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch.
+const (
+	ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearchBing    ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch = "bing"
+	ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearchGoogle  ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch = "google"
+	ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearchYoutube ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch = "youtube"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch enum.
+func (e ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearchBing:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearchGoogle:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearchYoutube:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode.
+const (
+	ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeALWAYS      ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode = "ALWAYS"
+	ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeCUSTOM      ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode = "CUSTOM"
+	ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeEVERYDAY    ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode = "EVERY_DAY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeEVERYWEEK   ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode = "EVERY_WEEK"
+	ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeONETIMEONLY ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode = "ONE_TIME_ONLY"
+	ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeUNKNOWN     ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode = "UNKNOWN"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode enum.
+func (e ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeALWAYS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeCUSTOM:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeEVERYDAY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeEVERYWEEK:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeONETIMEONLY:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsContentFilterScheduleModeUNKNOWN:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType.
+const (
+	ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeA     ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType = "A"
+	ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeAAAA  ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType = "AAAA"
+	ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeCNAME ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType = "CNAME"
+	ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeMX    ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType = "MX"
+	ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeNS    ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType = "NS"
+	ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeSRV   ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType = "SRV"
+	ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeTXT   ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType = "TXT"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType enum.
+func (e ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeA:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeAAAA:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeCNAME:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeMX:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeNS:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeSRV:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordTypeTXT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType.
+const (
+	ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupTypeAddressGroup     ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType = "address-group"
+	ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupTypeIpv6AddressGroup ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType = "ipv6-address-group"
+	ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupTypePortGroup        ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType = "port-group"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType enum.
+func (e ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupTypeAddressGroup:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupTypeIpv6AddressGroup:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupTypePortGroup:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction.
+const (
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyActionALLOW  ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction = "ALLOW"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyActionBLOCK  ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction = "BLOCK"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyActionREJECT ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction = "REJECT"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction enum.
+func (e ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyActionALLOW:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyActionBLOCK:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyActionREJECT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType.
+const (
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateTypeALL         ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType = "ALL"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateTypeCUSTOM      ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType = "CUSTOM"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateTypeRESPONDONLY ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType = "RESPOND_ONLY"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType enum.
+func (e ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateTypeALL:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateTypeCUSTOM:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateTypeRESPONDONLY:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates.
+const (
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStatesESTABLISHED ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates = "ESTABLISHED"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStatesINVALID     ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates = "INVALID"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStatesNEW         ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates = "NEW"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStatesRELATED     ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates = "RELATED"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates enum.
+func (e ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStatesESTABLISHED:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStatesINVALID:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStatesNEW:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStatesRELATED:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename.
+const (
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameAddressMaskReply        ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "address-mask-reply"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameAddressMaskRequest      ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "address-mask-request"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameAny                     ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "any"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameCommunicationProhibited ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "communication-prohibited"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameDestinationUnreachable  ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "destination-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameEchoReply               ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "echo-reply"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameEchoRequest             ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "echo-request"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameFragmentationNeeded     ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "fragmentation-needed"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostPrecedenceViolation ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "host-precedence-violation"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostProhibited          ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "host-prohibited"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostRedirect            ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "host-redirect"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostUnknown             ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "host-unknown"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostUnreachable         ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "host-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameIpHeaderBad             ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "ip-header-bad"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameNetworkProhibited       ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "network-prohibited"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameNetworkRedirect         ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "network-redirect"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameNetworkUnknown          ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "network-unknown"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameNetworkUnreachable      ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "network-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameParameterProblem        ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "parameter-problem"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenamePortUnreachable         ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "port-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenamePrecedenceCutoff        ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "precedence-cutoff"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameProtocolUnreachable     ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "protocol-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameRedirect                ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "redirect"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameRequiredOptionMissing   ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "required-option-missing"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameRouterAdvertisement     ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "router-advertisement"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameRouterSolicitation      ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "router-solicitation"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameSourceQuench            ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "source-quench"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameSourceRouteFailed       ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "source-route-failed"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTOSHostRedirect         ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "TOS-host-redirect"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTOSHostUnreachable      ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "TOS-host-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTOSNetworkRedirect      ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "TOS-network-redirect"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTOSNetworkUnreachable   ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "TOS-network-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTimeExceeded            ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "time-exceeded"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTimestampReply          ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "timestamp-reply"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTimestampRequest        ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "timestamp-request"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTtlZeroDuringReassembly ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "ttl-zero-during-reassembly"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTtlZeroDuringTransit    ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename = "ttl-zero-during-transit"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename enum.
+func (e ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameAddressMaskReply:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameAddressMaskRequest:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameAny:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameCommunicationProhibited:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameDestinationUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameEchoReply:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameEchoRequest:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameFragmentationNeeded:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostPrecedenceViolation:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostProhibited:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostRedirect:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostUnknown:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameHostUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameIpHeaderBad:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameNetworkProhibited:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameNetworkRedirect:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameNetworkUnknown:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameNetworkUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameParameterProblem:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenamePortUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenamePrecedenceCutoff:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameProtocolUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameRedirect:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameRequiredOptionMissing:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameRouterAdvertisement:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameRouterSolicitation:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameSourceQuench:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameSourceRouteFailed:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTOSHostRedirect:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTOSHostUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTOSNetworkRedirect:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTOSNetworkUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTimeExceeded:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTimestampReply:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTimestampRequest:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTtlZeroDuringReassembly:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypenameTtlZeroDuringTransit:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename.
+const (
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameAddressUnreachable      ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "address-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameAny                     ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "any"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameBadHeader               ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "bad-header"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameBeyondScope             ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "beyond-scope"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameCommunicationProhibited ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "communication-prohibited"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameDestinationUnreachable  ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "destination-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameEchoReply               ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "echo-reply"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameEchoRequest             ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "echo-request"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameFailedPolicy            ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "failed-policy"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameNeighborAdvertisement   ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "neighbor-advertisement"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameNeighborSolicitation    ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "neighbor-solicitation"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameNoRoute                 ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "no-route"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenamePacketTooBig            ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "packet-too-big"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameParameterProblem        ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "parameter-problem"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenamePortUnreachable         ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "port-unreachable"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameRedirect                ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "redirect"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameRejectRoute             ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "reject-route"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameRouterAdvertisement     ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "router-advertisement"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameRouterSolicitation      ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "router-solicitation"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameTimeExceeded            ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "time-exceeded"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameTtlZeroDuringReassembly ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "ttl-zero-during-reassembly"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameTtlZeroDuringTransit    ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "ttl-zero-during-transit"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameUnknownHeaderType       ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "unknown-header-type"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameUnknownOption           ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename = "unknown-option"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename enum.
+func (e ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameAddressUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameAny:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameBadHeader:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameBeyondScope:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameCommunicationProhibited:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameDestinationUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameEchoReply:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameEchoRequest:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameFailedPolicy:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameNeighborAdvertisement:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameNeighborSolicitation:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameNoRoute:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenamePacketTooBig:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameParameterProblem:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenamePortUnreachable:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameRedirect:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameRejectRoute:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameRouterAdvertisement:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameRouterSolicitation:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameTimeExceeded:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameTtlZeroDuringReassembly:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameTtlZeroDuringTransit:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameUnknownHeaderType:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6TypenameUnknownOption:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion.
+const (
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersionBOTH ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion = "BOTH"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersionIPV4 ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion = "IPV4"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersionIPV6 ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion = "IPV6"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion enum.
+func (e ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersionBOTH:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersionIPV4:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersionIPV6:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecType.
+const (
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecTypeMATCHIPSEC    ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecType = "MATCH_IP_SEC"
+	ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecTypeMATCHNONIPSEC ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecType = "MATCH_NON_IP_SEC"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecType enum.
+func (e ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecType) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecTypeMATCHIPSEC:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecTypeMATCHNONIPSEC:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPosture.
+const (
+	ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPostureALLOWALL ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPosture = "ALLOW_ALL"
+	ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPostureBLOCKALL ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPosture = "BLOCK_ALL"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPosture enum.
+func (e ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPosture) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPostureALLOWALL:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPostureBLOCKALL:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion.
+const (
+	ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersionDisabled ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion = "disabled"
+	ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersionRstp     ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion = "rstp"
+	ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersionStp      ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion = "stp"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion enum.
+func (e ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersionDisabled:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersionRstp:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersionStp:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor.
+const (
+	ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledForAll  ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor = "all"
+	ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledForNone ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor = "none"
+	ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledForSome ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor = "some"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor enum.
+func (e ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledForAll:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledForNone:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledForSome:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkType.
+const (
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkTypeCustom  ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkType = "custom"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkTypeGateway ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkType = "gateway"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkType enum.
+func (e ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkType) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkTypeCustom:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkTypeGateway:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType.
+const (
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsTypeConservative ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType = "conservative"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsTypeCustom       ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType = "custom"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsTypeMaximumSpeed ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType = "maximum_speed"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType enum.
+func (e ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsTypeConservative:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsTypeCustom:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsTypeMaximumSpeed:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth.
+const (
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthEHT240 ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "EHT_240"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthEHT320 ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "EHT_320"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT1080 ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "HT_1080"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT160  ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "HT_160"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT20   ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "HT_20"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT2160 ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "HT_2160"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT40   ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "HT_40"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT4320 ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "HT_4320"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT80   ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth = "HT_80"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth enum.
+func (e ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthEHT240:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthEHT320:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT1080:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT160:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT20:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT2160:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT40:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT4320:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidthHT80:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio.
+const (
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadioAd  ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio = "ad"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadioN6e ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio = "6e"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadioNa  ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio = "na"
+	ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadioNg  ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio = "ng"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio enum.
+func (e ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadioAd:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadioN6e:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadioNa:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadioNg:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsNetworkGatewayType.
+const (
+	ApiUcoreFabricConfigSiteConfigsNetworkGatewayTypeDefault ApiUcoreFabricConfigSiteConfigsNetworkGatewayType = "default"
+	ApiUcoreFabricConfigSiteConfigsNetworkGatewayTypeSwitch  ApiUcoreFabricConfigSiteConfigsNetworkGatewayType = "switch"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsNetworkGatewayType enum.
+func (e ApiUcoreFabricConfigSiteConfigsNetworkGatewayType) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsNetworkGatewayTypeDefault:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkGatewayTypeSwitch:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose.
+const (
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeCorporate        ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "corporate"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeGuest            ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "guest"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeIntervlanRouting ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "intervlan-routing"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeIpsecVpn         ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "ipsec-vpn"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeOpenvpnVpn       ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "openvpn-vpn"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeRemoteUserVpn    ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "remote-user-vpn"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeSiteVpn          ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "site-vpn"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeVlanOnly         ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "vlan-only"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeVpnClient        ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "vpn-client"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeWan              ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "wan"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeWanMagic         ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose = "wan_magic"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose enum.
+func (e ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeCorporate:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeGuest:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeIntervlanRouting:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeIpsecVpn:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeOpenvpnVpn:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeRemoteUserVpn:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeSiteVpn:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeVlanOnly:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeVpnClient:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeWan:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv4PurposeWanMagic:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignment.
+const (
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignmentDhcpv6 ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignment = "dhcpv6"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignmentSlaac  ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignment = "slaac"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignment enum.
+func (e ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignment) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignmentDhcpv6:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignmentSlaac:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType.
+const (
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceTypeNone          ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType = "none"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceTypePd            ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType = "pd"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceTypeSingleNetwork ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType = "single_network"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceTypeStatic        ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType = "static"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType enum.
+func (e ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceTypeNone:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceTypePd:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceTypeSingleNetwork:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceTypeStatic:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority.
+const (
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriorityHigh   ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority = "high"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriorityLow    ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority = "low"
+	ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriorityMedium ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority = "medium"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority enum.
+func (e ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriorityHigh:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriorityLow:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriorityMedium:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget.
+const (
+	ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTargetDOMAIN   ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget = "DOMAIN"
+	ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTargetINTERNET ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget = "INTERNET"
+	ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTargetIP       ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget = "IP"
+	ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTargetREGION   ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget = "REGION"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget enum.
+func (e ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTargetDOMAIN:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTargetINTERNET:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTargetIP:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTargetREGION:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersion.
+const (
+	ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersionV4 ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersion = "v4"
+	ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersionV6 ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersion = "v6"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersion enum.
+func (e ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersion) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersionV4:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersionV6:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsWifiPmfMode.
+const (
+	ApiUcoreFabricConfigSiteConfigsWifiPmfModeDisabled ApiUcoreFabricConfigSiteConfigsWifiPmfMode = "disabled"
+	ApiUcoreFabricConfigSiteConfigsWifiPmfModeOptional ApiUcoreFabricConfigSiteConfigsWifiPmfMode = "optional"
+	ApiUcoreFabricConfigSiteConfigsWifiPmfModeRequired ApiUcoreFabricConfigSiteConfigsWifiPmfMode = "required"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsWifiPmfMode enum.
+func (e ApiUcoreFabricConfigSiteConfigsWifiPmfMode) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsWifiPmfModeDisabled:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiPmfModeOptional:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiPmfModeRequired:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat.
+const (
+	ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatColonLower  ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat = "colon_lower"
+	ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatColonUpper  ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat = "colon_upper"
+	ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatHyphenLower ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat = "hyphen_lower"
+	ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatHyphenUpper ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat = "hyphen_upper"
+	ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatNoneLower   ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat = "none_lower"
+	ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatNoneUpper   ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat = "none_upper"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat enum.
+func (e ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatColonLower:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatColonUpper:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatHyphenLower:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatHyphenUpper:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatNoneLower:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormatNoneUpper:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol.
+const (
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolOpen          ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "open"
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolOwe           ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "owe"
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolOweTransition ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "owe_transition"
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa23eap      ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "wpa23eap"
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa23psk      ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "wpa23psk"
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa2eap       ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "wpa2eap"
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa2psk       ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "wpa2psk"
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa3eap       ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "wpa3eap"
+	ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa3psk       ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol = "wpa3psk"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol enum.
+func (e ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolOpen:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolOwe:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolOweTransition:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa23eap:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa23psk:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa2eap:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa2psk:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa3eap:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocolWpa3psk:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsWifiSettingPreference.
+const (
+	ApiUcoreFabricConfigSiteConfigsWifiSettingPreferenceAuto   ApiUcoreFabricConfigSiteConfigsWifiSettingPreference = "auto"
+	ApiUcoreFabricConfigSiteConfigsWifiSettingPreferenceManual ApiUcoreFabricConfigSiteConfigsWifiSettingPreference = "manual"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsWifiSettingPreference enum.
+func (e ApiUcoreFabricConfigSiteConfigsWifiSettingPreference) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsWifiSettingPreferenceAuto:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiSettingPreferenceManual:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsWifiWlanBands.
+const (
+	ApiUcoreFabricConfigSiteConfigsWifiWlanBandsBoth    ApiUcoreFabricConfigSiteConfigsWifiWlanBands = "both"
+	ApiUcoreFabricConfigSiteConfigsWifiWlanBandsN2g     ApiUcoreFabricConfigSiteConfigsWifiWlanBands = "2g"
+	ApiUcoreFabricConfigSiteConfigsWifiWlanBandsN5g     ApiUcoreFabricConfigSiteConfigsWifiWlanBands = "5g"
+	ApiUcoreFabricConfigSiteConfigsWifiWlanBandsN6g     ApiUcoreFabricConfigSiteConfigsWifiWlanBands = "6g"
+	ApiUcoreFabricConfigSiteConfigsWifiWlanBandsUnknown ApiUcoreFabricConfigSiteConfigsWifiWlanBands = "unknown"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsWifiWlanBands enum.
+func (e ApiUcoreFabricConfigSiteConfigsWifiWlanBands) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsWifiWlanBandsBoth:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiWlanBandsN2g:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiWlanBandsN5g:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiWlanBandsN6g:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiWlanBandsUnknown:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek.
+const (
+	ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekFri ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek = "fri"
+	ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekMon ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek = "mon"
+	ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekSat ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek = "sat"
+	ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekSun ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek = "sun"
+	ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekThu ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek = "thu"
+	ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekTue ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek = "tue"
+	ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekWed ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek = "wed"
+)
+
+// Valid indicates whether the value is a known member of the ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek enum.
+func (e ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek) Valid() bool {
+	switch e {
+	case ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekFri:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekMon:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekSat:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekSun:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekThu:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekTue:
+		return true
+	case ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeekWed:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ChannelplanRadioTableTxPowerMode.
 const (
 	ChannelplanRadioTableTxPowerModeAuto   ChannelplanRadioTableTxPowerMode = "auto"
@@ -1159,6 +2437,369 @@ func (e ContentFilteringSafeSearch) Valid() bool {
 	}
 }
 
+// Defines values for ContentFilteringCategorie.
+const (
+	ContentFilteringCategorieADULT                   ContentFilteringCategorie = "ADULT"
+	ContentFilteringCategorieADVERTISEMENT           ContentFilteringCategorie = "ADVERTISEMENT"
+	ContentFilteringCategorieALCOHOL                 ContentFilteringCategorie = "ALCOHOL"
+	ContentFilteringCategorieANONYMIZERS             ContentFilteringCategorie = "ANONYMIZERS"
+	ContentFilteringCategorieAPIS                    ContentFilteringCategorie = "APIS"
+	ContentFilteringCategorieART                     ContentFilteringCategorie = "ART"
+	ContentFilteringCategorieARTIFICIALINTELLIGENCE  ContentFilteringCategorie = "ARTIFICIAL_INTELLIGENCE"
+	ContentFilteringCategorieARTSANDCRAFTS           ContentFilteringCategorie = "ARTS_AND_CRAFTS"
+	ContentFilteringCategorieASTROLOGY               ContentFilteringCategorie = "ASTROLOGY"
+	ContentFilteringCategorieAUCTIONSANDMARKETPLACES ContentFilteringCategorie = "AUCTIONS_AND_MARKETPLACES"
+	ContentFilteringCategorieAUDIOSTREAMING          ContentFilteringCategorie = "AUDIO_STREAMING"
+	ContentFilteringCategorieBLOGS                   ContentFilteringCategorie = "BLOGS"
+	ContentFilteringCategorieBODYART                 ContentFilteringCategorie = "BODY_ART"
+	ContentFilteringCategorieBOTNETS                 ContentFilteringCategorie = "BOTNETS"
+	ContentFilteringCategorieBUSINESS                ContentFilteringCategorie = "BUSINESS"
+	ContentFilteringCategorieCARTOONSANDANIME        ContentFilteringCategorie = "CARTOONS_AND_ANIME"
+	ContentFilteringCategorieCHAT                    ContentFilteringCategorie = "CHAT"
+	ContentFilteringCategorieCHILDABUSE              ContentFilteringCategorie = "CHILD_ABUSE"
+	ContentFilteringCategorieCIPA                    ContentFilteringCategorie = "CIPA"
+	ContentFilteringCategorieCLOTHING                ContentFilteringCategorie = "CLOTHING"
+	ContentFilteringCategorieCOMICBOOKS              ContentFilteringCategorie = "COMIC_BOOKS"
+	ContentFilteringCategorieCOUNTERFEITBRANDS       ContentFilteringCategorie = "COUNTERFEIT_BRANDS"
+	ContentFilteringCategorieCOUPONS                 ContentFilteringCategorie = "COUPONS"
+	ContentFilteringCategorieCRYPTOCURRENCY          ContentFilteringCategorie = "CRYPTOCURRENCY"
+	ContentFilteringCategorieCRYPTOMINING            ContentFilteringCategorie = "CRYPTOMINING"
+	ContentFilteringCategorieDATINGANDRELATIONSHIPS  ContentFilteringCategorie = "DATING_AND_RELATIONSHIPS"
+	ContentFilteringCategorieDECEPTIVEADS            ContentFilteringCategorie = "DECEPTIVE_ADS"
+	ContentFilteringCategorieDGADOMAINS              ContentFilteringCategorie = "DGA_DOMAINS"
+	ContentFilteringCategorieDIGITALPOSTCARDS        ContentFilteringCategorie = "DIGITAL_POSTCARDS"
+	ContentFilteringCategorieDIGITALSAFETY           ContentFilteringCategorie = "DIGITAL_SAFETY"
+	ContentFilteringCategorieDNSTUNNELING            ContentFilteringCategorie = "DNS_TUNNELING"
+	ContentFilteringCategorieDRUGS                   ContentFilteringCategorie = "DRUGS"
+	ContentFilteringCategorieECOMMERCE               ContentFilteringCategorie = "ECOMMERCE"
+	ContentFilteringCategorieECONOMYANDFINANCE       ContentFilteringCategorie = "ECONOMY_AND_FINANCE"
+	ContentFilteringCategorieEDUCATION               ContentFilteringCategorie = "EDUCATION"
+	ContentFilteringCategorieEDUCATIONALINSTITUTIONS ContentFilteringCategorie = "EDUCATIONAL_INSTITUTIONS"
+	ContentFilteringCategorieEMPTYDOMAINS            ContentFilteringCategorie = "EMPTY_DOMAINS"
+	ContentFilteringCategorieENTERTAINMENT           ContentFilteringCategorie = "ENTERTAINMENT"
+	ContentFilteringCategorieFAMILY                  ContentFilteringCategorie = "FAMILY"
+	ContentFilteringCategorieFASHION                 ContentFilteringCategorie = "FASHION"
+	ContentFilteringCategorieFILESHARING             ContentFilteringCategorie = "FILE_SHARING"
+	ContentFilteringCategorieFINEARTS                ContentFilteringCategorie = "FINE_ARTS"
+	ContentFilteringCategorieFOODANDDRINK            ContentFilteringCategorie = "FOOD_AND_DRINK"
+	ContentFilteringCategorieFORUMS                  ContentFilteringCategorie = "FORUMS"
+	ContentFilteringCategorieGAMBLING                ContentFilteringCategorie = "GAMBLING"
+	ContentFilteringCategorieGAMING                  ContentFilteringCategorie = "GAMING"
+	ContentFilteringCategorieGOVERNMENT              ContentFilteringCategorie = "GOVERNMENT"
+	ContentFilteringCategorieHACKING                 ContentFilteringCategorie = "HACKING"
+	ContentFilteringCategorieHATESPEECHANDEXTREMISM  ContentFilteringCategorie = "HATE_SPEECH_AND_EXTREMISM"
+	ContentFilteringCategorieHEALTHANDFITNESS        ContentFilteringCategorie = "HEALTH_AND_FITNESS"
+	ContentFilteringCategorieHOBBIESANDINTERESTS     ContentFilteringCategorie = "HOBBIES_AND_INTERESTS"
+	ContentFilteringCategorieHOMEANDGARDEN           ContentFilteringCategorie = "HOME_AND_GARDEN"
+	ContentFilteringCategorieHOMEVIDEO               ContentFilteringCategorie = "HOME_VIDEO"
+	ContentFilteringCategorieHUMOR                   ContentFilteringCategorie = "HUMOR"
+	ContentFilteringCategorieINCLUSION               ContentFilteringCategorie = "INCLUSION"
+	ContentFilteringCategorieINSTANTMESSENGERS       ContentFilteringCategorie = "INSTANT_MESSENGERS"
+	ContentFilteringCategorieINTERNETCALLINGANDVOIP  ContentFilteringCategorie = "INTERNET_CALLING_AND_VOIP"
+	ContentFilteringCategorieITSERVICES              ContentFilteringCategorie = "IT_SERVICES"
+	ContentFilteringCategorieJOBSEARCHANDCAREERS     ContentFilteringCategorie = "JOB_SEARCH_AND_CAREERS"
+	ContentFilteringCategorieLIFESTYLE               ContentFilteringCategorie = "LIFESTYLE"
+	ContentFilteringCategorieLINGERIEANDBIKINI       ContentFilteringCategorie = "LINGERIE_AND_BIKINI"
+	ContentFilteringCategorieLOGINSCREENS            ContentFilteringCategorie = "LOGIN_SCREENS"
+	ContentFilteringCategorieMAGAZINES               ContentFilteringCategorie = "MAGAZINES"
+	ContentFilteringCategorieMALWARE                 ContentFilteringCategorie = "MALWARE"
+	ContentFilteringCategorieMEDIAANDFILEHOSTING     ContentFilteringCategorie = "MEDIA_AND_FILE_HOSTING"
+	ContentFilteringCategorieMESSAGING               ContentFilteringCategorie = "MESSAGING"
+	ContentFilteringCategorieMISCELLANEOUS           ContentFilteringCategorie = "MISCELLANEOUS"
+	ContentFilteringCategorieMOVIES                  ContentFilteringCategorie = "MOVIES"
+	ContentFilteringCategorieMUSIC                   ContentFilteringCategorie = "MUSIC"
+	ContentFilteringCategorieNEWLYDISCOVEREDDOMAINS  ContentFilteringCategorie = "NEWLY_DISCOVERED_DOMAINS"
+	ContentFilteringCategorieNEWLYREGISTEREDDOMAINS  ContentFilteringCategorie = "NEWLY_REGISTERED_DOMAINS"
+	ContentFilteringCategorieNEWSANDMEDIA            ContentFilteringCategorie = "NEWS_AND_MEDIA"
+	ContentFilteringCategorieNUDITY                  ContentFilteringCategorie = "NUDITY"
+	ContentFilteringCategoriePARANORMAL              ContentFilteringCategorie = "PARANORMAL"
+	ContentFilteringCategoriePARENTING               ContentFilteringCategorie = "PARENTING"
+	ContentFilteringCategoriePARKEDDOMAINS           ContentFilteringCategorie = "PARKED_DOMAINS"
+	ContentFilteringCategoriePEERTOPEER              ContentFilteringCategorie = "PEER_TO_PEER"
+	ContentFilteringCategoriePETS                    ContentFilteringCategorie = "PETS"
+	ContentFilteringCategoriePHISHING                ContentFilteringCategorie = "PHISHING"
+	ContentFilteringCategoriePHOTOGRAPHY             ContentFilteringCategorie = "PHOTOGRAPHY"
+	ContentFilteringCategoriePHOTOSHARING            ContentFilteringCategorie = "PHOTO_SHARING"
+	ContentFilteringCategoriePOLITICS                ContentFilteringCategorie = "POLITICS"
+	ContentFilteringCategoriePORNOGRAPHY             ContentFilteringCategorie = "PORNOGRAPHY"
+	ContentFilteringCategoriePORTALS                 ContentFilteringCategorie = "PORTALS"
+	ContentFilteringCategoriePRIVATEIPADDRESSES      ContentFilteringCategorie = "PRIVATE_IP_ADDRESSES"
+	ContentFilteringCategoriePROFANITY               ContentFilteringCategorie = "PROFANITY"
+	ContentFilteringCategoriePROFESSIONALNETWORKING  ContentFilteringCategorie = "PROFESSIONAL_NETWORKING"
+	ContentFilteringCategorieQUESTIONABLEACTIVITIES  ContentFilteringCategorie = "QUESTIONABLE_ACTIVITIES"
+	ContentFilteringCategorieRADIO                   ContentFilteringCategorie = "RADIO"
+	ContentFilteringCategorieREALESTATE              ContentFilteringCategorie = "REAL_ESTATE"
+	ContentFilteringCategorieREDIRECTORS             ContentFilteringCategorie = "REDIRECTORS"
+	ContentFilteringCategorieRELIGION                ContentFilteringCategorie = "RELIGION"
+	ContentFilteringCategorieSAFEFORKIDS             ContentFilteringCategorie = "SAFE_FOR_KIDS"
+	ContentFilteringCategorieSCIENCE                 ContentFilteringCategorie = "SCIENCE"
+	ContentFilteringCategorieSEARCHENGINES           ContentFilteringCategorie = "SEARCH_ENGINES"
+	ContentFilteringCategorieSEXEDUCATION            ContentFilteringCategorie = "SEX_EDUCATION"
+	ContentFilteringCategorieSEXUALITY               ContentFilteringCategorie = "SEXUALITY"
+	ContentFilteringCategorieSHOPPING                ContentFilteringCategorie = "SHOPPING"
+	ContentFilteringCategorieSOCIALNETWORKS          ContentFilteringCategorie = "SOCIAL_NETWORKS"
+	ContentFilteringCategorieSPACEANDASTRONOMY       ContentFilteringCategorie = "SPACE_AND_ASTRONOMY"
+	ContentFilteringCategorieSPAM                    ContentFilteringCategorie = "SPAM"
+	ContentFilteringCategorieSPORTS                  ContentFilteringCategorie = "SPORTS"
+	ContentFilteringCategorieSPYWARE                 ContentFilteringCategorie = "SPYWARE"
+	ContentFilteringCategorieSWIMSUITS               ContentFilteringCategorie = "SWIMSUITS"
+	ContentFilteringCategorieTECHNOLOGY              ContentFilteringCategorie = "TECHNOLOGY"
+	ContentFilteringCategorieTELEVISION              ContentFilteringCategorie = "TELEVISION"
+	ContentFilteringCategorieTOBACCO                 ContentFilteringCategorie = "TOBACCO"
+	ContentFilteringCategorieTRANSLATORS             ContentFilteringCategorie = "TRANSLATORS"
+	ContentFilteringCategorieTRAVEL                  ContentFilteringCategorie = "TRAVEL"
+	ContentFilteringCategorieUNREACHABLEDOMAINS      ContentFilteringCategorie = "UNREACHABLE_DOMAINS"
+	ContentFilteringCategorieUNRELIABLEINFORMATION   ContentFilteringCategorie = "UNRELIABLE_INFORMATION"
+	ContentFilteringCategorieVEHICLES                ContentFilteringCategorie = "VEHICLES"
+	ContentFilteringCategorieVIDEOSTREAMING          ContentFilteringCategorie = "VIDEO_STREAMING"
+	ContentFilteringCategorieVIOLENCE                ContentFilteringCategorie = "VIOLENCE"
+	ContentFilteringCategorieWEAPONS                 ContentFilteringCategorie = "WEAPONS"
+	ContentFilteringCategorieWEATHER                 ContentFilteringCategorie = "WEATHER"
+	ContentFilteringCategorieWEBMAIL                 ContentFilteringCategorie = "WEBMAIL"
+)
+
+// Valid indicates whether the value is a known member of the ContentFilteringCategorie enum.
+func (e ContentFilteringCategorie) Valid() bool {
+	switch e {
+	case ContentFilteringCategorieADULT:
+		return true
+	case ContentFilteringCategorieADVERTISEMENT:
+		return true
+	case ContentFilteringCategorieALCOHOL:
+		return true
+	case ContentFilteringCategorieANONYMIZERS:
+		return true
+	case ContentFilteringCategorieAPIS:
+		return true
+	case ContentFilteringCategorieART:
+		return true
+	case ContentFilteringCategorieARTIFICIALINTELLIGENCE:
+		return true
+	case ContentFilteringCategorieARTSANDCRAFTS:
+		return true
+	case ContentFilteringCategorieASTROLOGY:
+		return true
+	case ContentFilteringCategorieAUCTIONSANDMARKETPLACES:
+		return true
+	case ContentFilteringCategorieAUDIOSTREAMING:
+		return true
+	case ContentFilteringCategorieBLOGS:
+		return true
+	case ContentFilteringCategorieBODYART:
+		return true
+	case ContentFilteringCategorieBOTNETS:
+		return true
+	case ContentFilteringCategorieBUSINESS:
+		return true
+	case ContentFilteringCategorieCARTOONSANDANIME:
+		return true
+	case ContentFilteringCategorieCHAT:
+		return true
+	case ContentFilteringCategorieCHILDABUSE:
+		return true
+	case ContentFilteringCategorieCIPA:
+		return true
+	case ContentFilteringCategorieCLOTHING:
+		return true
+	case ContentFilteringCategorieCOMICBOOKS:
+		return true
+	case ContentFilteringCategorieCOUNTERFEITBRANDS:
+		return true
+	case ContentFilteringCategorieCOUPONS:
+		return true
+	case ContentFilteringCategorieCRYPTOCURRENCY:
+		return true
+	case ContentFilteringCategorieCRYPTOMINING:
+		return true
+	case ContentFilteringCategorieDATINGANDRELATIONSHIPS:
+		return true
+	case ContentFilteringCategorieDECEPTIVEADS:
+		return true
+	case ContentFilteringCategorieDGADOMAINS:
+		return true
+	case ContentFilteringCategorieDIGITALPOSTCARDS:
+		return true
+	case ContentFilteringCategorieDIGITALSAFETY:
+		return true
+	case ContentFilteringCategorieDNSTUNNELING:
+		return true
+	case ContentFilteringCategorieDRUGS:
+		return true
+	case ContentFilteringCategorieECOMMERCE:
+		return true
+	case ContentFilteringCategorieECONOMYANDFINANCE:
+		return true
+	case ContentFilteringCategorieEDUCATION:
+		return true
+	case ContentFilteringCategorieEDUCATIONALINSTITUTIONS:
+		return true
+	case ContentFilteringCategorieEMPTYDOMAINS:
+		return true
+	case ContentFilteringCategorieENTERTAINMENT:
+		return true
+	case ContentFilteringCategorieFAMILY:
+		return true
+	case ContentFilteringCategorieFASHION:
+		return true
+	case ContentFilteringCategorieFILESHARING:
+		return true
+	case ContentFilteringCategorieFINEARTS:
+		return true
+	case ContentFilteringCategorieFOODANDDRINK:
+		return true
+	case ContentFilteringCategorieFORUMS:
+		return true
+	case ContentFilteringCategorieGAMBLING:
+		return true
+	case ContentFilteringCategorieGAMING:
+		return true
+	case ContentFilteringCategorieGOVERNMENT:
+		return true
+	case ContentFilteringCategorieHACKING:
+		return true
+	case ContentFilteringCategorieHATESPEECHANDEXTREMISM:
+		return true
+	case ContentFilteringCategorieHEALTHANDFITNESS:
+		return true
+	case ContentFilteringCategorieHOBBIESANDINTERESTS:
+		return true
+	case ContentFilteringCategorieHOMEANDGARDEN:
+		return true
+	case ContentFilteringCategorieHOMEVIDEO:
+		return true
+	case ContentFilteringCategorieHUMOR:
+		return true
+	case ContentFilteringCategorieINCLUSION:
+		return true
+	case ContentFilteringCategorieINSTANTMESSENGERS:
+		return true
+	case ContentFilteringCategorieINTERNETCALLINGANDVOIP:
+		return true
+	case ContentFilteringCategorieITSERVICES:
+		return true
+	case ContentFilteringCategorieJOBSEARCHANDCAREERS:
+		return true
+	case ContentFilteringCategorieLIFESTYLE:
+		return true
+	case ContentFilteringCategorieLINGERIEANDBIKINI:
+		return true
+	case ContentFilteringCategorieLOGINSCREENS:
+		return true
+	case ContentFilteringCategorieMAGAZINES:
+		return true
+	case ContentFilteringCategorieMALWARE:
+		return true
+	case ContentFilteringCategorieMEDIAANDFILEHOSTING:
+		return true
+	case ContentFilteringCategorieMESSAGING:
+		return true
+	case ContentFilteringCategorieMISCELLANEOUS:
+		return true
+	case ContentFilteringCategorieMOVIES:
+		return true
+	case ContentFilteringCategorieMUSIC:
+		return true
+	case ContentFilteringCategorieNEWLYDISCOVEREDDOMAINS:
+		return true
+	case ContentFilteringCategorieNEWLYREGISTEREDDOMAINS:
+		return true
+	case ContentFilteringCategorieNEWSANDMEDIA:
+		return true
+	case ContentFilteringCategorieNUDITY:
+		return true
+	case ContentFilteringCategoriePARANORMAL:
+		return true
+	case ContentFilteringCategoriePARENTING:
+		return true
+	case ContentFilteringCategoriePARKEDDOMAINS:
+		return true
+	case ContentFilteringCategoriePEERTOPEER:
+		return true
+	case ContentFilteringCategoriePETS:
+		return true
+	case ContentFilteringCategoriePHISHING:
+		return true
+	case ContentFilteringCategoriePHOTOGRAPHY:
+		return true
+	case ContentFilteringCategoriePHOTOSHARING:
+		return true
+	case ContentFilteringCategoriePOLITICS:
+		return true
+	case ContentFilteringCategoriePORNOGRAPHY:
+		return true
+	case ContentFilteringCategoriePORTALS:
+		return true
+	case ContentFilteringCategoriePRIVATEIPADDRESSES:
+		return true
+	case ContentFilteringCategoriePROFANITY:
+		return true
+	case ContentFilteringCategoriePROFESSIONALNETWORKING:
+		return true
+	case ContentFilteringCategorieQUESTIONABLEACTIVITIES:
+		return true
+	case ContentFilteringCategorieRADIO:
+		return true
+	case ContentFilteringCategorieREALESTATE:
+		return true
+	case ContentFilteringCategorieREDIRECTORS:
+		return true
+	case ContentFilteringCategorieRELIGION:
+		return true
+	case ContentFilteringCategorieSAFEFORKIDS:
+		return true
+	case ContentFilteringCategorieSCIENCE:
+		return true
+	case ContentFilteringCategorieSEARCHENGINES:
+		return true
+	case ContentFilteringCategorieSEXEDUCATION:
+		return true
+	case ContentFilteringCategorieSEXUALITY:
+		return true
+	case ContentFilteringCategorieSHOPPING:
+		return true
+	case ContentFilteringCategorieSOCIALNETWORKS:
+		return true
+	case ContentFilteringCategorieSPACEANDASTRONOMY:
+		return true
+	case ContentFilteringCategorieSPAM:
+		return true
+	case ContentFilteringCategorieSPORTS:
+		return true
+	case ContentFilteringCategorieSPYWARE:
+		return true
+	case ContentFilteringCategorieSWIMSUITS:
+		return true
+	case ContentFilteringCategorieTECHNOLOGY:
+		return true
+	case ContentFilteringCategorieTELEVISION:
+		return true
+	case ContentFilteringCategorieTOBACCO:
+		return true
+	case ContentFilteringCategorieTRANSLATORS:
+		return true
+	case ContentFilteringCategorieTRAVEL:
+		return true
+	case ContentFilteringCategorieUNREACHABLEDOMAINS:
+		return true
+	case ContentFilteringCategorieUNRELIABLEINFORMATION:
+		return true
+	case ContentFilteringCategorieVEHICLES:
+		return true
+	case ContentFilteringCategorieVIDEOSTREAMING:
+		return true
+	case ContentFilteringCategorieVIOLENCE:
+		return true
+	case ContentFilteringCategorieWEAPONS:
+		return true
+	case ContentFilteringCategorieWEATHER:
+		return true
+	case ContentFilteringCategorieWEBMAIL:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ContentFilteringScheduleMode.
 const (
 	ContentFilteringScheduleModeALWAYS      ContentFilteringScheduleMode = "ALWAYS"
@@ -1219,111 +2860,33 @@ func (e ContentFilteringScheduleRepeatOnDays) Valid() bool {
 	}
 }
 
-// Defines values for DaoConfigEDTToyPkrNNHXKNEnk.
+// Defines values for ContentFilteringScheduleRepeatOnDay.
 const (
-	AUDIO DaoConfigEDTToyPkrNNHXKNEnk = "AUDIO"
-	VIDEO DaoConfigEDTToyPkrNNHXKNEnk = "VIDEO"
+	ContentFilteringScheduleRepeatOnDayFri ContentFilteringScheduleRepeatOnDay = "fri"
+	ContentFilteringScheduleRepeatOnDayMon ContentFilteringScheduleRepeatOnDay = "mon"
+	ContentFilteringScheduleRepeatOnDaySat ContentFilteringScheduleRepeatOnDay = "sat"
+	ContentFilteringScheduleRepeatOnDaySun ContentFilteringScheduleRepeatOnDay = "sun"
+	ContentFilteringScheduleRepeatOnDayThu ContentFilteringScheduleRepeatOnDay = "thu"
+	ContentFilteringScheduleRepeatOnDayTue ContentFilteringScheduleRepeatOnDay = "tue"
+	ContentFilteringScheduleRepeatOnDayWed ContentFilteringScheduleRepeatOnDay = "wed"
 )
 
-// Valid indicates whether the value is a known member of the DaoConfigEDTToyPkrNNHXKNEnk enum.
-func (e DaoConfigEDTToyPkrNNHXKNEnk) Valid() bool {
+// Valid indicates whether the value is a known member of the ContentFilteringScheduleRepeatOnDay enum.
+func (e ContentFilteringScheduleRepeatOnDay) Valid() bool {
 	switch e {
-	case AUDIO:
+	case ContentFilteringScheduleRepeatOnDayFri:
 		return true
-	case VIDEO:
+	case ContentFilteringScheduleRepeatOnDayMon:
 		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for DaoConfigEKKHUkYjHujLgFBD.
-const (
-	DaoConfigEKKHUkYjHujLgFBDOBJECT   DaoConfigEKKHUkYjHujLgFBD = "OBJECT"
-	DaoConfigEKKHUkYjHujLgFBDSPECIFIC DaoConfigEKKHUkYjHujLgFBD = "SPECIFIC"
-)
-
-// Valid indicates whether the value is a known member of the DaoConfigEKKHUkYjHujLgFBD enum.
-func (e DaoConfigEKKHUkYjHujLgFBD) Valid() bool {
-	switch e {
-	case DaoConfigEKKHUkYjHujLgFBDOBJECT:
+	case ContentFilteringScheduleRepeatOnDaySat:
 		return true
-	case DaoConfigEKKHUkYjHujLgFBDSPECIFIC:
+	case ContentFilteringScheduleRepeatOnDaySun:
 		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for DaoConfigEKAeyOUcXIsMsQw.
-const (
-	DaoConfigEKAeyOUcXIsMsQwANY      DaoConfigEKAeyOUcXIsMsQw = "ANY"
-	DaoConfigEKAeyOUcXIsMsQwOBJECT   DaoConfigEKAeyOUcXIsMsQw = "OBJECT"
-	DaoConfigEKAeyOUcXIsMsQwSPECIFIC DaoConfigEKAeyOUcXIsMsQw = "SPECIFIC"
-)
-
-// Valid indicates whether the value is a known member of the DaoConfigEKAeyOUcXIsMsQw enum.
-func (e DaoConfigEKAeyOUcXIsMsQw) Valid() bool {
-	switch e {
-	case DaoConfigEKAeyOUcXIsMsQwANY:
+	case ContentFilteringScheduleRepeatOnDayThu:
 		return true
-	case DaoConfigEKAeyOUcXIsMsQwOBJECT:
+	case ContentFilteringScheduleRepeatOnDayTue:
 		return true
-	case DaoConfigEKAeyOUcXIsMsQwSPECIFIC:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for DaoConfigEKCAeyOUcXIsMsQw.
-const (
-	DaoConfigEKCAeyOUcXIsMsQwLONG  DaoConfigEKCAeyOUcXIsMsQw = "LONG"
-	DaoConfigEKCAeyOUcXIsMsQwOFF   DaoConfigEKCAeyOUcXIsMsQw = "OFF"
-	DaoConfigEKCAeyOUcXIsMsQwSHORT DaoConfigEKCAeyOUcXIsMsQw = "SHORT"
-)
-
-// Valid indicates whether the value is a known member of the DaoConfigEKCAeyOUcXIsMsQw enum.
-func (e DaoConfigEKCAeyOUcXIsMsQw) Valid() bool {
-	switch e {
-	case DaoConfigEKCAeyOUcXIsMsQwLONG:
-		return true
-	case DaoConfigEKCAeyOUcXIsMsQwOFF:
-		return true
-	case DaoConfigEKCAeyOUcXIsMsQwSHORT:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for DaoConfigEWJRsSex.
-const (
-	DaoConfigEWJRsSexFri DaoConfigEWJRsSex = "fri"
-	DaoConfigEWJRsSexMon DaoConfigEWJRsSex = "mon"
-	DaoConfigEWJRsSexSat DaoConfigEWJRsSex = "sat"
-	DaoConfigEWJRsSexSun DaoConfigEWJRsSex = "sun"
-	DaoConfigEWJRsSexThu DaoConfigEWJRsSex = "thu"
-	DaoConfigEWJRsSexTue DaoConfigEWJRsSex = "tue"
-	DaoConfigEWJRsSexWed DaoConfigEWJRsSex = "wed"
-)
-
-// Valid indicates whether the value is a known member of the DaoConfigEWJRsSex enum.
-func (e DaoConfigEWJRsSex) Valid() bool {
-	switch e {
-	case DaoConfigEWJRsSexFri:
-		return true
-	case DaoConfigEWJRsSexMon:
-		return true
-	case DaoConfigEWJRsSexSat:
-		return true
-	case DaoConfigEWJRsSexSun:
-		return true
-	case DaoConfigEWJRsSexThu:
-		return true
-	case DaoConfigEWJRsSexTue:
-		return true
-	case DaoConfigEWJRsSexWed:
+	case ContentFilteringScheduleRepeatOnDayWed:
 		return true
 	default:
 		return false
@@ -2887,6 +4450,27 @@ func (e DeviceReplaceReplacementState) Valid() bool {
 	}
 }
 
+// Defines values for DeviceSupportFileGeneratorStatus.
+const (
+	DeviceSupportFileGeneratorStatusGENERATING      DeviceSupportFileGeneratorStatus = "GENERATING"
+	DeviceSupportFileGeneratorStatusREADYTODOWNLOAD DeviceSupportFileGeneratorStatus = "READY_TO_DOWNLOAD"
+	DeviceSupportFileGeneratorStatusREADYTOGENERATE DeviceSupportFileGeneratorStatus = "READY_TO_GENERATE"
+)
+
+// Valid indicates whether the value is a known member of the DeviceSupportFileGeneratorStatus enum.
+func (e DeviceSupportFileGeneratorStatus) Valid() bool {
+	switch e {
+	case DeviceSupportFileGeneratorStatusGENERATING:
+		return true
+	case DeviceSupportFileGeneratorStatusREADYTODOWNLOAD:
+		return true
+	case DeviceSupportFileGeneratorStatusREADYTOGENERATE:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for DevicesStpEdgeBatchEnableResultPortErrorCode.
 const (
 	DEVICENOTFOUND    DevicesStpEdgeBatchEnableResultPortErrorCode = "DEVICE_NOT_FOUND"
@@ -3145,60 +4729,6 @@ func (e DynamicdnsService) Valid() bool {
 	case DynamicdnsServiceTunnelbroker:
 		return true
 	case DynamicdnsServiceZoneedit:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for EAKHUkYjHujLgFBD.
-const (
-	EAKHUkYjHujLgFBDAll   EAKHUkYjHujLgFBD = "all"
-	EAKHUkYjHujLgFBDDebug EAKHUkYjHujLgFBD = "debug"
-	EAKHUkYjHujLgFBDError EAKHUkYjHujLgFBD = "error"
-	EAKHUkYjHujLgFBDFatal EAKHUkYjHujLgFBD = "fatal"
-	EAKHUkYjHujLgFBDInfo  EAKHUkYjHujLgFBD = "info"
-	EAKHUkYjHujLgFBDOff   EAKHUkYjHujLgFBD = "off"
-	EAKHUkYjHujLgFBDTrace EAKHUkYjHujLgFBD = "trace"
-	EAKHUkYjHujLgFBDWarn  EAKHUkYjHujLgFBD = "warn"
-)
-
-// Valid indicates whether the value is a known member of the EAKHUkYjHujLgFBD enum.
-func (e EAKHUkYjHujLgFBD) Valid() bool {
-	switch e {
-	case EAKHUkYjHujLgFBDAll:
-		return true
-	case EAKHUkYjHujLgFBDDebug:
-		return true
-	case EAKHUkYjHujLgFBDError:
-		return true
-	case EAKHUkYjHujLgFBDFatal:
-		return true
-	case EAKHUkYjHujLgFBDInfo:
-		return true
-	case EAKHUkYjHujLgFBDOff:
-		return true
-	case EAKHUkYjHujLgFBDTrace:
-		return true
-	case EAKHUkYjHujLgFBDWarn:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ERYtJfMBbtgWvku.
-const (
-	ERYtJfMBbtgWvkuAuto   ERYtJfMBbtgWvku = "auto"
-	ERYtJfMBbtgWvkuManual ERYtJfMBbtgWvku = "manual"
-)
-
-// Valid indicates whether the value is a known member of the ERYtJfMBbtgWvku enum.
-func (e ERYtJfMBbtgWvku) Valid() bool {
-	switch e {
-	case ERYtJfMBbtgWvkuAuto:
-		return true
-	case ERYtJfMBbtgWvkuManual:
 		return true
 	default:
 		return false
@@ -4282,726 +5812,6 @@ func (e FloorplanShapeType) Valid() bool {
 	}
 }
 
-// Defines values for GBNAEUraORhn.
-const (
-	GBNAEUraORhnAuto   GBNAEUraORhn = "auto"
-	GBNAEUraORhnManual GBNAEUraORhn = "manual"
-)
-
-// Valid indicates whether the value is a known member of the GBNAEUraORhn enum.
-func (e GBNAEUraORhn) Valid() bool {
-	switch e {
-	case GBNAEUraORhnAuto:
-		return true
-	case GBNAEUraORhnManual:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBUHtDMji.
-const (
-	GBUHtDMjiANOMALY              GBUHtDMji = "ANOMALY"
-	GBUHtDMjiCLIENTCONNECTED      GBUHtDMji = "CLIENT_CONNECTED"
-	GBUHtDMjiCLIENTDISCONNECTED   GBUHtDMji = "CLIENT_DISCONNECTED"
-	GBUHtDMjiDEVICECONNECTED      GBUHtDMji = "DEVICE_CONNECTED"
-	GBUHtDMjiDEVICEDISCONNECTED   GBUHtDMji = "DEVICE_DISCONNECTED"
-	GBUHtDMjiDEVICEOFFLINE        GBUHtDMji = "DEVICE_OFFLINE"
-	GBUHtDMjiINTERNETCONNECTED    GBUHtDMji = "INTERNET_CONNECTED"
-	GBUHtDMjiINTERNETDISCONNECTED GBUHtDMji = "INTERNET_DISCONNECTED"
-	GBUHtDMjiNETWORKOFFLINE       GBUHtDMji = "NETWORK_OFFLINE"
-	GBUHtDMjiNETWORKUPDATED       GBUHtDMji = "NETWORK_UPDATED"
-	GBUHtDMjiPOWERCYCLETRIGGERED  GBUHtDMji = "POWER_CYCLE_TRIGGERED"
-)
-
-// Valid indicates whether the value is a known member of the GBUHtDMji enum.
-func (e GBUHtDMji) Valid() bool {
-	switch e {
-	case GBUHtDMjiANOMALY:
-		return true
-	case GBUHtDMjiCLIENTCONNECTED:
-		return true
-	case GBUHtDMjiCLIENTDISCONNECTED:
-		return true
-	case GBUHtDMjiDEVICECONNECTED:
-		return true
-	case GBUHtDMjiDEVICEDISCONNECTED:
-		return true
-	case GBUHtDMjiDEVICEOFFLINE:
-		return true
-	case GBUHtDMjiINTERNETCONNECTED:
-		return true
-	case GBUHtDMjiINTERNETDISCONNECTED:
-		return true
-	case GBUHtDMjiNETWORKOFFLINE:
-		return true
-	case GBUHtDMjiNETWORKUPDATED:
-		return true
-	case GBUHtDMjiPOWERCYCLETRIGGERED:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAEKWFFqTgF.
-const (
-	GBAEKWFFqTgFWAN            GBAEKWFFqTgF = "WAN"
-	GBAEKWFFqTgFWAN2           GBAEKWFFqTgF = "WAN2"
-	GBAEKWFFqTgFWAN3           GBAEKWFFqTgF = "WAN3"
-	GBAEKWFFqTgFWAN4           GBAEKWFFqTgF = "WAN4"
-	GBAEKWFFqTgFWAN5           GBAEKWFFqTgF = "WAN5"
-	GBAEKWFFqTgFWAN6           GBAEKWFFqTgF = "WAN6"
-	GBAEKWFFqTgFWAN7           GBAEKWFFqTgF = "WAN7"
-	GBAEKWFFqTgFWAN8           GBAEKWFFqTgF = "WAN8"
-	GBAEKWFFqTgFWAN9           GBAEKWFFqTgF = "WAN9"
-	GBAEKWFFqTgFWANLTEFAILOVER GBAEKWFFqTgF = "WAN_LTE_FAILOVER"
-	GBAEKWFFqTgFWANMAGIC       GBAEKWFFqTgF = "WAN_MAGIC"
-)
-
-// Valid indicates whether the value is a known member of the GBAEKWFFqTgF enum.
-func (e GBAEKWFFqTgF) Valid() bool {
-	switch e {
-	case GBAEKWFFqTgFWAN:
-		return true
-	case GBAEKWFFqTgFWAN2:
-		return true
-	case GBAEKWFFqTgFWAN3:
-		return true
-	case GBAEKWFFqTgFWAN4:
-		return true
-	case GBAEKWFFqTgFWAN5:
-		return true
-	case GBAEKWFFqTgFWAN6:
-		return true
-	case GBAEKWFFqTgFWAN7:
-		return true
-	case GBAEKWFFqTgFWAN8:
-		return true
-	case GBAEKWFFqTgFWAN9:
-		return true
-	case GBAEKWFFqTgFWANLTEFAILOVER:
-		return true
-	case GBAEKWFFqTgFWANMAGIC:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAEBTToyPkrNNHXKNEnk.
-const (
-	GBAEBTToyPkrNNHXKNEnkDISTRIBUTED  GBAEBTToyPkrNNHXKNEnk = "DISTRIBUTED"
-	GBAEBTToyPkrNNHXKNEnkFAILOVERONLY GBAEBTToyPkrNNHXKNEnk = "FAILOVER_ONLY"
-)
-
-// Valid indicates whether the value is a known member of the GBAEBTToyPkrNNHXKNEnk enum.
-func (e GBAEBTToyPkrNNHXKNEnk) Valid() bool {
-	switch e {
-	case GBAEBTToyPkrNNHXKNEnkDISTRIBUTED:
-		return true
-	case GBAEBTToyPkrNNHXKNEnkFAILOVERONLY:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAHBLwwMKkr.
-const (
-	APAP     GBAHBLwwMKkr = "AP_AP"
-	APCLIENT GBAHBLwwMKkr = "AP_CLIENT"
-)
-
-// Valid indicates whether the value is a known member of the GBAHBLwwMKkr enum.
-func (e GBAHBLwwMKkr) Valid() bool {
-	switch e {
-	case APAP:
-		return true
-	case APCLIENT:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAIGWoWvNEX.
-const (
-	GBAIGWoWvNEXBoth    GBAIGWoWvNEX = "both"
-	GBAIGWoWvNEXN2g     GBAIGWoWvNEX = "2g"
-	GBAIGWoWvNEXN5g     GBAIGWoWvNEX = "5g"
-	GBAIGWoWvNEXN6g     GBAIGWoWvNEX = "6g"
-	GBAIGWoWvNEXUnknown GBAIGWoWvNEX = "unknown"
-)
-
-// Valid indicates whether the value is a known member of the GBAIGWoWvNEX enum.
-func (e GBAIGWoWvNEX) Valid() bool {
-	switch e {
-	case GBAIGWoWvNEXBoth:
-		return true
-	case GBAIGWoWvNEXN2g:
-		return true
-	case GBAIGWoWvNEXN5g:
-		return true
-	case GBAIGWoWvNEXN6g:
-		return true
-	case GBAIGWoWvNEXUnknown:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAkKHUkYjHujLgFBDStatus.
-const (
-	GBAkKHUkYjHujLgFBDStatusGENERATING      GBAkKHUkYjHujLgFBDStatus = "GENERATING"
-	GBAkKHUkYjHujLgFBDStatusREADYTODOWNLOAD GBAkKHUkYjHujLgFBDStatus = "READY_TO_DOWNLOAD"
-	GBAkKHUkYjHujLgFBDStatusREADYTOGENERATE GBAkKHUkYjHujLgFBDStatus = "READY_TO_GENERATE"
-)
-
-// Valid indicates whether the value is a known member of the GBAkKHUkYjHujLgFBDStatus enum.
-func (e GBAkKHUkYjHujLgFBDStatus) Valid() bool {
-	switch e {
-	case GBAkKHUkYjHujLgFBDStatusGENERATING:
-		return true
-	case GBAkKHUkYjHujLgFBDStatusREADYTODOWNLOAD:
-		return true
-	case GBAkKHUkYjHujLgFBDStatusREADYTOGENERATE:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAnGVVyiCType.
-const (
-	GBAnGVVyiCTypeCLIENT            GBAnGVVyiCType = "CLIENT"
-	GBAnGVVyiCTypeDEVICE            GBAnGVVyiCType = "DEVICE"
-	GBAnGVVyiCTypeUNIFIDEVICECLIENT GBAnGVVyiCType = "UNIFI_DEVICE_CLIENT"
-)
-
-// Valid indicates whether the value is a known member of the GBAnGVVyiCType enum.
-func (e GBAnGVVyiCType) Valid() bool {
-	switch e {
-	case GBAnGVVyiCTypeCLIENT:
-		return true
-	case GBAnGVVyiCTypeDEVICE:
-		return true
-	case GBAnGVVyiCTypeUNIFIDEVICECLIENT:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAnGHtDMjiType.
-const (
-	GBAnGHtDMjiTypeDESTINATIONNAT                GBAnGHtDMjiType = "DESTINATION_NAT"
-	GBAnGHtDMjiTypeFIREWALLPOLICY                GBAnGHtDMjiType = "FIREWALL_POLICY"
-	GBAnGHtDMjiTypeFIREWALLRULE                  GBAnGHtDMjiType = "FIREWALL_RULE"
-	GBAnGHtDMjiTypeGENERATEDALLOWFIREWALLPOLICY  GBAnGHtDMjiType = "GENERATED_ALLOW_FIREWALL_POLICY"
-	GBAnGHtDMjiTypeGENERATEDBLOCKFIREWALLPOLICY  GBAnGHtDMjiType = "GENERATED_BLOCK_FIREWALL_POLICY"
-	GBAnGHtDMjiTypeGENERATEDPOLICYBASEDROUTING   GBAnGHtDMjiType = "GENERATED_POLICY_BASED_ROUTING"
-	GBAnGHtDMjiTypeGENERATEDREJECTFIREWALLPOLICY GBAnGHtDMjiType = "GENERATED_REJECT_FIREWALL_POLICY"
-	GBAnGHtDMjiTypeMASQUERADE                    GBAnGHtDMjiType = "MASQUERADE"
-	GBAnGHtDMjiTypePORTFORWARDING                GBAnGHtDMjiType = "PORT_FORWARDING"
-	GBAnGHtDMjiTypePREDEFINEDFIREWALLRULE        GBAnGHtDMjiType = "PREDEFINED_FIREWALL_RULE"
-	GBAnGHtDMjiTypePREDEFINEDMASQUERADE          GBAnGHtDMjiType = "PREDEFINED_MASQUERADE"
-	GBAnGHtDMjiTypeSIMPLEAPPBLOCK                GBAnGHtDMjiType = "SIMPLE_APP_BLOCK"
-	GBAnGHtDMjiTypeSOURCENAT                     GBAnGHtDMjiType = "SOURCE_NAT"
-	GBAnGHtDMjiTypeTRAFFICROUTE                  GBAnGHtDMjiType = "TRAFFIC_ROUTE"
-	GBAnGHtDMjiTypeTRAFFICRULE                   GBAnGHtDMjiType = "TRAFFIC_RULE"
-)
-
-// Valid indicates whether the value is a known member of the GBAnGHtDMjiType enum.
-func (e GBAnGHtDMjiType) Valid() bool {
-	switch e {
-	case GBAnGHtDMjiTypeDESTINATIONNAT:
-		return true
-	case GBAnGHtDMjiTypeFIREWALLPOLICY:
-		return true
-	case GBAnGHtDMjiTypeFIREWALLRULE:
-		return true
-	case GBAnGHtDMjiTypeGENERATEDALLOWFIREWALLPOLICY:
-		return true
-	case GBAnGHtDMjiTypeGENERATEDBLOCKFIREWALLPOLICY:
-		return true
-	case GBAnGHtDMjiTypeGENERATEDPOLICYBASEDROUTING:
-		return true
-	case GBAnGHtDMjiTypeGENERATEDREJECTFIREWALLPOLICY:
-		return true
-	case GBAnGHtDMjiTypeMASQUERADE:
-		return true
-	case GBAnGHtDMjiTypePORTFORWARDING:
-		return true
-	case GBAnGHtDMjiTypePREDEFINEDFIREWALLRULE:
-		return true
-	case GBAnGHtDMjiTypePREDEFINEDMASQUERADE:
-		return true
-	case GBAnGHtDMjiTypeSIMPLEAPPBLOCK:
-		return true
-	case GBAnGHtDMjiTypeSOURCENAT:
-		return true
-	case GBAnGHtDMjiTypeTRAFFICROUTE:
-		return true
-	case GBAnGHtDMjiTypeTRAFFICRULE:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAqKHUkYjHujLgFBD.
-const (
-	BPDUGUARDTRIGGERED             GBAqKHUkYjHujLgFBD = "BPDU_GUARD_TRIGGERED"
-	CLIENTLINKFLAPWIRED            GBAqKHUkYjHujLgFBD = "CLIENT_LINK_FLAP_WIRED"
-	LOGSWITCHPORTLINKFLAP          GBAqKHUkYjHujLgFBD = "LOG_SWITCH_PORT_LINK_FLAP"
-	LOGSWITCHPORTSTPFLAP           GBAqKHUkYjHujLgFBD = "LOG_SWITCH_PORT_STP_FLAP"
-	NEGOTIATEDLOWUPLINKPORTSPEED   GBAqKHUkYjHujLgFBD = "NEGOTIATED_LOW_UPLINK_PORT_SPEED"
-	NETWORKLOOPDETECTEDBYKEEPALIVE GBAqKHUkYjHujLgFBD = "NETWORK_LOOP_DETECTED_BY_KEEPALIVE"
-	NETWORKLOOPDETECTEDBYSTP       GBAqKHUkYjHujLgFBD = "NETWORK_LOOP_DETECTED_BY_STP"
-	POEPORTBUDGETEXCEEDED          GBAqKHUkYjHujLgFBD = "POE_PORT_BUDGET_EXCEEDED"
-	PORTBROADCASTSTORM             GBAqKHUkYjHujLgFBD = "PORT_BROADCAST_STORM"
-	PORTDHCPSTORM                  GBAqKHUkYjHujLgFBD = "PORT_DHCP_STORM"
-	PORTDROPPEDTRAFFIC             GBAqKHUkYjHujLgFBD = "PORT_DROPPED_TRAFFIC"
-	PORTMACLOCKING                 GBAqKHUkYjHujLgFBD = "PORT_MAC_LOCKING"
-	PORTMULTICASTSTORM             GBAqKHUkYjHujLgFBD = "PORT_MULTICAST_STORM"
-	PORTTRANSMISSIONERRORS         GBAqKHUkYjHujLgFBD = "PORT_TRANSMISSION_ERRORS"
-	PORTUNICASTSTORM               GBAqKHUkYjHujLgFBD = "PORT_UNICAST_STORM"
-	ROGUEDHCPSERVERDETECTED        GBAqKHUkYjHujLgFBD = "ROGUE_DHCP_SERVER_DETECTED"
-	SFPEEPROMERROR                 GBAqKHUkYjHujLgFBD = "SFP_EEPROM_ERROR"
-	SFPRECEIVEDFAULT               GBAqKHUkYjHujLgFBD = "SFP_RECEIVED_FAULT"
-	SFPTRANSMISSIONFAULT           GBAqKHUkYjHujLgFBD = "SFP_TRANSMISSION_FAULT"
-)
-
-// Valid indicates whether the value is a known member of the GBAqKHUkYjHujLgFBD enum.
-func (e GBAqKHUkYjHujLgFBD) Valid() bool {
-	switch e {
-	case BPDUGUARDTRIGGERED:
-		return true
-	case CLIENTLINKFLAPWIRED:
-		return true
-	case LOGSWITCHPORTLINKFLAP:
-		return true
-	case LOGSWITCHPORTSTPFLAP:
-		return true
-	case NEGOTIATEDLOWUPLINKPORTSPEED:
-		return true
-	case NETWORKLOOPDETECTEDBYKEEPALIVE:
-		return true
-	case NETWORKLOOPDETECTEDBYSTP:
-		return true
-	case POEPORTBUDGETEXCEEDED:
-		return true
-	case PORTBROADCASTSTORM:
-		return true
-	case PORTDHCPSTORM:
-		return true
-	case PORTDROPPEDTRAFFIC:
-		return true
-	case PORTMACLOCKING:
-		return true
-	case PORTMULTICASTSTORM:
-		return true
-	case PORTTRANSMISSIONERRORS:
-		return true
-	case PORTUNICASTSTORM:
-		return true
-	case ROGUEDHCPSERVERDETECTED:
-		return true
-	case SFPEEPROMERROR:
-		return true
-	case SFPRECEIVEDFAULT:
-		return true
-	case SFPTRANSMISSIONFAULT:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBAtSNMiFVJXxaonBOtqbJ.
-const (
-	GBAtSNMiFVJXxaonBOtqbJAdBlocking       GBAtSNMiFVJXxaonBOtqbJ = "Ad Blocking"
-	GBAtSNMiFVJXxaonBOtqbJContentFiltering GBAtSNMiFVJXxaonBOtqbJ = "Content Filtering"
-	GBAtSNMiFVJXxaonBOtqbJDstNAT           GBAtSNMiFVJXxaonBOtqbJ = "Dst. NAT"
-	GBAtSNMiFVJXxaonBOtqbJFirewall         GBAtSNMiFVJXxaonBOtqbJ = "Firewall"
-	GBAtSNMiFVJXxaonBOtqbJIDSIPS           GBAtSNMiFVJXxaonBOtqbJ = "IDS/IPS"
-	GBAtSNMiFVJXxaonBOtqbJMasqNAT          GBAtSNMiFVJXxaonBOtqbJ = "Masq. NAT"
-	GBAtSNMiFVJXxaonBOtqbJNeXTAI           GBAtSNMiFVJXxaonBOtqbJ = "NeXT AI"
-	GBAtSNMiFVJXxaonBOtqbJPortFwd          GBAtSNMiFVJXxaonBOtqbJ = "Port Fwd."
-	GBAtSNMiFVJXxaonBOtqbJProtection       GBAtSNMiFVJXxaonBOtqbJ = "Protection"
-	GBAtSNMiFVJXxaonBOtqbJQoS              GBAtSNMiFVJXxaonBOtqbJ = "QoS"
-	GBAtSNMiFVJXxaonBOtqbJSrcNAT           GBAtSNMiFVJXxaonBOtqbJ = "Src. NAT"
-)
-
-// Valid indicates whether the value is a known member of the GBAtSNMiFVJXxaonBOtqbJ enum.
-func (e GBAtSNMiFVJXxaonBOtqbJ) Valid() bool {
-	switch e {
-	case GBAtSNMiFVJXxaonBOtqbJAdBlocking:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJContentFiltering:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJDstNAT:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJFirewall:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJIDSIPS:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJMasqNAT:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJNeXTAI:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJPortFwd:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJProtection:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJQoS:
-		return true
-	case GBAtSNMiFVJXxaonBOtqbJSrcNAT:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBCQnvuxbsxyajz0.
-const (
-	GBCQnvuxbsxyajz0ANOMALYENDED   GBCQnvuxbsxyajz0 = "ANOMALY_ENDED"
-	GBCQnvuxbsxyajz0ANOMALYSTARTED GBCQnvuxbsxyajz0 = "ANOMALY_STARTED"
-	GBCQnvuxbsxyajz0DEVICEADOPTED  GBCQnvuxbsxyajz0 = "DEVICE_ADOPTED"
-	GBCQnvuxbsxyajz0DEVICEOFFLINE  GBCQnvuxbsxyajz0 = "DEVICE_OFFLINE"
-	GBCQnvuxbsxyajz0DEVICEONLINE   GBCQnvuxbsxyajz0 = "DEVICE_ONLINE"
-	GBCQnvuxbsxyajz0DEVICEREMOVED  GBCQnvuxbsxyajz0 = "DEVICE_REMOVED"
-	GBCQnvuxbsxyajz0NETWORKOFFLINE GBCQnvuxbsxyajz0 = "NETWORK_OFFLINE"
-	GBCQnvuxbsxyajz0NETWORKUPDATED GBCQnvuxbsxyajz0 = "NETWORK_UPDATED"
-)
-
-// Valid indicates whether the value is a known member of the GBCQnvuxbsxyajz0 enum.
-func (e GBCQnvuxbsxyajz0) Valid() bool {
-	switch e {
-	case GBCQnvuxbsxyajz0ANOMALYENDED:
-		return true
-	case GBCQnvuxbsxyajz0ANOMALYSTARTED:
-		return true
-	case GBCQnvuxbsxyajz0DEVICEADOPTED:
-		return true
-	case GBCQnvuxbsxyajz0DEVICEOFFLINE:
-		return true
-	case GBCQnvuxbsxyajz0DEVICEONLINE:
-		return true
-	case GBCQnvuxbsxyajz0DEVICEREMOVED:
-		return true
-	case GBCQnvuxbsxyajz0NETWORKOFFLINE:
-		return true
-	case GBCQnvuxbsxyajz0NETWORKUPDATED:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBEirJvdtm.
-const (
-	GBEirJvdtmV4 GBEirJvdtm = "v4"
-	GBEirJvdtmV6 GBEirJvdtm = "v6"
-)
-
-// Valid indicates whether the value is a known member of the GBEirJvdtm enum.
-func (e GBEirJvdtm) Valid() bool {
-	switch e {
-	case GBEirJvdtmV4:
-		return true
-	case GBEirJvdtmV6:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBVAAeyOUcXIsMsQwNetworkPurpose.
-const (
-	GBVAAeyOUcXIsMsQwNetworkPurposeCorporate        GBVAAeyOUcXIsMsQwNetworkPurpose = "corporate"
-	GBVAAeyOUcXIsMsQwNetworkPurposeGuest            GBVAAeyOUcXIsMsQwNetworkPurpose = "guest"
-	GBVAAeyOUcXIsMsQwNetworkPurposeIntervlanRouting GBVAAeyOUcXIsMsQwNetworkPurpose = "intervlan-routing"
-	GBVAAeyOUcXIsMsQwNetworkPurposeIpsecVpn         GBVAAeyOUcXIsMsQwNetworkPurpose = "ipsec-vpn"
-	GBVAAeyOUcXIsMsQwNetworkPurposeOpenvpnVpn       GBVAAeyOUcXIsMsQwNetworkPurpose = "openvpn-vpn"
-	GBVAAeyOUcXIsMsQwNetworkPurposeRemoteUserVpn    GBVAAeyOUcXIsMsQwNetworkPurpose = "remote-user-vpn"
-	GBVAAeyOUcXIsMsQwNetworkPurposeSiteVpn          GBVAAeyOUcXIsMsQwNetworkPurpose = "site-vpn"
-	GBVAAeyOUcXIsMsQwNetworkPurposeVlanOnly         GBVAAeyOUcXIsMsQwNetworkPurpose = "vlan-only"
-	GBVAAeyOUcXIsMsQwNetworkPurposeVpnClient        GBVAAeyOUcXIsMsQwNetworkPurpose = "vpn-client"
-	GBVAAeyOUcXIsMsQwNetworkPurposeWan              GBVAAeyOUcXIsMsQwNetworkPurpose = "wan"
-	GBVAAeyOUcXIsMsQwNetworkPurposeWanMagic         GBVAAeyOUcXIsMsQwNetworkPurpose = "wan_magic"
-)
-
-// Valid indicates whether the value is a known member of the GBVAAeyOUcXIsMsQwNetworkPurpose enum.
-func (e GBVAAeyOUcXIsMsQwNetworkPurpose) Valid() bool {
-	switch e {
-	case GBVAAeyOUcXIsMsQwNetworkPurposeCorporate:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeGuest:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeIntervlanRouting:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeIpsecVpn:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeOpenvpnVpn:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeRemoteUserVpn:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeSiteVpn:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeVlanOnly:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeVpnClient:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeWan:
-		return true
-	case GBVAAeyOUcXIsMsQwNetworkPurposeWanMagic:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GBWAAKHUkYjHujLgFBD.
-const (
-	GBWAAKHUkYjHujLgFBDAll  GBWAAKHUkYjHujLgFBD = "all"
-	GBWAAKHUkYjHujLgFBDNone GBWAAKHUkYjHujLgFBD = "none"
-	GBWAAKHUkYjHujLgFBDSome GBWAAKHUkYjHujLgFBD = "some"
-)
-
-// Valid indicates whether the value is a known member of the GBWAAKHUkYjHujLgFBD enum.
-func (e GBWAAKHUkYjHujLgFBD) Valid() bool {
-	switch e {
-	case GBWAAKHUkYjHujLgFBDAll:
-		return true
-	case GBWAAKHUkYjHujLgFBDNone:
-		return true
-	case GBWAAKHUkYjHujLgFBDSome:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GDMAeyOUcXIsMsQw.
-const (
-	GDMAeyOUcXIsMsQwE1 GDMAeyOUcXIsMsQw = "e1"
-	GDMAeyOUcXIsMsQwE2 GDMAeyOUcXIsMsQw = "e2"
-)
-
-// Valid indicates whether the value is a known member of the GDMAeyOUcXIsMsQw enum.
-func (e GDMAeyOUcXIsMsQw) Valid() bool {
-	switch e {
-	case GDMAeyOUcXIsMsQwE1:
-		return true
-	case GDMAeyOUcXIsMsQwE2:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GDSKHUkYjHujLgFBD.
-const (
-	GDSKHUkYjHujLgFBDBACKUP GDSKHUkYjHujLgFBD = "BACKUP"
-	GDSKHUkYjHujLgFBDMASTER GDSKHUkYjHujLgFBD = "MASTER"
-	GDSKHUkYjHujLgFBDMEMBER GDSKHUkYjHujLgFBD = "MEMBER"
-)
-
-// Valid indicates whether the value is a known member of the GDSKHUkYjHujLgFBD enum.
-func (e GDSKHUkYjHujLgFBD) Valid() bool {
-	switch e {
-	case GDSKHUkYjHujLgFBDBACKUP:
-		return true
-	case GDSKHUkYjHujLgFBDMASTER:
-		return true
-	case GDSKHUkYjHujLgFBDMEMBER:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GFEKHUkYjHujLgFBD.
-const (
-	GFEKHUkYjHujLgFBDEHT240 GFEKHUkYjHujLgFBD = "EHT_240"
-	GFEKHUkYjHujLgFBDEHT320 GFEKHUkYjHujLgFBD = "EHT_320"
-	GFEKHUkYjHujLgFBDHT1080 GFEKHUkYjHujLgFBD = "HT_1080"
-	GFEKHUkYjHujLgFBDHT160  GFEKHUkYjHujLgFBD = "HT_160"
-	GFEKHUkYjHujLgFBDHT20   GFEKHUkYjHujLgFBD = "HT_20"
-	GFEKHUkYjHujLgFBDHT2160 GFEKHUkYjHujLgFBD = "HT_2160"
-	GFEKHUkYjHujLgFBDHT40   GFEKHUkYjHujLgFBD = "HT_40"
-	GFEKHUkYjHujLgFBDHT4320 GFEKHUkYjHujLgFBD = "HT_4320"
-	GFEKHUkYjHujLgFBDHT80   GFEKHUkYjHujLgFBD = "HT_80"
-)
-
-// Valid indicates whether the value is a known member of the GFEKHUkYjHujLgFBD enum.
-func (e GFEKHUkYjHujLgFBD) Valid() bool {
-	switch e {
-	case GFEKHUkYjHujLgFBDEHT240:
-		return true
-	case GFEKHUkYjHujLgFBDEHT320:
-		return true
-	case GFEKHUkYjHujLgFBDHT1080:
-		return true
-	case GFEKHUkYjHujLgFBDHT160:
-		return true
-	case GFEKHUkYjHujLgFBDHT20:
-		return true
-	case GFEKHUkYjHujLgFBDHT2160:
-		return true
-	case GFEKHUkYjHujLgFBDHT40:
-		return true
-	case GFEKHUkYjHujLgFBDHT4320:
-		return true
-	case GFEKHUkYjHujLgFBDHT80:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GFERYtJfMBbtgWvku.
-const (
-	GFERYtJfMBbtgWvkuAd  GFERYtJfMBbtgWvku = "ad"
-	GFERYtJfMBbtgWvkuN6e GFERYtJfMBbtgWvku = "6e"
-	GFERYtJfMBbtgWvkuNa  GFERYtJfMBbtgWvku = "na"
-	GFERYtJfMBbtgWvkuNg  GFERYtJfMBbtgWvku = "ng"
-)
-
-// Valid indicates whether the value is a known member of the GFERYtJfMBbtgWvku enum.
-func (e GFERYtJfMBbtgWvku) Valid() bool {
-	switch e {
-	case GFERYtJfMBbtgWvkuAd:
-		return true
-	case GFERYtJfMBbtgWvkuN6e:
-		return true
-	case GFERYtJfMBbtgWvkuNa:
-		return true
-	case GFERYtJfMBbtgWvkuNg:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GLBRYtJfMBbtgWvku.
-const (
-	GLBRYtJfMBbtgWvkuAuto                    GLBRYtJfMBbtgWvku = "auto"
-	GLBRYtJfMBbtgWvkuIpsecVpn                GLBRYtJfMBbtgWvku = "ipsec-vpn"
-	GLBRYtJfMBbtgWvkuL2tpServer              GLBRYtJfMBbtgWvku = "l2tp-server"
-	GLBRYtJfMBbtgWvkuOpenvpnClient           GLBRYtJfMBbtgWvku = "openvpn-client"
-	GLBRYtJfMBbtgWvkuOpenvpnServer           GLBRYtJfMBbtgWvku = "openvpn-server"
-	GLBRYtJfMBbtgWvkuOpenvpnVpn              GLBRYtJfMBbtgWvku = "openvpn-vpn"
-	GLBRYtJfMBbtgWvkuPptpClient              GLBRYtJfMBbtgWvku = "pptp-client"
-	GLBRYtJfMBbtgWvkuPptpServer              GLBRYtJfMBbtgWvku = "pptp-server"
-	GLBRYtJfMBbtgWvkuSdwanHubSpokeTunnel     GLBRYtJfMBbtgWvku = "sdwan-hub-spoke-tunnel"
-	GLBRYtJfMBbtgWvkuSdwanMeshTunnel         GLBRYtJfMBbtgWvku = "sdwan-mesh-tunnel"
-	GLBRYtJfMBbtgWvkuUidServer               GLBRYtJfMBbtgWvku = "uid-server"
-	GLBRYtJfMBbtgWvkuWireguardClient         GLBRYtJfMBbtgWvku = "wireguard-client"
-	GLBRYtJfMBbtgWvkuWireguardServer         GLBRYtJfMBbtgWvku = "wireguard-server"
-	GLBRYtJfMBbtgWvkuWireguardSiteToSite     GLBRYtJfMBbtgWvku = "wireguard-site-to-site"
-	GLBRYtJfMBbtgWvkuWireguardTeleportServer GLBRYtJfMBbtgWvku = "wireguard-teleport-server"
-)
-
-// Valid indicates whether the value is a known member of the GLBRYtJfMBbtgWvku enum.
-func (e GLBRYtJfMBbtgWvku) Valid() bool {
-	switch e {
-	case GLBRYtJfMBbtgWvkuAuto:
-		return true
-	case GLBRYtJfMBbtgWvkuIpsecVpn:
-		return true
-	case GLBRYtJfMBbtgWvkuL2tpServer:
-		return true
-	case GLBRYtJfMBbtgWvkuOpenvpnClient:
-		return true
-	case GLBRYtJfMBbtgWvkuOpenvpnServer:
-		return true
-	case GLBRYtJfMBbtgWvkuOpenvpnVpn:
-		return true
-	case GLBRYtJfMBbtgWvkuPptpClient:
-		return true
-	case GLBRYtJfMBbtgWvkuPptpServer:
-		return true
-	case GLBRYtJfMBbtgWvkuSdwanHubSpokeTunnel:
-		return true
-	case GLBRYtJfMBbtgWvkuSdwanMeshTunnel:
-		return true
-	case GLBRYtJfMBbtgWvkuUidServer:
-		return true
-	case GLBRYtJfMBbtgWvkuWireguardClient:
-		return true
-	case GLBRYtJfMBbtgWvkuWireguardServer:
-		return true
-	case GLBRYtJfMBbtgWvkuWireguardSiteToSite:
-		return true
-	case GLBRYtJfMBbtgWvkuWireguardTeleportServer:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GSKHUkYjHujLgFBD.
-const (
-	GSKHUkYjHujLgFBDMIMO1 GSKHUkYjHujLgFBD = "MIMO_1"
-	GSKHUkYjHujLgFBDMIMO2 GSKHUkYjHujLgFBD = "MIMO_2"
-	GSKHUkYjHujLgFBDMIMO3 GSKHUkYjHujLgFBD = "MIMO_3"
-	GSKHUkYjHujLgFBDMIMO4 GSKHUkYjHujLgFBD = "MIMO_4"
-)
-
-// Valid indicates whether the value is a known member of the GSKHUkYjHujLgFBD enum.
-func (e GSKHUkYjHujLgFBD) Valid() bool {
-	switch e {
-	case GSKHUkYjHujLgFBDMIMO1:
-		return true
-	case GSKHUkYjHujLgFBDMIMO2:
-		return true
-	case GSKHUkYjHujLgFBDMIMO3:
-		return true
-	case GSKHUkYjHujLgFBDMIMO4:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for GSAeyOUcXIsMsQw.
-const (
-	GSAeyOUcXIsMsQwWIFI1 GSAeyOUcXIsMsQw = "WIFI_1"
-	GSAeyOUcXIsMsQwWIFI2 GSAeyOUcXIsMsQw = "WIFI_2"
-	GSAeyOUcXIsMsQwWIFI3 GSAeyOUcXIsMsQw = "WIFI_3"
-	GSAeyOUcXIsMsQwWIFI4 GSAeyOUcXIsMsQw = "WIFI_4"
-	GSAeyOUcXIsMsQwWIFI5 GSAeyOUcXIsMsQw = "WIFI_5"
-	GSAeyOUcXIsMsQwWIFI6 GSAeyOUcXIsMsQw = "WIFI_6"
-	GSAeyOUcXIsMsQwWIFI7 GSAeyOUcXIsMsQw = "WIFI_7"
-)
-
-// Valid indicates whether the value is a known member of the GSAeyOUcXIsMsQw enum.
-func (e GSAeyOUcXIsMsQw) Valid() bool {
-	switch e {
-	case GSAeyOUcXIsMsQwWIFI1:
-		return true
-	case GSAeyOUcXIsMsQwWIFI2:
-		return true
-	case GSAeyOUcXIsMsQwWIFI3:
-		return true
-	case GSAeyOUcXIsMsQwWIFI4:
-		return true
-	case GSAeyOUcXIsMsQwWIFI5:
-		return true
-	case GSAeyOUcXIsMsQwWIFI6:
-		return true
-	case GSAeyOUcXIsMsQwWIFI7:
-		return true
-	default:
-		return false
-	}
-}
-
 // Defines values for GatewayType.
 const (
 	GatewayTypeADBLOCK               GatewayType = "AD_BLOCK"
@@ -5104,6 +5914,129 @@ func (e GatewayEngineLogsKey) Valid() bool {
 	case SOURCEStartedTransferThroughINTERFACEByTRIGGER:
 		return true
 	case SOURCEWasBlockedFromAccessingDESTINATIONByTRIGGER:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for GatewayEngineLogsParamNetworkPurpose.
+const (
+	GatewayEngineLogsParamNetworkPurposeCorporate        GatewayEngineLogsParamNetworkPurpose = "corporate"
+	GatewayEngineLogsParamNetworkPurposeGuest            GatewayEngineLogsParamNetworkPurpose = "guest"
+	GatewayEngineLogsParamNetworkPurposeIntervlanRouting GatewayEngineLogsParamNetworkPurpose = "intervlan-routing"
+	GatewayEngineLogsParamNetworkPurposeIpsecVpn         GatewayEngineLogsParamNetworkPurpose = "ipsec-vpn"
+	GatewayEngineLogsParamNetworkPurposeOpenvpnVpn       GatewayEngineLogsParamNetworkPurpose = "openvpn-vpn"
+	GatewayEngineLogsParamNetworkPurposeRemoteUserVpn    GatewayEngineLogsParamNetworkPurpose = "remote-user-vpn"
+	GatewayEngineLogsParamNetworkPurposeSiteVpn          GatewayEngineLogsParamNetworkPurpose = "site-vpn"
+	GatewayEngineLogsParamNetworkPurposeVlanOnly         GatewayEngineLogsParamNetworkPurpose = "vlan-only"
+	GatewayEngineLogsParamNetworkPurposeVpnClient        GatewayEngineLogsParamNetworkPurpose = "vpn-client"
+	GatewayEngineLogsParamNetworkPurposeWan              GatewayEngineLogsParamNetworkPurpose = "wan"
+	GatewayEngineLogsParamNetworkPurposeWanMagic         GatewayEngineLogsParamNetworkPurpose = "wan_magic"
+)
+
+// Valid indicates whether the value is a known member of the GatewayEngineLogsParamNetworkPurpose enum.
+func (e GatewayEngineLogsParamNetworkPurpose) Valid() bool {
+	switch e {
+	case GatewayEngineLogsParamNetworkPurposeCorporate:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeGuest:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeIntervlanRouting:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeIpsecVpn:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeOpenvpnVpn:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeRemoteUserVpn:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeSiteVpn:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeVlanOnly:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeVpnClient:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeWan:
+		return true
+	case GatewayEngineLogsParamNetworkPurposeWanMagic:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for GatewayEngineLogsParamSourceType.
+const (
+	GatewayEngineLogsParamSourceTypeCLIENT            GatewayEngineLogsParamSourceType = "CLIENT"
+	GatewayEngineLogsParamSourceTypeDEVICE            GatewayEngineLogsParamSourceType = "DEVICE"
+	GatewayEngineLogsParamSourceTypeUNIFIDEVICECLIENT GatewayEngineLogsParamSourceType = "UNIFI_DEVICE_CLIENT"
+)
+
+// Valid indicates whether the value is a known member of the GatewayEngineLogsParamSourceType enum.
+func (e GatewayEngineLogsParamSourceType) Valid() bool {
+	switch e {
+	case GatewayEngineLogsParamSourceTypeCLIENT:
+		return true
+	case GatewayEngineLogsParamSourceTypeDEVICE:
+		return true
+	case GatewayEngineLogsParamSourceTypeUNIFIDEVICECLIENT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for GatewayEngineLogsParamTriggerType.
+const (
+	GatewayEngineLogsParamTriggerTypeDESTINATIONNAT                GatewayEngineLogsParamTriggerType = "DESTINATION_NAT"
+	GatewayEngineLogsParamTriggerTypeFIREWALLPOLICY                GatewayEngineLogsParamTriggerType = "FIREWALL_POLICY"
+	GatewayEngineLogsParamTriggerTypeFIREWALLRULE                  GatewayEngineLogsParamTriggerType = "FIREWALL_RULE"
+	GatewayEngineLogsParamTriggerTypeGENERATEDALLOWFIREWALLPOLICY  GatewayEngineLogsParamTriggerType = "GENERATED_ALLOW_FIREWALL_POLICY"
+	GatewayEngineLogsParamTriggerTypeGENERATEDBLOCKFIREWALLPOLICY  GatewayEngineLogsParamTriggerType = "GENERATED_BLOCK_FIREWALL_POLICY"
+	GatewayEngineLogsParamTriggerTypeGENERATEDPOLICYBASEDROUTING   GatewayEngineLogsParamTriggerType = "GENERATED_POLICY_BASED_ROUTING"
+	GatewayEngineLogsParamTriggerTypeGENERATEDREJECTFIREWALLPOLICY GatewayEngineLogsParamTriggerType = "GENERATED_REJECT_FIREWALL_POLICY"
+	GatewayEngineLogsParamTriggerTypeMASQUERADE                    GatewayEngineLogsParamTriggerType = "MASQUERADE"
+	GatewayEngineLogsParamTriggerTypePORTFORWARDING                GatewayEngineLogsParamTriggerType = "PORT_FORWARDING"
+	GatewayEngineLogsParamTriggerTypePREDEFINEDFIREWALLRULE        GatewayEngineLogsParamTriggerType = "PREDEFINED_FIREWALL_RULE"
+	GatewayEngineLogsParamTriggerTypePREDEFINEDMASQUERADE          GatewayEngineLogsParamTriggerType = "PREDEFINED_MASQUERADE"
+	GatewayEngineLogsParamTriggerTypeSIMPLEAPPBLOCK                GatewayEngineLogsParamTriggerType = "SIMPLE_APP_BLOCK"
+	GatewayEngineLogsParamTriggerTypeSOURCENAT                     GatewayEngineLogsParamTriggerType = "SOURCE_NAT"
+	GatewayEngineLogsParamTriggerTypeTRAFFICROUTE                  GatewayEngineLogsParamTriggerType = "TRAFFIC_ROUTE"
+	GatewayEngineLogsParamTriggerTypeTRAFFICRULE                   GatewayEngineLogsParamTriggerType = "TRAFFIC_RULE"
+)
+
+// Valid indicates whether the value is a known member of the GatewayEngineLogsParamTriggerType enum.
+func (e GatewayEngineLogsParamTriggerType) Valid() bool {
+	switch e {
+	case GatewayEngineLogsParamTriggerTypeDESTINATIONNAT:
+		return true
+	case GatewayEngineLogsParamTriggerTypeFIREWALLPOLICY:
+		return true
+	case GatewayEngineLogsParamTriggerTypeFIREWALLRULE:
+		return true
+	case GatewayEngineLogsParamTriggerTypeGENERATEDALLOWFIREWALLPOLICY:
+		return true
+	case GatewayEngineLogsParamTriggerTypeGENERATEDBLOCKFIREWALLPOLICY:
+		return true
+	case GatewayEngineLogsParamTriggerTypeGENERATEDPOLICYBASEDROUTING:
+		return true
+	case GatewayEngineLogsParamTriggerTypeGENERATEDREJECTFIREWALLPOLICY:
+		return true
+	case GatewayEngineLogsParamTriggerTypeMASQUERADE:
+		return true
+	case GatewayEngineLogsParamTriggerTypePORTFORWARDING:
+		return true
+	case GatewayEngineLogsParamTriggerTypePREDEFINEDFIREWALLRULE:
+		return true
+	case GatewayEngineLogsParamTriggerTypePREDEFINEDMASQUERADE:
+		return true
+	case GatewayEngineLogsParamTriggerTypeSIMPLEAPPBLOCK:
+		return true
+	case GatewayEngineLogsParamTriggerTypeSOURCENAT:
+		return true
+	case GatewayEngineLogsParamTriggerTypeTRAFFICROUTE:
+		return true
+	case GatewayEngineLogsParamTriggerTypeTRAFFICRULE:
 		return true
 	default:
 		return false
@@ -5596,6 +6529,111 @@ func (e InfrastructureEdgeType) Valid() bool {
 	}
 }
 
+// Defines values for InfrastructureHistoryTimelineAnomalyType.
+const (
+	BPDUGUARDTRIGGERED             InfrastructureHistoryTimelineAnomalyType = "BPDU_GUARD_TRIGGERED"
+	CLIENTLINKFLAPWIRED            InfrastructureHistoryTimelineAnomalyType = "CLIENT_LINK_FLAP_WIRED"
+	LOGSWITCHPORTLINKFLAP          InfrastructureHistoryTimelineAnomalyType = "LOG_SWITCH_PORT_LINK_FLAP"
+	LOGSWITCHPORTSTPFLAP           InfrastructureHistoryTimelineAnomalyType = "LOG_SWITCH_PORT_STP_FLAP"
+	NEGOTIATEDLOWUPLINKPORTSPEED   InfrastructureHistoryTimelineAnomalyType = "NEGOTIATED_LOW_UPLINK_PORT_SPEED"
+	NETWORKLOOPDETECTEDBYKEEPALIVE InfrastructureHistoryTimelineAnomalyType = "NETWORK_LOOP_DETECTED_BY_KEEPALIVE"
+	NETWORKLOOPDETECTEDBYSTP       InfrastructureHistoryTimelineAnomalyType = "NETWORK_LOOP_DETECTED_BY_STP"
+	POEPORTBUDGETEXCEEDED          InfrastructureHistoryTimelineAnomalyType = "POE_PORT_BUDGET_EXCEEDED"
+	PORTBROADCASTSTORM             InfrastructureHistoryTimelineAnomalyType = "PORT_BROADCAST_STORM"
+	PORTDHCPSTORM                  InfrastructureHistoryTimelineAnomalyType = "PORT_DHCP_STORM"
+	PORTDROPPEDTRAFFIC             InfrastructureHistoryTimelineAnomalyType = "PORT_DROPPED_TRAFFIC"
+	PORTMACLOCKING                 InfrastructureHistoryTimelineAnomalyType = "PORT_MAC_LOCKING"
+	PORTMULTICASTSTORM             InfrastructureHistoryTimelineAnomalyType = "PORT_MULTICAST_STORM"
+	PORTTRANSMISSIONERRORS         InfrastructureHistoryTimelineAnomalyType = "PORT_TRANSMISSION_ERRORS"
+	PORTUNICASTSTORM               InfrastructureHistoryTimelineAnomalyType = "PORT_UNICAST_STORM"
+	ROGUEDHCPSERVERDETECTED        InfrastructureHistoryTimelineAnomalyType = "ROGUE_DHCP_SERVER_DETECTED"
+	SFPEEPROMERROR                 InfrastructureHistoryTimelineAnomalyType = "SFP_EEPROM_ERROR"
+	SFPRECEIVEDFAULT               InfrastructureHistoryTimelineAnomalyType = "SFP_RECEIVED_FAULT"
+	SFPTRANSMISSIONFAULT           InfrastructureHistoryTimelineAnomalyType = "SFP_TRANSMISSION_FAULT"
+)
+
+// Valid indicates whether the value is a known member of the InfrastructureHistoryTimelineAnomalyType enum.
+func (e InfrastructureHistoryTimelineAnomalyType) Valid() bool {
+	switch e {
+	case BPDUGUARDTRIGGERED:
+		return true
+	case CLIENTLINKFLAPWIRED:
+		return true
+	case LOGSWITCHPORTLINKFLAP:
+		return true
+	case LOGSWITCHPORTSTPFLAP:
+		return true
+	case NEGOTIATEDLOWUPLINKPORTSPEED:
+		return true
+	case NETWORKLOOPDETECTEDBYKEEPALIVE:
+		return true
+	case NETWORKLOOPDETECTEDBYSTP:
+		return true
+	case POEPORTBUDGETEXCEEDED:
+		return true
+	case PORTBROADCASTSTORM:
+		return true
+	case PORTDHCPSTORM:
+		return true
+	case PORTDROPPEDTRAFFIC:
+		return true
+	case PORTMACLOCKING:
+		return true
+	case PORTMULTICASTSTORM:
+		return true
+	case PORTTRANSMISSIONERRORS:
+		return true
+	case PORTUNICASTSTORM:
+		return true
+	case ROGUEDHCPSERVERDETECTED:
+		return true
+	case SFPEEPROMERROR:
+		return true
+	case SFPRECEIVEDFAULT:
+		return true
+	case SFPTRANSMISSIONFAULT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for InfrastructureHistoryTimelineType.
+const (
+	InfrastructureHistoryTimelineTypeANOMALYENDED   InfrastructureHistoryTimelineType = "ANOMALY_ENDED"
+	InfrastructureHistoryTimelineTypeANOMALYSTARTED InfrastructureHistoryTimelineType = "ANOMALY_STARTED"
+	InfrastructureHistoryTimelineTypeDEVICEADOPTED  InfrastructureHistoryTimelineType = "DEVICE_ADOPTED"
+	InfrastructureHistoryTimelineTypeDEVICEOFFLINE  InfrastructureHistoryTimelineType = "DEVICE_OFFLINE"
+	InfrastructureHistoryTimelineTypeDEVICEONLINE   InfrastructureHistoryTimelineType = "DEVICE_ONLINE"
+	InfrastructureHistoryTimelineTypeDEVICEREMOVED  InfrastructureHistoryTimelineType = "DEVICE_REMOVED"
+	InfrastructureHistoryTimelineTypeNETWORKOFFLINE InfrastructureHistoryTimelineType = "NETWORK_OFFLINE"
+	InfrastructureHistoryTimelineTypeNETWORKUPDATED InfrastructureHistoryTimelineType = "NETWORK_UPDATED"
+)
+
+// Valid indicates whether the value is a known member of the InfrastructureHistoryTimelineType enum.
+func (e InfrastructureHistoryTimelineType) Valid() bool {
+	switch e {
+	case InfrastructureHistoryTimelineTypeANOMALYENDED:
+		return true
+	case InfrastructureHistoryTimelineTypeANOMALYSTARTED:
+		return true
+	case InfrastructureHistoryTimelineTypeDEVICEADOPTED:
+		return true
+	case InfrastructureHistoryTimelineTypeDEVICEOFFLINE:
+		return true
+	case InfrastructureHistoryTimelineTypeDEVICEONLINE:
+		return true
+	case InfrastructureHistoryTimelineTypeDEVICEREMOVED:
+		return true
+	case InfrastructureHistoryTimelineTypeNETWORKOFFLINE:
+		return true
+	case InfrastructureHistoryTimelineTypeNETWORKUPDATED:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for InfrastructureIspDataLoadBalancingMode.
 const (
 	InfrastructureIspDataLoadBalancingModeDISTRIBUTED  InfrastructureIspDataLoadBalancingMode = "DISTRIBUTED"
@@ -5947,6 +6985,87 @@ func (e MagicsitetositevpnStatuConnectionErrors) Valid() bool {
 	}
 }
 
+// Defines values for MagicsitetositevpnStatuConnectionError.
+const (
+	MagicsitetositevpnStatuConnectionErrorCOMMITERROR                   MagicsitetositevpnStatuConnectionError = "COMMIT_ERROR"
+	MagicsitetositevpnStatuConnectionErrorCONFLICTWITHLOCALOSPFCONFIG   MagicsitetositevpnStatuConnectionError = "CONFLICT_WITH_LOCAL_OSPF_CONFIG"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONFIGID               MagicsitetositevpnStatuConnectionError = "INVALID_CONFIG_ID"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONFIGNAME             MagicsitetositevpnStatuConnectionError = "INVALID_CONFIG_NAME"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONDEVICEID     MagicsitetositevpnStatuConnectionError = "INVALID_CONNECTION_DEVICE_ID"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONID           MagicsitetositevpnStatuConnectionError = "INVALID_CONNECTION_ID"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONPUBLICKEY    MagicsitetositevpnStatuConnectionError = "INVALID_CONNECTION_PUBLIC_KEY"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONSITEID       MagicsitetositevpnStatuConnectionError = "INVALID_CONNECTION_SITE_ID"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONSIZE         MagicsitetositevpnStatuConnectionError = "INVALID_CONNECTION_SIZE"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONTUNNELIP     MagicsitetositevpnStatuConnectionError = "INVALID_CONNECTION_TUNNEL_IP"
+	MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONWANIP        MagicsitetositevpnStatuConnectionError = "INVALID_CONNECTION_WAN_IP"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDEVICEID               MagicsitetositevpnStatuConnectionError = "INVALID_DEVICE_ID"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENAME             MagicsitetositevpnStatuConnectionError = "INVALID_DEVICE_NAME"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENETWORKID        MagicsitetositevpnStatuConnectionError = "INVALID_DEVICE_NETWORK_ID"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENETWORKNAME      MagicsitetositevpnStatuConnectionError = "INVALID_DEVICE_NETWORK_NAME"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENETWORKROUTERIP  MagicsitetositevpnStatuConnectionError = "INVALID_DEVICE_NETWORK_ROUTER_IP"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENETWORKSUBNET    MagicsitetositevpnStatuConnectionError = "INVALID_DEVICE_NETWORK_SUBNET"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDEVICESITEID           MagicsitetositevpnStatuConnectionError = "INVALID_DEVICE_SITE_ID"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDEVICESITENAME         MagicsitetositevpnStatuConnectionError = "INVALID_DEVICE_SITE_NAME"
+	MagicsitetositevpnStatuConnectionErrorINVALIDDUPLICATEDPUBLICKEYS   MagicsitetositevpnStatuConnectionError = "INVALID_DUPLICATED_PUBLIC_KEYS"
+	MagicsitetositevpnStatuConnectionErrorINVALIDMULTIPLECONFIGSPERSITE MagicsitetositevpnStatuConnectionError = "INVALID_MULTIPLE_CONFIGS_PER_SITE"
+	MagicsitetositevpnStatuConnectionErrorINVALIDNOCONSOLEWITHPUBLICIP  MagicsitetositevpnStatuConnectionError = "INVALID_NO_CONSOLE_WITH_PUBLIC_IP"
+	MagicsitetositevpnStatuConnectionErrorINVALIDTUNNELSUBNET           MagicsitetositevpnStatuConnectionError = "INVALID_TUNNEL_SUBNET"
+)
+
+// Valid indicates whether the value is a known member of the MagicsitetositevpnStatuConnectionError enum.
+func (e MagicsitetositevpnStatuConnectionError) Valid() bool {
+	switch e {
+	case MagicsitetositevpnStatuConnectionErrorCOMMITERROR:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorCONFLICTWITHLOCALOSPFCONFIG:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONFIGID:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONFIGNAME:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONDEVICEID:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONID:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONPUBLICKEY:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONSITEID:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONSIZE:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONTUNNELIP:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDCONNECTIONWANIP:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDEVICEID:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENAME:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENETWORKID:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENETWORKNAME:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENETWORKROUTERIP:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDEVICENETWORKSUBNET:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDEVICESITEID:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDEVICESITENAME:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDDUPLICATEDPUBLICKEYS:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDMULTIPLECONFIGSPERSITE:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDNOCONSOLEWITHPUBLICIP:
+		return true
+	case MagicsitetositevpnStatuConnectionErrorINVALIDTUNNELSUBNET:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for NatIpVersion.
 const (
 	NatIpVersionIPV4 NatIpVersion = "IPV4"
@@ -6025,1284 +7144,6 @@ func (e NatSourceFilterFilterType) Valid() bool {
 	case NatSourceFilterFilterTypeNETWORKCONF:
 		return true
 	case NatSourceFilterFilterTypeNONE:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAAAKHUkYjHujLgFBDCategories.
-const (
-	NetKSAAAKHUkYjHujLgFBDCategoriesADULT                   NetKSAAAKHUkYjHujLgFBDCategories = "ADULT"
-	NetKSAAAKHUkYjHujLgFBDCategoriesADVERTISEMENT           NetKSAAAKHUkYjHujLgFBDCategories = "ADVERTISEMENT"
-	NetKSAAAKHUkYjHujLgFBDCategoriesALCOHOL                 NetKSAAAKHUkYjHujLgFBDCategories = "ALCOHOL"
-	NetKSAAAKHUkYjHujLgFBDCategoriesANONYMIZERS             NetKSAAAKHUkYjHujLgFBDCategories = "ANONYMIZERS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesAPIS                    NetKSAAAKHUkYjHujLgFBDCategories = "APIS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesART                     NetKSAAAKHUkYjHujLgFBDCategories = "ART"
-	NetKSAAAKHUkYjHujLgFBDCategoriesARTIFICIALINTELLIGENCE  NetKSAAAKHUkYjHujLgFBDCategories = "ARTIFICIAL_INTELLIGENCE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesARTSANDCRAFTS           NetKSAAAKHUkYjHujLgFBDCategories = "ARTS_AND_CRAFTS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesASTROLOGY               NetKSAAAKHUkYjHujLgFBDCategories = "ASTROLOGY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesAUCTIONSANDMARKETPLACES NetKSAAAKHUkYjHujLgFBDCategories = "AUCTIONS_AND_MARKETPLACES"
-	NetKSAAAKHUkYjHujLgFBDCategoriesAUDIOSTREAMING          NetKSAAAKHUkYjHujLgFBDCategories = "AUDIO_STREAMING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesBLOGS                   NetKSAAAKHUkYjHujLgFBDCategories = "BLOGS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesBODYART                 NetKSAAAKHUkYjHujLgFBDCategories = "BODY_ART"
-	NetKSAAAKHUkYjHujLgFBDCategoriesBOTNETS                 NetKSAAAKHUkYjHujLgFBDCategories = "BOTNETS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesBUSINESS                NetKSAAAKHUkYjHujLgFBDCategories = "BUSINESS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCARTOONSANDANIME        NetKSAAAKHUkYjHujLgFBDCategories = "CARTOONS_AND_ANIME"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCHAT                    NetKSAAAKHUkYjHujLgFBDCategories = "CHAT"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCHILDABUSE              NetKSAAAKHUkYjHujLgFBDCategories = "CHILD_ABUSE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCIPA                    NetKSAAAKHUkYjHujLgFBDCategories = "CIPA"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCLOTHING                NetKSAAAKHUkYjHujLgFBDCategories = "CLOTHING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCOMICBOOKS              NetKSAAAKHUkYjHujLgFBDCategories = "COMIC_BOOKS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCOUNTERFEITBRANDS       NetKSAAAKHUkYjHujLgFBDCategories = "COUNTERFEIT_BRANDS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCOUPONS                 NetKSAAAKHUkYjHujLgFBDCategories = "COUPONS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCRYPTOCURRENCY          NetKSAAAKHUkYjHujLgFBDCategories = "CRYPTOCURRENCY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesCRYPTOMINING            NetKSAAAKHUkYjHujLgFBDCategories = "CRYPTOMINING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesDATINGANDRELATIONSHIPS  NetKSAAAKHUkYjHujLgFBDCategories = "DATING_AND_RELATIONSHIPS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesDECEPTIVEADS            NetKSAAAKHUkYjHujLgFBDCategories = "DECEPTIVE_ADS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesDGADOMAINS              NetKSAAAKHUkYjHujLgFBDCategories = "DGA_DOMAINS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesDIGITALPOSTCARDS        NetKSAAAKHUkYjHujLgFBDCategories = "DIGITAL_POSTCARDS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesDIGITALSAFETY           NetKSAAAKHUkYjHujLgFBDCategories = "DIGITAL_SAFETY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesDNSTUNNELING            NetKSAAAKHUkYjHujLgFBDCategories = "DNS_TUNNELING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesDRUGS                   NetKSAAAKHUkYjHujLgFBDCategories = "DRUGS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesECOMMERCE               NetKSAAAKHUkYjHujLgFBDCategories = "ECOMMERCE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesECONOMYANDFINANCE       NetKSAAAKHUkYjHujLgFBDCategories = "ECONOMY_AND_FINANCE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesEDUCATION               NetKSAAAKHUkYjHujLgFBDCategories = "EDUCATION"
-	NetKSAAAKHUkYjHujLgFBDCategoriesEDUCATIONALINSTITUTIONS NetKSAAAKHUkYjHujLgFBDCategories = "EDUCATIONAL_INSTITUTIONS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesEMPTYDOMAINS            NetKSAAAKHUkYjHujLgFBDCategories = "EMPTY_DOMAINS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesENTERTAINMENT           NetKSAAAKHUkYjHujLgFBDCategories = "ENTERTAINMENT"
-	NetKSAAAKHUkYjHujLgFBDCategoriesFAMILY                  NetKSAAAKHUkYjHujLgFBDCategories = "FAMILY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesFASHION                 NetKSAAAKHUkYjHujLgFBDCategories = "FASHION"
-	NetKSAAAKHUkYjHujLgFBDCategoriesFILESHARING             NetKSAAAKHUkYjHujLgFBDCategories = "FILE_SHARING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesFINEARTS                NetKSAAAKHUkYjHujLgFBDCategories = "FINE_ARTS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesFOODANDDRINK            NetKSAAAKHUkYjHujLgFBDCategories = "FOOD_AND_DRINK"
-	NetKSAAAKHUkYjHujLgFBDCategoriesFORUMS                  NetKSAAAKHUkYjHujLgFBDCategories = "FORUMS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesGAMBLING                NetKSAAAKHUkYjHujLgFBDCategories = "GAMBLING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesGAMING                  NetKSAAAKHUkYjHujLgFBDCategories = "GAMING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesGOVERNMENT              NetKSAAAKHUkYjHujLgFBDCategories = "GOVERNMENT"
-	NetKSAAAKHUkYjHujLgFBDCategoriesHACKING                 NetKSAAAKHUkYjHujLgFBDCategories = "HACKING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesHATESPEECHANDEXTREMISM  NetKSAAAKHUkYjHujLgFBDCategories = "HATE_SPEECH_AND_EXTREMISM"
-	NetKSAAAKHUkYjHujLgFBDCategoriesHEALTHANDFITNESS        NetKSAAAKHUkYjHujLgFBDCategories = "HEALTH_AND_FITNESS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesHOBBIESANDINTERESTS     NetKSAAAKHUkYjHujLgFBDCategories = "HOBBIES_AND_INTERESTS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesHOMEANDGARDEN           NetKSAAAKHUkYjHujLgFBDCategories = "HOME_AND_GARDEN"
-	NetKSAAAKHUkYjHujLgFBDCategoriesHOMEVIDEO               NetKSAAAKHUkYjHujLgFBDCategories = "HOME_VIDEO"
-	NetKSAAAKHUkYjHujLgFBDCategoriesHUMOR                   NetKSAAAKHUkYjHujLgFBDCategories = "HUMOR"
-	NetKSAAAKHUkYjHujLgFBDCategoriesINCLUSION               NetKSAAAKHUkYjHujLgFBDCategories = "INCLUSION"
-	NetKSAAAKHUkYjHujLgFBDCategoriesINSTANTMESSENGERS       NetKSAAAKHUkYjHujLgFBDCategories = "INSTANT_MESSENGERS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesINTERNETCALLINGANDVOIP  NetKSAAAKHUkYjHujLgFBDCategories = "INTERNET_CALLING_AND_VOIP"
-	NetKSAAAKHUkYjHujLgFBDCategoriesITSERVICES              NetKSAAAKHUkYjHujLgFBDCategories = "IT_SERVICES"
-	NetKSAAAKHUkYjHujLgFBDCategoriesJOBSEARCHANDCAREERS     NetKSAAAKHUkYjHujLgFBDCategories = "JOB_SEARCH_AND_CAREERS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesLIFESTYLE               NetKSAAAKHUkYjHujLgFBDCategories = "LIFESTYLE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesLINGERIEANDBIKINI       NetKSAAAKHUkYjHujLgFBDCategories = "LINGERIE_AND_BIKINI"
-	NetKSAAAKHUkYjHujLgFBDCategoriesLOGINSCREENS            NetKSAAAKHUkYjHujLgFBDCategories = "LOGIN_SCREENS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesMAGAZINES               NetKSAAAKHUkYjHujLgFBDCategories = "MAGAZINES"
-	NetKSAAAKHUkYjHujLgFBDCategoriesMALWARE                 NetKSAAAKHUkYjHujLgFBDCategories = "MALWARE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesMEDIAANDFILEHOSTING     NetKSAAAKHUkYjHujLgFBDCategories = "MEDIA_AND_FILE_HOSTING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesMESSAGING               NetKSAAAKHUkYjHujLgFBDCategories = "MESSAGING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesMISCELLANEOUS           NetKSAAAKHUkYjHujLgFBDCategories = "MISCELLANEOUS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesMOVIES                  NetKSAAAKHUkYjHujLgFBDCategories = "MOVIES"
-	NetKSAAAKHUkYjHujLgFBDCategoriesMUSIC                   NetKSAAAKHUkYjHujLgFBDCategories = "MUSIC"
-	NetKSAAAKHUkYjHujLgFBDCategoriesNEWLYDISCOVEREDDOMAINS  NetKSAAAKHUkYjHujLgFBDCategories = "NEWLY_DISCOVERED_DOMAINS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesNEWLYREGISTEREDDOMAINS  NetKSAAAKHUkYjHujLgFBDCategories = "NEWLY_REGISTERED_DOMAINS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesNEWSANDMEDIA            NetKSAAAKHUkYjHujLgFBDCategories = "NEWS_AND_MEDIA"
-	NetKSAAAKHUkYjHujLgFBDCategoriesNUDITY                  NetKSAAAKHUkYjHujLgFBDCategories = "NUDITY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPARANORMAL              NetKSAAAKHUkYjHujLgFBDCategories = "PARANORMAL"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPARENTING               NetKSAAAKHUkYjHujLgFBDCategories = "PARENTING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPARKEDDOMAINS           NetKSAAAKHUkYjHujLgFBDCategories = "PARKED_DOMAINS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPEERTOPEER              NetKSAAAKHUkYjHujLgFBDCategories = "PEER_TO_PEER"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPETS                    NetKSAAAKHUkYjHujLgFBDCategories = "PETS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPHISHING                NetKSAAAKHUkYjHujLgFBDCategories = "PHISHING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPHOTOGRAPHY             NetKSAAAKHUkYjHujLgFBDCategories = "PHOTOGRAPHY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPHOTOSHARING            NetKSAAAKHUkYjHujLgFBDCategories = "PHOTO_SHARING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPOLITICS                NetKSAAAKHUkYjHujLgFBDCategories = "POLITICS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPORNOGRAPHY             NetKSAAAKHUkYjHujLgFBDCategories = "PORNOGRAPHY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPORTALS                 NetKSAAAKHUkYjHujLgFBDCategories = "PORTALS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPRIVATEIPADDRESSES      NetKSAAAKHUkYjHujLgFBDCategories = "PRIVATE_IP_ADDRESSES"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPROFANITY               NetKSAAAKHUkYjHujLgFBDCategories = "PROFANITY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesPROFESSIONALNETWORKING  NetKSAAAKHUkYjHujLgFBDCategories = "PROFESSIONAL_NETWORKING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesQUESTIONABLEACTIVITIES  NetKSAAAKHUkYjHujLgFBDCategories = "QUESTIONABLE_ACTIVITIES"
-	NetKSAAAKHUkYjHujLgFBDCategoriesRADIO                   NetKSAAAKHUkYjHujLgFBDCategories = "RADIO"
-	NetKSAAAKHUkYjHujLgFBDCategoriesREALESTATE              NetKSAAAKHUkYjHujLgFBDCategories = "REAL_ESTATE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesREDIRECTORS             NetKSAAAKHUkYjHujLgFBDCategories = "REDIRECTORS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesRELIGION                NetKSAAAKHUkYjHujLgFBDCategories = "RELIGION"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSAFEFORKIDS             NetKSAAAKHUkYjHujLgFBDCategories = "SAFE_FOR_KIDS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSCIENCE                 NetKSAAAKHUkYjHujLgFBDCategories = "SCIENCE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSEARCHENGINES           NetKSAAAKHUkYjHujLgFBDCategories = "SEARCH_ENGINES"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSEXEDUCATION            NetKSAAAKHUkYjHujLgFBDCategories = "SEX_EDUCATION"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSEXUALITY               NetKSAAAKHUkYjHujLgFBDCategories = "SEXUALITY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSHOPPING                NetKSAAAKHUkYjHujLgFBDCategories = "SHOPPING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSOCIALNETWORKS          NetKSAAAKHUkYjHujLgFBDCategories = "SOCIAL_NETWORKS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSPACEANDASTRONOMY       NetKSAAAKHUkYjHujLgFBDCategories = "SPACE_AND_ASTRONOMY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSPAM                    NetKSAAAKHUkYjHujLgFBDCategories = "SPAM"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSPORTS                  NetKSAAAKHUkYjHujLgFBDCategories = "SPORTS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSPYWARE                 NetKSAAAKHUkYjHujLgFBDCategories = "SPYWARE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesSWIMSUITS               NetKSAAAKHUkYjHujLgFBDCategories = "SWIMSUITS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesTECHNOLOGY              NetKSAAAKHUkYjHujLgFBDCategories = "TECHNOLOGY"
-	NetKSAAAKHUkYjHujLgFBDCategoriesTELEVISION              NetKSAAAKHUkYjHujLgFBDCategories = "TELEVISION"
-	NetKSAAAKHUkYjHujLgFBDCategoriesTOBACCO                 NetKSAAAKHUkYjHujLgFBDCategories = "TOBACCO"
-	NetKSAAAKHUkYjHujLgFBDCategoriesTRANSLATORS             NetKSAAAKHUkYjHujLgFBDCategories = "TRANSLATORS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesTRAVEL                  NetKSAAAKHUkYjHujLgFBDCategories = "TRAVEL"
-	NetKSAAAKHUkYjHujLgFBDCategoriesUNREACHABLEDOMAINS      NetKSAAAKHUkYjHujLgFBDCategories = "UNREACHABLE_DOMAINS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesUNRELIABLEINFORMATION   NetKSAAAKHUkYjHujLgFBDCategories = "UNRELIABLE_INFORMATION"
-	NetKSAAAKHUkYjHujLgFBDCategoriesVEHICLES                NetKSAAAKHUkYjHujLgFBDCategories = "VEHICLES"
-	NetKSAAAKHUkYjHujLgFBDCategoriesVIDEOSTREAMING          NetKSAAAKHUkYjHujLgFBDCategories = "VIDEO_STREAMING"
-	NetKSAAAKHUkYjHujLgFBDCategoriesVIOLENCE                NetKSAAAKHUkYjHujLgFBDCategories = "VIOLENCE"
-	NetKSAAAKHUkYjHujLgFBDCategoriesWEAPONS                 NetKSAAAKHUkYjHujLgFBDCategories = "WEAPONS"
-	NetKSAAAKHUkYjHujLgFBDCategoriesWEATHER                 NetKSAAAKHUkYjHujLgFBDCategories = "WEATHER"
-	NetKSAAAKHUkYjHujLgFBDCategoriesWEBMAIL                 NetKSAAAKHUkYjHujLgFBDCategories = "WEBMAIL"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAAAKHUkYjHujLgFBDCategories enum.
-func (e NetKSAAAKHUkYjHujLgFBDCategories) Valid() bool {
-	switch e {
-	case NetKSAAAKHUkYjHujLgFBDCategoriesADULT:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesADVERTISEMENT:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesALCOHOL:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesANONYMIZERS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesAPIS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesART:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesARTIFICIALINTELLIGENCE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesARTSANDCRAFTS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesASTROLOGY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesAUCTIONSANDMARKETPLACES:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesAUDIOSTREAMING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesBLOGS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesBODYART:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesBOTNETS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesBUSINESS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCARTOONSANDANIME:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCHAT:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCHILDABUSE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCIPA:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCLOTHING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCOMICBOOKS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCOUNTERFEITBRANDS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCOUPONS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCRYPTOCURRENCY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesCRYPTOMINING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesDATINGANDRELATIONSHIPS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesDECEPTIVEADS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesDGADOMAINS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesDIGITALPOSTCARDS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesDIGITALSAFETY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesDNSTUNNELING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesDRUGS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesECOMMERCE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesECONOMYANDFINANCE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesEDUCATION:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesEDUCATIONALINSTITUTIONS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesEMPTYDOMAINS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesENTERTAINMENT:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesFAMILY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesFASHION:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesFILESHARING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesFINEARTS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesFOODANDDRINK:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesFORUMS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesGAMBLING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesGAMING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesGOVERNMENT:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesHACKING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesHATESPEECHANDEXTREMISM:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesHEALTHANDFITNESS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesHOBBIESANDINTERESTS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesHOMEANDGARDEN:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesHOMEVIDEO:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesHUMOR:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesINCLUSION:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesINSTANTMESSENGERS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesINTERNETCALLINGANDVOIP:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesITSERVICES:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesJOBSEARCHANDCAREERS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesLIFESTYLE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesLINGERIEANDBIKINI:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesLOGINSCREENS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesMAGAZINES:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesMALWARE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesMEDIAANDFILEHOSTING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesMESSAGING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesMISCELLANEOUS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesMOVIES:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesMUSIC:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesNEWLYDISCOVEREDDOMAINS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesNEWLYREGISTEREDDOMAINS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesNEWSANDMEDIA:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesNUDITY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPARANORMAL:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPARENTING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPARKEDDOMAINS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPEERTOPEER:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPETS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPHISHING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPHOTOGRAPHY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPHOTOSHARING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPOLITICS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPORNOGRAPHY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPORTALS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPRIVATEIPADDRESSES:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPROFANITY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesPROFESSIONALNETWORKING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesQUESTIONABLEACTIVITIES:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesRADIO:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesREALESTATE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesREDIRECTORS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesRELIGION:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSAFEFORKIDS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSCIENCE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSEARCHENGINES:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSEXEDUCATION:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSEXUALITY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSHOPPING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSOCIALNETWORKS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSPACEANDASTRONOMY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSPAM:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSPORTS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSPYWARE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesSWIMSUITS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesTECHNOLOGY:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesTELEVISION:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesTOBACCO:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesTRANSLATORS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesTRAVEL:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesUNREACHABLEDOMAINS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesUNRELIABLEINFORMATION:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesVEHICLES:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesVIDEOSTREAMING:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesVIOLENCE:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesWEAPONS:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesWEATHER:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDCategoriesWEBMAIL:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAAAKHUkYjHujLgFBDSafeSearch.
-const (
-	NetKSAAAKHUkYjHujLgFBDSafeSearchBing    NetKSAAAKHUkYjHujLgFBDSafeSearch = "bing"
-	NetKSAAAKHUkYjHujLgFBDSafeSearchGoogle  NetKSAAAKHUkYjHujLgFBDSafeSearch = "google"
-	NetKSAAAKHUkYjHujLgFBDSafeSearchYoutube NetKSAAAKHUkYjHujLgFBDSafeSearch = "youtube"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAAAKHUkYjHujLgFBDSafeSearch enum.
-func (e NetKSAAAKHUkYjHujLgFBDSafeSearch) Valid() bool {
-	switch e {
-	case NetKSAAAKHUkYjHujLgFBDSafeSearchBing:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDSafeSearchGoogle:
-		return true
-	case NetKSAAAKHUkYjHujLgFBDSafeSearchYoutube:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAAAJRsSexMode.
-const (
-	NetKSAAAJRsSexModeALWAYS      NetKSAAAJRsSexMode = "ALWAYS"
-	NetKSAAAJRsSexModeCUSTOM      NetKSAAAJRsSexMode = "CUSTOM"
-	NetKSAAAJRsSexModeEVERYDAY    NetKSAAAJRsSexMode = "EVERY_DAY"
-	NetKSAAAJRsSexModeEVERYWEEK   NetKSAAAJRsSexMode = "EVERY_WEEK"
-	NetKSAAAJRsSexModeONETIMEONLY NetKSAAAJRsSexMode = "ONE_TIME_ONLY"
-	NetKSAAAJRsSexModeUNKNOWN     NetKSAAAJRsSexMode = "UNKNOWN"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAAAJRsSexMode enum.
-func (e NetKSAAAJRsSexMode) Valid() bool {
-	switch e {
-	case NetKSAAAJRsSexModeALWAYS:
-		return true
-	case NetKSAAAJRsSexModeCUSTOM:
-		return true
-	case NetKSAAAJRsSexModeEVERYDAY:
-		return true
-	case NetKSAAAJRsSexModeEVERYWEEK:
-		return true
-	case NetKSAAAJRsSexModeONETIMEONLY:
-		return true
-	case NetKSAAAJRsSexModeUNKNOWN:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSABAKHUkYjHujLgFBDGroupType.
-const (
-	NetKSABAKHUkYjHujLgFBDGroupTypeAddressGroup     NetKSABAKHUkYjHujLgFBDGroupType = "address-group"
-	NetKSABAKHUkYjHujLgFBDGroupTypeIpv6AddressGroup NetKSABAKHUkYjHujLgFBDGroupType = "ipv6-address-group"
-	NetKSABAKHUkYjHujLgFBDGroupTypePortGroup        NetKSABAKHUkYjHujLgFBDGroupType = "port-group"
-)
-
-// Valid indicates whether the value is a known member of the NetKSABAKHUkYjHujLgFBDGroupType enum.
-func (e NetKSABAKHUkYjHujLgFBDGroupType) Valid() bool {
-	switch e {
-	case NetKSABAKHUkYjHujLgFBDGroupTypeAddressGroup:
-		return true
-	case NetKSABAKHUkYjHujLgFBDGroupTypeIpv6AddressGroup:
-		return true
-	case NetKSABAKHUkYjHujLgFBDGroupTypePortGroup:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSABBKHUkYjHujLgFBDAction.
-const (
-	NetKSABBKHUkYjHujLgFBDActionALLOW  NetKSABBKHUkYjHujLgFBDAction = "ALLOW"
-	NetKSABBKHUkYjHujLgFBDActionBLOCK  NetKSABBKHUkYjHujLgFBDAction = "BLOCK"
-	NetKSABBKHUkYjHujLgFBDActionREJECT NetKSABBKHUkYjHujLgFBDAction = "REJECT"
-)
-
-// Valid indicates whether the value is a known member of the NetKSABBKHUkYjHujLgFBDAction enum.
-func (e NetKSABBKHUkYjHujLgFBDAction) Valid() bool {
-	switch e {
-	case NetKSABBKHUkYjHujLgFBDActionALLOW:
-		return true
-	case NetKSABBKHUkYjHujLgFBDActionBLOCK:
-		return true
-	case NetKSABBKHUkYjHujLgFBDActionREJECT:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSABBKHUkYjHujLgFBDConnectionStateType.
-const (
-	NetKSABBKHUkYjHujLgFBDConnectionStateTypeALL         NetKSABBKHUkYjHujLgFBDConnectionStateType = "ALL"
-	NetKSABBKHUkYjHujLgFBDConnectionStateTypeCUSTOM      NetKSABBKHUkYjHujLgFBDConnectionStateType = "CUSTOM"
-	NetKSABBKHUkYjHujLgFBDConnectionStateTypeRESPONDONLY NetKSABBKHUkYjHujLgFBDConnectionStateType = "RESPOND_ONLY"
-)
-
-// Valid indicates whether the value is a known member of the NetKSABBKHUkYjHujLgFBDConnectionStateType enum.
-func (e NetKSABBKHUkYjHujLgFBDConnectionStateType) Valid() bool {
-	switch e {
-	case NetKSABBKHUkYjHujLgFBDConnectionStateTypeALL:
-		return true
-	case NetKSABBKHUkYjHujLgFBDConnectionStateTypeCUSTOM:
-		return true
-	case NetKSABBKHUkYjHujLgFBDConnectionStateTypeRESPONDONLY:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSABBKHUkYjHujLgFBDConnectionStates.
-const (
-	NetKSABBKHUkYjHujLgFBDConnectionStatesESTABLISHED NetKSABBKHUkYjHujLgFBDConnectionStates = "ESTABLISHED"
-	NetKSABBKHUkYjHujLgFBDConnectionStatesINVALID     NetKSABBKHUkYjHujLgFBDConnectionStates = "INVALID"
-	NetKSABBKHUkYjHujLgFBDConnectionStatesNEW         NetKSABBKHUkYjHujLgFBDConnectionStates = "NEW"
-	NetKSABBKHUkYjHujLgFBDConnectionStatesRELATED     NetKSABBKHUkYjHujLgFBDConnectionStates = "RELATED"
-)
-
-// Valid indicates whether the value is a known member of the NetKSABBKHUkYjHujLgFBDConnectionStates enum.
-func (e NetKSABBKHUkYjHujLgFBDConnectionStates) Valid() bool {
-	switch e {
-	case NetKSABBKHUkYjHujLgFBDConnectionStatesESTABLISHED:
-		return true
-	case NetKSABBKHUkYjHujLgFBDConnectionStatesINVALID:
-		return true
-	case NetKSABBKHUkYjHujLgFBDConnectionStatesNEW:
-		return true
-	case NetKSABBKHUkYjHujLgFBDConnectionStatesRELATED:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSABBKHUkYjHujLgFBDIcmpTypename.
-const (
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameAddressMaskReply        NetKSABBKHUkYjHujLgFBDIcmpTypename = "address-mask-reply"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameAddressMaskRequest      NetKSABBKHUkYjHujLgFBDIcmpTypename = "address-mask-request"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameAny                     NetKSABBKHUkYjHujLgFBDIcmpTypename = "any"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameCommunicationProhibited NetKSABBKHUkYjHujLgFBDIcmpTypename = "communication-prohibited"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameDestinationUnreachable  NetKSABBKHUkYjHujLgFBDIcmpTypename = "destination-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameEchoReply               NetKSABBKHUkYjHujLgFBDIcmpTypename = "echo-reply"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameEchoRequest             NetKSABBKHUkYjHujLgFBDIcmpTypename = "echo-request"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameFragmentationNeeded     NetKSABBKHUkYjHujLgFBDIcmpTypename = "fragmentation-needed"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameHostPrecedenceViolation NetKSABBKHUkYjHujLgFBDIcmpTypename = "host-precedence-violation"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameHostProhibited          NetKSABBKHUkYjHujLgFBDIcmpTypename = "host-prohibited"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameHostRedirect            NetKSABBKHUkYjHujLgFBDIcmpTypename = "host-redirect"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameHostUnknown             NetKSABBKHUkYjHujLgFBDIcmpTypename = "host-unknown"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameHostUnreachable         NetKSABBKHUkYjHujLgFBDIcmpTypename = "host-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameIpHeaderBad             NetKSABBKHUkYjHujLgFBDIcmpTypename = "ip-header-bad"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameNetworkProhibited       NetKSABBKHUkYjHujLgFBDIcmpTypename = "network-prohibited"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameNetworkRedirect         NetKSABBKHUkYjHujLgFBDIcmpTypename = "network-redirect"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameNetworkUnknown          NetKSABBKHUkYjHujLgFBDIcmpTypename = "network-unknown"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameNetworkUnreachable      NetKSABBKHUkYjHujLgFBDIcmpTypename = "network-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameParameterProblem        NetKSABBKHUkYjHujLgFBDIcmpTypename = "parameter-problem"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenamePortUnreachable         NetKSABBKHUkYjHujLgFBDIcmpTypename = "port-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenamePrecedenceCutoff        NetKSABBKHUkYjHujLgFBDIcmpTypename = "precedence-cutoff"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameProtocolUnreachable     NetKSABBKHUkYjHujLgFBDIcmpTypename = "protocol-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameRedirect                NetKSABBKHUkYjHujLgFBDIcmpTypename = "redirect"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameRequiredOptionMissing   NetKSABBKHUkYjHujLgFBDIcmpTypename = "required-option-missing"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameRouterAdvertisement     NetKSABBKHUkYjHujLgFBDIcmpTypename = "router-advertisement"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameRouterSolicitation      NetKSABBKHUkYjHujLgFBDIcmpTypename = "router-solicitation"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameSourceQuench            NetKSABBKHUkYjHujLgFBDIcmpTypename = "source-quench"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameSourceRouteFailed       NetKSABBKHUkYjHujLgFBDIcmpTypename = "source-route-failed"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTOSHostRedirect         NetKSABBKHUkYjHujLgFBDIcmpTypename = "TOS-host-redirect"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTOSHostUnreachable      NetKSABBKHUkYjHujLgFBDIcmpTypename = "TOS-host-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTOSNetworkRedirect      NetKSABBKHUkYjHujLgFBDIcmpTypename = "TOS-network-redirect"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTOSNetworkUnreachable   NetKSABBKHUkYjHujLgFBDIcmpTypename = "TOS-network-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTimeExceeded            NetKSABBKHUkYjHujLgFBDIcmpTypename = "time-exceeded"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTimestampReply          NetKSABBKHUkYjHujLgFBDIcmpTypename = "timestamp-reply"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTimestampRequest        NetKSABBKHUkYjHujLgFBDIcmpTypename = "timestamp-request"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTtlZeroDuringReassembly NetKSABBKHUkYjHujLgFBDIcmpTypename = "ttl-zero-during-reassembly"
-	NetKSABBKHUkYjHujLgFBDIcmpTypenameTtlZeroDuringTransit    NetKSABBKHUkYjHujLgFBDIcmpTypename = "ttl-zero-during-transit"
-)
-
-// Valid indicates whether the value is a known member of the NetKSABBKHUkYjHujLgFBDIcmpTypename enum.
-func (e NetKSABBKHUkYjHujLgFBDIcmpTypename) Valid() bool {
-	switch e {
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameAddressMaskReply:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameAddressMaskRequest:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameAny:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameCommunicationProhibited:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameDestinationUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameEchoReply:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameEchoRequest:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameFragmentationNeeded:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameHostPrecedenceViolation:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameHostProhibited:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameHostRedirect:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameHostUnknown:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameHostUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameIpHeaderBad:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameNetworkProhibited:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameNetworkRedirect:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameNetworkUnknown:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameNetworkUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameParameterProblem:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenamePortUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenamePrecedenceCutoff:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameProtocolUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameRedirect:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameRequiredOptionMissing:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameRouterAdvertisement:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameRouterSolicitation:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameSourceQuench:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameSourceRouteFailed:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTOSHostRedirect:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTOSHostUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTOSNetworkRedirect:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTOSNetworkUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTimeExceeded:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTimestampReply:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTimestampRequest:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTtlZeroDuringReassembly:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpTypenameTtlZeroDuringTransit:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSABBKHUkYjHujLgFBDIcmpV6Typename.
-const (
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameAddressUnreachable      NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "address-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameAny                     NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "any"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameBadHeader               NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "bad-header"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameBeyondScope             NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "beyond-scope"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameCommunicationProhibited NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "communication-prohibited"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameDestinationUnreachable  NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "destination-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameEchoReply               NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "echo-reply"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameEchoRequest             NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "echo-request"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameFailedPolicy            NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "failed-policy"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameNeighborAdvertisement   NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "neighbor-advertisement"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameNeighborSolicitation    NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "neighbor-solicitation"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameNoRoute                 NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "no-route"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenamePacketTooBig            NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "packet-too-big"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameParameterProblem        NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "parameter-problem"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenamePortUnreachable         NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "port-unreachable"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameRedirect                NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "redirect"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameRejectRoute             NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "reject-route"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameRouterAdvertisement     NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "router-advertisement"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameRouterSolicitation      NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "router-solicitation"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameTimeExceeded            NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "time-exceeded"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameTtlZeroDuringReassembly NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "ttl-zero-during-reassembly"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameTtlZeroDuringTransit    NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "ttl-zero-during-transit"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameUnknownHeaderType       NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "unknown-header-type"
-	NetKSABBKHUkYjHujLgFBDIcmpV6TypenameUnknownOption           NetKSABBKHUkYjHujLgFBDIcmpV6Typename = "unknown-option"
-)
-
-// Valid indicates whether the value is a known member of the NetKSABBKHUkYjHujLgFBDIcmpV6Typename enum.
-func (e NetKSABBKHUkYjHujLgFBDIcmpV6Typename) Valid() bool {
-	switch e {
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameAddressUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameAny:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameBadHeader:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameBeyondScope:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameCommunicationProhibited:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameDestinationUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameEchoReply:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameEchoRequest:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameFailedPolicy:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameNeighborAdvertisement:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameNeighborSolicitation:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameNoRoute:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenamePacketTooBig:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameParameterProblem:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenamePortUnreachable:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameRedirect:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameRejectRoute:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameRouterAdvertisement:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameRouterSolicitation:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameTimeExceeded:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameTtlZeroDuringReassembly:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameTtlZeroDuringTransit:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameUnknownHeaderType:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIcmpV6TypenameUnknownOption:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSABBKHUkYjHujLgFBDIpVersion.
-const (
-	NetKSABBKHUkYjHujLgFBDIpVersionBOTH NetKSABBKHUkYjHujLgFBDIpVersion = "BOTH"
-	NetKSABBKHUkYjHujLgFBDIpVersionIPV4 NetKSABBKHUkYjHujLgFBDIpVersion = "IPV4"
-	NetKSABBKHUkYjHujLgFBDIpVersionIPV6 NetKSABBKHUkYjHujLgFBDIpVersion = "IPV6"
-)
-
-// Valid indicates whether the value is a known member of the NetKSABBKHUkYjHujLgFBDIpVersion enum.
-func (e NetKSABBKHUkYjHujLgFBDIpVersion) Valid() bool {
-	switch e {
-	case NetKSABBKHUkYjHujLgFBDIpVersionBOTH:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIpVersionIPV4:
-		return true
-	case NetKSABBKHUkYjHujLgFBDIpVersionIPV6:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSABBKHUkYjHujLgFBDMatchIpSecType.
-const (
-	NetKSABBKHUkYjHujLgFBDMatchIpSecTypeMATCHIPSEC    NetKSABBKHUkYjHujLgFBDMatchIpSecType = "MATCH_IP_SEC"
-	NetKSABBKHUkYjHujLgFBDMatchIpSecTypeMATCHNONIPSEC NetKSABBKHUkYjHujLgFBDMatchIpSecType = "MATCH_NON_IP_SEC"
-)
-
-// Valid indicates whether the value is a known member of the NetKSABBKHUkYjHujLgFBDMatchIpSecType enum.
-func (e NetKSABBKHUkYjHujLgFBDMatchIpSecType) Valid() bool {
-	switch e {
-	case NetKSABBKHUkYjHujLgFBDMatchIpSecTypeMATCHIPSEC:
-		return true
-	case NetKSABBKHUkYjHujLgFBDMatchIpSecTypeMATCHNONIPSEC:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSACMiVjHefafStpVersion.
-const (
-	NetKSACMiVjHefafStpVersionDisabled NetKSACMiVjHefafStpVersion = "disabled"
-	NetKSACMiVjHefafStpVersionRstp     NetKSACMiVjHefafStpVersion = "rstp"
-	NetKSACMiVjHefafStpVersionStp      NetKSACMiVjHefafStpVersion = "stp"
-)
-
-// Valid indicates whether the value is a known member of the NetKSACMiVjHefafStpVersion enum.
-func (e NetKSACMiVjHefafStpVersion) Valid() bool {
-	switch e {
-	case NetKSACMiVjHefafStpVersionDisabled:
-		return true
-	case NetKSACMiVjHefafStpVersionRstp:
-		return true
-	case NetKSACMiVjHefafStpVersionStp:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSACVVyiCEnabledFor.
-const (
-	NetKSACVVyiCEnabledForAll  NetKSACVVyiCEnabledFor = "all"
-	NetKSACVVyiCEnabledForNone NetKSACVVyiCEnabledFor = "none"
-	NetKSACVVyiCEnabledForSome NetKSACVVyiCEnabledFor = "some"
-)
-
-// Valid indicates whether the value is a known member of the NetKSACVVyiCEnabledFor enum.
-func (e NetKSACVVyiCEnabledFor) Valid() bool {
-	switch e {
-	case NetKSACVVyiCEnabledForAll:
-		return true
-	case NetKSACVVyiCEnabledForNone:
-		return true
-	case NetKSACVVyiCEnabledForSome:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSACAeyOUcXIsMsQwDefaultSecurityPosture.
-const (
-	NetKSACAeyOUcXIsMsQwDefaultSecurityPostureALLOWALL NetKSACAeyOUcXIsMsQwDefaultSecurityPosture = "ALLOW_ALL"
-	NetKSACAeyOUcXIsMsQwDefaultSecurityPostureBLOCKALL NetKSACAeyOUcXIsMsQwDefaultSecurityPosture = "BLOCK_ALL"
-)
-
-// Valid indicates whether the value is a known member of the NetKSACAeyOUcXIsMsQwDefaultSecurityPosture enum.
-func (e NetKSACAeyOUcXIsMsQwDefaultSecurityPosture) Valid() bool {
-	switch e {
-	case NetKSACAeyOUcXIsMsQwDefaultSecurityPostureALLOWALL:
-		return true
-	case NetKSACAeyOUcXIsMsQwDefaultSecurityPostureBLOCKALL:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSADKHUkYjHujLgFBDUplinkType.
-const (
-	NetKSADKHUkYjHujLgFBDUplinkTypeCustom  NetKSADKHUkYjHujLgFBDUplinkType = "custom"
-	NetKSADKHUkYjHujLgFBDUplinkTypeGateway NetKSADKHUkYjHujLgFBDUplinkType = "gateway"
-)
-
-// Valid indicates whether the value is a known member of the NetKSADKHUkYjHujLgFBDUplinkType enum.
-func (e NetKSADKHUkYjHujLgFBDUplinkType) Valid() bool {
-	switch e {
-	case NetKSADKHUkYjHujLgFBDUplinkTypeCustom:
-		return true
-	case NetKSADKHUkYjHujLgFBDUplinkTypeGateway:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSADMiVjHefafAutoChannelPresetsType.
-const (
-	NetKSADMiVjHefafAutoChannelPresetsTypeConservative NetKSADMiVjHefafAutoChannelPresetsType = "conservative"
-	NetKSADMiVjHefafAutoChannelPresetsTypeCustom       NetKSADMiVjHefafAutoChannelPresetsType = "custom"
-	NetKSADMiVjHefafAutoChannelPresetsTypeMaximumSpeed NetKSADMiVjHefafAutoChannelPresetsType = "maximum_speed"
-)
-
-// Valid indicates whether the value is a known member of the NetKSADMiVjHefafAutoChannelPresetsType enum.
-func (e NetKSADMiVjHefafAutoChannelPresetsType) Valid() bool {
-	switch e {
-	case NetKSADMiVjHefafAutoChannelPresetsTypeConservative:
-		return true
-	case NetKSADMiVjHefafAutoChannelPresetsTypeCustom:
-		return true
-	case NetKSADMiVjHefafAutoChannelPresetsTypeMaximumSpeed:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSADRYtJfMBbtgWvkuChannelWidth.
-const (
-	NetKSADRYtJfMBbtgWvkuChannelWidthEHT240 NetKSADRYtJfMBbtgWvkuChannelWidth = "EHT_240"
-	NetKSADRYtJfMBbtgWvkuChannelWidthEHT320 NetKSADRYtJfMBbtgWvkuChannelWidth = "EHT_320"
-	NetKSADRYtJfMBbtgWvkuChannelWidthHT1080 NetKSADRYtJfMBbtgWvkuChannelWidth = "HT_1080"
-	NetKSADRYtJfMBbtgWvkuChannelWidthHT160  NetKSADRYtJfMBbtgWvkuChannelWidth = "HT_160"
-	NetKSADRYtJfMBbtgWvkuChannelWidthHT20   NetKSADRYtJfMBbtgWvkuChannelWidth = "HT_20"
-	NetKSADRYtJfMBbtgWvkuChannelWidthHT2160 NetKSADRYtJfMBbtgWvkuChannelWidth = "HT_2160"
-	NetKSADRYtJfMBbtgWvkuChannelWidthHT40   NetKSADRYtJfMBbtgWvkuChannelWidth = "HT_40"
-	NetKSADRYtJfMBbtgWvkuChannelWidthHT4320 NetKSADRYtJfMBbtgWvkuChannelWidth = "HT_4320"
-	NetKSADRYtJfMBbtgWvkuChannelWidthHT80   NetKSADRYtJfMBbtgWvkuChannelWidth = "HT_80"
-)
-
-// Valid indicates whether the value is a known member of the NetKSADRYtJfMBbtgWvkuChannelWidth enum.
-func (e NetKSADRYtJfMBbtgWvkuChannelWidth) Valid() bool {
-	switch e {
-	case NetKSADRYtJfMBbtgWvkuChannelWidthEHT240:
-		return true
-	case NetKSADRYtJfMBbtgWvkuChannelWidthEHT320:
-		return true
-	case NetKSADRYtJfMBbtgWvkuChannelWidthHT1080:
-		return true
-	case NetKSADRYtJfMBbtgWvkuChannelWidthHT160:
-		return true
-	case NetKSADRYtJfMBbtgWvkuChannelWidthHT20:
-		return true
-	case NetKSADRYtJfMBbtgWvkuChannelWidthHT2160:
-		return true
-	case NetKSADRYtJfMBbtgWvkuChannelWidthHT40:
-		return true
-	case NetKSADRYtJfMBbtgWvkuChannelWidthHT4320:
-		return true
-	case NetKSADRYtJfMBbtgWvkuChannelWidthHT80:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSADRYtJfMBbtgWvkuRadio.
-const (
-	NetKSADRYtJfMBbtgWvkuRadioAd  NetKSADRYtJfMBbtgWvkuRadio = "ad"
-	NetKSADRYtJfMBbtgWvkuRadioN6e NetKSADRYtJfMBbtgWvkuRadio = "6e"
-	NetKSADRYtJfMBbtgWvkuRadioNa  NetKSADRYtJfMBbtgWvkuRadio = "na"
-	NetKSADRYtJfMBbtgWvkuRadioNg  NetKSADRYtJfMBbtgWvkuRadio = "ng"
-)
-
-// Valid indicates whether the value is a known member of the NetKSADRYtJfMBbtgWvkuRadio enum.
-func (e NetKSADRYtJfMBbtgWvkuRadio) Valid() bool {
-	switch e {
-	case NetKSADRYtJfMBbtgWvkuRadioAd:
-		return true
-	case NetKSADRYtJfMBbtgWvkuRadioN6e:
-		return true
-	case NetKSADRYtJfMBbtgWvkuRadioNa:
-		return true
-	case NetKSADRYtJfMBbtgWvkuRadioNg:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAEKHUkYjHujLgFBDGatewayType.
-const (
-	NetKSAEKHUkYjHujLgFBDGatewayTypeDefault NetKSAEKHUkYjHujLgFBDGatewayType = "default"
-	NetKSAEKHUkYjHujLgFBDGatewayTypeSwitch  NetKSAEKHUkYjHujLgFBDGatewayType = "switch"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAEKHUkYjHujLgFBDGatewayType enum.
-func (e NetKSAEKHUkYjHujLgFBDGatewayType) Valid() bool {
-	switch e {
-	case NetKSAEKHUkYjHujLgFBDGatewayTypeDefault:
-		return true
-	case NetKSAEKHUkYjHujLgFBDGatewayTypeSwitch:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAEMiVjHefafClientAddressAssignment.
-const (
-	NetKSAEMiVjHefafClientAddressAssignmentDhcpv6 NetKSAEMiVjHefafClientAddressAssignment = "dhcpv6"
-	NetKSAEMiVjHefafClientAddressAssignmentSlaac  NetKSAEMiVjHefafClientAddressAssignment = "slaac"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAEMiVjHefafClientAddressAssignment enum.
-func (e NetKSAEMiVjHefafClientAddressAssignment) Valid() bool {
-	switch e {
-	case NetKSAEMiVjHefafClientAddressAssignmentDhcpv6:
-		return true
-	case NetKSAEMiVjHefafClientAddressAssignmentSlaac:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAEMiVjHefafInterfaceType.
-const (
-	NetKSAEMiVjHefafInterfaceTypeNone          NetKSAEMiVjHefafInterfaceType = "none"
-	NetKSAEMiVjHefafInterfaceTypePd            NetKSAEMiVjHefafInterfaceType = "pd"
-	NetKSAEMiVjHefafInterfaceTypeSingleNetwork NetKSAEMiVjHefafInterfaceType = "single_network"
-	NetKSAEMiVjHefafInterfaceTypeStatic        NetKSAEMiVjHefafInterfaceType = "static"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAEMiVjHefafInterfaceType enum.
-func (e NetKSAEMiVjHefafInterfaceType) Valid() bool {
-	switch e {
-	case NetKSAEMiVjHefafInterfaceTypeNone:
-		return true
-	case NetKSAEMiVjHefafInterfaceTypePd:
-		return true
-	case NetKSAEMiVjHefafInterfaceTypeSingleNetwork:
-		return true
-	case NetKSAEMiVjHefafInterfaceTypeStatic:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAEMiVjHefafRaPriority.
-const (
-	NetKSAEMiVjHefafRaPriorityHigh   NetKSAEMiVjHefafRaPriority = "high"
-	NetKSAEMiVjHefafRaPriorityLow    NetKSAEMiVjHefafRaPriority = "low"
-	NetKSAEMiVjHefafRaPriorityMedium NetKSAEMiVjHefafRaPriority = "medium"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAEMiVjHefafRaPriority enum.
-func (e NetKSAEMiVjHefafRaPriority) Valid() bool {
-	switch e {
-	case NetKSAEMiVjHefafRaPriorityHigh:
-		return true
-	case NetKSAEMiVjHefafRaPriorityLow:
-		return true
-	case NetKSAEMiVjHefafRaPriorityMedium:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAEJRsSexPurpose.
-const (
-	NetKSAEJRsSexPurposeCorporate        NetKSAEJRsSexPurpose = "corporate"
-	NetKSAEJRsSexPurposeGuest            NetKSAEJRsSexPurpose = "guest"
-	NetKSAEJRsSexPurposeIntervlanRouting NetKSAEJRsSexPurpose = "intervlan-routing"
-	NetKSAEJRsSexPurposeIpsecVpn         NetKSAEJRsSexPurpose = "ipsec-vpn"
-	NetKSAEJRsSexPurposeOpenvpnVpn       NetKSAEJRsSexPurpose = "openvpn-vpn"
-	NetKSAEJRsSexPurposeRemoteUserVpn    NetKSAEJRsSexPurpose = "remote-user-vpn"
-	NetKSAEJRsSexPurposeSiteVpn          NetKSAEJRsSexPurpose = "site-vpn"
-	NetKSAEJRsSexPurposeVlanOnly         NetKSAEJRsSexPurpose = "vlan-only"
-	NetKSAEJRsSexPurposeVpnClient        NetKSAEJRsSexPurpose = "vpn-client"
-	NetKSAEJRsSexPurposeWan              NetKSAEJRsSexPurpose = "wan"
-	NetKSAEJRsSexPurposeWanMagic         NetKSAEJRsSexPurpose = "wan_magic"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAEJRsSexPurpose enum.
-func (e NetKSAEJRsSexPurpose) Valid() bool {
-	switch e {
-	case NetKSAEJRsSexPurposeCorporate:
-		return true
-	case NetKSAEJRsSexPurposeGuest:
-		return true
-	case NetKSAEJRsSexPurposeIntervlanRouting:
-		return true
-	case NetKSAEJRsSexPurposeIpsecVpn:
-		return true
-	case NetKSAEJRsSexPurposeOpenvpnVpn:
-		return true
-	case NetKSAEJRsSexPurposeRemoteUserVpn:
-		return true
-	case NetKSAEJRsSexPurposeSiteVpn:
-		return true
-	case NetKSAEJRsSexPurposeVlanOnly:
-		return true
-	case NetKSAEJRsSexPurposeVpnClient:
-		return true
-	case NetKSAEJRsSexPurposeWan:
-		return true
-	case NetKSAEJRsSexPurposeWanMagic:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAFAKHUkYjHujLgFBDRecordType.
-const (
-	NetKSAFAKHUkYjHujLgFBDRecordTypeA     NetKSAFAKHUkYjHujLgFBDRecordType = "A"
-	NetKSAFAKHUkYjHujLgFBDRecordTypeAAAA  NetKSAFAKHUkYjHujLgFBDRecordType = "AAAA"
-	NetKSAFAKHUkYjHujLgFBDRecordTypeCNAME NetKSAFAKHUkYjHujLgFBDRecordType = "CNAME"
-	NetKSAFAKHUkYjHujLgFBDRecordTypeMX    NetKSAFAKHUkYjHujLgFBDRecordType = "MX"
-	NetKSAFAKHUkYjHujLgFBDRecordTypeNS    NetKSAFAKHUkYjHujLgFBDRecordType = "NS"
-	NetKSAFAKHUkYjHujLgFBDRecordTypeSRV   NetKSAFAKHUkYjHujLgFBDRecordType = "SRV"
-	NetKSAFAKHUkYjHujLgFBDRecordTypeTXT   NetKSAFAKHUkYjHujLgFBDRecordType = "TXT"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAFAKHUkYjHujLgFBDRecordType enum.
-func (e NetKSAFAKHUkYjHujLgFBDRecordType) Valid() bool {
-	switch e {
-	case NetKSAFAKHUkYjHujLgFBDRecordTypeA:
-		return true
-	case NetKSAFAKHUkYjHujLgFBDRecordTypeAAAA:
-		return true
-	case NetKSAFAKHUkYjHujLgFBDRecordTypeCNAME:
-		return true
-	case NetKSAFAKHUkYjHujLgFBDRecordTypeMX:
-		return true
-	case NetKSAFAKHUkYjHujLgFBDRecordTypeNS:
-		return true
-	case NetKSAFAKHUkYjHujLgFBDRecordTypeSRV:
-		return true
-	case NetKSAFAKHUkYjHujLgFBDRecordTypeTXT:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAFBKHUkYjHujLgFBDMatchingTarget.
-const (
-	NetKSAFBKHUkYjHujLgFBDMatchingTargetDOMAIN   NetKSAFBKHUkYjHujLgFBDMatchingTarget = "DOMAIN"
-	NetKSAFBKHUkYjHujLgFBDMatchingTargetINTERNET NetKSAFBKHUkYjHujLgFBDMatchingTarget = "INTERNET"
-	NetKSAFBKHUkYjHujLgFBDMatchingTargetIP       NetKSAFBKHUkYjHujLgFBDMatchingTarget = "IP"
-	NetKSAFBKHUkYjHujLgFBDMatchingTargetREGION   NetKSAFBKHUkYjHujLgFBDMatchingTarget = "REGION"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAFBKHUkYjHujLgFBDMatchingTarget enum.
-func (e NetKSAFBKHUkYjHujLgFBDMatchingTarget) Valid() bool {
-	switch e {
-	case NetKSAFBKHUkYjHujLgFBDMatchingTargetDOMAIN:
-		return true
-	case NetKSAFBKHUkYjHujLgFBDMatchingTargetINTERNET:
-		return true
-	case NetKSAFBKHUkYjHujLgFBDMatchingTargetIP:
-		return true
-	case NetKSAFBKHUkYjHujLgFBDMatchingTargetREGION:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAFBAeyOUcXIsMsQwIpVersion.
-const (
-	NetKSAFBAeyOUcXIsMsQwIpVersionV4 NetKSAFBAeyOUcXIsMsQwIpVersion = "v4"
-	NetKSAFBAeyOUcXIsMsQwIpVersionV6 NetKSAFBAeyOUcXIsMsQwIpVersion = "v6"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAFBAeyOUcXIsMsQwIpVersion enum.
-func (e NetKSAFBAeyOUcXIsMsQwIpVersion) Valid() bool {
-	switch e {
-	case NetKSAFBAeyOUcXIsMsQwIpVersionV4:
-		return true
-	case NetKSAFBAeyOUcXIsMsQwIpVersionV6:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAIKHUkYjHujLgFBDPmfMode.
-const (
-	NetKSAIKHUkYjHujLgFBDPmfModeDisabled NetKSAIKHUkYjHujLgFBDPmfMode = "disabled"
-	NetKSAIKHUkYjHujLgFBDPmfModeOptional NetKSAIKHUkYjHujLgFBDPmfMode = "optional"
-	NetKSAIKHUkYjHujLgFBDPmfModeRequired NetKSAIKHUkYjHujLgFBDPmfMode = "required"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAIKHUkYjHujLgFBDPmfMode enum.
-func (e NetKSAIKHUkYjHujLgFBDPmfMode) Valid() bool {
-	switch e {
-	case NetKSAIKHUkYjHujLgFBDPmfModeDisabled:
-		return true
-	case NetKSAIKHUkYjHujLgFBDPmfModeOptional:
-		return true
-	case NetKSAIKHUkYjHujLgFBDPmfModeRequired:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat.
-const (
-	NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatColonLower  NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat = "colon_lower"
-	NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatColonUpper  NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat = "colon_upper"
-	NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatHyphenLower NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat = "hyphen_lower"
-	NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatHyphenUpper NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat = "hyphen_upper"
-	NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatNoneLower   NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat = "none_lower"
-	NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatNoneUpper   NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat = "none_upper"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat enum.
-func (e NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat) Valid() bool {
-	switch e {
-	case NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatColonLower:
-		return true
-	case NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatColonUpper:
-		return true
-	case NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatHyphenLower:
-		return true
-	case NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatHyphenUpper:
-		return true
-	case NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatNoneLower:
-		return true
-	case NetKSAIKHUkYjHujLgFBDRadiusMacaclFormatNoneUpper:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAIKHUkYjHujLgFBDSecurityProtocol.
-const (
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolOpen          NetKSAIKHUkYjHujLgFBDSecurityProtocol = "open"
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolOwe           NetKSAIKHUkYjHujLgFBDSecurityProtocol = "owe"
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolOweTransition NetKSAIKHUkYjHujLgFBDSecurityProtocol = "owe_transition"
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa23eap      NetKSAIKHUkYjHujLgFBDSecurityProtocol = "wpa23eap"
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa23psk      NetKSAIKHUkYjHujLgFBDSecurityProtocol = "wpa23psk"
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa2eap       NetKSAIKHUkYjHujLgFBDSecurityProtocol = "wpa2eap"
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa2psk       NetKSAIKHUkYjHujLgFBDSecurityProtocol = "wpa2psk"
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa3eap       NetKSAIKHUkYjHujLgFBDSecurityProtocol = "wpa3eap"
-	NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa3psk       NetKSAIKHUkYjHujLgFBDSecurityProtocol = "wpa3psk"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAIKHUkYjHujLgFBDSecurityProtocol enum.
-func (e NetKSAIKHUkYjHujLgFBDSecurityProtocol) Valid() bool {
-	switch e {
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolOpen:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolOwe:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolOweTransition:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa23eap:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa23psk:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa2eap:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa2psk:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa3eap:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSecurityProtocolWpa3psk:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAIKHUkYjHujLgFBDSettingPreference.
-const (
-	NetKSAIKHUkYjHujLgFBDSettingPreferenceAuto   NetKSAIKHUkYjHujLgFBDSettingPreference = "auto"
-	NetKSAIKHUkYjHujLgFBDSettingPreferenceManual NetKSAIKHUkYjHujLgFBDSettingPreference = "manual"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAIKHUkYjHujLgFBDSettingPreference enum.
-func (e NetKSAIKHUkYjHujLgFBDSettingPreference) Valid() bool {
-	switch e {
-	case NetKSAIKHUkYjHujLgFBDSettingPreferenceAuto:
-		return true
-	case NetKSAIKHUkYjHujLgFBDSettingPreferenceManual:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAIKHUkYjHujLgFBDWlanBands.
-const (
-	NetKSAIKHUkYjHujLgFBDWlanBandsBoth    NetKSAIKHUkYjHujLgFBDWlanBands = "both"
-	NetKSAIKHUkYjHujLgFBDWlanBandsN2g     NetKSAIKHUkYjHujLgFBDWlanBands = "2g"
-	NetKSAIKHUkYjHujLgFBDWlanBandsN5g     NetKSAIKHUkYjHujLgFBDWlanBands = "5g"
-	NetKSAIKHUkYjHujLgFBDWlanBandsN6g     NetKSAIKHUkYjHujLgFBDWlanBands = "6g"
-	NetKSAIKHUkYjHujLgFBDWlanBandsUnknown NetKSAIKHUkYjHujLgFBDWlanBands = "unknown"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAIKHUkYjHujLgFBDWlanBands enum.
-func (e NetKSAIKHUkYjHujLgFBDWlanBands) Valid() bool {
-	switch e {
-	case NetKSAIKHUkYjHujLgFBDWlanBandsBoth:
-		return true
-	case NetKSAIKHUkYjHujLgFBDWlanBandsN2g:
-		return true
-	case NetKSAIKHUkYjHujLgFBDWlanBandsN5g:
-		return true
-	case NetKSAIKHUkYjHujLgFBDWlanBandsN6g:
-		return true
-	case NetKSAIKHUkYjHujLgFBDWlanBandsUnknown:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for NetKSAIAeyOUcXIsMsQwStartDaysOfWeek.
-const (
-	NetKSAIAeyOUcXIsMsQwStartDaysOfWeekFri NetKSAIAeyOUcXIsMsQwStartDaysOfWeek = "fri"
-	NetKSAIAeyOUcXIsMsQwStartDaysOfWeekMon NetKSAIAeyOUcXIsMsQwStartDaysOfWeek = "mon"
-	NetKSAIAeyOUcXIsMsQwStartDaysOfWeekSat NetKSAIAeyOUcXIsMsQwStartDaysOfWeek = "sat"
-	NetKSAIAeyOUcXIsMsQwStartDaysOfWeekSun NetKSAIAeyOUcXIsMsQwStartDaysOfWeek = "sun"
-	NetKSAIAeyOUcXIsMsQwStartDaysOfWeekThu NetKSAIAeyOUcXIsMsQwStartDaysOfWeek = "thu"
-	NetKSAIAeyOUcXIsMsQwStartDaysOfWeekTue NetKSAIAeyOUcXIsMsQwStartDaysOfWeek = "tue"
-	NetKSAIAeyOUcXIsMsQwStartDaysOfWeekWed NetKSAIAeyOUcXIsMsQwStartDaysOfWeek = "wed"
-)
-
-// Valid indicates whether the value is a known member of the NetKSAIAeyOUcXIsMsQwStartDaysOfWeek enum.
-func (e NetKSAIAeyOUcXIsMsQwStartDaysOfWeek) Valid() bool {
-	switch e {
-	case NetKSAIAeyOUcXIsMsQwStartDaysOfWeekFri:
-		return true
-	case NetKSAIAeyOUcXIsMsQwStartDaysOfWeekMon:
-		return true
-	case NetKSAIAeyOUcXIsMsQwStartDaysOfWeekSat:
-		return true
-	case NetKSAIAeyOUcXIsMsQwStartDaysOfWeekSun:
-		return true
-	case NetKSAIAeyOUcXIsMsQwStartDaysOfWeekThu:
-		return true
-	case NetKSAIAeyOUcXIsMsQwStartDaysOfWeekTue:
-		return true
-	case NetKSAIAeyOUcXIsMsQwStartDaysOfWeekWed:
 		return true
 	default:
 		return false
@@ -7692,25 +7533,25 @@ func (e NetworkconfIpsecIkeEncryption) Valid() bool {
 
 // Defines values for NetworkconfIpsecIkeHash.
 const (
-	NetworkconfIpsecIkeHashMd5    NetworkconfIpsecIkeHash = "md5"
-	NetworkconfIpsecIkeHashSha1   NetworkconfIpsecIkeHash = "sha1"
-	NetworkconfIpsecIkeHashSha256 NetworkconfIpsecIkeHash = "sha256"
-	NetworkconfIpsecIkeHashSha384 NetworkconfIpsecIkeHash = "sha384"
-	NetworkconfIpsecIkeHashSha512 NetworkconfIpsecIkeHash = "sha512"
+	Md5    NetworkconfIpsecIkeHash = "md5"
+	Sha1   NetworkconfIpsecIkeHash = "sha1"
+	Sha256 NetworkconfIpsecIkeHash = "sha256"
+	Sha384 NetworkconfIpsecIkeHash = "sha384"
+	Sha512 NetworkconfIpsecIkeHash = "sha512"
 )
 
 // Valid indicates whether the value is a known member of the NetworkconfIpsecIkeHash enum.
 func (e NetworkconfIpsecIkeHash) Valid() bool {
 	switch e {
-	case NetworkconfIpsecIkeHashMd5:
+	case Md5:
 		return true
-	case NetworkconfIpsecIkeHashSha1:
+	case Sha1:
 		return true
-	case NetworkconfIpsecIkeHashSha256:
+	case Sha256:
 		return true
-	case NetworkconfIpsecIkeHashSha384:
+	case Sha384:
 		return true
-	case NetworkconfIpsecIkeHashSha512:
+	case Sha512:
 		return true
 	default:
 		return false
@@ -8499,16 +8340,16 @@ func (e OrchestrationSettingKeys) Valid() bool {
 
 // Defines values for OspfRedistributeStaticRoutesMetricType.
 const (
-	OspfRedistributeStaticRoutesMetricTypeE1 OspfRedistributeStaticRoutesMetricType = "e1"
-	OspfRedistributeStaticRoutesMetricTypeE2 OspfRedistributeStaticRoutesMetricType = "e2"
+	E1 OspfRedistributeStaticRoutesMetricType = "e1"
+	E2 OspfRedistributeStaticRoutesMetricType = "e2"
 )
 
 // Valid indicates whether the value is a known member of the OspfRedistributeStaticRoutesMetricType enum.
 func (e OspfRedistributeStaticRoutesMetricType) Valid() bool {
 	switch e {
-	case OspfRedistributeStaticRoutesMetricTypeE1:
+	case E1:
 		return true
-	case OspfRedistributeStaticRoutesMetricTypeE2:
+	case E2:
 		return true
 	default:
 		return false
@@ -9073,6 +8914,51 @@ func (e PortforwardSrcLimitingType) Valid() bool {
 	}
 }
 
+// Defines values for PortsHistoryTimelineType.
+const (
+	PortsHistoryTimelineTypeANOMALY              PortsHistoryTimelineType = "ANOMALY"
+	PortsHistoryTimelineTypeCLIENTCONNECTED      PortsHistoryTimelineType = "CLIENT_CONNECTED"
+	PortsHistoryTimelineTypeCLIENTDISCONNECTED   PortsHistoryTimelineType = "CLIENT_DISCONNECTED"
+	PortsHistoryTimelineTypeDEVICECONNECTED      PortsHistoryTimelineType = "DEVICE_CONNECTED"
+	PortsHistoryTimelineTypeDEVICEDISCONNECTED   PortsHistoryTimelineType = "DEVICE_DISCONNECTED"
+	PortsHistoryTimelineTypeDEVICEOFFLINE        PortsHistoryTimelineType = "DEVICE_OFFLINE"
+	PortsHistoryTimelineTypeINTERNETCONNECTED    PortsHistoryTimelineType = "INTERNET_CONNECTED"
+	PortsHistoryTimelineTypeINTERNETDISCONNECTED PortsHistoryTimelineType = "INTERNET_DISCONNECTED"
+	PortsHistoryTimelineTypeNETWORKOFFLINE       PortsHistoryTimelineType = "NETWORK_OFFLINE"
+	PortsHistoryTimelineTypeNETWORKUPDATED       PortsHistoryTimelineType = "NETWORK_UPDATED"
+	PortsHistoryTimelineTypePOWERCYCLETRIGGERED  PortsHistoryTimelineType = "POWER_CYCLE_TRIGGERED"
+)
+
+// Valid indicates whether the value is a known member of the PortsHistoryTimelineType enum.
+func (e PortsHistoryTimelineType) Valid() bool {
+	switch e {
+	case PortsHistoryTimelineTypeANOMALY:
+		return true
+	case PortsHistoryTimelineTypeCLIENTCONNECTED:
+		return true
+	case PortsHistoryTimelineTypeCLIENTDISCONNECTED:
+		return true
+	case PortsHistoryTimelineTypeDEVICECONNECTED:
+		return true
+	case PortsHistoryTimelineTypeDEVICEDISCONNECTED:
+		return true
+	case PortsHistoryTimelineTypeDEVICEOFFLINE:
+		return true
+	case PortsHistoryTimelineTypeINTERNETCONNECTED:
+		return true
+	case PortsHistoryTimelineTypeINTERNETDISCONNECTED:
+		return true
+	case PortsHistoryTimelineTypeNETWORKOFFLINE:
+		return true
+	case PortsHistoryTimelineTypeNETWORKUPDATED:
+		return true
+	case PortsHistoryTimelineTypePOWERCYCLETRIGGERED:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for PortsPortAnomaliesPortAnomalieScoreAnomalyCategory.
 const (
 	CABLEPOWER         PortsPortAnomaliesPortAnomalieScoreAnomalyCategory = "CABLE_POWER"
@@ -9127,6 +9013,24 @@ func (e PowerSupervisorsPowerSourcePowerSourceType) Valid() bool {
 	case PowerSupervisorsPowerSourcePowerSourceTypeOUTLET:
 		return true
 	case PowerSupervisorsPowerSourcePowerSourceTypePOEPORT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProavGroupType.
+const (
+	AUDIO ProavGroupType = "AUDIO"
+	VIDEO ProavGroupType = "VIDEO"
+)
+
+// Valid indicates whether the value is a known member of the ProavGroupType enum.
+func (e ProavGroupType) Valid() bool {
+	switch e {
+	case AUDIO:
+		return true
+	case VIDEO:
 		return true
 	default:
 		return false
@@ -9547,237 +9451,6 @@ func (e RoutingStaticRouteType) Valid() bool {
 	case InterfaceRoute:
 		return true
 	case NexthopRoute:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ServiceBgEkfCWfaSnrqscUb.
-const (
-	ServiceBgEkfCWfaSnrqscUbNETWORKCONF ServiceBgEkfCWfaSnrqscUb = "NETWORK_CONF"
-)
-
-// Valid indicates whether the value is a known member of the ServiceBgEkfCWfaSnrqscUb enum.
-func (e ServiceBgEkfCWfaSnrqscUb) Valid() bool {
-	switch e {
-	case ServiceBgEkfCWfaSnrqscUbNETWORKCONF:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ServiceLEMiVjHefaf.
-const (
-	Offline ServiceLEMiVjHefaf = "offline"
-	Online  ServiceLEMiVjHefaf = "online"
-)
-
-// Valid indicates whether the value is a known member of the ServiceLEMiVjHefaf enum.
-func (e ServiceLEMiVjHefaf) Valid() bool {
-	switch e {
-	case Offline:
-		return true
-	case Online:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ServiceLECVbZoFIZsWYaVCquTr.
-const (
-	BPSK     ServiceLECVbZoFIZsWYaVCquTr = "BPSK"
-	BPSKDCM  ServiceLECVbZoFIZsWYaVCquTr = "BPSK-DCM"
-	N1024QAM ServiceLECVbZoFIZsWYaVCquTr = "1024-QAM"
-	N16QAM   ServiceLECVbZoFIZsWYaVCquTr = "16-QAM"
-	N256QAM  ServiceLECVbZoFIZsWYaVCquTr = "256-QAM"
-	N4096QAM ServiceLECVbZoFIZsWYaVCquTr = "4096-QAM"
-	N64QAM   ServiceLECVbZoFIZsWYaVCquTr = "64-QAM"
-	QPSK     ServiceLECVbZoFIZsWYaVCquTr = "QPSK"
-)
-
-// Valid indicates whether the value is a known member of the ServiceLECVbZoFIZsWYaVCquTr enum.
-func (e ServiceLECVbZoFIZsWYaVCquTr) Valid() bool {
-	switch e {
-	case BPSK:
-		return true
-	case BPSKDCM:
-		return true
-	case N1024QAM:
-		return true
-	case N16QAM:
-		return true
-	case N256QAM:
-		return true
-	case N4096QAM:
-		return true
-	case N64QAM:
-		return true
-	case QPSK:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ServiceLERYtJfMBbtgWvku.
-const (
-	ServiceLERYtJfMBbtgWvkuTELEPORT ServiceLERYtJfMBbtgWvku = "TELEPORT"
-	ServiceLERYtJfMBbtgWvkuVPN      ServiceLERYtJfMBbtgWvku = "VPN"
-	ServiceLERYtJfMBbtgWvkuWIRED    ServiceLERYtJfMBbtgWvku = "WIRED"
-	ServiceLERYtJfMBbtgWvkuWIRELESS ServiceLERYtJfMBbtgWvku = "WIRELESS"
-)
-
-// Valid indicates whether the value is a known member of the ServiceLERYtJfMBbtgWvku enum.
-func (e ServiceLERYtJfMBbtgWvku) Valid() bool {
-	switch e {
-	case ServiceLERYtJfMBbtgWvkuTELEPORT:
-		return true
-	case ServiceLERYtJfMBbtgWvkuVPN:
-		return true
-	case ServiceLERYtJfMBbtgWvkuWIRED:
-		return true
-	case ServiceLERYtJfMBbtgWvkuWIRELESS:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ServiceMagicsitetositevpnBANVVyiC.
-const (
-	ServiceMagicsitetositevpnBANVVyiCCOMMITERROR                   ServiceMagicsitetositevpnBANVVyiC = "COMMIT_ERROR"
-	ServiceMagicsitetositevpnBANVVyiCCONFLICTWITHLOCALOSPFCONFIG   ServiceMagicsitetositevpnBANVVyiC = "CONFLICT_WITH_LOCAL_OSPF_CONFIG"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONFIGID               ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONFIG_ID"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONFIGNAME             ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONFIG_NAME"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONDEVICEID     ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONNECTION_DEVICE_ID"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONID           ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONNECTION_ID"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONPUBLICKEY    ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONNECTION_PUBLIC_KEY"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONSITEID       ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONNECTION_SITE_ID"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONSIZE         ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONNECTION_SIZE"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONTUNNELIP     ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONNECTION_TUNNEL_IP"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONWANIP        ServiceMagicsitetositevpnBANVVyiC = "INVALID_CONNECTION_WAN_IP"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICEID               ServiceMagicsitetositevpnBANVVyiC = "INVALID_DEVICE_ID"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENAME             ServiceMagicsitetositevpnBANVVyiC = "INVALID_DEVICE_NAME"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENETWORKID        ServiceMagicsitetositevpnBANVVyiC = "INVALID_DEVICE_NETWORK_ID"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENETWORKNAME      ServiceMagicsitetositevpnBANVVyiC = "INVALID_DEVICE_NETWORK_NAME"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENETWORKROUTERIP  ServiceMagicsitetositevpnBANVVyiC = "INVALID_DEVICE_NETWORK_ROUTER_IP"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENETWORKSUBNET    ServiceMagicsitetositevpnBANVVyiC = "INVALID_DEVICE_NETWORK_SUBNET"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICESITEID           ServiceMagicsitetositevpnBANVVyiC = "INVALID_DEVICE_SITE_ID"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICESITENAME         ServiceMagicsitetositevpnBANVVyiC = "INVALID_DEVICE_SITE_NAME"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDDUPLICATEDPUBLICKEYS   ServiceMagicsitetositevpnBANVVyiC = "INVALID_DUPLICATED_PUBLIC_KEYS"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDMULTIPLECONFIGSPERSITE ServiceMagicsitetositevpnBANVVyiC = "INVALID_MULTIPLE_CONFIGS_PER_SITE"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDNOCONSOLEWITHPUBLICIP  ServiceMagicsitetositevpnBANVVyiC = "INVALID_NO_CONSOLE_WITH_PUBLIC_IP"
-	ServiceMagicsitetositevpnBANVVyiCINVALIDTUNNELSUBNET           ServiceMagicsitetositevpnBANVVyiC = "INVALID_TUNNEL_SUBNET"
-)
-
-// Valid indicates whether the value is a known member of the ServiceMagicsitetositevpnBANVVyiC enum.
-func (e ServiceMagicsitetositevpnBANVVyiC) Valid() bool {
-	switch e {
-	case ServiceMagicsitetositevpnBANVVyiCCOMMITERROR:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCCONFLICTWITHLOCALOSPFCONFIG:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONFIGID:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONFIGNAME:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONDEVICEID:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONID:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONPUBLICKEY:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONSITEID:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONSIZE:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONTUNNELIP:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDCONNECTIONWANIP:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICEID:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENAME:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENETWORKID:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENETWORKNAME:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENETWORKROUTERIP:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICENETWORKSUBNET:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICESITEID:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDEVICESITENAME:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDDUPLICATEDPUBLICKEYS:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDMULTIPLECONFIGSPERSITE:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDNOCONSOLEWITHPUBLICIP:
-		return true
-	case ServiceMagicsitetositevpnBANVVyiCINVALIDTUNNELSUBNET:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ServiceSystemlogAdminActivityMiVjHefaf.
-const (
-	ServiceSystemlogAdminActivityMiVjHefafACCESSEDNETWORKANDROID            ServiceSystemlogAdminActivityMiVjHefaf = "ACCESSED_NETWORK_ANDROID"
-	ServiceSystemlogAdminActivityMiVjHefafACCESSEDNETWORKIOS                ServiceSystemlogAdminActivityMiVjHefaf = "ACCESSED_NETWORK_IOS"
-	ServiceSystemlogAdminActivityMiVjHefafACCESSEDNETWORKWEB                ServiceSystemlogAdminActivityMiVjHefaf = "ACCESSED_NETWORK_WEB"
-	ServiceSystemlogAdminActivityMiVjHefafADMINMadeChangesToOBJECTSECTION   ServiceSystemlogAdminActivityMiVjHefaf = "{ADMIN} made changes to {OBJECT} {SECTION}."
-	ServiceSystemlogAdminActivityMiVjHefafADMINMadeChangesToYourSECTION     ServiceSystemlogAdminActivityMiVjHefaf = "{ADMIN} made changes to your {SECTION}."
-	ServiceSystemlogAdminActivityMiVjHefafADMINRevokedSECTION               ServiceSystemlogAdminActivityMiVjHefaf = "{ADMIN} revoked {SECTION}."
-	ServiceSystemlogAdminActivityMiVjHefafCREATEDENTITY                     ServiceSystemlogAdminActivityMiVjHefaf = "CREATED_ENTITY"
-	ServiceSystemlogAdminActivityMiVjHefafGENERATED                         ServiceSystemlogAdminActivityMiVjHefaf = "GENERATED"
-	ServiceSystemlogAdminActivityMiVjHefafMADECHANGESMULTIPLEGLOBALSETTINGS ServiceSystemlogAdminActivityMiVjHefaf = "MADE_CHANGES_MULTIPLE_GLOBAL_SETTINGS"
-	ServiceSystemlogAdminActivityMiVjHefafMADECHANGESMULTIPLESETTINGOBJECTS ServiceSystemlogAdminActivityMiVjHefaf = "MADE_CHANGES_MULTIPLE_SETTING_OBJECTS"
-	ServiceSystemlogAdminActivityMiVjHefafMADECHANGESONEGLOBALSETTING       ServiceSystemlogAdminActivityMiVjHefaf = "MADE_CHANGES_ONE_GLOBAL_SETTING"
-	ServiceSystemlogAdminActivityMiVjHefafMADECHANGESONESETTINGOBJECT       ServiceSystemlogAdminActivityMiVjHefaf = "MADE_CHANGES_ONE_SETTING_OBJECT"
-	ServiceSystemlogAdminActivityMiVjHefafPAUSEDENTITY                      ServiceSystemlogAdminActivityMiVjHefaf = "PAUSED_ENTITY"
-	ServiceSystemlogAdminActivityMiVjHefafREMOVEDENTITY                     ServiceSystemlogAdminActivityMiVjHefaf = "REMOVED_ENTITY"
-	ServiceSystemlogAdminActivityMiVjHefafRESUMEDENTITY                     ServiceSystemlogAdminActivityMiVjHefaf = "RESUMED_ENTITY"
-)
-
-// Valid indicates whether the value is a known member of the ServiceSystemlogAdminActivityMiVjHefaf enum.
-func (e ServiceSystemlogAdminActivityMiVjHefaf) Valid() bool {
-	switch e {
-	case ServiceSystemlogAdminActivityMiVjHefafACCESSEDNETWORKANDROID:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafACCESSEDNETWORKIOS:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafACCESSEDNETWORKWEB:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafADMINMadeChangesToOBJECTSECTION:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafADMINMadeChangesToYourSECTION:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafADMINRevokedSECTION:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafCREATEDENTITY:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafGENERATED:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafMADECHANGESMULTIPLEGLOBALSETTINGS:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafMADECHANGESMULTIPLESETTINGOBJECTS:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafMADECHANGESONEGLOBALSETTING:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafMADECHANGESONESETTINGOBJECT:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafPAUSEDENTITY:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafREMOVEDENTITY:
-		return true
-	case ServiceSystemlogAdminActivityMiVjHefafRESUMEDENTITY:
 		return true
 	default:
 		return false
@@ -12091,6 +11764,27 @@ func (e SslInspectionProfilesFilterType) Valid() bool {
 	}
 }
 
+// Defines values for StackingUnitRole.
+const (
+	StackingUnitRoleBACKUP StackingUnitRole = "BACKUP"
+	StackingUnitRoleMASTER StackingUnitRole = "MASTER"
+	StackingUnitRoleMEMBER StackingUnitRole = "MEMBER"
+)
+
+// Valid indicates whether the value is a known member of the StackingUnitRole enum.
+func (e StackingUnitRole) Valid() bool {
+	switch e {
+	case StackingUnitRoleBACKUP:
+		return true
+	case StackingUnitRoleMASTER:
+		return true
+	case StackingUnitRoleMEMBER:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for StaticDnsRecordType.
 const (
 	StaticDnsRecordTypeA     StaticDnsRecordType = "A"
@@ -12126,55 +11820,55 @@ func (e StaticDnsRecordType) Valid() bool {
 
 // Defines values for SystemLogAdminAccessLogKey.
 const (
-	SystemLogAdminAccessLogKeyACCESSEDNETWORKANDROID            SystemLogAdminAccessLogKey = "ACCESSED_NETWORK_ANDROID"
-	SystemLogAdminAccessLogKeyACCESSEDNETWORKIOS                SystemLogAdminAccessLogKey = "ACCESSED_NETWORK_IOS"
-	SystemLogAdminAccessLogKeyACCESSEDNETWORKWEB                SystemLogAdminAccessLogKey = "ACCESSED_NETWORK_WEB"
-	SystemLogAdminAccessLogKeyADMINMadeChangesToOBJECTSECTION   SystemLogAdminAccessLogKey = "{ADMIN} made changes to {OBJECT} {SECTION}."
-	SystemLogAdminAccessLogKeyADMINMadeChangesToYourSECTION     SystemLogAdminAccessLogKey = "{ADMIN} made changes to your {SECTION}."
-	SystemLogAdminAccessLogKeyADMINRevokedSECTION               SystemLogAdminAccessLogKey = "{ADMIN} revoked {SECTION}."
-	SystemLogAdminAccessLogKeyCREATEDENTITY                     SystemLogAdminAccessLogKey = "CREATED_ENTITY"
-	SystemLogAdminAccessLogKeyGENERATED                         SystemLogAdminAccessLogKey = "GENERATED"
-	SystemLogAdminAccessLogKeyMADECHANGESMULTIPLEGLOBALSETTINGS SystemLogAdminAccessLogKey = "MADE_CHANGES_MULTIPLE_GLOBAL_SETTINGS"
-	SystemLogAdminAccessLogKeyMADECHANGESMULTIPLESETTINGOBJECTS SystemLogAdminAccessLogKey = "MADE_CHANGES_MULTIPLE_SETTING_OBJECTS"
-	SystemLogAdminAccessLogKeyMADECHANGESONEGLOBALSETTING       SystemLogAdminAccessLogKey = "MADE_CHANGES_ONE_GLOBAL_SETTING"
-	SystemLogAdminAccessLogKeyMADECHANGESONESETTINGOBJECT       SystemLogAdminAccessLogKey = "MADE_CHANGES_ONE_SETTING_OBJECT"
-	SystemLogAdminAccessLogKeyPAUSEDENTITY                      SystemLogAdminAccessLogKey = "PAUSED_ENTITY"
-	SystemLogAdminAccessLogKeyREMOVEDENTITY                     SystemLogAdminAccessLogKey = "REMOVED_ENTITY"
-	SystemLogAdminAccessLogKeyRESUMEDENTITY                     SystemLogAdminAccessLogKey = "RESUMED_ENTITY"
+	ACCESSEDNETWORKANDROID            SystemLogAdminAccessLogKey = "ACCESSED_NETWORK_ANDROID"
+	ACCESSEDNETWORKIOS                SystemLogAdminAccessLogKey = "ACCESSED_NETWORK_IOS"
+	ACCESSEDNETWORKWEB                SystemLogAdminAccessLogKey = "ACCESSED_NETWORK_WEB"
+	ADMINMadeChangesToOBJECTSECTION   SystemLogAdminAccessLogKey = "{ADMIN} made changes to {OBJECT} {SECTION}."
+	ADMINMadeChangesToYourSECTION     SystemLogAdminAccessLogKey = "{ADMIN} made changes to your {SECTION}."
+	ADMINRevokedSECTION               SystemLogAdminAccessLogKey = "{ADMIN} revoked {SECTION}."
+	CREATEDENTITY                     SystemLogAdminAccessLogKey = "CREATED_ENTITY"
+	GENERATED                         SystemLogAdminAccessLogKey = "GENERATED"
+	MADECHANGESMULTIPLEGLOBALSETTINGS SystemLogAdminAccessLogKey = "MADE_CHANGES_MULTIPLE_GLOBAL_SETTINGS"
+	MADECHANGESMULTIPLESETTINGOBJECTS SystemLogAdminAccessLogKey = "MADE_CHANGES_MULTIPLE_SETTING_OBJECTS"
+	MADECHANGESONEGLOBALSETTING       SystemLogAdminAccessLogKey = "MADE_CHANGES_ONE_GLOBAL_SETTING"
+	MADECHANGESONESETTINGOBJECT       SystemLogAdminAccessLogKey = "MADE_CHANGES_ONE_SETTING_OBJECT"
+	PAUSEDENTITY                      SystemLogAdminAccessLogKey = "PAUSED_ENTITY"
+	REMOVEDENTITY                     SystemLogAdminAccessLogKey = "REMOVED_ENTITY"
+	RESUMEDENTITY                     SystemLogAdminAccessLogKey = "RESUMED_ENTITY"
 )
 
 // Valid indicates whether the value is a known member of the SystemLogAdminAccessLogKey enum.
 func (e SystemLogAdminAccessLogKey) Valid() bool {
 	switch e {
-	case SystemLogAdminAccessLogKeyACCESSEDNETWORKANDROID:
+	case ACCESSEDNETWORKANDROID:
 		return true
-	case SystemLogAdminAccessLogKeyACCESSEDNETWORKIOS:
+	case ACCESSEDNETWORKIOS:
 		return true
-	case SystemLogAdminAccessLogKeyACCESSEDNETWORKWEB:
+	case ACCESSEDNETWORKWEB:
 		return true
-	case SystemLogAdminAccessLogKeyADMINMadeChangesToOBJECTSECTION:
+	case ADMINMadeChangesToOBJECTSECTION:
 		return true
-	case SystemLogAdminAccessLogKeyADMINMadeChangesToYourSECTION:
+	case ADMINMadeChangesToYourSECTION:
 		return true
-	case SystemLogAdminAccessLogKeyADMINRevokedSECTION:
+	case ADMINRevokedSECTION:
 		return true
-	case SystemLogAdminAccessLogKeyCREATEDENTITY:
+	case CREATEDENTITY:
 		return true
-	case SystemLogAdminAccessLogKeyGENERATED:
+	case GENERATED:
 		return true
-	case SystemLogAdminAccessLogKeyMADECHANGESMULTIPLEGLOBALSETTINGS:
+	case MADECHANGESMULTIPLEGLOBALSETTINGS:
 		return true
-	case SystemLogAdminAccessLogKeyMADECHANGESMULTIPLESETTINGOBJECTS:
+	case MADECHANGESMULTIPLESETTINGOBJECTS:
 		return true
-	case SystemLogAdminAccessLogKeyMADECHANGESONEGLOBALSETTING:
+	case MADECHANGESONEGLOBALSETTING:
 		return true
-	case SystemLogAdminAccessLogKeyMADECHANGESONESETTINGOBJECT:
+	case MADECHANGESONESETTINGOBJECT:
 		return true
-	case SystemLogAdminAccessLogKeyPAUSEDENTITY:
+	case PAUSEDENTITY:
 		return true
-	case SystemLogAdminAccessLogKeyREMOVEDENTITY:
+	case REMOVEDENTITY:
 		return true
-	case SystemLogAdminAccessLogKeyRESUMEDENTITY:
+	case RESUMEDENTITY:
 		return true
 	default:
 		return false
@@ -13791,13 +13485,13 @@ func (e TestConfigsConflictConflictType) Valid() bool {
 
 // Defines values for TestConfigsEntrieConfigType.
 const (
-	TestConfigsEntrieConfigTypeNETWORKCONF TestConfigsEntrieConfigType = "NETWORK_CONF"
+	NETWORKCONF TestConfigsEntrieConfigType = "NETWORK_CONF"
 )
 
 // Valid indicates whether the value is a known member of the TestConfigsEntrieConfigType enum.
 func (e TestConfigsEntrieConfigType) Valid() bool {
 	switch e {
-	case TestConfigsEntrieConfigTypeNETWORKCONF:
+	case NETWORKCONF:
 		return true
 	default:
 		return false
@@ -13855,6 +13549,51 @@ func (e TopologyVerticeType) Valid() bool {
 	case TopologyVerticeTypeCLIENT:
 		return true
 	case TopologyVerticeTypeDEVICE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType.
+const (
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeAdBlocking       TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "Ad Blocking"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeContentFiltering TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "Content Filtering"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeDstNAT           TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "Dst. NAT"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeFirewall         TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "Firewall"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeIDSIPS           TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "IDS/IPS"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeMasqNAT          TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "Masq. NAT"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeNeXTAI           TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "NeXT AI"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypePortFwd          TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "Port Fwd."
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeProtection       TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "Protection"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeQoS              TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "QoS"
+	TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeSrcNAT           TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType = "Src. NAT"
+)
+
+// Valid indicates whether the value is a known member of the TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType enum.
+func (e TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType) Valid() bool {
+	switch e {
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeAdBlocking:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeContentFiltering:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeDstNAT:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeFirewall:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeIDSIPS:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeMasqNAT:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeNeXTAI:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypePortFwd:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeProtection:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeQoS:
+		return true
+	case TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyTypeSrcNAT:
 		return true
 	default:
 		return false
@@ -16780,18 +16519,18 @@ func (e TrafficroutesOriginType) Valid() bool {
 	}
 }
 
-// Defines values for TrafficroutesIpAddresseIpVersion.
+// Defines values for TrafficroutesIpAddressIpVersion.
 const (
-	V4 TrafficroutesIpAddresseIpVersion = "v4"
-	V6 TrafficroutesIpAddresseIpVersion = "v6"
+	TrafficroutesIpAddressIpVersionV4 TrafficroutesIpAddressIpVersion = "v4"
+	TrafficroutesIpAddressIpVersionV6 TrafficroutesIpAddressIpVersion = "v6"
 )
 
-// Valid indicates whether the value is a known member of the TrafficroutesIpAddresseIpVersion enum.
-func (e TrafficroutesIpAddresseIpVersion) Valid() bool {
+// Valid indicates whether the value is a known member of the TrafficroutesIpAddressIpVersion enum.
+func (e TrafficroutesIpAddressIpVersion) Valid() bool {
 	switch e {
-	case V4:
+	case TrafficroutesIpAddressIpVersionV4:
 		return true
-	case V6:
+	case TrafficroutesIpAddressIpVersionV6:
 		return true
 	default:
 		return false
@@ -17643,16 +17382,16 @@ func (e WanNetworkgroupsWanNetworkGroupId) Valid() bool {
 
 // Defines values for WanNetworkgroupsWanNetworkGroupLoadBalancingMode.
 const (
-	WanNetworkgroupsWanNetworkGroupLoadBalancingModeDISTRIBUTED  WanNetworkgroupsWanNetworkGroupLoadBalancingMode = "DISTRIBUTED"
-	WanNetworkgroupsWanNetworkGroupLoadBalancingModeFAILOVERONLY WanNetworkgroupsWanNetworkGroupLoadBalancingMode = "FAILOVER_ONLY"
+	DISTRIBUTED  WanNetworkgroupsWanNetworkGroupLoadBalancingMode = "DISTRIBUTED"
+	FAILOVERONLY WanNetworkgroupsWanNetworkGroupLoadBalancingMode = "FAILOVER_ONLY"
 )
 
 // Valid indicates whether the value is a known member of the WanNetworkgroupsWanNetworkGroupLoadBalancingMode enum.
 func (e WanNetworkgroupsWanNetworkGroupLoadBalancingMode) Valid() bool {
 	switch e {
-	case WanNetworkgroupsWanNetworkGroupLoadBalancingModeDISTRIBUTED:
+	case DISTRIBUTED:
 		return true
-	case WanNetworkgroupsWanNetworkGroupLoadBalancingModeFAILOVERONLY:
+	case FAILOVERONLY:
 		return true
 	default:
 		return false
@@ -17661,22 +17400,22 @@ func (e WanNetworkgroupsWanNetworkGroupLoadBalancingMode) Valid() bool {
 
 // Defines values for WanSlasMonitorHealthType.
 const (
-	ALL      WanSlasMonitorHealthType = "ALL"
-	ANY      WanSlasMonitorHealthType = "ANY"
-	CUSTOM   WanSlasMonitorHealthType = "CUSTOM"
-	MAJORITY WanSlasMonitorHealthType = "MAJORITY"
+	WanSlasMonitorHealthTypeALL      WanSlasMonitorHealthType = "ALL"
+	WanSlasMonitorHealthTypeANY      WanSlasMonitorHealthType = "ANY"
+	WanSlasMonitorHealthTypeCUSTOM   WanSlasMonitorHealthType = "CUSTOM"
+	WanSlasMonitorHealthTypeMAJORITY WanSlasMonitorHealthType = "MAJORITY"
 )
 
 // Valid indicates whether the value is a known member of the WanSlasMonitorHealthType enum.
 func (e WanSlasMonitorHealthType) Valid() bool {
 	switch e {
-	case ALL:
+	case WanSlasMonitorHealthTypeALL:
 		return true
-	case ANY:
+	case WanSlasMonitorHealthTypeANY:
 		return true
-	case CUSTOM:
+	case WanSlasMonitorHealthTypeCUSTOM:
 		return true
-	case MAJORITY:
+	case WanSlasMonitorHealthTypeMAJORITY:
 		return true
 	default:
 		return false
@@ -17745,43 +17484,43 @@ func (e WanSlasMonitorAlertThresholdPolicy) Valid() bool {
 
 // Defines values for WanWanInterfaceWanNetworkgroup.
 const (
-	WanWanInterfaceWanNetworkgroupWAN            WanWanInterfaceWanNetworkgroup = "WAN"
-	WanWanInterfaceWanNetworkgroupWAN2           WanWanInterfaceWanNetworkgroup = "WAN2"
-	WanWanInterfaceWanNetworkgroupWAN3           WanWanInterfaceWanNetworkgroup = "WAN3"
-	WanWanInterfaceWanNetworkgroupWAN4           WanWanInterfaceWanNetworkgroup = "WAN4"
-	WanWanInterfaceWanNetworkgroupWAN5           WanWanInterfaceWanNetworkgroup = "WAN5"
-	WanWanInterfaceWanNetworkgroupWAN6           WanWanInterfaceWanNetworkgroup = "WAN6"
-	WanWanInterfaceWanNetworkgroupWAN7           WanWanInterfaceWanNetworkgroup = "WAN7"
-	WanWanInterfaceWanNetworkgroupWAN8           WanWanInterfaceWanNetworkgroup = "WAN8"
-	WanWanInterfaceWanNetworkgroupWAN9           WanWanInterfaceWanNetworkgroup = "WAN9"
-	WanWanInterfaceWanNetworkgroupWANLTEFAILOVER WanWanInterfaceWanNetworkgroup = "WAN_LTE_FAILOVER"
-	WanWanInterfaceWanNetworkgroupWANMAGIC       WanWanInterfaceWanNetworkgroup = "WAN_MAGIC"
+	WAN            WanWanInterfaceWanNetworkgroup = "WAN"
+	WAN2           WanWanInterfaceWanNetworkgroup = "WAN2"
+	WAN3           WanWanInterfaceWanNetworkgroup = "WAN3"
+	WAN4           WanWanInterfaceWanNetworkgroup = "WAN4"
+	WAN5           WanWanInterfaceWanNetworkgroup = "WAN5"
+	WAN6           WanWanInterfaceWanNetworkgroup = "WAN6"
+	WAN7           WanWanInterfaceWanNetworkgroup = "WAN7"
+	WAN8           WanWanInterfaceWanNetworkgroup = "WAN8"
+	WAN9           WanWanInterfaceWanNetworkgroup = "WAN9"
+	WANLTEFAILOVER WanWanInterfaceWanNetworkgroup = "WAN_LTE_FAILOVER"
+	WANMAGIC       WanWanInterfaceWanNetworkgroup = "WAN_MAGIC"
 )
 
 // Valid indicates whether the value is a known member of the WanWanInterfaceWanNetworkgroup enum.
 func (e WanWanInterfaceWanNetworkgroup) Valid() bool {
 	switch e {
-	case WanWanInterfaceWanNetworkgroupWAN:
+	case WAN:
 		return true
-	case WanWanInterfaceWanNetworkgroupWAN2:
+	case WAN2:
 		return true
-	case WanWanInterfaceWanNetworkgroupWAN3:
+	case WAN3:
 		return true
-	case WanWanInterfaceWanNetworkgroupWAN4:
+	case WAN4:
 		return true
-	case WanWanInterfaceWanNetworkgroupWAN5:
+	case WAN5:
 		return true
-	case WanWanInterfaceWanNetworkgroupWAN6:
+	case WAN6:
 		return true
-	case WanWanInterfaceWanNetworkgroupWAN7:
+	case WAN7:
 		return true
-	case WanWanInterfaceWanNetworkgroupWAN8:
+	case WAN8:
 		return true
-	case WanWanInterfaceWanNetworkgroupWAN9:
+	case WAN9:
 		return true
-	case WanWanInterfaceWanNetworkgroupWANLTEFAILOVER:
+	case WANLTEFAILOVER:
 		return true
-	case WanWanInterfaceWanNetworkgroupWANMAGIC:
+	case WANMAGIC:
 		return true
 	default:
 		return false
@@ -18057,22 +17796,22 @@ func (e WifiStatsDetailsClientDetailPhyModeMostCommon) Valid() bool {
 
 // Defines values for WifiStatsDetailsClientDetailMloDetailBand.
 const (
-	WifiStatsDetailsClientDetailMloDetailBandAd  WifiStatsDetailsClientDetailMloDetailBand = "ad"
-	WifiStatsDetailsClientDetailMloDetailBandN6e WifiStatsDetailsClientDetailMloDetailBand = "6e"
-	WifiStatsDetailsClientDetailMloDetailBandNa  WifiStatsDetailsClientDetailMloDetailBand = "na"
-	WifiStatsDetailsClientDetailMloDetailBandNg  WifiStatsDetailsClientDetailMloDetailBand = "ng"
+	Ad  WifiStatsDetailsClientDetailMloDetailBand = "ad"
+	N6e WifiStatsDetailsClientDetailMloDetailBand = "6e"
+	Na  WifiStatsDetailsClientDetailMloDetailBand = "na"
+	Ng  WifiStatsDetailsClientDetailMloDetailBand = "ng"
 )
 
 // Valid indicates whether the value is a known member of the WifiStatsDetailsClientDetailMloDetailBand enum.
 func (e WifiStatsDetailsClientDetailMloDetailBand) Valid() bool {
 	switch e {
-	case WifiStatsDetailsClientDetailMloDetailBandAd:
+	case Ad:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailBandN6e:
+	case N6e:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailBandNa:
+	case Na:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailBandNg:
+	case Ng:
 		return true
 	default:
 		return false
@@ -18081,37 +17820,37 @@ func (e WifiStatsDetailsClientDetailMloDetailBand) Valid() bool {
 
 // Defines values for WifiStatsDetailsClientDetailMloDetailChannelWidth.
 const (
-	WifiStatsDetailsClientDetailMloDetailChannelWidthEHT240 WifiStatsDetailsClientDetailMloDetailChannelWidth = "EHT_240"
-	WifiStatsDetailsClientDetailMloDetailChannelWidthEHT320 WifiStatsDetailsClientDetailMloDetailChannelWidth = "EHT_320"
-	WifiStatsDetailsClientDetailMloDetailChannelWidthHT1080 WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_1080"
-	WifiStatsDetailsClientDetailMloDetailChannelWidthHT160  WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_160"
-	WifiStatsDetailsClientDetailMloDetailChannelWidthHT20   WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_20"
-	WifiStatsDetailsClientDetailMloDetailChannelWidthHT2160 WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_2160"
-	WifiStatsDetailsClientDetailMloDetailChannelWidthHT40   WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_40"
-	WifiStatsDetailsClientDetailMloDetailChannelWidthHT4320 WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_4320"
-	WifiStatsDetailsClientDetailMloDetailChannelWidthHT80   WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_80"
+	EHT240 WifiStatsDetailsClientDetailMloDetailChannelWidth = "EHT_240"
+	EHT320 WifiStatsDetailsClientDetailMloDetailChannelWidth = "EHT_320"
+	HT1080 WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_1080"
+	HT160  WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_160"
+	HT20   WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_20"
+	HT2160 WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_2160"
+	HT40   WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_40"
+	HT4320 WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_4320"
+	HT80   WifiStatsDetailsClientDetailMloDetailChannelWidth = "HT_80"
 )
 
 // Valid indicates whether the value is a known member of the WifiStatsDetailsClientDetailMloDetailChannelWidth enum.
 func (e WifiStatsDetailsClientDetailMloDetailChannelWidth) Valid() bool {
 	switch e {
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthEHT240:
+	case EHT240:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthEHT320:
+	case EHT320:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthHT1080:
+	case HT1080:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthHT160:
+	case HT160:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthHT20:
+	case HT20:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthHT2160:
+	case HT2160:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthHT40:
+	case HT40:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthHT4320:
+	case HT4320:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailChannelWidthHT80:
+	case HT80:
 		return true
 	default:
 		return false
@@ -18120,22 +17859,22 @@ func (e WifiStatsDetailsClientDetailMloDetailChannelWidth) Valid() bool {
 
 // Defines values for WifiStatsDetailsClientDetailMloDetailMimo.
 const (
-	WifiStatsDetailsClientDetailMloDetailMimoMIMO1 WifiStatsDetailsClientDetailMloDetailMimo = "MIMO_1"
-	WifiStatsDetailsClientDetailMloDetailMimoMIMO2 WifiStatsDetailsClientDetailMloDetailMimo = "MIMO_2"
-	WifiStatsDetailsClientDetailMloDetailMimoMIMO3 WifiStatsDetailsClientDetailMloDetailMimo = "MIMO_3"
-	WifiStatsDetailsClientDetailMloDetailMimoMIMO4 WifiStatsDetailsClientDetailMloDetailMimo = "MIMO_4"
+	MIMO1 WifiStatsDetailsClientDetailMloDetailMimo = "MIMO_1"
+	MIMO2 WifiStatsDetailsClientDetailMloDetailMimo = "MIMO_2"
+	MIMO3 WifiStatsDetailsClientDetailMloDetailMimo = "MIMO_3"
+	MIMO4 WifiStatsDetailsClientDetailMloDetailMimo = "MIMO_4"
 )
 
 // Valid indicates whether the value is a known member of the WifiStatsDetailsClientDetailMloDetailMimo enum.
 func (e WifiStatsDetailsClientDetailMloDetailMimo) Valid() bool {
 	switch e {
-	case WifiStatsDetailsClientDetailMloDetailMimoMIMO1:
+	case MIMO1:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailMimoMIMO2:
+	case MIMO2:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailMimoMIMO3:
+	case MIMO3:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailMimoMIMO4:
+	case MIMO4:
 		return true
 	default:
 		return false
@@ -18144,31 +17883,31 @@ func (e WifiStatsDetailsClientDetailMloDetailMimo) Valid() bool {
 
 // Defines values for WifiStatsDetailsClientDetailMloDetailStandard.
 const (
-	WifiStatsDetailsClientDetailMloDetailStandardWIFI1 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_1"
-	WifiStatsDetailsClientDetailMloDetailStandardWIFI2 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_2"
-	WifiStatsDetailsClientDetailMloDetailStandardWIFI3 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_3"
-	WifiStatsDetailsClientDetailMloDetailStandardWIFI4 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_4"
-	WifiStatsDetailsClientDetailMloDetailStandardWIFI5 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_5"
-	WifiStatsDetailsClientDetailMloDetailStandardWIFI6 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_6"
-	WifiStatsDetailsClientDetailMloDetailStandardWIFI7 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_7"
+	WIFI1 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_1"
+	WIFI2 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_2"
+	WIFI3 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_3"
+	WIFI4 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_4"
+	WIFI5 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_5"
+	WIFI6 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_6"
+	WIFI7 WifiStatsDetailsClientDetailMloDetailStandard = "WIFI_7"
 )
 
 // Valid indicates whether the value is a known member of the WifiStatsDetailsClientDetailMloDetailStandard enum.
 func (e WifiStatsDetailsClientDetailMloDetailStandard) Valid() bool {
 	switch e {
-	case WifiStatsDetailsClientDetailMloDetailStandardWIFI1:
+	case WIFI1:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailStandardWIFI2:
+	case WIFI2:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailStandardWIFI3:
+	case WIFI3:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailStandardWIFI4:
+	case WIFI4:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailStandardWIFI5:
+	case WIFI5:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailStandardWIFI6:
+	case WIFI6:
 		return true
-	case WifiStatsDetailsClientDetailMloDetailStandardWIFI7:
+	case WIFI7:
 		return true
 	default:
 		return false
@@ -18220,6 +17959,60 @@ func (e Wifiman2WlanBand) Valid() bool {
 	case Wifiman2WlanBandN6g:
 		return true
 	case Wifiman2WlanBandUnknown:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for WifimanNearestNeighborSignalSignalType.
+const (
+	APAP     WifimanNearestNeighborSignalSignalType = "AP_AP"
+	APCLIENT WifimanNearestNeighborSignalSignalType = "AP_CLIENT"
+)
+
+// Valid indicates whether the value is a known member of the WifimanNearestNeighborSignalSignalType enum.
+func (e WifimanNearestNeighborSignalSignalType) Valid() bool {
+	switch e {
+	case APAP:
+		return true
+	case APCLIENT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for WifimanRadioModulation.
+const (
+	BPSK     WifimanRadioModulation = "BPSK"
+	BPSKDCM  WifimanRadioModulation = "BPSK-DCM"
+	N1024QAM WifimanRadioModulation = "1024-QAM"
+	N16QAM   WifimanRadioModulation = "16-QAM"
+	N256QAM  WifimanRadioModulation = "256-QAM"
+	N4096QAM WifimanRadioModulation = "4096-QAM"
+	N64QAM   WifimanRadioModulation = "64-QAM"
+	QPSK     WifimanRadioModulation = "QPSK"
+)
+
+// Valid indicates whether the value is a known member of the WifimanRadioModulation enum.
+func (e WifimanRadioModulation) Valid() bool {
+	switch e {
+	case BPSK:
+		return true
+	case BPSKDCM:
+		return true
+	case N1024QAM:
+		return true
+	case N16QAM:
+		return true
+	case N256QAM:
+		return true
+	case N4096QAM:
+		return true
+	case N64QAM:
+		return true
+	case QPSK:
 		return true
 	default:
 		return false
@@ -18702,46 +18495,46 @@ func (e WlanHotspot2NetworkType) Valid() bool {
 
 // Defines values for WlanHotspot2VenueGroup.
 const (
-	ASSEMBLY                WlanHotspot2VenueGroup = "ASSEMBLY"
-	BUSINESS                WlanHotspot2VenueGroup = "BUSINESS"
-	EDUCATIONAL             WlanHotspot2VenueGroup = "EDUCATIONAL"
-	FACTORYANDINDUSTRIAL    WlanHotspot2VenueGroup = "FACTORY_AND_INDUSTRIAL"
-	INSTITUTIONAL           WlanHotspot2VenueGroup = "INSTITUTIONAL"
-	MERCANTILE              WlanHotspot2VenueGroup = "MERCANTILE"
-	OUTDOOR                 WlanHotspot2VenueGroup = "OUTDOOR"
-	RESIDENTIAL             WlanHotspot2VenueGroup = "RESIDENTIAL"
-	STORAGE                 WlanHotspot2VenueGroup = "STORAGE"
-	UNSPECIFIED             WlanHotspot2VenueGroup = "UNSPECIFIED"
-	UTILITYANDMISCELLANEOUS WlanHotspot2VenueGroup = "UTILITY_AND_MISCELLANEOUS"
-	VEHICULAR               WlanHotspot2VenueGroup = "VEHICULAR"
+	WlanHotspot2VenueGroupASSEMBLY                WlanHotspot2VenueGroup = "ASSEMBLY"
+	WlanHotspot2VenueGroupBUSINESS                WlanHotspot2VenueGroup = "BUSINESS"
+	WlanHotspot2VenueGroupEDUCATIONAL             WlanHotspot2VenueGroup = "EDUCATIONAL"
+	WlanHotspot2VenueGroupFACTORYANDINDUSTRIAL    WlanHotspot2VenueGroup = "FACTORY_AND_INDUSTRIAL"
+	WlanHotspot2VenueGroupINSTITUTIONAL           WlanHotspot2VenueGroup = "INSTITUTIONAL"
+	WlanHotspot2VenueGroupMERCANTILE              WlanHotspot2VenueGroup = "MERCANTILE"
+	WlanHotspot2VenueGroupOUTDOOR                 WlanHotspot2VenueGroup = "OUTDOOR"
+	WlanHotspot2VenueGroupRESIDENTIAL             WlanHotspot2VenueGroup = "RESIDENTIAL"
+	WlanHotspot2VenueGroupSTORAGE                 WlanHotspot2VenueGroup = "STORAGE"
+	WlanHotspot2VenueGroupUNSPECIFIED             WlanHotspot2VenueGroup = "UNSPECIFIED"
+	WlanHotspot2VenueGroupUTILITYANDMISCELLANEOUS WlanHotspot2VenueGroup = "UTILITY_AND_MISCELLANEOUS"
+	WlanHotspot2VenueGroupVEHICULAR               WlanHotspot2VenueGroup = "VEHICULAR"
 )
 
 // Valid indicates whether the value is a known member of the WlanHotspot2VenueGroup enum.
 func (e WlanHotspot2VenueGroup) Valid() bool {
 	switch e {
-	case ASSEMBLY:
+	case WlanHotspot2VenueGroupASSEMBLY:
 		return true
-	case BUSINESS:
+	case WlanHotspot2VenueGroupBUSINESS:
 		return true
-	case EDUCATIONAL:
+	case WlanHotspot2VenueGroupEDUCATIONAL:
 		return true
-	case FACTORYANDINDUSTRIAL:
+	case WlanHotspot2VenueGroupFACTORYANDINDUSTRIAL:
 		return true
-	case INSTITUTIONAL:
+	case WlanHotspot2VenueGroupINSTITUTIONAL:
 		return true
-	case MERCANTILE:
+	case WlanHotspot2VenueGroupMERCANTILE:
 		return true
-	case OUTDOOR:
+	case WlanHotspot2VenueGroupOUTDOOR:
 		return true
-	case RESIDENTIAL:
+	case WlanHotspot2VenueGroupRESIDENTIAL:
 		return true
-	case STORAGE:
+	case WlanHotspot2VenueGroupSTORAGE:
 		return true
-	case UNSPECIFIED:
+	case WlanHotspot2VenueGroupUNSPECIFIED:
 		return true
-	case UTILITYANDMISCELLANEOUS:
+	case WlanHotspot2VenueGroupUTILITYANDMISCELLANEOUS:
 		return true
-	case VEHICULAR:
+	case WlanHotspot2VenueGroupVEHICULAR:
 		return true
 	default:
 		return false
@@ -19539,25 +19332,25 @@ func (e WlanconfMinrateSettingPreference) Valid() bool {
 
 // Defines values for WlanconfNasIdentifierType.
 const (
-	ApMac    WlanconfNasIdentifierType = "ap_mac"
-	ApName   WlanconfNasIdentifierType = "ap_name"
-	Bssid    WlanconfNasIdentifierType = "bssid"
-	Custom   WlanconfNasIdentifierType = "custom"
-	SiteName WlanconfNasIdentifierType = "site_name"
+	WlanconfNasIdentifierTypeApMac    WlanconfNasIdentifierType = "ap_mac"
+	WlanconfNasIdentifierTypeApName   WlanconfNasIdentifierType = "ap_name"
+	WlanconfNasIdentifierTypeBssid    WlanconfNasIdentifierType = "bssid"
+	WlanconfNasIdentifierTypeCustom   WlanconfNasIdentifierType = "custom"
+	WlanconfNasIdentifierTypeSiteName WlanconfNasIdentifierType = "site_name"
 )
 
 // Valid indicates whether the value is a known member of the WlanconfNasIdentifierType enum.
 func (e WlanconfNasIdentifierType) Valid() bool {
 	switch e {
-	case ApMac:
+	case WlanconfNasIdentifierTypeApMac:
 		return true
-	case ApName:
+	case WlanconfNasIdentifierTypeApName:
 		return true
-	case Bssid:
+	case WlanconfNasIdentifierTypeBssid:
 		return true
-	case Custom:
+	case WlanconfNasIdentifierTypeCustom:
 		return true
-	case SiteName:
+	case WlanconfNasIdentifierTypeSiteName:
 		return true
 	default:
 		return false
@@ -19827,19 +19620,19 @@ func (e WlanconfWpaMode) Valid() bool {
 
 // Defines values for WlanconfWpaPskRadius.
 const (
-	Disabled WlanconfWpaPskRadius = "disabled"
-	Optional WlanconfWpaPskRadius = "optional"
-	Required WlanconfWpaPskRadius = "required"
+	WlanconfWpaPskRadiusDisabled WlanconfWpaPskRadius = "disabled"
+	WlanconfWpaPskRadiusOptional WlanconfWpaPskRadius = "optional"
+	WlanconfWpaPskRadiusRequired WlanconfWpaPskRadius = "required"
 )
 
 // Valid indicates whether the value is a known member of the WlanconfWpaPskRadius enum.
 func (e WlanconfWpaPskRadius) Valid() bool {
 	switch e {
-	case Disabled:
+	case WlanconfWpaPskRadiusDisabled:
 		return true
-	case Optional:
+	case WlanconfWpaPskRadiusOptional:
 		return true
-	case Required:
+	case WlanconfWpaPskRadiusRequired:
 		return true
 	default:
 		return false
@@ -19990,8 +19783,8 @@ type AdoptInfo struct {
 
 // AggregatedDashboard defines model for aggregated_dashboard.
 type AggregatedDashboard struct {
-	DashboardMeta *AggregatedDashboardDashboardMeta `json:"dashboard_meta,omitempty"`
-	WidgetData    *map[string]GBKAKuhBRF            `json:"widgetData,omitempty"`
+	DashboardMeta *AggregatedDashboardDashboardMeta         `json:"dashboard_meta,omitempty"`
+	WidgetData    *map[string]AggregatedDashboardWidgetData `json:"widgetData,omitempty"`
 }
 
 // AggregatedDashboardDashboardMeta defines model for aggregated_dashboard_dashboard_meta.
@@ -20007,6 +19800,9 @@ type AggregatedDashboardDashboardMetaLayout string
 
 // AggregatedDashboardDashboardMetaWidgets defines model for AggregatedDashboardDashboardMeta.Widgets.
 type AggregatedDashboardDashboardMetaWidgets string
+
+// AggregatedDashboardWidgetData defines model for aggregated_dashboard_widgetData.
+type AggregatedDashboardWidgetData = map[string]interface{}
 
 // AiFingerprint defines model for ai_fingerprint.
 type AiFingerprint struct {
@@ -20030,7 +19826,12 @@ type Alias struct {
 
 // Alias2 defines model for alias_2.
 type Alias2 struct {
-	Aliases *map[string]GBDKHUkYjHujLgFBD `json:"aliases,omitempty"`
+	Aliases *map[string]AliasAlias `json:"aliases,omitempty"`
+}
+
+// AliasAlias defines model for alias_alias.
+type AliasAlias struct {
+	Name *string `json:"name,omitempty"`
 }
 
 // Ap defines model for ap.
@@ -20266,10 +20067,10 @@ type ApiInfoSystem struct {
 // ApiLogLevelsDefaults defines model for api_log_levels_defaults.
 type ApiLogLevelsDefaults struct {
 	Device            *ApiLogLevelsDefaultsDevice            `json:"device,omitempty"`
-	Mgmt              *EAKHUkYjHujLgFBD                      `json:"mgmt,omitempty"`
-	Sdn               *EAKHUkYjHujLgFBD                      `json:"sdn,omitempty"`
+	Mgmt              *ApiLogLevelsDefaultsDevice            `json:"mgmt,omitempty"`
+	Sdn               *ApiLogLevelsDefaultsDevice            `json:"sdn,omitempty"`
 	SettingPreference *ApiLogLevelsDefaultsSettingPreference `json:"setting_preference,omitempty"`
-	System            *EAKHUkYjHujLgFBD                      `json:"system,omitempty"`
+	System            *ApiLogLevelsDefaultsDevice            `json:"system,omitempty"`
 }
 
 // ApiLogLevelsDefaultsDevice defines model for ApiLogLevelsDefaults.Device.
@@ -20299,13 +20100,13 @@ type ApiRadioAiOptimizePreview struct {
 
 // ApiRadioAiOptimizePreviewData defines model for api_radio_ai_optimize_preview_data.
 type ApiRadioAiOptimizePreviewData struct {
-	CurrentChannel       *int               `json:"current_channel,omitempty"`
-	CurrentChannelWidth  *int               `json:"current_channel_width,omitempty"`
-	DeviceMac            *string            `json:"device_mac,omitempty"`
-	DeviceName           *string            `json:"device_name,omitempty"`
-	DeviceRadio          *GFERYtJfMBbtgWvku `json:"device_radio,omitempty"`
-	PreviousChannel      *int               `json:"previous_channel,omitempty"`
-	PreviousChannelWidth *int               `json:"previous_channel_width,omitempty"`
+	CurrentChannel       *int    `json:"current_channel,omitempty"`
+	CurrentChannelWidth  *int    `json:"current_channel_width,omitempty"`
+	DeviceMac            *string `json:"device_mac,omitempty"`
+	DeviceName           *string `json:"device_name,omitempty"`
+	DeviceRadio          *ApBand `json:"device_radio,omitempty"`
+	PreviousChannel      *int    `json:"previous_channel,omitempty"`
+	PreviousChannelWidth *int    `json:"previous_channel_width,omitempty"`
 }
 
 // ApiSettingsSuperMgmtDefaults defines model for api_settings_super_mgmt_defaults.
@@ -20444,19 +20245,585 @@ type ApiUcoreFabricConfigSite struct {
 
 // ApiUcoreFabricConfigSiteConfigs defines model for api_ucore_fabric_config_site_configs.
 type ApiUcoreFabricConfigSiteConfigs struct {
-	ContentFilter    *map[string][]NetKSAAAKHUkYjHujLgFBD `json:"content_filter,omitempty"`
-	DnsPolicy        *map[string][]NetKSAFAKHUkYjHujLgFBD `json:"dns_policy,omitempty"`
-	FirewallGroup    *map[string][]NetKSABAKHUkYjHujLgFBD `json:"firewall_group,omitempty"`
-	FirewallPolicy   *map[string][]NetKSABBKHUkYjHujLgFBD `json:"firewall_policy,omitempty"`
-	FirewallZone     *map[string][]NetKSABCKHUkYjHujLgFBD `json:"firewall_zone,omitempty"`
-	GlobalNetwork    *map[string][]NetKSACJRsSex          `json:"global_network,omitempty"`
-	GlobalWifi       *map[string][]NetKSADAeyOUcXIsMsQw   `json:"global_wifi,omitempty"`
-	Network          *map[string][]NetKSAEKHUkYjHujLgFBD  `json:"network,omitempty"`
-	PolicyBasedRoute *map[string][]NetKSAFBKHUkYjHujLgFBD `json:"policy_based_route,omitempty"`
-	Protection       *map[string][]NetKSAGAcrQJeJCScLn    `json:"protection,omitempty"`
-	RadiusProfile    *map[string][]NetKSAHMiVjHefaf       `json:"radius_profile,omitempty"`
-	Wifi             *map[string][]NetKSAIKHUkYjHujLgFBD  `json:"wifi,omitempty"`
+	ContentFilter    *map[string][]ApiUcoreFabricConfigSiteConfigsContentFilter    `json:"content_filter,omitempty"`
+	DnsPolicy        *map[string][]ApiUcoreFabricConfigSiteConfigsDnsPolicy        `json:"dns_policy,omitempty"`
+	FirewallGroup    *map[string][]ApiUcoreFabricConfigSiteConfigsFirewallGroup    `json:"firewall_group,omitempty"`
+	FirewallPolicy   *map[string][]ApiUcoreFabricConfigSiteConfigsFirewallPolicy   `json:"firewall_policy,omitempty"`
+	FirewallZone     *map[string][]ApiUcoreFabricConfigSiteConfigsFirewallZone     `json:"firewall_zone,omitempty"`
+	GlobalNetwork    *map[string][]ApiUcoreFabricConfigSiteConfigsGlobalNetwork    `json:"global_network,omitempty"`
+	GlobalWifi       *map[string][]ApiUcoreFabricConfigSiteConfigsGlobalWifi       `json:"global_wifi,omitempty"`
+	Network          *map[string][]ApiUcoreFabricConfigSiteConfigsNetwork          `json:"network,omitempty"`
+	PolicyBasedRoute *map[string][]ApiUcoreFabricConfigSiteConfigsPolicyBasedRoute `json:"policy_based_route,omitempty"`
+	Protection       *map[string][]ApiUcoreFabricConfigSiteConfigsProtection       `json:"protection,omitempty"`
+	RadiusProfile    *map[string][]ApiUcoreFabricConfigSiteConfigsRadiusProfile    `json:"radius_profile,omitempty"`
+	Wifi             *map[string][]ApiUcoreFabricConfigSiteConfigsWifi             `json:"wifi,omitempty"`
 }
+
+// ApiUcoreFabricConfigSiteConfigsContentFilter defines model for api_ucore_fabric_config_site_configs_content_filter.
+type ApiUcoreFabricConfigSiteConfigsContentFilter struct {
+	AllowList     *[]string                                                 `json:"allow_list,omitempty"`
+	BlockList     *[]string                                                 `json:"block_list,omitempty"`
+	Categories    *[]ApiUcoreFabricConfigSiteConfigsContentFilterCategories `json:"categories,omitempty"`
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate         `json:"cloud_template,omitempty"`
+	Enabled       *bool                                                     `json:"enabled,omitempty"`
+	Id            *string                                                   `json:"id,omitempty"`
+	Name          *string                                                   `json:"name,omitempty"`
+	SafeSearch    *[]ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch `json:"safe_search,omitempty"`
+	Schedule      *ApiUcoreFabricConfigSiteConfigsContentFilterSchedule     `json:"schedule,omitempty"`
+	Sources       *ApiUcoreFabricConfigSiteConfigsContentFilterSources      `json:"sources,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsContentFilterCategories defines model for ApiUcoreFabricConfigSiteConfigsContentFilter.Categories.
+type ApiUcoreFabricConfigSiteConfigsContentFilterCategories string
+
+// ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch defines model for ApiUcoreFabricConfigSiteConfigsContentFilter.SafeSearch.
+type ApiUcoreFabricConfigSiteConfigsContentFilterSafeSearch string
+
+// ApiUcoreFabricConfigSiteConfigsContentFilterSchedule defines model for api_ucore_fabric_config_site_configs_content_filter_schedule.
+type ApiUcoreFabricConfigSiteConfigsContentFilterSchedule struct {
+	Date           *openapi_types.Date                                       `json:"date,omitempty"`
+	DateEnd        *openapi_types.Date                                       `json:"date_end,omitempty"`
+	DateStart      *openapi_types.Date                                       `json:"date_start,omitempty"`
+	Mode           *ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode `json:"mode,omitempty"`
+	RepeatOnDays   *[]ContentFilteringScheduleRepeatOnDay                    `json:"repeat_on_days,omitempty"`
+	TimeAllDay     *bool                                                     `json:"time_all_day,omitempty"`
+	TimeRangeEnd   *string                                                   `json:"time_range_end,omitempty"`
+	TimeRangeStart *string                                                   `json:"time_range_start,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode defines model for ApiUcoreFabricConfigSiteConfigsContentFilterSchedule.Mode.
+type ApiUcoreFabricConfigSiteConfigsContentFilterScheduleMode string
+
+// ApiUcoreFabricConfigSiteConfigsContentFilterSources defines model for api_ucore_fabric_config_site_configs_content_filter_sources.
+type ApiUcoreFabricConfigSiteConfigsContentFilterSources struct {
+	VlanIds *[]int `json:"vlan_ids,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsDnsPolicy defines model for api_ucore_fabric_config_site_configs_dns_policy.
+type ApiUcoreFabricConfigSiteConfigsDnsPolicy struct {
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate   `json:"cloud_template,omitempty"`
+	Enabled       *bool                                               `json:"enabled,omitempty"`
+	ExternalId    *string                                             `json:"external_id,omitempty"`
+	Id            *string                                             `json:"id,omitempty"`
+	Key           *string                                             `json:"key,omitempty"`
+	Port          *int                                                `json:"port,omitempty"`
+	Priority      *int                                                `json:"priority,omitempty"`
+	RecordType    *ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType `json:"record_type,omitempty"`
+	Ttl           *int                                                `json:"ttl,omitempty"`
+	Value         *string                                             `json:"value,omitempty"`
+	Weight        *int                                                `json:"weight,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType defines model for ApiUcoreFabricConfigSiteConfigsDnsPolicy.RecordType.
+type ApiUcoreFabricConfigSiteConfigsDnsPolicyRecordType string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallGroup defines model for api_ucore_fabric_config_site_configs_firewall_group.
+type ApiUcoreFabricConfigSiteConfigsFirewallGroup struct {
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate      `json:"cloud_template,omitempty"`
+	ExternalId    *string                                                `json:"external_id,omitempty"`
+	GroupMembers  *[]string                                              `json:"group_members,omitempty"`
+	GroupType     *ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType `json:"group_type,omitempty"`
+	Id            *string                                                `json:"id,omitempty"`
+	Name          *string                                                `json:"name,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType defines model for ApiUcoreFabricConfigSiteConfigsFirewallGroup.GroupType.
+type ApiUcoreFabricConfigSiteConfigsFirewallGroupGroupType string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicy defines model for api_ucore_fabric_config_site_configs_firewall_policy.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicy struct {
+	Action                *ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction              `json:"action,omitempty"`
+	CloudTemplate         *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate                 `json:"cloud_template,omitempty"`
+	ConnectionStateType   *ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType `json:"connection_state_type,omitempty"`
+	ConnectionStates      *[]ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates  `json:"connection_states,omitempty"`
+	CreateAllowRespond    *bool                                                             `json:"create_allow_respond,omitempty"`
+	Description           *string                                                           `json:"description,omitempty"`
+	Destination           *ApiUcoreFabricConfigSiteConfigsFirewallPolicyDestination         `json:"destination,omitempty"`
+	Enabled               *bool                                                             `json:"enabled,omitempty"`
+	ExternalId            *string                                                           `json:"external_id,omitempty"`
+	IcmpTypename          *ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename        `json:"icmp_typename,omitempty"`
+	IcmpV6Typename        *ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename      `json:"icmp_v6_typename,omitempty"`
+	Id                    *string                                                           `json:"id,omitempty"`
+	Index                 *int                                                              `json:"index,omitempty"`
+	IpVersion             *ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion           `json:"ip_version,omitempty"`
+	Logging               *bool                                                             `json:"logging,omitempty"`
+	MatchIpSec            *bool                                                             `json:"match_ip_sec,omitempty"`
+	MatchIpSecType        *ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecType      `json:"match_ip_sec_type,omitempty"`
+	MatchOppositeProtocol *bool                                                             `json:"match_opposite_protocol,omitempty"`
+	Name                  *string                                                           `json:"name,omitempty"`
+	Protocol              *string                                                           `json:"protocol,omitempty"`
+	Schedule              *ContentFilteringSchedule                                         `json:"schedule,omitempty"`
+	Source                *ApiUcoreFabricConfigSiteConfigsFirewallPolicySource              `json:"source,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction defines model for ApiUcoreFabricConfigSiteConfigsFirewallPolicy.Action.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicyAction string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType defines model for ApiUcoreFabricConfigSiteConfigsFirewallPolicy.ConnectionStateType.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStateType string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates defines model for ApiUcoreFabricConfigSiteConfigsFirewallPolicy.ConnectionStates.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicyConnectionStates string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename defines model for ApiUcoreFabricConfigSiteConfigsFirewallPolicy.IcmpTypename.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpTypename string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename defines model for ApiUcoreFabricConfigSiteConfigsFirewallPolicy.IcmpV6Typename.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicyIcmpV6Typename string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion defines model for ApiUcoreFabricConfigSiteConfigsFirewallPolicy.IpVersion.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicyIpVersion string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecType defines model for ApiUcoreFabricConfigSiteConfigsFirewallPolicy.MatchIpSecType.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicyMatchIpSecType string
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicyDestination defines model for api_ucore_fabric_config_site_configs_firewall_policy_destination.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicyDestination = map[string]interface{}
+
+// ApiUcoreFabricConfigSiteConfigsFirewallPolicySource defines model for api_ucore_fabric_config_site_configs_firewall_policy_source.
+type ApiUcoreFabricConfigSiteConfigsFirewallPolicySource = map[string]interface{}
+
+// ApiUcoreFabricConfigSiteConfigsFirewallZone defines model for api_ucore_fabric_config_site_configs_firewall_zone.
+type ApiUcoreFabricConfigSiteConfigsFirewallZone struct {
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate `json:"cloud_template,omitempty"`
+	DefaultZone   *bool                                             `json:"default_zone,omitempty"`
+	Id            *string                                           `json:"id,omitempty"`
+	Name          *string                                           `json:"name,omitempty"`
+	NetworkIds    *[]string                                         `json:"network_ids,omitempty"`
+	NoEdit        *bool                                             `json:"no_edit,omitempty"`
+	ZoneKey       *string                                           `json:"zone_key,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetwork defines model for api_ucore_fabric_config_site_configs_global_network.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetwork struct {
+	GlobalNetwork *ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetwork `json:"global_network,omitempty"`
+	GlobalSwitch  *ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitch  `json:"global_switch,omitempty"`
+	Mdns          *ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdns          `json:"mdns,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetwork defines model for api_ucore_fabric_config_site_configs_global_network_global_network.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetwork struct {
+	CloudTemplate          *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate                                `json:"cloud_template,omitempty"`
+	DefaultSecurityPosture *ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPosture `json:"default_security_posture,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPosture defines model for ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetwork.DefaultSecurityPosture.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalNetworkDefaultSecurityPosture string
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitch defines model for api_ucore_fabric_config_site_configs_global_network_global_switch.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitch struct {
+	AclDeviceIsolationVlanIds *[]int                                                                    `json:"acl_device_isolation_vlan_ids,omitempty"`
+	AclL3Isolation            *[]ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchAclL3Isolation `json:"acl_l3_isolation,omitempty"`
+	CloudTemplate             *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate                         `json:"cloud_template,omitempty"`
+	DhcpSnoop                 *bool                                                                     `json:"dhcp_snoop,omitempty"`
+	Dot1xFallbackVlanId       *int                                                                      `json:"dot1x_fallback_vlan_id,omitempty"`
+	Dot1xPortctrlEnabled      *bool                                                                     `json:"dot1x_portctrl_enabled,omitempty"`
+	FlowctrlEnabled           *bool                                                                     `json:"flowctrl_enabled,omitempty"`
+	JumboframeEnabled         *bool                                                                     `json:"jumboframe_enabled,omitempty"`
+	RadiusprofileId           *string                                                                   `json:"radiusprofile_id,omitempty"`
+	StpVersion                *ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion       `json:"stp_version,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion defines model for ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitch.StpVersion.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchStpVersion string
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchAclL3Isolation defines model for api_ucore_fabric_config_site_configs_global_network_global_switch_acl_l3_isolation.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkGlobalSwitchAclL3Isolation struct {
+	DestinationVlanIds *[]int `json:"destination_vlan_ids,omitempty"`
+	SourceVlanId       *int   `json:"source_vlan_id,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdns defines model for api_ucore_fabric_config_site_configs_global_network_mdns.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdns struct {
+	CloudTemplate      *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate                    `json:"cloud_template,omitempty"`
+	CustomServices     *[]ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsCustomService     `json:"custom_services,omitempty"`
+	EnabledFor         *ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor          `json:"enabled_for,omitempty"`
+	EnabledForVlanIds  *[]int                                                               `json:"enabled_for_vlan_ids,omitempty"`
+	Mode               *map[string]interface{}                                              `json:"mode,omitempty"`
+	PredefinedServices *[]ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsPredefinedService `json:"predefined_services,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor defines model for ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdns.EnabledFor.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsEnabledFor string
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsCustomService defines model for api_ucore_fabric_config_site_configs_global_network_mdns_custom_service.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsCustomService struct {
+	Address *string `json:"address,omitempty"`
+	Name    *string `json:"name,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsPredefinedService defines model for api_ucore_fabric_config_site_configs_global_network_mdns_predefined_service.
+type ApiUcoreFabricConfigSiteConfigsGlobalNetworkMdnsPredefinedService struct {
+	Code *map[string]interface{} `json:"code,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifi defines model for api_ucore_fabric_config_site_configs_global_wifi.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifi struct {
+	Connectivity *ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivity `json:"connectivity,omitempty"`
+	ElementAdopt *ApiUcoreFabricConfigSiteConfigsGlobalWifiElementAdopt `json:"element_adopt,omitempty"`
+	RadioAi      *ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAi      `json:"radio_ai,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivity defines model for api_ucore_fabric_config_site_configs_global_wifi_connectivity.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivity struct {
+	CloudTemplate  *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate                `json:"cloud_template,omitempty"`
+	MeshingEnabled *bool                                                            `json:"meshing_enabled,omitempty"`
+	MloMeshEnabled *bool                                                            `json:"mlo_mesh_enabled,omitempty"`
+	UplinkHost     *string                                                          `json:"uplink_host,omitempty"`
+	UplinkType     *ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkType `json:"uplink_type,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkType defines model for ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivity.UplinkType.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifiConnectivityUplinkType string
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifiElementAdopt defines model for api_ucore_fabric_config_site_configs_global_wifi_element_adopt.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifiElementAdopt struct {
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate `json:"cloud_template,omitempty"`
+	Enabled       *bool                                             `json:"enabled,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAi defines model for api_ucore_fabric_config_site_configs_global_wifi_radio_ai.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAi struct {
+	AutoChannelPresetsType *ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType `json:"auto_channel_presets_type,omitempty"`
+	CloudTemplate          *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate                       `json:"cloud_template,omitempty"`
+	RadiosConfiguration    *[]ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfiguration  `json:"radios_configuration,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType defines model for ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAi.AutoChannelPresetsType.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiAutoChannelPresetsType string
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfiguration defines model for api_ucore_fabric_config_site_configs_global_wifi_radio_ai_radios_configuration.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfiguration struct {
+	ChannelWidth *ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth `json:"channel_width,omitempty"`
+	Dfs          *bool                                                                            `json:"dfs,omitempty"`
+	Radio        *ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio        `json:"radio,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth defines model for ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfiguration.ChannelWidth.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationChannelWidth string
+
+// ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio defines model for ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfiguration.Radio.
+type ApiUcoreFabricConfigSiteConfigsGlobalWifiRadioAiRadiosConfigurationRadio string
+
+// ApiUcoreFabricConfigSiteConfigsNetwork defines model for api_ucore_fabric_config_site_configs_network.
+type ApiUcoreFabricConfigSiteConfigsNetwork struct {
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate  `json:"cloud_template,omitempty"`
+	Enabled       *bool                                              `json:"enabled,omitempty"`
+	GatewayType   *ApiUcoreFabricConfigSiteConfigsNetworkGatewayType `json:"gateway_type,omitempty"`
+	Id            *string                                            `json:"id,omitempty"`
+	Ipv4          *ApiUcoreFabricConfigSiteConfigsNetworkIpv4        `json:"ipv4,omitempty"`
+	Ipv6          *ApiUcoreFabricConfigSiteConfigsNetworkIpv6        `json:"ipv6,omitempty"`
+	Name          *string                                            `json:"name,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsNetworkGatewayType defines model for ApiUcoreFabricConfigSiteConfigsNetwork.GatewayType.
+type ApiUcoreFabricConfigSiteConfigsNetworkGatewayType string
+
+// ApiUcoreFabricConfigSiteConfigsNetworkIpv4 defines model for api_ucore_fabric_config_site_configs_network_ipv4.
+type ApiUcoreFabricConfigSiteConfigsNetworkIpv4 struct {
+	AutoScaleEnabled        *bool                                              `json:"auto_scale_enabled,omitempty"`
+	Dhcpd                   *ApiUcoreFabricConfigSiteConfigsNetworkIpv4Dhcpd   `json:"dhcpd,omitempty"`
+	DomainName              *string                                            `json:"domain_name,omitempty"`
+	IgmpSnoopingEnabled     *bool                                              `json:"igmp_snooping_enabled,omitempty"`
+	InternetAccessEnabled   *bool                                              `json:"internet_access_enabled,omitempty"`
+	MdnsEnabled             *bool                                              `json:"mdns_enabled,omitempty"`
+	NetworkIsolationEnabled *bool                                              `json:"network_isolation_enabled,omitempty"`
+	Purpose                 *ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose `json:"purpose,omitempty"`
+	SettingPreference       *WlanSettingPreference                             `json:"setting_preference,omitempty"`
+	Vlan                    *int                                               `json:"vlan,omitempty"`
+	VlanEnabled             *bool                                              `json:"vlan_enabled,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose defines model for ApiUcoreFabricConfigSiteConfigsNetworkIpv4.Purpose.
+type ApiUcoreFabricConfigSiteConfigsNetworkIpv4Purpose string
+
+// ApiUcoreFabricConfigSiteConfigsNetworkIpv4Dhcpd defines model for api_ucore_fabric_config_site_configs_network_ipv4_dhcpd.
+type ApiUcoreFabricConfigSiteConfigsNetworkIpv4Dhcpd struct {
+	BootEnabled       *bool     `json:"boot_enabled,omitempty"`
+	BootFilename      *string   `json:"boot_filename,omitempty"`
+	BootServer        *string   `json:"boot_server,omitempty"`
+	ConflictChecking  *bool     `json:"conflict_checking,omitempty"`
+	DnsEnabled        *bool     `json:"dns_enabled,omitempty"`
+	DnsList           *[]string `json:"dns_list,omitempty"`
+	Enabled           *bool     `json:"enabled,omitempty"`
+	Gateway           *string   `json:"gateway,omitempty"`
+	GatewayEnabled    *bool     `json:"gateway_enabled,omitempty"`
+	GuardEnabled      *bool     `json:"guard_enabled,omitempty"`
+	IpSubnet          *string   `json:"ip_subnet,omitempty"`
+	Leasetime         *int      `json:"leasetime,omitempty"`
+	NtpEnabled        *bool     `json:"ntp_enabled,omitempty"`
+	NtpList           *[]string `json:"ntp_list,omitempty"`
+	RelayEnabled      *bool     `json:"relay_enabled,omitempty"`
+	ServerIpList      *[]string `json:"server_ip_list,omitempty"`
+	Start             *string   `json:"start,omitempty"`
+	Stop              *string   `json:"stop,omitempty"`
+	TftpServer        *string   `json:"tftp_server,omitempty"`
+	TimeOffset        *int      `json:"time_offset,omitempty"`
+	TimeOffsetEnabled *bool     `json:"time_offset_enabled,omitempty"`
+	UnifiController   *string   `json:"unifi_controller,omitempty"`
+	WinsEnabled       *bool     `json:"wins_enabled,omitempty"`
+	WinsList          *[]string `json:"wins_list,omitempty"`
+	WpadUrl           *string   `json:"wpad_url,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsNetworkIpv6 defines model for api_ucore_fabric_config_site_configs_network_ipv6.
+type ApiUcoreFabricConfigSiteConfigsNetworkIpv6 struct {
+	ClientAddressAssignment *ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignment `json:"client_address_assignment,omitempty"`
+	Dhcpd                   *ApiUcoreFabricConfigSiteConfigsNetworkIpv6Dhcpd                   `json:"dhcpd,omitempty"`
+	InterfaceType           *ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType           `json:"interface_type,omitempty"`
+	IpSubnet                *string                                                            `json:"ip_subnet,omitempty"`
+	PdAutoPrefixidEnabled   *bool                                                              `json:"pd_auto_prefixid_enabled,omitempty"`
+	PdInterface             *string                                                            `json:"pd_interface,omitempty"`
+	RaEnabled               *bool                                                              `json:"ra_enabled,omitempty"`
+	RaPreferredLifetime     *string                                                            `json:"ra_preferred_lifetime,omitempty"`
+	RaPriority              *ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority              `json:"ra_priority,omitempty"`
+	SettingPreference       *WlanSettingPreference                                             `json:"setting_preference,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignment defines model for ApiUcoreFabricConfigSiteConfigsNetworkIpv6.ClientAddressAssignment.
+type ApiUcoreFabricConfigSiteConfigsNetworkIpv6ClientAddressAssignment string
+
+// ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType defines model for ApiUcoreFabricConfigSiteConfigsNetworkIpv6.InterfaceType.
+type ApiUcoreFabricConfigSiteConfigsNetworkIpv6InterfaceType string
+
+// ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority defines model for ApiUcoreFabricConfigSiteConfigsNetworkIpv6.RaPriority.
+type ApiUcoreFabricConfigSiteConfigsNetworkIpv6RaPriority string
+
+// ApiUcoreFabricConfigSiteConfigsNetworkIpv6Dhcpd defines model for api_ucore_fabric_config_site_configs_network_ipv6_dhcpd.
+type ApiUcoreFabricConfigSiteConfigsNetworkIpv6Dhcpd struct {
+	AllowSlaac     *bool     `json:"allow_slaac,omitempty"`
+	DnsAutoEnabled *bool     `json:"dns_auto_enabled,omitempty"`
+	DnsList        *[]string `json:"dns_list,omitempty"`
+	Enabled        *bool     `json:"enabled,omitempty"`
+	Leasetime      *int      `json:"leasetime,omitempty"`
+	Start          *string   `json:"start,omitempty"`
+	Stop           *string   `json:"stop,omitempty"`
+	WanPdSizeAuto  *bool     `json:"wan_pd_size_auto,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRoute defines model for api_ucore_fabric_config_site_configs_policy_based_route.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRoute struct {
+	UnderscoreId      *string                                                                      `json:"_id,omitempty"`
+	CloudTemplate     *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate                            `json:"cloud_template,omitempty"`
+	Description       *string                                                                      `json:"description,omitempty"`
+	Domains           *[]ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteDomain                     `json:"domains,omitempty"`
+	EgressTarget      *ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteTargetDeviceNetworkReference `json:"egress_target,omitempty"`
+	Enabled           *bool                                                                        `json:"enabled,omitempty"`
+	IpAddresses       *[]ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddress                  `json:"ip_addresses,omitempty"`
+	IpRanges          *[]ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpRange                    `json:"ip_ranges,omitempty"`
+	KillSwitchEnabled *bool                                                                        `json:"kill_switch_enabled,omitempty"`
+	MatchingTarget    *ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget               `json:"matching_target,omitempty"`
+	NextHop           *string                                                                      `json:"next_hop,omitempty"`
+	Regions           *[]string                                                                    `json:"regions,omitempty"`
+	TargetDevices     *[]ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteTargetDevice               `json:"target_devices,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget defines model for ApiUcoreFabricConfigSiteConfigsPolicyBasedRoute.MatchingTarget.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteMatchingTarget string
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteDomain defines model for api_ucore_fabric_config_site_configs_policy_based_route_domain.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteDomain struct {
+	Domain     *string                                                           `json:"domain,omitempty"`
+	PortRanges *[]ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteDomainPortRange `json:"port_ranges,omitempty"`
+	Ports      *[]int                                                            `json:"ports,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteDomainPortRange defines model for api_ucore_fabric_config_site_configs_policy_based_route_domain_port_range.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteDomainPortRange struct {
+	PortStart *int `json:"port_start,omitempty"`
+	PortStop  *int `json:"port_stop,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddress defines model for api_ucore_fabric_config_site_configs_policy_based_route_ip_address.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddress struct {
+	IpOrSubnet *string                                                            `json:"ip_or_subnet,omitempty"`
+	IpVersion  *ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersion `json:"ip_version,omitempty"`
+	PortRanges *[]ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteDomainPortRange  `json:"port_ranges,omitempty"`
+	Ports      *[]int                                                             `json:"ports,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersion defines model for ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddress.IpVersion.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpAddressIpVersion string
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpRange defines model for api_ucore_fabric_config_site_configs_policy_based_route_ip_range.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteIpRange struct {
+	IpStart   *string                          `json:"ip_start,omitempty"`
+	IpStop    *string                          `json:"ip_stop,omitempty"`
+	IpVersion *TrafficroutesIpAddressIpVersion `json:"ip_version,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteTargetDevice defines model for api_ucore_fabric_config_site_configs_policy_based_route_target_device.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteTargetDevice struct {
+	ClientMac        *string                                                                      `json:"client_mac,omitempty"`
+	NetworkReference *ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteTargetDeviceNetworkReference `json:"network_reference,omitempty"`
+	Type             *string                                                                      `json:"type,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteTargetDeviceNetworkReference defines model for api_ucore_fabric_config_site_configs_policy_based_route_target_device_network_reference.
+type ApiUcoreFabricConfigSiteConfigsPolicyBasedRouteTargetDeviceNetworkReference = map[string]interface{}
+
+// ApiUcoreFabricConfigSiteConfigsProtection defines model for api_ucore_fabric_config_site_configs_protection.
+type ApiUcoreFabricConfigSiteConfigsProtection struct {
+	Doh    *ApiUcoreFabricConfigSiteConfigsProtectionDoh    `json:"doh,omitempty"`
+	Dpi    *ApiUcoreFabricConfigSiteConfigsProtectionDpi    `json:"dpi,omitempty"`
+	Ips    *ApiUcoreFabricConfigSiteConfigsProtectionIps    `json:"ips,omitempty"`
+	UsgGeo *ApiUcoreFabricConfigSiteConfigsProtectionUsgGeo `json:"usg_geo,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsProtectionDoh defines model for api_ucore_fabric_config_site_configs_protection_doh.
+type ApiUcoreFabricConfigSiteConfigsProtectionDoh struct {
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate           `json:"cloud_template,omitempty"`
+	CustomServers *[]ApiUcoreFabricConfigSiteConfigsProtectionDohCustomServer `json:"custom_servers,omitempty"`
+	KnownServers  *[]string                                                   `json:"known_servers,omitempty"`
+	State         *string                                                     `json:"state,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsProtectionDohCustomServer defines model for api_ucore_fabric_config_site_configs_protection_doh_custom_server.
+type ApiUcoreFabricConfigSiteConfigsProtectionDohCustomServer struct {
+	Enabled    *bool   `json:"enabled,omitempty"`
+	SdnsStamp  *string `json:"sdns_stamp,omitempty"`
+	ServerName *string `json:"server_name,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsProtectionDpi defines model for api_ucore_fabric_config_site_configs_protection_dpi.
+type ApiUcoreFabricConfigSiteConfigsProtectionDpi struct {
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate `json:"cloud_template,omitempty"`
+	Mode          *string                                           `json:"mode,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsProtectionIps defines model for api_ucore_fabric_config_site_configs_protection_ips.
+type ApiUcoreFabricConfigSiteConfigsProtectionIps struct {
+	AdvancedFilteringPreference         *string                                                 `json:"advanced_filtering_preference,omitempty"`
+	CloudTemplate                       *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate       `json:"cloud_template,omitempty"`
+	ContentFilteringBlockingPageEnabled *bool                                                   `json:"content_filtering_blocking_page_enabled,omitempty"`
+	EnabledCategories                   *[]string                                               `json:"enabled_categories,omitempty"`
+	EnabledVlanIds                      *[]int                                                  `json:"enabled_vlanIds,omitempty"`
+	Honeypot                            *[]ApiUcoreFabricConfigSiteConfigsProtectionIpsHoneypot `json:"honeypot,omitempty"`
+	IpsMode                             *string                                                 `json:"ips_mode,omitempty"`
+	MemoryOptimized                     *bool                                                   `json:"memory_optimized,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsProtectionIpsHoneypot defines model for api_ucore_fabric_config_site_configs_protection_ips_honeypot.
+type ApiUcoreFabricConfigSiteConfigsProtectionIpsHoneypot struct {
+	IpAddress *string `json:"ip_address,omitempty"`
+	Version   *string `json:"version,omitempty"`
+	VlanId    *int    `json:"vlan_id,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsProtectionUsgGeo defines model for api_ucore_fabric_config_site_configs_protection_usg_geo.
+type ApiUcoreFabricConfigSiteConfigsProtectionUsgGeo struct {
+	CloudTemplate *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate           `json:"cloud_template,omitempty"`
+	IpFiltering   *ApiUcoreFabricConfigSiteConfigsProtectionUsgGeoIpFiltering `json:"ip_filtering,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsProtectionUsgGeoIpFiltering defines model for api_ucore_fabric_config_site_configs_protection_usg_geo_ip_filtering.
+type ApiUcoreFabricConfigSiteConfigsProtectionUsgGeoIpFiltering struct {
+	Action           *string   `json:"action,omitempty"`
+	Countries        *[]string `json:"countries,omitempty"`
+	Enabled          *bool     `json:"enabled,omitempty"`
+	TrafficDirection *string   `json:"traffic_direction,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsRadiusProfile defines model for api_ucore_fabric_config_site_configs_radius_profile.
+type ApiUcoreFabricConfigSiteConfigsRadiusProfile = map[string]interface{}
+
+// ApiUcoreFabricConfigSiteConfigsWifi defines model for api_ucore_fabric_config_site_configs_wifi.
+type ApiUcoreFabricConfigSiteConfigsWifi struct {
+	AdvertiseDeviceNameInBeacon *bool                                                      `json:"advertise_device_name_in_beacon,omitempty"`
+	BcFilterEnabled             *bool                                                      `json:"bc_filter_enabled,omitempty"`
+	BcFilterList                *[]string                                                  `json:"bc_filter_list,omitempty"`
+	BssTransition               *bool                                                      `json:"bss_transition,omitempty"`
+	CloudTemplate               *ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate          `json:"cloud_template,omitempty"`
+	DnsAssistanceMode           *string                                                    `json:"dns_assistance_mode,omitempty"`
+	DnsAssistanceServers        *[]string                                                  `json:"dns_assistance_servers,omitempty"`
+	Dtim6e                      *int                                                       `json:"dtim_6e,omitempty"`
+	DtimMode                    *string                                                    `json:"dtim_mode,omitempty"`
+	DtimNa                      *int                                                       `json:"dtim_na,omitempty"`
+	DtimNg                      *int                                                       `json:"dtim_ng,omitempty"`
+	EnhancedIot                 *bool                                                      `json:"enhanced_iot,omitempty"`
+	FastRoamingEnabled          *bool                                                      `json:"fast_roaming_enabled,omitempty"`
+	GroupRekey                  *int                                                       `json:"group_rekey,omitempty"`
+	HideSsid                    *bool                                                      `json:"hide_ssid,omitempty"`
+	Hotspot2confEnabled         *bool                                                      `json:"hotspot2conf_enabled,omitempty"`
+	Id                          *string                                                    `json:"id,omitempty"`
+	IotChannelLock              *bool                                                      `json:"iot_channel_lock,omitempty"`
+	IotDtimLock                 *bool                                                      `json:"iot_dtim_lock,omitempty"`
+	IsGuest                     *bool                                                      `json:"is_guest,omitempty"`
+	L2Isolation                 *bool                                                      `json:"l2_isolation,omitempty"`
+	MacFilterEnabled            *bool                                                      `json:"mac_filter_enabled,omitempty"`
+	MacFilterList               *[]string                                                  `json:"mac_filter_list,omitempty"`
+	MacFilterPolicy             *string                                                    `json:"mac_filter_policy,omitempty"`
+	McastenhanceEnabled         *bool                                                      `json:"mcastenhance_enabled,omitempty"`
+	MinrateNaAdvertisingRates   *bool                                                      `json:"minrate_na_advertising_rates,omitempty"`
+	MinrateNaDataRateKbps       *int                                                       `json:"minrate_na_data_rate_kbps,omitempty"`
+	MinrateNaEnabled            *bool                                                      `json:"minrate_na_enabled,omitempty"`
+	MinrateNgAdvertisingRates   *bool                                                      `json:"minrate_ng_advertising_rates,omitempty"`
+	MinrateNgDataRateKbps       *int                                                       `json:"minrate_ng_data_rate_kbps,omitempty"`
+	MinrateNgEnabled            *bool                                                      `json:"minrate_ng_enabled,omitempty"`
+	MinrateSettingPreference    *WlanSettingPreference                                     `json:"minrate_setting_preference,omitempty"`
+	MloEnabled                  *bool                                                      `json:"mlo_enabled,omitempty"`
+	Name                        *string                                                    `json:"name,omitempty"`
+	No2ghzOui                   *bool                                                      `json:"no2ghz_oui,omitempty"`
+	PmfMode                     *ApiUcoreFabricConfigSiteConfigsWifiPmfMode                `json:"pmf_mode,omitempty"`
+	PrivatePresharedKeys        *[]ApiUcoreFabricConfigSiteConfigsWifiPrivatePresharedKey  `json:"private_preshared_keys,omitempty"`
+	PrivatePresharedKeysEnabled *bool                                                      `json:"private_preshared_keys_enabled,omitempty"`
+	ProxyArp                    *bool                                                      `json:"proxy_arp,omitempty"`
+	RadiusMacAuthEnabled        *bool                                                      `json:"radius_mac_auth_enabled,omitempty"`
+	RadiusMacaclFormat          *ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat     `json:"radius_macacl_format,omitempty"`
+	RadiusprofileId             *string                                                    `json:"radiusprofile_id,omitempty"`
+	RoamingAssistant6eEnabled   *bool                                                      `json:"roaming_assistant_6e_enabled,omitempty"`
+	RoamingAssistant6eRssi      *int                                                       `json:"roaming_assistant_6e_rssi,omitempty"`
+	RoamingAssistantNaEnabled   *bool                                                      `json:"roaming_assistant_na_enabled,omitempty"`
+	RoamingAssistantNaRssi      *int                                                       `json:"roaming_assistant_na_rssi,omitempty"`
+	ScheduleWithDuration        *[]ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDuration `json:"schedule_with_duration,omitempty"`
+	SecurityProtocol            *ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol       `json:"security_protocol,omitempty"`
+	SettingPreference           *ApiUcoreFabricConfigSiteConfigsWifiSettingPreference      `json:"setting_preference,omitempty"`
+	UapsdEnabled                *bool                                                      `json:"uapsd_enabled,omitempty"`
+	VlanId                      *int                                                       `json:"vlan_id,omitempty"`
+	WlanBands                   *[]ApiUcoreFabricConfigSiteConfigsWifiWlanBands            `json:"wlan_bands,omitempty"`
+	XPassphrase                 *string                                                    `json:"x_passphrase,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsWifiPmfMode defines model for ApiUcoreFabricConfigSiteConfigsWifi.PmfMode.
+type ApiUcoreFabricConfigSiteConfigsWifiPmfMode string
+
+// ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat defines model for ApiUcoreFabricConfigSiteConfigsWifi.RadiusMacaclFormat.
+type ApiUcoreFabricConfigSiteConfigsWifiRadiusMacaclFormat string
+
+// ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol defines model for ApiUcoreFabricConfigSiteConfigsWifi.SecurityProtocol.
+type ApiUcoreFabricConfigSiteConfigsWifiSecurityProtocol string
+
+// ApiUcoreFabricConfigSiteConfigsWifiSettingPreference defines model for ApiUcoreFabricConfigSiteConfigsWifi.SettingPreference.
+type ApiUcoreFabricConfigSiteConfigsWifiSettingPreference string
+
+// ApiUcoreFabricConfigSiteConfigsWifiWlanBands defines model for ApiUcoreFabricConfigSiteConfigsWifi.WlanBands.
+type ApiUcoreFabricConfigSiteConfigsWifiWlanBands string
+
+// ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate defines model for api_ucore_fabric_config_site_configs_wifi_cloud_template.
+type ApiUcoreFabricConfigSiteConfigsWifiCloudTemplate struct {
+	ConfigId        *string `json:"config_id,omitempty"`
+	OrchestrationId *string `json:"orchestration_id,omitempty"`
+	OrganizationId  *string `json:"organization_id,omitempty"`
+	RevisionId      *string `json:"revision_id,omitempty"`
+	TemplateId      *string `json:"template_id,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsWifiPrivatePresharedKey defines model for api_ucore_fabric_config_site_configs_wifi_private_preshared_key.
+type ApiUcoreFabricConfigSiteConfigsWifiPrivatePresharedKey struct {
+	Password *string `json:"password,omitempty"`
+	VlanId   *int    `json:"vlan_id,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDuration defines model for api_ucore_fabric_config_site_configs_wifi_schedule_with_duration.
+type ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDuration struct {
+	DurationMinutes *int                                                                      `json:"duration_minutes,omitempty"`
+	StartDaysOfWeek *[]ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek `json:"start_days_of_week,omitempty"`
+	StartHour       *int                                                                      `json:"start_hour,omitempty"`
+	StartMinute     *int                                                                      `json:"start_minute,omitempty"`
+}
+
+// ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek defines model for ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDuration.StartDaysOfWeek.
+type ApiUcoreFabricConfigSiteConfigsWifiScheduleWithDurationStartDaysOfWeek string
 
 // ApiUcoreSupportDump defines model for api_ucore_support_dump.
 type ApiUcoreSupportDump struct {
@@ -20726,6 +21093,9 @@ type ContentFilteringCategories string
 // ContentFilteringSafeSearch defines model for ContentFiltering.SafeSearch.
 type ContentFilteringSafeSearch string
 
+// ContentFilteringCategorie defines model for content_filtering_categorie.
+type ContentFilteringCategorie string
+
 // ContentFilteringCloudTemplate defines model for content_filtering_cloud_template.
 type ContentFilteringCloudTemplate struct {
 	ConfigId        *string `json:"config_id,omitempty"`
@@ -20754,6 +21124,9 @@ type ContentFilteringScheduleMode string
 // ContentFilteringScheduleRepeatOnDays defines model for ContentFilteringSchedule.RepeatOnDays.
 type ContentFilteringScheduleRepeatOnDays string
 
+// ContentFilteringScheduleRepeatOnDay defines model for content_filtering_schedule_repeatOnDay.
+type ContentFilteringScheduleRepeatOnDay string
+
 // Countries defines model for countries.
 type Countries = map[string]interface{}
 
@@ -20769,21 +21142,6 @@ type CountryTrafficUsageByCountry struct {
 	Country          *string `json:"country,omitempty"`
 	TotalBytes       *int    `json:"total_bytes,omitempty"`
 }
-
-// DaoConfigEDTToyPkrNNHXKNEnk defines model for dao_config_e_d_TToyPkrNNHXKNEnk.
-type DaoConfigEDTToyPkrNNHXKNEnk string
-
-// DaoConfigEKKHUkYjHujLgFBD defines model for dao_config_e_k_KHUkYjHujLgFBD.
-type DaoConfigEKKHUkYjHujLgFBD string
-
-// DaoConfigEKAeyOUcXIsMsQw defines model for dao_config_e_k_aeyOUcXIsMsQw.
-type DaoConfigEKAeyOUcXIsMsQw string
-
-// DaoConfigEKCAeyOUcXIsMsQw defines model for dao_config_e_k_c_aeyOUcXIsMsQw.
-type DaoConfigEKCAeyOUcXIsMsQw string
-
-// DaoConfigEWJRsSex defines model for dao_config_e_w_jRsSex.
-type DaoConfigEWJRsSex string
 
 // Dashboard defines model for dashboard.
 type Dashboard struct {
@@ -21421,6 +21779,15 @@ type DeviceReplacementCandidates struct {
 	Devices *[]DeviceCloneCandidatesDevice `json:"devices,omitempty"`
 }
 
+// DeviceSupportFileGenerator defines model for device_support_file_generator.
+type DeviceSupportFileGenerator struct {
+	Mac    *string                           `json:"mac,omitempty"`
+	Status *DeviceSupportFileGeneratorStatus `json:"status,omitempty"`
+}
+
+// DeviceSupportFileGeneratorStatus defines model for DeviceSupportFileGenerator.Status.
+type DeviceSupportFileGeneratorStatus string
+
 // DeviceTags defines model for device_tags.
 type DeviceTags struct {
 	MemberDeviceMacs *[]string `json:"member_device_macs,omitempty"`
@@ -21636,12 +22003,6 @@ type Dynamicdns struct {
 // DynamicdnsService defines model for Dynamicdns.Service.
 type DynamicdnsService string
 
-// EAKHUkYjHujLgFBD defines model for e_a_KHUkYjHujLgFBD.
-type EAKHUkYjHujLgFBD string
-
-// ERYtJfMBbtgWvku defines model for e_rYtJfMBbtgWvku.
-type ERYtJfMBbtgWvku string
-
 // ExcludedIps defines model for excluded_ips.
 type ExcludedIps struct {
 	ExcludedIpClientInfo       *[]ExcludedIpsExcludedIpClientInfo       `json:"excluded_ip_client_info,omitempty"`
@@ -21797,10 +22158,10 @@ type FirewallPolicies5 = map[string]interface{}
 type FirewallPoliciesDestination struct {
 	MatchOppositePorts *bool                                     `json:"match_opposite_ports,omitempty"`
 	MatchingTarget     FirewallPoliciesDestinationMatchingTarget `json:"matching_target"`
-	MatchingTargetType *DaoConfigEKKHUkYjHujLgFBD                `json:"matching_target_type,omitempty"`
+	MatchingTargetType *FirewallPoliciesSourceMatchingTargetType `json:"matching_target_type,omitempty"`
 	Port               *string                                   `json:"port,omitempty"`
 	PortGroupId        *string                                   `json:"port_group_id,omitempty"`
-	PortMatchingType   DaoConfigEKAeyOUcXIsMsQw                  `json:"port_matching_type"`
+	PortMatchingType   FirewallPoliciesSourcePortMatchingType    `json:"port_matching_type"`
 	ZoneId             string                                    `json:"zone_id"`
 }
 
@@ -22008,136 +22369,6 @@ type FloorplanShapeBatch struct {
 	Update      *[]FloorplanShape `json:"update,omitempty"`
 }
 
-// GBNAEUraORhn defines model for g_b_N_a_EUraORhn.
-type GBNAEUraORhn string
-
-// GBUHtDMji defines model for g_b_U_htDMji.
-type GBUHtDMji string
-
-// GBAEKWFFqTgF defines model for g_b_aE_KWFFqTgF.
-type GBAEKWFFqTgF string
-
-// GBAEBTToyPkrNNHXKNEnk defines model for g_b_aE_b_TToyPkrNNHXKNEnk.
-type GBAEBTToyPkrNNHXKNEnk string
-
-// GBAHBLwwMKkr defines model for g_b_aH_bLwwMKkr.
-type GBAHBLwwMKkr string
-
-// GBAIGWoWvNEX defines model for g_b_aI_GWoWvNEX.
-type GBAIGWoWvNEX string
-
-// GBAkKHUkYjHujLgFBD defines model for g_b_ak_KHUkYjHujLgFBD.
-type GBAkKHUkYjHujLgFBD struct {
-	Mac    *string                   `json:"mac,omitempty"`
-	Status *GBAkKHUkYjHujLgFBDStatus `json:"status,omitempty"`
-}
-
-// GBAkKHUkYjHujLgFBDStatus defines model for GBAkKHUkYjHujLgFBD.Status.
-type GBAkKHUkYjHujLgFBDStatus string
-
-// GBAnGVVyiC defines model for g_b_an_g_VVyiC.
-type GBAnGVVyiC struct {
-	Ip   *string         `json:"ip,omitempty"`
-	Mac  *string         `json:"mac,omitempty"`
-	Name *string         `json:"name,omitempty"`
-	Port *int            `json:"port,omitempty"`
-	Type *GBAnGVVyiCType `json:"type,omitempty"`
-}
-
-// GBAnGVVyiCType defines model for GBAnGVVyiC.Type.
-type GBAnGVVyiCType string
-
-// GBAnGHtDMji defines model for g_b_an_g_htDMji.
-type GBAnGHtDMji struct {
-	TriggerId   *string          `json:"trigger_id,omitempty"`
-	TriggerName *string          `json:"trigger_name,omitempty"`
-	Type        *GBAnGHtDMjiType `json:"type,omitempty"`
-}
-
-// GBAnGHtDMjiType defines model for GBAnGHtDMji.Type.
-type GBAnGHtDMjiType string
-
-// GBAqKHUkYjHujLgFBD defines model for g_b_aq_KHUkYjHujLgFBD.
-type GBAqKHUkYjHujLgFBD string
-
-// GBAtSNMiFVJXxaonBOtqbJ defines model for g_b_at_SNMiFVJXxaonBOtqbJ.
-type GBAtSNMiFVJXxaonBOtqbJ string
-
-// GBCAQODNNoMmBlFpWXX defines model for g_b_c_AQODNNoMmBlFpWXX.
-type GBCAQODNNoMmBlFpWXX struct {
-	Category                   *map[string]interface{} `json:"category,omitempty"`
-	Label                      *string                 `json:"label,omitempty"`
-	SendEmail                  *bool                   `json:"send_email,omitempty"`
-	SendMobilePushNotification *bool                   `json:"send_mobile_push_notification,omitempty"`
-	Subcategory                *map[string]interface{} `json:"subcategory,omitempty"`
-}
-
-// GBCKWFFqTgF defines model for g_b_c_KWFFqTgF.
-type GBCKWFFqTgF struct {
-	EnclosedWithBrackets *bool   `json:"enclosed_with_brackets,omitempty"`
-	Id                   *string `json:"id,omitempty"`
-	Name                 *string `json:"name,omitempty"`
-	NotActionable        *bool   `json:"not_actionable,omitempty"`
-}
-
-// GBCQnvuxbsxyajz0 defines model for g_b_c_qnvuxbsxyajz_0.
-type GBCQnvuxbsxyajz0 string
-
-// GBCWbFONodBTUv defines model for g_b_c_wbFONodBTUv.
-type GBCWbFONodBTUv struct {
-	SendEmail                  bool `json:"send_email"`
-	SendMobilePushNotification bool `json:"send_mobile_push_notification"`
-	ShowInAlertPage            bool `json:"show_in_alert_page"`
-}
-
-// GBDKHUkYjHujLgFBD defines model for g_b_d_KHUkYjHujLgFBD.
-type GBDKHUkYjHujLgFBD struct {
-	Name *string `json:"name,omitempty"`
-}
-
-// GBEirJvdtm defines model for g_b_eirJvdtm.
-type GBEirJvdtm string
-
-// GBKAKuhBRF defines model for g_b_k_a_kuhBRF.
-type GBKAKuhBRF = map[string]interface{}
-
-// GBVAAeyOUcXIsMsQw defines model for g_b_v_a_aeyOUcXIsMsQw.
-type GBVAAeyOUcXIsMsQw struct {
-	Destination    *GBAnGVVyiC                      `json:"destination,omitempty"`
-	Id             *string                          `json:"id,omitempty"`
-	Name           *string                          `json:"name,omitempty"`
-	NetworkPurpose *GBVAAeyOUcXIsMsQwNetworkPurpose `json:"network_purpose,omitempty"`
-	Source         *GBAnGVVyiC                      `json:"source,omitempty"`
-	Trigger        *GBAnGHtDMji                     `json:"trigger,omitempty"`
-}
-
-// GBVAAeyOUcXIsMsQwNetworkPurpose defines model for GBVAAeyOUcXIsMsQw.NetworkPurpose.
-type GBVAAeyOUcXIsMsQwNetworkPurpose string
-
-// GBWAAKHUkYjHujLgFBD defines model for g_b_w_a_a_KHUkYjHujLgFBD.
-type GBWAAKHUkYjHujLgFBD string
-
-// GDMAeyOUcXIsMsQw defines model for g_d_m_aeyOUcXIsMsQw.
-type GDMAeyOUcXIsMsQw string
-
-// GDSKHUkYjHujLgFBD defines model for g_d_s_KHUkYjHujLgFBD.
-type GDSKHUkYjHujLgFBD string
-
-// GFEKHUkYjHujLgFBD defines model for g_f_e_KHUkYjHujLgFBD.
-type GFEKHUkYjHujLgFBD string
-
-// GFERYtJfMBbtgWvku defines model for g_f_e_rYtJfMBbtgWvku.
-type GFERYtJfMBbtgWvku string
-
-// GLBRYtJfMBbtgWvku defines model for g_l_b_rYtJfMBbtgWvku.
-type GLBRYtJfMBbtgWvku string
-
-// GSKHUkYjHujLgFBD defines model for g_s_KHUkYjHujLgFBD.
-type GSKHUkYjHujLgFBD string
-
-// GSAeyOUcXIsMsQw defines model for g_s_aeyOUcXIsMsQw.
-type GSAeyOUcXIsMsQw string
-
 // Gateway defines model for gateway.
 type Gateway struct {
 	Enabled        *bool        `json:"enabled,omitempty"`
@@ -22151,11 +22382,11 @@ type GatewayType string
 
 // GatewayEngineLogs defines model for gateway_engine_logs.
 type GatewayEngineLogs struct {
-	Feature   *GatewayEngineLogsFeature     `json:"feature,omitempty"`
-	Key       *GatewayEngineLogsKey         `json:"key,omitempty"`
-	Message   *string                       `json:"message,omitempty"`
-	Params    *map[string]GBVAAeyOUcXIsMsQw `json:"params,omitempty"`
-	Timestamp *int                          `json:"timestamp,omitempty"`
+	Feature   *GatewayEngineLogsFeature          `json:"feature,omitempty"`
+	Key       *GatewayEngineLogsKey              `json:"key,omitempty"`
+	Message   *string                            `json:"message,omitempty"`
+	Params    *map[string]GatewayEngineLogsParam `json:"params,omitempty"`
+	Timestamp *int                               `json:"timestamp,omitempty"`
 }
 
 // GatewayEngineLogsFeature defines model for GatewayEngineLogs.Feature.
@@ -22163,6 +22394,41 @@ type GatewayEngineLogsFeature string
 
 // GatewayEngineLogsKey defines model for GatewayEngineLogs.Key.
 type GatewayEngineLogsKey string
+
+// GatewayEngineLogsParam defines model for gateway_engine_logs_param.
+type GatewayEngineLogsParam struct {
+	Destination    *GatewayEngineLogsParamSource         `json:"destination,omitempty"`
+	Id             *string                               `json:"id,omitempty"`
+	Name           *string                               `json:"name,omitempty"`
+	NetworkPurpose *GatewayEngineLogsParamNetworkPurpose `json:"network_purpose,omitempty"`
+	Source         *GatewayEngineLogsParamSource         `json:"source,omitempty"`
+	Trigger        *GatewayEngineLogsParamTrigger        `json:"trigger,omitempty"`
+}
+
+// GatewayEngineLogsParamNetworkPurpose defines model for GatewayEngineLogsParam.NetworkPurpose.
+type GatewayEngineLogsParamNetworkPurpose string
+
+// GatewayEngineLogsParamSource defines model for gateway_engine_logs_param_source.
+type GatewayEngineLogsParamSource struct {
+	Ip   *string                           `json:"ip,omitempty"`
+	Mac  *string                           `json:"mac,omitempty"`
+	Name *string                           `json:"name,omitempty"`
+	Port *int                              `json:"port,omitempty"`
+	Type *GatewayEngineLogsParamSourceType `json:"type,omitempty"`
+}
+
+// GatewayEngineLogsParamSourceType defines model for GatewayEngineLogsParamSource.Type.
+type GatewayEngineLogsParamSourceType string
+
+// GatewayEngineLogsParamTrigger defines model for gateway_engine_logs_param_trigger.
+type GatewayEngineLogsParamTrigger struct {
+	TriggerId   *string                            `json:"trigger_id,omitempty"`
+	TriggerName *string                            `json:"trigger_name,omitempty"`
+	Type        *GatewayEngineLogsParamTriggerType `json:"type,omitempty"`
+}
+
+// GatewayEngineLogsParamTriggerType defines model for GatewayEngineLogsParamTrigger.Type.
+type GatewayEngineLogsParamTriggerType string
 
 // GatewayEngineMostActiveNetworks defines model for gateway_engine_most_active_networks.
 type GatewayEngineMostActiveNetworks struct {
@@ -22197,11 +22463,11 @@ type Global struct {
 	DefaultSecurityPosture             *GlobalDefaultSecurityPosture `json:"default_security_posture,omitempty"`
 	FloodUnknownMulticastForNetworkIds *[]string                     `json:"flood_unknown_multicast_for_network_ids,omitempty"`
 	IgmpFastleaveForNetworkIds         *[]string                     `json:"igmp_fastleave_for_network_ids,omitempty"`
-	IgmpQuerierSwitches                *[]GlobalIgmpQuerierSwitche   `json:"igmp_querier_switches,omitempty"`
+	IgmpQuerierSwitches                *[]GlobalIgmpQuerierSwitch    `json:"igmp_querier_switches,omitempty"`
 	IgmpSnoopingFor                    GlobalIgmpSnoopingFor         `json:"igmp_snooping_for"`
 	IgmpSnoopingForNetworkIds          []string                      `json:"igmp_snooping_for_network_ids"`
 	Ipv6PdInterfaces                   *[]GlobalIpv6PdInterface      `json:"ipv6_pd_interfaces,omitempty"`
-	MdnsEnabledFor                     GBWAAKHUkYjHujLgFBD           `json:"mdns_enabled_for"`
+	MdnsEnabledFor                     GlobalIgmpSnoopingFor         `json:"mdns_enabled_for"`
 	MdnsEnabledForNetworkIds           []string                      `json:"mdns_enabled_for_network_ids"`
 }
 
@@ -22211,8 +22477,8 @@ type GlobalDefaultSecurityPosture string
 // GlobalIgmpSnoopingFor defines model for Global.IgmpSnoopingFor.
 type GlobalIgmpSnoopingFor string
 
-// GlobalIgmpQuerierSwitche defines model for global_igmp_querier_switche.
-type GlobalIgmpQuerierSwitche struct {
+// GlobalIgmpQuerierSwitch defines model for global_igmp_querier_switch.
+type GlobalIgmpQuerierSwitch struct {
 	Mac            string  `json:"mac"`
 	NetworkId      string  `json:"network_id"`
 	QuerierAddress *string `json:"querier_address,omitempty"`
@@ -22467,17 +22733,17 @@ type Info = map[string]interface{}
 
 // Infrastructure defines model for infrastructure.
 type Infrastructure struct {
-	DefaultLanNetworkId *string                           `json:"defaultLanNetworkId,omitempty"`
-	Edges               *[]InfrastructureEdge             `json:"edges,omitempty"`
-	GatewayMac          *string                           `json:"gatewayMac,omitempty"`
-	IspData             *[]InfrastructureIspData          `json:"ispData,omitempty"`
-	MclagData           *[]MclagGroups                    `json:"mclagData,omitempty"`
-	ShadowMode          *InfrastructureShadowMode         `json:"shadowMode,omitempty"`
-	StackingData        *[]InfrastructureStackingData     `json:"stackingData,omitempty"`
-	ThirdPartyClients   *[]InfrastructureThirdPartyClient `json:"thirdPartyClients,omitempty"`
-	UswWanDevices       *[]InfrastructureUswWanDevice     `json:"uswWanDevices,omitempty"`
-	Vertices            *[]InfrastructureVertice          `json:"vertices,omitempty"`
-	WanMode             *GBAEBTToyPkrNNHXKNEnk            `json:"wanMode,omitempty"`
+	DefaultLanNetworkId *string                                 `json:"defaultLanNetworkId,omitempty"`
+	Edges               *[]InfrastructureEdge                   `json:"edges,omitempty"`
+	GatewayMac          *string                                 `json:"gatewayMac,omitempty"`
+	IspData             *[]InfrastructureIspData                `json:"ispData,omitempty"`
+	MclagData           *[]MclagGroups                          `json:"mclagData,omitempty"`
+	ShadowMode          *InfrastructureShadowMode               `json:"shadowMode,omitempty"`
+	StackingData        *[]InfrastructureStackingData           `json:"stackingData,omitempty"`
+	ThirdPartyClients   *[]InfrastructureThirdPartyClient       `json:"thirdPartyClients,omitempty"`
+	UswWanDevices       *[]InfrastructureUswWanDevice           `json:"uswWanDevices,omitempty"`
+	Vertices            *[]InfrastructureVertice                `json:"vertices,omitempty"`
+	WanMode             *InfrastructureIspDataLoadBalancingMode `json:"wanMode,omitempty"`
 }
 
 // InfrastructureEdge defines model for infrastructure_edge.
@@ -22546,14 +22812,20 @@ type InfrastructureEdgeUplinkPortLastConnection struct {
 
 // InfrastructureHistoryTimeline defines model for infrastructure_history_timeline.
 type InfrastructureHistoryTimeline struct {
-	AnomalyType  *GBAqKHUkYjHujLgFBD `json:"anomaly_type,omitempty"`
-	EndTimestamp *int                `json:"end_timestamp,omitempty"`
-	Mac          *string             `json:"mac,omitempty"`
-	Name         *string             `json:"name,omitempty"`
-	PortIdx      *int                `json:"port_idx,omitempty"`
-	Timestamp    *int                `json:"timestamp,omitempty"`
-	Type         *GBCQnvuxbsxyajz0   `json:"type,omitempty"`
+	AnomalyType  *InfrastructureHistoryTimelineAnomalyType `json:"anomaly_type,omitempty"`
+	EndTimestamp *int                                      `json:"end_timestamp,omitempty"`
+	Mac          *string                                   `json:"mac,omitempty"`
+	Name         *string                                   `json:"name,omitempty"`
+	PortIdx      *int                                      `json:"port_idx,omitempty"`
+	Timestamp    *int                                      `json:"timestamp,omitempty"`
+	Type         *InfrastructureHistoryTimelineType        `json:"type,omitempty"`
 }
+
+// InfrastructureHistoryTimelineAnomalyType defines model for infrastructure_history_timeline_anomaly_type.
+type InfrastructureHistoryTimelineAnomalyType string
+
+// InfrastructureHistoryTimelineType defines model for infrastructure_history_timeline_type.
+type InfrastructureHistoryTimelineType string
 
 // InfrastructureIspData defines model for infrastructure_ispData.
 type InfrastructureIspData struct {
@@ -22752,7 +23024,7 @@ type InsightsMulticastClientMembershipMember struct {
 	Ipv6Addresses *[]string                                   `json:"ipv6_addresses,omitempty"`
 	Mac           *string                                     `json:"mac,omitempty"`
 	Name          *string                                     `json:"name,omitempty"`
-	Status        *ServiceLEMiVjHefaf                         `json:"status,omitempty"`
+	Status        *ClientsStatus                              `json:"status,omitempty"`
 	UplinkDevice  *InsightsMulticastClientUplinkDevice        `json:"uplink_device,omitempty"`
 }
 
@@ -22838,12 +23110,12 @@ type InsightsMulticastClientsClientWlan struct {
 
 // InsightsMulticastClientsFilters defines model for insights_multicast_clients_filters.
 type InsightsMulticastClientsFilters struct {
-	Aps            *[]InsightsMulticastClientsFiltersAp      `json:"aps,omitempty"`
-	MulticastTypes *[]string                                 `json:"multicast_types,omitempty"`
-	Networks       *[]InsightsMulticastClientNetwork         `json:"networks,omitempty"`
-	Radios         *[]string                                 `json:"radios,omitempty"`
-	Switches       *[]InsightsMulticastClientsFiltersSwitche `json:"switches,omitempty"`
-	Wlans          *[]InsightsMulticastClientsClientWlan     `json:"wlans,omitempty"`
+	Aps            *[]InsightsMulticastClientsFiltersAp     `json:"aps,omitempty"`
+	MulticastTypes *[]string                                `json:"multicast_types,omitempty"`
+	Networks       *[]InsightsMulticastClientNetwork        `json:"networks,omitempty"`
+	Radios         *[]string                                `json:"radios,omitempty"`
+	Switches       *[]InsightsMulticastClientsFiltersSwitch `json:"switches,omitempty"`
+	Wlans          *[]InsightsMulticastClientsClientWlan    `json:"wlans,omitempty"`
 }
 
 // InsightsMulticastClientsFiltersAp defines model for insights_multicast_clients_filters_ap.
@@ -22854,8 +23126,8 @@ type InsightsMulticastClientsFiltersAp struct {
 	Outdated *bool   `json:"outdated,omitempty"`
 }
 
-// InsightsMulticastClientsFiltersSwitche defines model for insights_multicast_clients_filters_switche.
-type InsightsMulticastClientsFiltersSwitche struct {
+// InsightsMulticastClientsFiltersSwitch defines model for insights_multicast_clients_filters_switch.
+type InsightsMulticastClientsFiltersSwitch struct {
 	Mac   *string `json:"mac,omitempty"`
 	Model *string `json:"model,omitempty"`
 	Name  *string `json:"name,omitempty"`
@@ -22951,7 +23223,7 @@ type IspStatusSpeedtestHistorical struct {
 	NetworkConfId           *string                                              `json:"network_conf_id,omitempty"`
 	Time                    *int                                                 `json:"time,omitempty"`
 	UploadMbps              *int                                                 `json:"upload_mbps,omitempty"`
-	WanNetworkgroup         *GBAEKWFFqTgF                                        `json:"wan_networkgroup,omitempty"`
+	WanNetworkgroup         *DowntimeWanNetworkGroup                             `json:"wan_networkgroup,omitempty"`
 	WanProviderCapabilities *IspStatusSpeedtestHistoricalWanProviderCapabilities `json:"wan_provider_capabilities,omitempty"`
 }
 
@@ -23016,7 +23288,7 @@ type LanDefaults struct {
 	Ipv6RaEnabled               *bool                                   `json:"ipv6_ra_enabled,omitempty"`
 	Ipv6RaPreferredLifetime     *string                                 `json:"ipv6_ra_preferred_lifetime,omitempty"`
 	Ipv6RaPriority              *LanDefaultsIpv6RaPriority              `json:"ipv6_ra_priority,omitempty"`
-	Ipv6SettingPreference       *ERYtJfMBbtgWvku                        `json:"ipv6_setting_preference,omitempty"`
+	Ipv6SettingPreference       *WlanSettingPreference                  `json:"ipv6_setting_preference,omitempty"`
 	IsNat                       *bool                                   `json:"is_nat,omitempty"`
 	LteLanEnabled               *bool                                   `json:"lte_lan_enabled,omitempty"`
 	MdnsEnabled                 *bool                                   `json:"mdns_enabled,omitempty"`
@@ -23149,10 +23421,10 @@ type MagicsitetositevpnDeviceSiteNetwork struct {
 
 // MagicsitetositevpnStatu defines model for magicsitetositevpn_statu.
 type MagicsitetositevpnStatu struct {
-	Connections *[]MagicsitetositevpnStatuConnection `json:"connections,omitempty"`
-	Errors      *[]ServiceMagicsitetositevpnBANVVyiC `json:"errors,omitempty"`
-	SiteId      *string                              `json:"siteId,omitempty"`
-	Warnings    *[]MagicsitetositevpnStatuWarnings   `json:"warnings,omitempty"`
+	Connections *[]MagicsitetositevpnStatuConnection      `json:"connections,omitempty"`
+	Errors      *[]MagicsitetositevpnStatuConnectionError `json:"errors,omitempty"`
+	SiteId      *string                                   `json:"siteId,omitempty"`
+	Warnings    *[]MagicsitetositevpnStatuWarnings        `json:"warnings,omitempty"`
 }
 
 // MagicsitetositevpnStatuWarnings defines model for MagicsitetositevpnStatu.Warnings.
@@ -23169,6 +23441,9 @@ type MagicsitetositevpnStatuConnection struct {
 
 // MagicsitetositevpnStatuConnectionErrors defines model for MagicsitetositevpnStatuConnection.Errors.
 type MagicsitetositevpnStatuConnectionErrors string
+
+// MagicsitetositevpnStatuConnectionError defines model for magicsitetositevpn_statu_connection_error.
+type MagicsitetositevpnStatuConnectionError string
 
 // MclagGroups defines model for mclag_groups.
 type MclagGroups struct {
@@ -23259,572 +23534,6 @@ type NatSourceFilter struct {
 
 // NatSourceFilterFilterType defines model for NatSourceFilter.FilterType.
 type NatSourceFilterFilterType string
-
-// NetKSAAcrQJeJCScLn defines model for net_k_s_a_AcrQJeJCScLn.
-type NetKSAAcrQJeJCScLn = map[string]interface{}
-
-// NetKSAKHUkYjHujLgFBD defines model for net_k_s_a_KHUkYjHujLgFBD.
-type NetKSAKHUkYjHujLgFBD struct {
-	ConfigId        *string `json:"config_id,omitempty"`
-	OrchestrationId *string `json:"orchestration_id,omitempty"`
-	OrganizationId  *string `json:"organization_id,omitempty"`
-	RevisionId      *string `json:"revision_id,omitempty"`
-	TemplateId      *string `json:"template_id,omitempty"`
-}
-
-// NetKSAAAKHUkYjHujLgFBD defines model for net_k_s_a_a_a_KHUkYjHujLgFBD.
-type NetKSAAAKHUkYjHujLgFBD struct {
-	AllowList     *[]string                           `json:"allow_list,omitempty"`
-	BlockList     *[]string                           `json:"block_list,omitempty"`
-	Categories    *[]NetKSAAAKHUkYjHujLgFBDCategories `json:"categories,omitempty"`
-	CloudTemplate *NetKSAKHUkYjHujLgFBD               `json:"cloud_template,omitempty"`
-	Enabled       *bool                               `json:"enabled,omitempty"`
-	Id            *string                             `json:"id,omitempty"`
-	Name          *string                             `json:"name,omitempty"`
-	SafeSearch    *[]NetKSAAAKHUkYjHujLgFBDSafeSearch `json:"safe_search,omitempty"`
-	Schedule      *NetKSAAAJRsSex                     `json:"schedule,omitempty"`
-	Sources       *NetKSAAAAeyOUcXIsMsQw              `json:"sources,omitempty"`
-}
-
-// NetKSAAAKHUkYjHujLgFBDCategories defines model for NetKSAAAKHUkYjHujLgFBD.Categories.
-type NetKSAAAKHUkYjHujLgFBDCategories string
-
-// NetKSAAAKHUkYjHujLgFBDSafeSearch defines model for NetKSAAAKHUkYjHujLgFBD.SafeSearch.
-type NetKSAAAKHUkYjHujLgFBDSafeSearch string
-
-// NetKSAAAAeyOUcXIsMsQw defines model for net_k_s_a_a_a_aeyOUcXIsMsQw.
-type NetKSAAAAeyOUcXIsMsQw struct {
-	VlanIds *[]int `json:"vlan_ids,omitempty"`
-}
-
-// NetKSAAAJRsSex defines model for net_k_s_a_a_a_jRsSex.
-type NetKSAAAJRsSex struct {
-	Date           *openapi_types.Date  `json:"date,omitempty"`
-	DateEnd        *openapi_types.Date  `json:"date_end,omitempty"`
-	DateStart      *openapi_types.Date  `json:"date_start,omitempty"`
-	Mode           *NetKSAAAJRsSexMode  `json:"mode,omitempty"`
-	RepeatOnDays   *[]DaoConfigEWJRsSex `json:"repeat_on_days,omitempty"`
-	TimeAllDay     *bool                `json:"time_all_day,omitempty"`
-	TimeRangeEnd   *string              `json:"time_range_end,omitempty"`
-	TimeRangeStart *string              `json:"time_range_start,omitempty"`
-}
-
-// NetKSAAAJRsSexMode defines model for NetKSAAAJRsSex.Mode.
-type NetKSAAAJRsSexMode string
-
-// NetKSABAKHUkYjHujLgFBD defines model for net_k_s_a_b_a_KHUkYjHujLgFBD.
-type NetKSABAKHUkYjHujLgFBD struct {
-	CloudTemplate *NetKSAKHUkYjHujLgFBD            `json:"cloud_template,omitempty"`
-	ExternalId    *string                          `json:"external_id,omitempty"`
-	GroupMembers  *[]string                        `json:"group_members,omitempty"`
-	GroupType     *NetKSABAKHUkYjHujLgFBDGroupType `json:"group_type,omitempty"`
-	Id            *string                          `json:"id,omitempty"`
-	Name          *string                          `json:"name,omitempty"`
-}
-
-// NetKSABAKHUkYjHujLgFBDGroupType defines model for NetKSABAKHUkYjHujLgFBD.GroupType.
-type NetKSABAKHUkYjHujLgFBDGroupType string
-
-// NetKSABBKHUkYjHujLgFBD defines model for net_k_s_a_b_b_KHUkYjHujLgFBD.
-type NetKSABBKHUkYjHujLgFBD struct {
-	Action                *NetKSABBKHUkYjHujLgFBDAction              `json:"action,omitempty"`
-	CloudTemplate         *NetKSAKHUkYjHujLgFBD                      `json:"cloud_template,omitempty"`
-	ConnectionStateType   *NetKSABBKHUkYjHujLgFBDConnectionStateType `json:"connection_state_type,omitempty"`
-	ConnectionStates      *[]NetKSABBKHUkYjHujLgFBDConnectionStates  `json:"connection_states,omitempty"`
-	CreateAllowRespond    *bool                                      `json:"create_allow_respond,omitempty"`
-	Description           *string                                    `json:"description,omitempty"`
-	Destination           *NetKSABBAMiVjHefaf                        `json:"destination,omitempty"`
-	Enabled               *bool                                      `json:"enabled,omitempty"`
-	ExternalId            *string                                    `json:"external_id,omitempty"`
-	IcmpTypename          *NetKSABBKHUkYjHujLgFBDIcmpTypename        `json:"icmp_typename,omitempty"`
-	IcmpV6Typename        *NetKSABBKHUkYjHujLgFBDIcmpV6Typename      `json:"icmp_v6_typename,omitempty"`
-	Id                    *string                                    `json:"id,omitempty"`
-	Index                 *int                                       `json:"index,omitempty"`
-	IpVersion             *NetKSABBKHUkYjHujLgFBDIpVersion           `json:"ip_version,omitempty"`
-	Logging               *bool                                      `json:"logging,omitempty"`
-	MatchIpSec            *bool                                      `json:"match_ip_sec,omitempty"`
-	MatchIpSecType        *NetKSABBKHUkYjHujLgFBDMatchIpSecType      `json:"match_ip_sec_type,omitempty"`
-	MatchOppositeProtocol *bool                                      `json:"match_opposite_protocol,omitempty"`
-	Name                  *string                                    `json:"name,omitempty"`
-	Protocol              *string                                    `json:"protocol,omitempty"`
-	Schedule              *ContentFilteringSchedule                  `json:"schedule,omitempty"`
-	Source                *NetKSABBBJRsSex                           `json:"source,omitempty"`
-}
-
-// NetKSABBKHUkYjHujLgFBDAction defines model for NetKSABBKHUkYjHujLgFBD.Action.
-type NetKSABBKHUkYjHujLgFBDAction string
-
-// NetKSABBKHUkYjHujLgFBDConnectionStateType defines model for NetKSABBKHUkYjHujLgFBD.ConnectionStateType.
-type NetKSABBKHUkYjHujLgFBDConnectionStateType string
-
-// NetKSABBKHUkYjHujLgFBDConnectionStates defines model for NetKSABBKHUkYjHujLgFBD.ConnectionStates.
-type NetKSABBKHUkYjHujLgFBDConnectionStates string
-
-// NetKSABBKHUkYjHujLgFBDIcmpTypename defines model for NetKSABBKHUkYjHujLgFBD.IcmpTypename.
-type NetKSABBKHUkYjHujLgFBDIcmpTypename string
-
-// NetKSABBKHUkYjHujLgFBDIcmpV6Typename defines model for NetKSABBKHUkYjHujLgFBD.IcmpV6Typename.
-type NetKSABBKHUkYjHujLgFBDIcmpV6Typename string
-
-// NetKSABBKHUkYjHujLgFBDIpVersion defines model for NetKSABBKHUkYjHujLgFBD.IpVersion.
-type NetKSABBKHUkYjHujLgFBDIpVersion string
-
-// NetKSABBKHUkYjHujLgFBDMatchIpSecType defines model for NetKSABBKHUkYjHujLgFBD.MatchIpSecType.
-type NetKSABBKHUkYjHujLgFBDMatchIpSecType string
-
-// NetKSABBAMiVjHefaf defines model for net_k_s_a_b_b_a_MiVjHefaf.
-type NetKSABBAMiVjHefaf = map[string]interface{}
-
-// NetKSABBBJRsSex defines model for net_k_s_a_b_b_b_jRsSex.
-type NetKSABBBJRsSex = map[string]interface{}
-
-// NetKSABCKHUkYjHujLgFBD defines model for net_k_s_a_b_c_KHUkYjHujLgFBD.
-type NetKSABCKHUkYjHujLgFBD struct {
-	CloudTemplate *NetKSAKHUkYjHujLgFBD `json:"cloud_template,omitempty"`
-	DefaultZone   *bool                 `json:"default_zone,omitempty"`
-	Id            *string               `json:"id,omitempty"`
-	Name          *string               `json:"name,omitempty"`
-	NetworkIds    *[]string             `json:"network_ids,omitempty"`
-	NoEdit        *bool                 `json:"no_edit,omitempty"`
-	ZoneKey       *string               `json:"zone_key,omitempty"`
-}
-
-// NetKSACAcrQJeJCScLn defines model for net_k_s_a_c_AcrQJeJCScLn.
-type NetKSACAcrQJeJCScLn struct {
-	Code *map[string]interface{} `json:"code,omitempty"`
-}
-
-// NetKSACKHUkYjHujLgFBD defines model for net_k_s_a_c_KHUkYjHujLgFBD.
-type NetKSACKHUkYjHujLgFBD struct {
-	DestinationVlanIds *[]int `json:"destination_vlan_ids,omitempty"`
-	SourceVlanId       *int   `json:"source_vlan_id,omitempty"`
-}
-
-// NetKSACMiVjHefaf defines model for net_k_s_a_c_MiVjHefaf.
-type NetKSACMiVjHefaf struct {
-	AclDeviceIsolationVlanIds *[]int                      `json:"acl_device_isolation_vlan_ids,omitempty"`
-	AclL3Isolation            *[]NetKSACKHUkYjHujLgFBD    `json:"acl_l3_isolation,omitempty"`
-	CloudTemplate             *NetKSAKHUkYjHujLgFBD       `json:"cloud_template,omitempty"`
-	DhcpSnoop                 *bool                       `json:"dhcp_snoop,omitempty"`
-	Dot1xFallbackVlanId       *int                        `json:"dot1x_fallback_vlan_id,omitempty"`
-	Dot1xPortctrlEnabled      *bool                       `json:"dot1x_portctrl_enabled,omitempty"`
-	FlowctrlEnabled           *bool                       `json:"flowctrl_enabled,omitempty"`
-	JumboframeEnabled         *bool                       `json:"jumboframe_enabled,omitempty"`
-	RadiusprofileId           *string                     `json:"radiusprofile_id,omitempty"`
-	StpVersion                *NetKSACMiVjHefafStpVersion `json:"stp_version,omitempty"`
-}
-
-// NetKSACMiVjHefafStpVersion defines model for NetKSACMiVjHefaf.StpVersion.
-type NetKSACMiVjHefafStpVersion string
-
-// NetKSACVVyiC defines model for net_k_s_a_c_VVyiC.
-type NetKSACVVyiC struct {
-	CloudTemplate      *NetKSAKHUkYjHujLgFBD    `json:"cloud_template,omitempty"`
-	CustomServices     *[]NetKSACRYtJfMBbtgWvku `json:"custom_services,omitempty"`
-	EnabledFor         *NetKSACVVyiCEnabledFor  `json:"enabled_for,omitempty"`
-	EnabledForVlanIds  *[]int                   `json:"enabled_for_vlan_ids,omitempty"`
-	Mode               *map[string]interface{}  `json:"mode,omitempty"`
-	PredefinedServices *[]NetKSACAcrQJeJCScLn   `json:"predefined_services,omitempty"`
-}
-
-// NetKSACVVyiCEnabledFor defines model for NetKSACVVyiC.EnabledFor.
-type NetKSACVVyiCEnabledFor string
-
-// NetKSACAeyOUcXIsMsQw defines model for net_k_s_a_c_aeyOUcXIsMsQw.
-type NetKSACAeyOUcXIsMsQw struct {
-	CloudTemplate          *NetKSAKHUkYjHujLgFBD                       `json:"cloud_template,omitempty"`
-	DefaultSecurityPosture *NetKSACAeyOUcXIsMsQwDefaultSecurityPosture `json:"default_security_posture,omitempty"`
-}
-
-// NetKSACAeyOUcXIsMsQwDefaultSecurityPosture defines model for NetKSACAeyOUcXIsMsQw.DefaultSecurityPosture.
-type NetKSACAeyOUcXIsMsQwDefaultSecurityPosture string
-
-// NetKSACJRsSex defines model for net_k_s_a_c_jRsSex.
-type NetKSACJRsSex struct {
-	GlobalNetwork *NetKSACAeyOUcXIsMsQw `json:"global_network,omitempty"`
-	GlobalSwitch  *NetKSACMiVjHefaf     `json:"global_switch,omitempty"`
-	Mdns          *NetKSACVVyiC         `json:"mdns,omitempty"`
-}
-
-// NetKSACRYtJfMBbtgWvku defines model for net_k_s_a_c_rYtJfMBbtgWvku.
-type NetKSACRYtJfMBbtgWvku struct {
-	Address *string `json:"address,omitempty"`
-	Name    *string `json:"name,omitempty"`
-}
-
-// NetKSADKHUkYjHujLgFBD defines model for net_k_s_a_d_KHUkYjHujLgFBD.
-type NetKSADKHUkYjHujLgFBD struct {
-	CloudTemplate  *NetKSAKHUkYjHujLgFBD            `json:"cloud_template,omitempty"`
-	MeshingEnabled *bool                            `json:"meshing_enabled,omitempty"`
-	MloMeshEnabled *bool                            `json:"mlo_mesh_enabled,omitempty"`
-	UplinkHost     *string                          `json:"uplink_host,omitempty"`
-	UplinkType     *NetKSADKHUkYjHujLgFBDUplinkType `json:"uplink_type,omitempty"`
-}
-
-// NetKSADKHUkYjHujLgFBDUplinkType defines model for NetKSADKHUkYjHujLgFBD.UplinkType.
-type NetKSADKHUkYjHujLgFBDUplinkType string
-
-// NetKSADMiVjHefaf defines model for net_k_s_a_d_MiVjHefaf.
-type NetKSADMiVjHefaf struct {
-	AutoChannelPresetsType *NetKSADMiVjHefafAutoChannelPresetsType `json:"auto_channel_presets_type,omitempty"`
-	CloudTemplate          *NetKSAKHUkYjHujLgFBD                   `json:"cloud_template,omitempty"`
-	RadiosConfiguration    *[]NetKSADRYtJfMBbtgWvku                `json:"radios_configuration,omitempty"`
-}
-
-// NetKSADMiVjHefafAutoChannelPresetsType defines model for NetKSADMiVjHefaf.AutoChannelPresetsType.
-type NetKSADMiVjHefafAutoChannelPresetsType string
-
-// NetKSADAeyOUcXIsMsQw defines model for net_k_s_a_d_aeyOUcXIsMsQw.
-type NetKSADAeyOUcXIsMsQw struct {
-	Connectivity *NetKSADKHUkYjHujLgFBD `json:"connectivity,omitempty"`
-	ElementAdopt *NetKSADJRsSex         `json:"element_adopt,omitempty"`
-	RadioAi      *NetKSADMiVjHefaf      `json:"radio_ai,omitempty"`
-}
-
-// NetKSADJRsSex defines model for net_k_s_a_d_jRsSex.
-type NetKSADJRsSex struct {
-	CloudTemplate *NetKSAKHUkYjHujLgFBD `json:"cloud_template,omitempty"`
-	Enabled       *bool                 `json:"enabled,omitempty"`
-}
-
-// NetKSADRYtJfMBbtgWvku defines model for net_k_s_a_d_rYtJfMBbtgWvku.
-type NetKSADRYtJfMBbtgWvku struct {
-	ChannelWidth *NetKSADRYtJfMBbtgWvkuChannelWidth `json:"channel_width,omitempty"`
-	Dfs          *bool                              `json:"dfs,omitempty"`
-	Radio        *NetKSADRYtJfMBbtgWvkuRadio        `json:"radio,omitempty"`
-}
-
-// NetKSADRYtJfMBbtgWvkuChannelWidth defines model for NetKSADRYtJfMBbtgWvku.ChannelWidth.
-type NetKSADRYtJfMBbtgWvkuChannelWidth string
-
-// NetKSADRYtJfMBbtgWvkuRadio defines model for NetKSADRYtJfMBbtgWvku.Radio.
-type NetKSADRYtJfMBbtgWvkuRadio string
-
-// NetKSAEKHUkYjHujLgFBD defines model for net_k_s_a_e_KHUkYjHujLgFBD.
-type NetKSAEKHUkYjHujLgFBD struct {
-	CloudTemplate *NetKSAKHUkYjHujLgFBD             `json:"cloud_template,omitempty"`
-	Enabled       *bool                             `json:"enabled,omitempty"`
-	GatewayType   *NetKSAEKHUkYjHujLgFBDGatewayType `json:"gateway_type,omitempty"`
-	Id            *string                           `json:"id,omitempty"`
-	Ipv4          *NetKSAEJRsSex                    `json:"ipv4,omitempty"`
-	Ipv6          *NetKSAEMiVjHefaf                 `json:"ipv6,omitempty"`
-	Name          *string                           `json:"name,omitempty"`
-}
-
-// NetKSAEKHUkYjHujLgFBDGatewayType defines model for NetKSAEKHUkYjHujLgFBD.GatewayType.
-type NetKSAEKHUkYjHujLgFBDGatewayType string
-
-// NetKSAEMiVjHefaf defines model for net_k_s_a_e_MiVjHefaf.
-type NetKSAEMiVjHefaf struct {
-	ClientAddressAssignment *NetKSAEMiVjHefafClientAddressAssignment `json:"client_address_assignment,omitempty"`
-	Dhcpd                   *NetKSAERYtJfMBbtgWvku                   `json:"dhcpd,omitempty"`
-	InterfaceType           *NetKSAEMiVjHefafInterfaceType           `json:"interface_type,omitempty"`
-	IpSubnet                *string                                  `json:"ip_subnet,omitempty"`
-	PdAutoPrefixidEnabled   *bool                                    `json:"pd_auto_prefixid_enabled,omitempty"`
-	PdInterface             *string                                  `json:"pd_interface,omitempty"`
-	RaEnabled               *bool                                    `json:"ra_enabled,omitempty"`
-	RaPreferredLifetime     *string                                  `json:"ra_preferred_lifetime,omitempty"`
-	RaPriority              *NetKSAEMiVjHefafRaPriority              `json:"ra_priority,omitempty"`
-	SettingPreference       *ERYtJfMBbtgWvku                         `json:"setting_preference,omitempty"`
-}
-
-// NetKSAEMiVjHefafClientAddressAssignment defines model for NetKSAEMiVjHefaf.ClientAddressAssignment.
-type NetKSAEMiVjHefafClientAddressAssignment string
-
-// NetKSAEMiVjHefafInterfaceType defines model for NetKSAEMiVjHefaf.InterfaceType.
-type NetKSAEMiVjHefafInterfaceType string
-
-// NetKSAEMiVjHefafRaPriority defines model for NetKSAEMiVjHefaf.RaPriority.
-type NetKSAEMiVjHefafRaPriority string
-
-// NetKSAEAeyOUcXIsMsQw defines model for net_k_s_a_e_aeyOUcXIsMsQw.
-type NetKSAEAeyOUcXIsMsQw struct {
-	BootEnabled       *bool     `json:"boot_enabled,omitempty"`
-	BootFilename      *string   `json:"boot_filename,omitempty"`
-	BootServer        *string   `json:"boot_server,omitempty"`
-	ConflictChecking  *bool     `json:"conflict_checking,omitempty"`
-	DnsEnabled        *bool     `json:"dns_enabled,omitempty"`
-	DnsList           *[]string `json:"dns_list,omitempty"`
-	Enabled           *bool     `json:"enabled,omitempty"`
-	Gateway           *string   `json:"gateway,omitempty"`
-	GatewayEnabled    *bool     `json:"gateway_enabled,omitempty"`
-	GuardEnabled      *bool     `json:"guard_enabled,omitempty"`
-	IpSubnet          *string   `json:"ip_subnet,omitempty"`
-	Leasetime         *int      `json:"leasetime,omitempty"`
-	NtpEnabled        *bool     `json:"ntp_enabled,omitempty"`
-	NtpList           *[]string `json:"ntp_list,omitempty"`
-	RelayEnabled      *bool     `json:"relay_enabled,omitempty"`
-	ServerIpList      *[]string `json:"server_ip_list,omitempty"`
-	Start             *string   `json:"start,omitempty"`
-	Stop              *string   `json:"stop,omitempty"`
-	TftpServer        *string   `json:"tftp_server,omitempty"`
-	TimeOffset        *int      `json:"time_offset,omitempty"`
-	TimeOffsetEnabled *bool     `json:"time_offset_enabled,omitempty"`
-	UnifiController   *string   `json:"unifi_controller,omitempty"`
-	WinsEnabled       *bool     `json:"wins_enabled,omitempty"`
-	WinsList          *[]string `json:"wins_list,omitempty"`
-	WpadUrl           *string   `json:"wpad_url,omitempty"`
-}
-
-// NetKSAEJRsSex defines model for net_k_s_a_e_jRsSex.
-type NetKSAEJRsSex struct {
-	AutoScaleEnabled        *bool                 `json:"auto_scale_enabled,omitempty"`
-	Dhcpd                   *NetKSAEAeyOUcXIsMsQw `json:"dhcpd,omitempty"`
-	DomainName              *string               `json:"domain_name,omitempty"`
-	IgmpSnoopingEnabled     *bool                 `json:"igmp_snooping_enabled,omitempty"`
-	InternetAccessEnabled   *bool                 `json:"internet_access_enabled,omitempty"`
-	MdnsEnabled             *bool                 `json:"mdns_enabled,omitempty"`
-	NetworkIsolationEnabled *bool                 `json:"network_isolation_enabled,omitempty"`
-	Purpose                 *NetKSAEJRsSexPurpose `json:"purpose,omitempty"`
-	SettingPreference       *ERYtJfMBbtgWvku      `json:"setting_preference,omitempty"`
-	Vlan                    *int                  `json:"vlan,omitempty"`
-	VlanEnabled             *bool                 `json:"vlan_enabled,omitempty"`
-}
-
-// NetKSAEJRsSexPurpose defines model for NetKSAEJRsSex.Purpose.
-type NetKSAEJRsSexPurpose string
-
-// NetKSAERYtJfMBbtgWvku defines model for net_k_s_a_e_rYtJfMBbtgWvku.
-type NetKSAERYtJfMBbtgWvku struct {
-	AllowSlaac     *bool     `json:"allow_slaac,omitempty"`
-	DnsAutoEnabled *bool     `json:"dns_auto_enabled,omitempty"`
-	DnsList        *[]string `json:"dns_list,omitempty"`
-	Enabled        *bool     `json:"enabled,omitempty"`
-	Leasetime      *int      `json:"leasetime,omitempty"`
-	Start          *string   `json:"start,omitempty"`
-	Stop           *string   `json:"stop,omitempty"`
-	WanPdSizeAuto  *bool     `json:"wan_pd_size_auto,omitempty"`
-}
-
-// NetKSAFAKHUkYjHujLgFBD defines model for net_k_s_a_f_a_KHUkYjHujLgFBD.
-type NetKSAFAKHUkYjHujLgFBD struct {
-	CloudTemplate *NetKSAKHUkYjHujLgFBD             `json:"cloud_template,omitempty"`
-	Enabled       *bool                             `json:"enabled,omitempty"`
-	ExternalId    *string                           `json:"external_id,omitempty"`
-	Id            *string                           `json:"id,omitempty"`
-	Key           *string                           `json:"key,omitempty"`
-	Port          *int                              `json:"port,omitempty"`
-	Priority      *int                              `json:"priority,omitempty"`
-	RecordType    *NetKSAFAKHUkYjHujLgFBDRecordType `json:"record_type,omitempty"`
-	Ttl           *int                              `json:"ttl,omitempty"`
-	Value         *string                           `json:"value,omitempty"`
-	Weight        *int                              `json:"weight,omitempty"`
-}
-
-// NetKSAFAKHUkYjHujLgFBDRecordType defines model for NetKSAFAKHUkYjHujLgFBD.RecordType.
-type NetKSAFAKHUkYjHujLgFBDRecordType string
-
-// NetKSAFBAcrQJeJCScLn defines model for net_k_s_a_f_b_AcrQJeJCScLn.
-type NetKSAFBAcrQJeJCScLn struct {
-	ClientMac        *string             `json:"client_mac,omitempty"`
-	NetworkReference *NetKSAAcrQJeJCScLn `json:"network_reference,omitempty"`
-	Type             *string             `json:"type,omitempty"`
-}
-
-// NetKSAFBKHUkYjHujLgFBD defines model for net_k_s_a_f_b_KHUkYjHujLgFBD.
-type NetKSAFBKHUkYjHujLgFBD struct {
-	UnderscoreId      *string                               `json:"_id,omitempty"`
-	CloudTemplate     *NetKSAKHUkYjHujLgFBD                 `json:"cloud_template,omitempty"`
-	Description       *string                               `json:"description,omitempty"`
-	Domains           *[]NetKSAFBJRsSex                     `json:"domains,omitempty"`
-	EgressTarget      *NetKSAAcrQJeJCScLn                   `json:"egress_target,omitempty"`
-	Enabled           *bool                                 `json:"enabled,omitempty"`
-	IpAddresses       *[]NetKSAFBAeyOUcXIsMsQw              `json:"ip_addresses,omitempty"`
-	IpRanges          *[]NetKSAFBMiVjHefaf                  `json:"ip_ranges,omitempty"`
-	KillSwitchEnabled *bool                                 `json:"kill_switch_enabled,omitempty"`
-	MatchingTarget    *NetKSAFBKHUkYjHujLgFBDMatchingTarget `json:"matching_target,omitempty"`
-	NextHop           *string                               `json:"next_hop,omitempty"`
-	Regions           *[]string                             `json:"regions,omitempty"`
-	TargetDevices     *[]NetKSAFBAcrQJeJCScLn               `json:"target_devices,omitempty"`
-}
-
-// NetKSAFBKHUkYjHujLgFBDMatchingTarget defines model for NetKSAFBKHUkYjHujLgFBD.MatchingTarget.
-type NetKSAFBKHUkYjHujLgFBDMatchingTarget string
-
-// NetKSAFBMiVjHefaf defines model for net_k_s_a_f_b_MiVjHefaf.
-type NetKSAFBMiVjHefaf struct {
-	IpStart   *string     `json:"ip_start,omitempty"`
-	IpStop    *string     `json:"ip_stop,omitempty"`
-	IpVersion *GBEirJvdtm `json:"ip_version,omitempty"`
-}
-
-// NetKSAFBAeyOUcXIsMsQw defines model for net_k_s_a_f_b_aeyOUcXIsMsQw.
-type NetKSAFBAeyOUcXIsMsQw struct {
-	IpOrSubnet *string                         `json:"ip_or_subnet,omitempty"`
-	IpVersion  *NetKSAFBAeyOUcXIsMsQwIpVersion `json:"ip_version,omitempty"`
-	PortRanges *[]NetKSAFBRYtJfMBbtgWvku       `json:"port_ranges,omitempty"`
-	Ports      *[]int                          `json:"ports,omitempty"`
-}
-
-// NetKSAFBAeyOUcXIsMsQwIpVersion defines model for NetKSAFBAeyOUcXIsMsQw.IpVersion.
-type NetKSAFBAeyOUcXIsMsQwIpVersion string
-
-// NetKSAFBJRsSex defines model for net_k_s_a_f_b_jRsSex.
-type NetKSAFBJRsSex struct {
-	Domain     *string                   `json:"domain,omitempty"`
-	PortRanges *[]NetKSAFBRYtJfMBbtgWvku `json:"port_ranges,omitempty"`
-	Ports      *[]int                    `json:"ports,omitempty"`
-}
-
-// NetKSAFBRYtJfMBbtgWvku defines model for net_k_s_a_f_b_rYtJfMBbtgWvku.
-type NetKSAFBRYtJfMBbtgWvku struct {
-	PortStart *int `json:"port_start,omitempty"`
-	PortStop  *int `json:"port_stop,omitempty"`
-}
-
-// NetKSAGAcrQJeJCScLn defines model for net_k_s_a_g_AcrQJeJCScLn.
-type NetKSAGAcrQJeJCScLn struct {
-	Doh    *NetKSAGJRsSex           `json:"doh,omitempty"`
-	Dpi    *NetKSAGAeyOUcXIsMsQw    `json:"dpi,omitempty"`
-	Ips    *NetKSAGRYtJfMBbtgWvku   `json:"ips,omitempty"`
-	UsgGeo *NetKSAGTToyPkrNNHXKNEnk `json:"usg_geo,omitempty"`
-}
-
-// NetKSAGKHUkYjHujLgFBD defines model for net_k_s_a_g_KHUkYjHujLgFBD.
-type NetKSAGKHUkYjHujLgFBD struct {
-	Enabled    *bool   `json:"enabled,omitempty"`
-	SdnsStamp  *string `json:"sdns_stamp,omitempty"`
-	ServerName *string `json:"server_name,omitempty"`
-}
-
-// NetKSAGMiVjHefaf defines model for net_k_s_a_g_MiVjHefaf.
-type NetKSAGMiVjHefaf struct {
-	IpAddress *string `json:"ip_address,omitempty"`
-	Version   *string `json:"version,omitempty"`
-	VlanId    *int    `json:"vlan_id,omitempty"`
-}
-
-// NetKSAGTToyPkrNNHXKNEnk defines model for net_k_s_a_g_TToyPkrNNHXKNEnk.
-type NetKSAGTToyPkrNNHXKNEnk struct {
-	CloudTemplate *NetKSAKHUkYjHujLgFBD `json:"cloud_template,omitempty"`
-	IpFiltering   *NetKSAGVVyiC         `json:"ip_filtering,omitempty"`
-}
-
-// NetKSAGVVyiC defines model for net_k_s_a_g_VVyiC.
-type NetKSAGVVyiC struct {
-	Action           *string   `json:"action,omitempty"`
-	Countries        *[]string `json:"countries,omitempty"`
-	Enabled          *bool     `json:"enabled,omitempty"`
-	TrafficDirection *string   `json:"traffic_direction,omitempty"`
-}
-
-// NetKSAGAeyOUcXIsMsQw defines model for net_k_s_a_g_aeyOUcXIsMsQw.
-type NetKSAGAeyOUcXIsMsQw struct {
-	CloudTemplate *NetKSAKHUkYjHujLgFBD `json:"cloud_template,omitempty"`
-	Mode          *string               `json:"mode,omitempty"`
-}
-
-// NetKSAGJRsSex defines model for net_k_s_a_g_jRsSex.
-type NetKSAGJRsSex struct {
-	CloudTemplate *NetKSAKHUkYjHujLgFBD    `json:"cloud_template,omitempty"`
-	CustomServers *[]NetKSAGKHUkYjHujLgFBD `json:"custom_servers,omitempty"`
-	KnownServers  *[]string                `json:"known_servers,omitempty"`
-	State         *string                  `json:"state,omitempty"`
-}
-
-// NetKSAGRYtJfMBbtgWvku defines model for net_k_s_a_g_rYtJfMBbtgWvku.
-type NetKSAGRYtJfMBbtgWvku struct {
-	AdvancedFilteringPreference         *string               `json:"advanced_filtering_preference,omitempty"`
-	CloudTemplate                       *NetKSAKHUkYjHujLgFBD `json:"cloud_template,omitempty"`
-	ContentFilteringBlockingPageEnabled *bool                 `json:"content_filtering_blocking_page_enabled,omitempty"`
-	EnabledCategories                   *[]string             `json:"enabled_categories,omitempty"`
-	EnabledVlanIds                      *[]int                `json:"enabled_vlanIds,omitempty"`
-	Honeypot                            *[]NetKSAGMiVjHefaf   `json:"honeypot,omitempty"`
-	IpsMode                             *string               `json:"ips_mode,omitempty"`
-	MemoryOptimized                     *bool                 `json:"memory_optimized,omitempty"`
-}
-
-// NetKSAHMiVjHefaf defines model for net_k_s_a_h_MiVjHefaf.
-type NetKSAHMiVjHefaf = map[string]interface{}
-
-// NetKSAIKHUkYjHujLgFBD defines model for net_k_s_a_i_KHUkYjHujLgFBD.
-type NetKSAIKHUkYjHujLgFBD struct {
-	AdvertiseDeviceNameInBeacon *bool                                    `json:"advertise_device_name_in_beacon,omitempty"`
-	BcFilterEnabled             *bool                                    `json:"bc_filter_enabled,omitempty"`
-	BcFilterList                *[]string                                `json:"bc_filter_list,omitempty"`
-	BssTransition               *bool                                    `json:"bss_transition,omitempty"`
-	CloudTemplate               *NetKSAKHUkYjHujLgFBD                    `json:"cloud_template,omitempty"`
-	DnsAssistanceMode           *string                                  `json:"dns_assistance_mode,omitempty"`
-	DnsAssistanceServers        *[]string                                `json:"dns_assistance_servers,omitempty"`
-	Dtim6e                      *int                                     `json:"dtim_6e,omitempty"`
-	DtimMode                    *string                                  `json:"dtim_mode,omitempty"`
-	DtimNa                      *int                                     `json:"dtim_na,omitempty"`
-	DtimNg                      *int                                     `json:"dtim_ng,omitempty"`
-	EnhancedIot                 *bool                                    `json:"enhanced_iot,omitempty"`
-	FastRoamingEnabled          *bool                                    `json:"fast_roaming_enabled,omitempty"`
-	GroupRekey                  *int                                     `json:"group_rekey,omitempty"`
-	HideSsid                    *bool                                    `json:"hide_ssid,omitempty"`
-	Hotspot2confEnabled         *bool                                    `json:"hotspot2conf_enabled,omitempty"`
-	Id                          *string                                  `json:"id,omitempty"`
-	IotChannelLock              *bool                                    `json:"iot_channel_lock,omitempty"`
-	IotDtimLock                 *bool                                    `json:"iot_dtim_lock,omitempty"`
-	IsGuest                     *bool                                    `json:"is_guest,omitempty"`
-	L2Isolation                 *bool                                    `json:"l2_isolation,omitempty"`
-	MacFilterEnabled            *bool                                    `json:"mac_filter_enabled,omitempty"`
-	MacFilterList               *[]string                                `json:"mac_filter_list,omitempty"`
-	MacFilterPolicy             *string                                  `json:"mac_filter_policy,omitempty"`
-	McastenhanceEnabled         *bool                                    `json:"mcastenhance_enabled,omitempty"`
-	MinrateNaAdvertisingRates   *bool                                    `json:"minrate_na_advertising_rates,omitempty"`
-	MinrateNaDataRateKbps       *int                                     `json:"minrate_na_data_rate_kbps,omitempty"`
-	MinrateNaEnabled            *bool                                    `json:"minrate_na_enabled,omitempty"`
-	MinrateNgAdvertisingRates   *bool                                    `json:"minrate_ng_advertising_rates,omitempty"`
-	MinrateNgDataRateKbps       *int                                     `json:"minrate_ng_data_rate_kbps,omitempty"`
-	MinrateNgEnabled            *bool                                    `json:"minrate_ng_enabled,omitempty"`
-	MinrateSettingPreference    *ERYtJfMBbtgWvku                         `json:"minrate_setting_preference,omitempty"`
-	MloEnabled                  *bool                                    `json:"mlo_enabled,omitempty"`
-	Name                        *string                                  `json:"name,omitempty"`
-	No2ghzOui                   *bool                                    `json:"no2ghz_oui,omitempty"`
-	PmfMode                     *NetKSAIKHUkYjHujLgFBDPmfMode            `json:"pmf_mode,omitempty"`
-	PrivatePresharedKeys        *[]NetKSAIJRsSex                         `json:"private_preshared_keys,omitempty"`
-	PrivatePresharedKeysEnabled *bool                                    `json:"private_preshared_keys_enabled,omitempty"`
-	ProxyArp                    *bool                                    `json:"proxy_arp,omitempty"`
-	RadiusMacAuthEnabled        *bool                                    `json:"radius_mac_auth_enabled,omitempty"`
-	RadiusMacaclFormat          *NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat `json:"radius_macacl_format,omitempty"`
-	RadiusprofileId             *string                                  `json:"radiusprofile_id,omitempty"`
-	RoamingAssistant6eEnabled   *bool                                    `json:"roaming_assistant_6e_enabled,omitempty"`
-	RoamingAssistant6eRssi      *int                                     `json:"roaming_assistant_6e_rssi,omitempty"`
-	RoamingAssistantNaEnabled   *bool                                    `json:"roaming_assistant_na_enabled,omitempty"`
-	RoamingAssistantNaRssi      *int                                     `json:"roaming_assistant_na_rssi,omitempty"`
-	ScheduleWithDuration        *[]NetKSAIAeyOUcXIsMsQw                  `json:"schedule_with_duration,omitempty"`
-	SecurityProtocol            *NetKSAIKHUkYjHujLgFBDSecurityProtocol   `json:"security_protocol,omitempty"`
-	SettingPreference           *NetKSAIKHUkYjHujLgFBDSettingPreference  `json:"setting_preference,omitempty"`
-	UapsdEnabled                *bool                                    `json:"uapsd_enabled,omitempty"`
-	VlanId                      *int                                     `json:"vlan_id,omitempty"`
-	WlanBands                   *[]NetKSAIKHUkYjHujLgFBDWlanBands        `json:"wlan_bands,omitempty"`
-	XPassphrase                 *string                                  `json:"x_passphrase,omitempty"`
-}
-
-// NetKSAIKHUkYjHujLgFBDPmfMode defines model for NetKSAIKHUkYjHujLgFBD.PmfMode.
-type NetKSAIKHUkYjHujLgFBDPmfMode string
-
-// NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat defines model for NetKSAIKHUkYjHujLgFBD.RadiusMacaclFormat.
-type NetKSAIKHUkYjHujLgFBDRadiusMacaclFormat string
-
-// NetKSAIKHUkYjHujLgFBDSecurityProtocol defines model for NetKSAIKHUkYjHujLgFBD.SecurityProtocol.
-type NetKSAIKHUkYjHujLgFBDSecurityProtocol string
-
-// NetKSAIKHUkYjHujLgFBDSettingPreference defines model for NetKSAIKHUkYjHujLgFBD.SettingPreference.
-type NetKSAIKHUkYjHujLgFBDSettingPreference string
-
-// NetKSAIKHUkYjHujLgFBDWlanBands defines model for NetKSAIKHUkYjHujLgFBD.WlanBands.
-type NetKSAIKHUkYjHujLgFBDWlanBands string
-
-// NetKSAIAeyOUcXIsMsQw defines model for net_k_s_a_i_aeyOUcXIsMsQw.
-type NetKSAIAeyOUcXIsMsQw struct {
-	DurationMinutes *int                                   `json:"duration_minutes,omitempty"`
-	StartDaysOfWeek *[]NetKSAIAeyOUcXIsMsQwStartDaysOfWeek `json:"start_days_of_week,omitempty"`
-	StartHour       *int                                   `json:"start_hour,omitempty"`
-	StartMinute     *int                                   `json:"start_minute,omitempty"`
-}
-
-// NetKSAIAeyOUcXIsMsQwStartDaysOfWeek defines model for NetKSAIAeyOUcXIsMsQw.StartDaysOfWeek.
-type NetKSAIAeyOUcXIsMsQwStartDaysOfWeek string
-
-// NetKSAIJRsSex defines model for net_k_s_a_i_jRsSex.
-type NetKSAIJRsSex struct {
-	Password *string `json:"password,omitempty"`
-	VlanId   *int    `json:"vlan_id,omitempty"`
-}
 
 // Network defines model for network.
 type Network struct {
@@ -24322,9 +24031,9 @@ type Ospf struct {
 	Enabled                               *bool                                   `json:"enabled,omitempty"`
 	Interfaces                            *[]OspfInterface                        `json:"interfaces,omitempty"`
 	RedistributeBgpRoutes                 *bool                                   `json:"redistribute_bgp_routes,omitempty"`
-	RedistributeBgpRoutesMetricType       *GDMAeyOUcXIsMsQw                       `json:"redistribute_bgp_routes_metric_type,omitempty"`
+	RedistributeBgpRoutesMetricType       *OspfRedistributeStaticRoutesMetricType `json:"redistribute_bgp_routes_metric_type,omitempty"`
 	RedistributeConnectedRoutes           *bool                                   `json:"redistribute_connected_routes,omitempty"`
-	RedistributeConnectedRoutesMetricType *GDMAeyOUcXIsMsQw                       `json:"redistribute_connected_routes_metric_type,omitempty"`
+	RedistributeConnectedRoutesMetricType *OspfRedistributeStaticRoutesMetricType `json:"redistribute_connected_routes_metric_type,omitempty"`
 	RedistributeStaticRoutes              *bool                                   `json:"redistribute_static_routes,omitempty"`
 	RedistributeStaticRoutesMetricType    *OspfRedistributeStaticRoutesMetricType `json:"redistribute_static_routes_metric_type,omitempty"`
 	RouterId                              string                                  `json:"router_id"`
@@ -24650,15 +24359,18 @@ type PortsHistoryAtEthernetOverride struct {
 
 // PortsHistoryTimeline defines model for ports_history_timeline.
 type PortsHistoryTimeline struct {
-	AnomalyType  *GBAqKHUkYjHujLgFBD `json:"anomaly_type,omitempty"`
-	EndTimestamp *int                `json:"end_timestamp,omitempty"`
-	ExternalId   *string             `json:"external_id,omitempty"`
-	Mac          *string             `json:"mac,omitempty"`
-	Name         *string             `json:"name,omitempty"`
-	PortIdx      *int                `json:"port_idx,omitempty"`
-	Timestamp    *int                `json:"timestamp,omitempty"`
-	Type         *GBUHtDMji          `json:"type,omitempty"`
+	AnomalyType  *InfrastructureHistoryTimelineAnomalyType `json:"anomaly_type,omitempty"`
+	EndTimestamp *int                                      `json:"end_timestamp,omitempty"`
+	ExternalId   *string                                   `json:"external_id,omitempty"`
+	Mac          *string                                   `json:"mac,omitempty"`
+	Name         *string                                   `json:"name,omitempty"`
+	PortIdx      *int                                      `json:"port_idx,omitempty"`
+	Timestamp    *int                                      `json:"timestamp,omitempty"`
+	Type         *PortsHistoryTimelineType                 `json:"type,omitempty"`
 }
+
+// PortsHistoryTimelineType defines model for ports_history_timeline_type.
+type PortsHistoryTimelineType string
 
 // PortsMacTables defines model for ports_mac_tables.
 type PortsMacTables = map[string]interface{}
@@ -24765,27 +24477,30 @@ type PowerSupervisorsSuperviseAllPoePoweredSkipped struct {
 
 // ProavGroup defines model for proav_group.
 type ProavGroup struct {
-	Channel *int                        `json:"channel,omitempty"`
-	Clients []ProavGroupClient          `json:"clients"`
-	Host    ProavGroupHost              `json:"host"`
-	Id      *string                     `json:"id,omitempty"`
-	Name    string                      `json:"name"`
-	Type    DaoConfigEDTToyPkrNNHXKNEnk `json:"type"`
+	Channel *int               `json:"channel,omitempty"`
+	Clients []ProavGroupClient `json:"clients"`
+	Host    ProavGroupHost     `json:"host"`
+	Id      *string            `json:"id,omitempty"`
+	Name    string             `json:"name"`
+	Type    ProavGroupType     `json:"type"`
 }
 
 // ProavGroupClient defines model for proav_group_client.
 type ProavGroupClient struct {
-	ClientType *DaoConfigEDTToyPkrNNHXKNEnk `json:"client_type,omitempty"`
-	Enabled    *bool                        `json:"enabled,omitempty"`
-	Mac        *string                      `json:"mac,omitempty"`
+	ClientType *ProavGroupType `json:"client_type,omitempty"`
+	Enabled    *bool           `json:"enabled,omitempty"`
+	Mac        *string         `json:"mac,omitempty"`
 }
 
 // ProavGroupHost defines model for proav_group_host.
 type ProavGroupHost struct {
-	Enabled  *bool                        `json:"enabled,omitempty"`
-	HostType *DaoConfigEDTToyPkrNNHXKNEnk `json:"host_type,omitempty"`
-	Mac      *string                      `json:"mac,omitempty"`
+	Enabled  *bool           `json:"enabled,omitempty"`
+	HostType *ProavGroupType `json:"host_type,omitempty"`
+	Mac      *string         `json:"mac,omitempty"`
 }
+
+// ProavGroupType defines model for proav_group_type.
+type ProavGroupType string
 
 // ProavMatrix defines model for proav_matrix.
 type ProavMatrix struct {
@@ -24799,22 +24514,22 @@ type ProavMatrix struct {
 
 // QosRules defines model for qos_rules.
 type QosRules struct {
-	UnderscoreId      *string                    `json:"_id,omitempty"`
-	Destination       QosRulesDestination        `json:"destination"`
-	DownloadBurst     *QosRulesDownloadBurst     `json:"download_burst,omitempty"`
-	DownloadLimitKbps *int                       `json:"download_limit_kbps,omitempty"`
-	Enabled           *bool                      `json:"enabled,omitempty"`
-	Index             *int                       `json:"index,omitempty"`
-	Name              *string                    `json:"name,omitempty"`
-	Objective         QosRulesObjective          `json:"objective"`
-	OriginId          *string                    `json:"origin_id,omitempty"`
-	OriginType        *QosRulesOriginType        `json:"origin_type,omitempty"`
-	Predefined        *bool                      `json:"predefined,omitempty"`
-	Schedule          ContentFilteringSchedule   `json:"schedule"`
-	Source            QosRulesSource             `json:"source"`
-	UploadBurst       *DaoConfigEKCAeyOUcXIsMsQw `json:"upload_burst,omitempty"`
-	UploadLimitKbps   *int                       `json:"upload_limit_kbps,omitempty"`
-	WanOrVpnNetwork   *string                    `json:"wan_or_vpn_network,omitempty"`
+	UnderscoreId      *string                  `json:"_id,omitempty"`
+	Destination       QosRulesDestination      `json:"destination"`
+	DownloadBurst     *QosRulesDownloadBurst   `json:"download_burst,omitempty"`
+	DownloadLimitKbps *int                     `json:"download_limit_kbps,omitempty"`
+	Enabled           *bool                    `json:"enabled,omitempty"`
+	Index             *int                     `json:"index,omitempty"`
+	Name              *string                  `json:"name,omitempty"`
+	Objective         QosRulesObjective        `json:"objective"`
+	OriginId          *string                  `json:"origin_id,omitempty"`
+	OriginType        *QosRulesOriginType      `json:"origin_type,omitempty"`
+	Predefined        *bool                    `json:"predefined,omitempty"`
+	Schedule          ContentFilteringSchedule `json:"schedule"`
+	Source            QosRulesSource           `json:"source"`
+	UploadBurst       *QosRulesDownloadBurst   `json:"upload_burst,omitempty"`
+	UploadLimitKbps   *int                     `json:"upload_limit_kbps,omitempty"`
+	WanOrVpnNetwork   *string                  `json:"wan_or_vpn_network,omitempty"`
 }
 
 // QosRulesDownloadBurst defines model for QosRules.DownloadBurst.
@@ -25094,24 +24809,6 @@ type Scheduletask struct {
 		Mac *string `json:"mac,omitempty"`
 	} `json:"upgrade_targets,omitempty"`
 }
-
-// ServiceBgEkfCWfaSnrqscUb defines model for service_bg_ekfCWfaSnrqscUb.
-type ServiceBgEkfCWfaSnrqscUb string
-
-// ServiceLEMiVjHefaf defines model for service_l_e_MiVjHefaf.
-type ServiceLEMiVjHefaf string
-
-// ServiceLECVbZoFIZsWYaVCquTr defines model for service_l_e_cVbZoFIZsWYaVCquTr.
-type ServiceLECVbZoFIZsWYaVCquTr string
-
-// ServiceLERYtJfMBbtgWvku defines model for service_l_e_rYtJfMBbtgWvku.
-type ServiceLERYtJfMBbtgWvku string
-
-// ServiceMagicsitetositevpnBANVVyiC defines model for service_magicsitetositevpn_b_a_n_VVyiC.
-type ServiceMagicsitetositevpnBANVVyiC string
-
-// ServiceSystemlogAdminActivityMiVjHefaf defines model for service_systemlog_admin_activity_MiVjHefaf.
-type ServiceSystemlogAdminActivityMiVjHefaf string
 
 // Setting defines model for setting.
 type Setting struct {
@@ -25862,11 +25559,11 @@ type SettingUsgGeoIpFilteringTrafficDirection string
 
 // SettingIgmpSnoopingQuerierTable defines model for setting_igmp_snooping_querier_table.
 type SettingIgmpSnoopingQuerierTable struct {
-	ActiveQuerierAddresses *[]SettingIgmpSnoopingQuerierTableActiveQuerierAddresse `json:"active_querier_addresses,omitempty"`
+	ActiveQuerierAddresses *[]SettingIgmpSnoopingQuerierTableActiveQuerierAddress `json:"active_querier_addresses,omitempty"`
 }
 
-// SettingIgmpSnoopingQuerierTableActiveQuerierAddresse defines model for setting_igmp_snooping_querier_table_active_querier_addresse.
-type SettingIgmpSnoopingQuerierTableActiveQuerierAddresse struct {
+// SettingIgmpSnoopingQuerierTableActiveQuerierAddress defines model for setting_igmp_snooping_querier_table_active_querier_address.
+type SettingIgmpSnoopingQuerierTableActiveQuerierAddress struct {
 	ActiveQuerierIp     *string `json:"active_querier_ip,omitempty"`
 	ConfiguredQuerierIp *string `json:"configured_querier_ip,omitempty"`
 	Network             string  `json:"network"`
@@ -26065,10 +25762,10 @@ type SettingsUsgDefaultsTimeoutSettingPreference string
 
 // SettingsUsgDefaultsDnsVerification defines model for settings_usg_defaults_dns_verification.
 type SettingsUsgDefaultsDnsVerification struct {
-	Domain             *string          `json:"domain,omitempty"`
-	PrimaryDnsServer   *string          `json:"primary_dns_server,omitempty"`
-	SecondaryDnsServer *string          `json:"secondary_dns_server,omitempty"`
-	SettingPreference  *ERYtJfMBbtgWvku `json:"setting_preference,omitempty"`
+	Domain             *string                `json:"domain,omitempty"`
+	PrimaryDnsServer   *string                `json:"primary_dns_server,omitempty"`
+	SecondaryDnsServer *string                `json:"secondary_dns_server,omitempty"`
+	SettingPreference  *WlanSettingPreference `json:"setting_preference,omitempty"`
 }
 
 // SettingsWifiaiDefaults defines model for settings_wifiai_defaults.
@@ -26351,10 +26048,13 @@ type StackingLagGroupUnitLag struct {
 
 // StackingUnit defines model for stacking_unit.
 type StackingUnit struct {
-	Index *int              `json:"index,omitempty"`
-	Mac   *string           `json:"mac,omitempty"`
-	Role  GDSKHUkYjHujLgFBD `json:"role"`
+	Index *int             `json:"index,omitempty"`
+	Mac   *string          `json:"mac,omitempty"`
+	Role  StackingUnitRole `json:"role"`
 }
+
+// StackingUnitRole defines model for stacking_unit_role.
+type StackingUnitRole string
 
 // StaticDns defines model for static_dns.
 type StaticDns struct {
@@ -26407,10 +26107,10 @@ type SwitchingSwitchStacks2 = map[string]interface{}
 
 // SystemLog defines model for system_log.
 type SystemLog struct {
-	ActivityKeys      *[]ServiceSystemlogAdminActivityMiVjHefaf `json:"activity_keys,omitempty"`
-	AdminAccessLogKey *[]SystemLogAdminAccessLogKey             `json:"adminAccessLogKey,omitempty"`
-	AdminIds          *[]string                                 `json:"adminIds,omitempty"`
-	ChangeKeys        *[]SystemLogChangeKeys                    `json:"change_keys,omitempty"`
+	ActivityKeys      *[]SystemLogAdminAccessLogKey `json:"activity_keys,omitempty"`
+	AdminAccessLogKey *[]SystemLogAdminAccessLogKey `json:"adminAccessLogKey,omitempty"`
+	AdminIds          *[]string                     `json:"adminIds,omitempty"`
+	ChangeKeys        *[]SystemLogChangeKeys        `json:"change_keys,omitempty"`
 }
 
 // SystemLogAdminAccessLogKey defines model for SystemLog.AdminAccessLogKey.
@@ -26524,20 +26224,28 @@ type SystemLogByExternalId struct {
 	Message    *string                 `json:"message,omitempty"`
 
 	// MessageRaw Already translated message but with no parameters replaces. Present only if applicable
-	MessageRaw      *string                 `json:"message_raw,omitempty"`
-	Parameters      *map[string]GBCKWFFqTgF `json:"parameters,omitempty"`
-	ReplaceAlerts   *[]string               `json:"replace_alerts,omitempty"`
-	Severity        *map[string]interface{} `json:"severity,omitempty"`
-	ShowOnDashboard *bool                   `json:"show_on_dashboard,omitempty"`
-	Status          *map[string]interface{} `json:"status,omitempty"`
-	Subcategory     *map[string]interface{} `json:"subcategory,omitempty"`
-	Target          *map[string]interface{} `json:"target,omitempty"`
-	Timestamp       *int                    `json:"timestamp,omitempty"`
-	Title           *string                 `json:"title,omitempty"`
+	MessageRaw      *string                                    `json:"message_raw,omitempty"`
+	Parameters      *map[string]SystemLogByExternalIdParameter `json:"parameters,omitempty"`
+	ReplaceAlerts   *[]string                                  `json:"replace_alerts,omitempty"`
+	Severity        *map[string]interface{}                    `json:"severity,omitempty"`
+	ShowOnDashboard *bool                                      `json:"show_on_dashboard,omitempty"`
+	Status          *map[string]interface{}                    `json:"status,omitempty"`
+	Subcategory     *map[string]interface{}                    `json:"subcategory,omitempty"`
+	Target          *map[string]interface{}                    `json:"target,omitempty"`
+	Timestamp       *int                                       `json:"timestamp,omitempty"`
+	Title           *string                                    `json:"title,omitempty"`
 
 	// TitleRaw Alert title with no parameters replaces. Present only if applicable
 	TitleRaw *string                 `json:"title_raw,omitempty"`
 	Type     *map[string]interface{} `json:"type,omitempty"`
+}
+
+// SystemLogByExternalIdParameter defines model for system_log_by_external_id_parameter.
+type SystemLogByExternalIdParameter struct {
+	EnclosedWithBrackets *bool   `json:"enclosed_with_brackets,omitempty"`
+	Id                   *string `json:"id,omitempty"`
+	Name                 *string `json:"name,omitempty"`
+	NotActionable        *bool   `json:"not_actionable,omitempty"`
 }
 
 // SystemLogCef defines model for system_log_cef.
@@ -26559,12 +26267,12 @@ type SystemLogClientAlertGuestAuthorizationMethod string
 
 // SystemLogClientConnection defines model for system_log_client_connection.
 type SystemLogClientConnection struct {
-	Id         *string                 `json:"id,omitempty"`
-	Key        *map[string]interface{} `json:"key,omitempty"`
-	MessageRaw *string                 `json:"message_raw,omitempty"`
-	Parameters *map[string]GBCKWFFqTgF `json:"parameters,omitempty"`
-	Target     *map[string]interface{} `json:"target,omitempty"`
-	Timestamp  *int                    `json:"timestamp,omitempty"`
+	Id         *string                                    `json:"id,omitempty"`
+	Key        *map[string]interface{}                    `json:"key,omitempty"`
+	MessageRaw *string                                    `json:"message_raw,omitempty"`
+	Parameters *map[string]SystemLogByExternalIdParameter `json:"parameters,omitempty"`
+	Target     *map[string]interface{}                    `json:"target,omitempty"`
+	Timestamp  *int                                       `json:"timestamp,omitempty"`
 }
 
 // SystemLogCount defines model for system_log_count.
@@ -26611,13 +26319,13 @@ type SystemLogCritical struct {
 
 // SystemLogDevice defines model for system_log_device.
 type SystemLogDevice struct {
-	Id         *string                 `json:"id,omitempty"`
-	Key        *map[string]interface{} `json:"key,omitempty"`
-	Message    *string                 `json:"message,omitempty"`
-	MessageRaw *string                 `json:"message_raw,omitempty"`
-	Parameters *map[string]GBCKWFFqTgF `json:"parameters,omitempty"`
-	Target     *map[string]interface{} `json:"target,omitempty"`
-	Timestamp  *int                    `json:"timestamp,omitempty"`
+	Id         *string                                    `json:"id,omitempty"`
+	Key        *map[string]interface{}                    `json:"key,omitempty"`
+	Message    *string                                    `json:"message,omitempty"`
+	MessageRaw *string                                    `json:"message_raw,omitempty"`
+	Parameters *map[string]SystemLogByExternalIdParameter `json:"parameters,omitempty"`
+	Target     *map[string]interface{}                    `json:"target,omitempty"`
+	Timestamp  *int                                       `json:"timestamp,omitempty"`
 }
 
 // SystemLogDeviceAlert defines model for system_log_device_alert.
@@ -26721,8 +26429,8 @@ type SystemLogRemoteSettings struct {
 
 // SystemLogSetting defines model for system_log_setting.
 type SystemLogSetting struct {
-	AlertEventSettings *map[string]GBCAQODNNoMmBlFpWXX    `json:"alert_event_settings,omitempty"`
-	SettingPreference  *SystemLogSettingSettingPreference `json:"setting_preference,omitempty"`
+	AlertEventSettings *map[string]SystemLogSettingAlertEventSetting `json:"alert_event_settings,omitempty"`
+	SettingPreference  *SystemLogSettingSettingPreference            `json:"setting_preference,omitempty"`
 }
 
 // SystemLogSettingSettingPreference defines model for SystemLogSetting.SettingPreference.
@@ -26730,13 +26438,29 @@ type SystemLogSettingSettingPreference string
 
 // SystemLogSetting2 defines model for system_log_setting_2.
 type SystemLogSetting2 struct {
-	AlertEventSettings *map[string]GBCWbFONodBTUv          `json:"alert_event_settings,omitempty"`
-	AlertTypeSettings  *map[string]GBCWbFONodBTUv          `json:"alert_type_settings,omitempty"`
-	SettingPreference  *SystemLogSetting2SettingPreference `json:"setting_preference,omitempty"`
+	AlertEventSettings *map[string]SystemLogSettingAlertTypeSetting `json:"alert_event_settings,omitempty"`
+	AlertTypeSettings  *map[string]SystemLogSettingAlertTypeSetting `json:"alert_type_settings,omitempty"`
+	SettingPreference  *SystemLogSetting2SettingPreference          `json:"setting_preference,omitempty"`
 }
 
 // SystemLogSetting2SettingPreference defines model for SystemLogSetting2.SettingPreference.
 type SystemLogSetting2SettingPreference string
+
+// SystemLogSettingAlertEventSetting defines model for system_log_setting_alert_event_setting.
+type SystemLogSettingAlertEventSetting struct {
+	Category                   *map[string]interface{} `json:"category,omitempty"`
+	Label                      *string                 `json:"label,omitempty"`
+	SendEmail                  *bool                   `json:"send_email,omitempty"`
+	SendMobilePushNotification *bool                   `json:"send_mobile_push_notification,omitempty"`
+	Subcategory                *map[string]interface{} `json:"subcategory,omitempty"`
+}
+
+// SystemLogSettingAlertTypeSetting defines model for system_log_setting_alert_type_setting.
+type SystemLogSettingAlertTypeSetting struct {
+	SendEmail                  bool `json:"send_email"`
+	SendMobilePushNotification bool `json:"send_mobile_push_notification"`
+	ShowInAlertPage            bool `json:"show_in_alert_page"`
+}
 
 // SystemLogSystemCriticalAlert defines model for system_log_system_critical_alert.
 type SystemLogSystemCriticalAlert struct {
@@ -26847,7 +26571,7 @@ type TestConfigs2 struct {
 // TestConfigsConflict defines model for test_configs_conflict.
 type TestConfigsConflict struct {
 	ConfigId     *string                          `json:"config_id,omitempty"`
-	ConfigType   *ServiceBgEkfCWfaSnrqscUb        `json:"config_type,omitempty"`
+	ConfigType   *TestConfigsEntrieConfigType     `json:"config_type,omitempty"`
 	ConflictType *TestConfigsConflictConflictType `json:"conflict_type,omitempty"`
 }
 
@@ -26950,10 +26674,13 @@ type TrafficFlowLatestStatisticsTopAllTrafficByApplication struct {
 
 // TrafficFlowLatestStatisticsTopBlockedCountByPolicy defines model for traffic_flow_latest_statistics_top_blocked_count_by_policy.
 type TrafficFlowLatestStatisticsTopBlockedCountByPolicy struct {
-	PolicyId   *string                 `json:"policy_id,omitempty"`
-	PolicyName *string                 `json:"policy_name,omitempty"`
-	PolicyType *GBAtSNMiFVJXxaonBOtqbJ `json:"policy_type,omitempty"`
+	PolicyId   *string                                                       `json:"policy_id,omitempty"`
+	PolicyName *string                                                       `json:"policy_name,omitempty"`
+	PolicyType *TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType `json:"policy_type,omitempty"`
 }
+
+// TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType defines model for traffic_flow_latest_statistics_top_blocked_count_by_policy_policy_type.
+type TrafficFlowLatestStatisticsTopBlockedCountByPolicyPolicyType string
 
 // TrafficFlows defines model for traffic_flows.
 type TrafficFlows struct {
@@ -27233,7 +26960,7 @@ type Trafficroutes struct {
 	Domains           *[]TrafficroutesDomain         `json:"domains,omitempty"`
 	Enabled           *bool                          `json:"enabled,omitempty"`
 	HiddenId          *string                        `json:"hidden_id,omitempty"`
-	IpAddresses       *[]TrafficroutesIpAddresse     `json:"ip_addresses,omitempty"`
+	IpAddresses       *[]TrafficroutesIpAddress      `json:"ip_addresses,omitempty"`
 	IpRanges          *[]TrafficroutesIpRange        `json:"ip_ranges,omitempty"`
 	KillSwitchEnabled *bool                          `json:"kill_switch_enabled,omitempty"`
 	MatchingTarget    TrafficroutesMatchingTarget    `json:"matching_target"`
@@ -27265,22 +26992,22 @@ type TrafficroutesDomainPortRange struct {
 	PortStop  *int `json:"port_stop,omitempty"`
 }
 
-// TrafficroutesIpAddresse defines model for trafficroutes_ip_addresse.
-type TrafficroutesIpAddresse struct {
-	IpOrSubnet string                           `json:"ip_or_subnet"`
-	IpVersion  TrafficroutesIpAddresseIpVersion `json:"ip_version"`
-	PortRanges *[]TrafficroutesDomainPortRange  `json:"port_ranges,omitempty"`
-	Ports      *[]int                           `json:"ports,omitempty"`
+// TrafficroutesIpAddress defines model for trafficroutes_ip_address.
+type TrafficroutesIpAddress struct {
+	IpOrSubnet string                          `json:"ip_or_subnet"`
+	IpVersion  TrafficroutesIpAddressIpVersion `json:"ip_version"`
+	PortRanges *[]TrafficroutesDomainPortRange `json:"port_ranges,omitempty"`
+	Ports      *[]int                          `json:"ports,omitempty"`
 }
 
-// TrafficroutesIpAddresseIpVersion defines model for TrafficroutesIpAddresse.IpVersion.
-type TrafficroutesIpAddresseIpVersion string
+// TrafficroutesIpAddressIpVersion defines model for TrafficroutesIpAddress.IpVersion.
+type TrafficroutesIpAddressIpVersion string
 
 // TrafficroutesIpRange defines model for trafficroutes_ip_range.
 type TrafficroutesIpRange struct {
-	IpStart   string     `json:"ip_start"`
-	IpStop    string     `json:"ip_stop"`
-	IpVersion GBEirJvdtm `json:"ip_version"`
+	IpStart   string                          `json:"ip_start"`
+	IpStop    string                          `json:"ip_stop"`
+	IpVersion TrafficroutesIpAddressIpVersion `json:"ip_version"`
 }
 
 // TrafficroutesTargetDevice defines model for trafficroutes_target_device.
@@ -27335,7 +27062,7 @@ type Trafficrules struct {
 	Description      *string                       `json:"description,omitempty"`
 	Domains          *[]TrafficroutesDomain        `json:"domains,omitempty"`
 	Enabled          *bool                         `json:"enabled,omitempty"`
-	IpAddresses      *[]TrafficroutesIpAddresse    `json:"ip_addresses,omitempty"`
+	IpAddresses      *[]TrafficroutesIpAddress     `json:"ip_addresses,omitempty"`
 	IpRanges         *[]TrafficroutesIpRange       `json:"ip_ranges,omitempty"`
 	MatchingTarget   TrafficrulesMatchingTarget    `json:"matching_target"`
 	NetworkIds       *[]string                     `json:"network_ids,omitempty"`
@@ -27658,27 +27385,27 @@ type VpnSiteToSiteTunnels = map[string]interface{}
 
 // VpnUsers defines model for vpn_users.
 type VpnUsers struct {
-	AssocTime   *int                     `json:"assoc_time,omitempty"`
-	CountryCode *string                  `json:"country_code,omitempty"`
-	DisplayName *string                  `json:"display_name,omitempty"`
-	Id          *string                  `json:"id,omitempty"`
-	Ip          *string                  `json:"ip,omitempty"`
-	Ipv6        *[]string                `json:"ipv6,omitempty"`
-	LastSeen    *int                     `json:"last_seen,omitempty"`
-	Name        *string                  `json:"name,omitempty"`
-	NetworkId   *string                  `json:"network_id,omitempty"`
-	NetworkName *string                  `json:"network_name,omitempty"`
-	RemoteIp    *string                  `json:"remote_ip,omitempty"`
-	RemotePort  *int                     `json:"remote_port,omitempty"`
-	RxBytes     *int                     `json:"rx_bytes,omitempty"`
-	RxBytesR    *int                     `json:"rx_bytes-r,omitempty"`
-	Status      *ServiceLEMiVjHefaf      `json:"status,omitempty"`
-	TxBytes     *int                     `json:"tx_bytes,omitempty"`
-	TxBytesR    *int                     `json:"tx_bytes-r,omitempty"`
-	Type        *ServiceLERYtJfMBbtgWvku `json:"type,omitempty"`
-	Uptime      *int                     `json:"uptime,omitempty"`
-	UsageBytes  *int                     `json:"usage_bytes,omitempty"`
-	VpnType     *GLBRYtJfMBbtgWvku       `json:"vpn_type,omitempty"`
+	AssocTime   *int               `json:"assoc_time,omitempty"`
+	CountryCode *string            `json:"country_code,omitempty"`
+	DisplayName *string            `json:"display_name,omitempty"`
+	Id          *string            `json:"id,omitempty"`
+	Ip          *string            `json:"ip,omitempty"`
+	Ipv6        *[]string          `json:"ipv6,omitempty"`
+	LastSeen    *int               `json:"last_seen,omitempty"`
+	Name        *string            `json:"name,omitempty"`
+	NetworkId   *string            `json:"network_id,omitempty"`
+	NetworkName *string            `json:"network_name,omitempty"`
+	RemoteIp    *string            `json:"remote_ip,omitempty"`
+	RemotePort  *int               `json:"remote_port,omitempty"`
+	RxBytes     *int               `json:"rx_bytes,omitempty"`
+	RxBytesR    *int               `json:"rx_bytes-r,omitempty"`
+	Status      *ClientsStatus     `json:"status,omitempty"`
+	TxBytes     *int               `json:"tx_bytes,omitempty"`
+	TxBytesR    *int               `json:"tx_bytes-r,omitempty"`
+	Type        *ClientsType       `json:"type,omitempty"`
+	Uptime      *int               `json:"uptime,omitempty"`
+	UsageBytes  *int               `json:"usage_bytes,omitempty"`
+	VpnType     *VpnConnectionType `json:"vpn_type,omitempty"`
 }
 
 // Wan defines model for wan.
@@ -27727,7 +27454,7 @@ type WanDefaults struct {
 	WanIpv6                           *string                                              `json:"wan_ipv6,omitempty"`
 	WanIpv6Dns1                       *string                                              `json:"wan_ipv6_dns1,omitempty"`
 	WanIpv6Dns2                       *string                                              `json:"wan_ipv6_dns2,omitempty"`
-	WanIpv6DnsPreference              *GBNAEUraORhn                                        `json:"wan_ipv6_dns_preference,omitempty"`
+	WanIpv6DnsPreference              *WanDefaultsWanDnsPreference                         `json:"wan_ipv6_dns_preference,omitempty"`
 	WanLoadBalanceType                *WanDefaultsWanLoadBalanceType                       `json:"wan_load_balance_type,omitempty"`
 	WanLoadBalanceWeight              *int                                                 `json:"wan_load_balance_weight,omitempty"`
 	WanMagicEnabled                   *bool                                                `json:"wan_magic_enabled,omitempty"`
@@ -27820,7 +27547,7 @@ type WanInsightsHistory = map[string]interface{}
 
 // WanInsightsOverview defines model for wan_insights_overview.
 type WanInsightsOverview struct {
-	NetworkGroup *GBAEKWFFqTgF `json:"network_group,omitempty"`
+	NetworkGroup *DowntimeWanNetworkGroup `json:"network_group,omitempty"`
 }
 
 // WanInsightsSpeedTests defines model for wan_insights_speed_tests.
@@ -27944,12 +27671,12 @@ type WanSlasMonitorAlertThresholdPolicy string
 
 // WanWanInterface defines model for wan_wan_interface.
 type WanWanInterface struct {
-	Mode            *GBAEBTToyPkrNNHXKNEnk          `json:"mode,omitempty"`
-	Name            *string                         `json:"name,omitempty"`
-	Priority        *int                            `json:"priority,omitempty"`
-	WanNetworkgroup *WanWanInterfaceWanNetworkgroup `json:"wan_networkgroup,omitempty"`
-	WanSla          *string                         `json:"wan_sla,omitempty"`
-	Weight          *int                            `json:"weight,omitempty"`
+	Mode            *InfrastructureIspDataLoadBalancingMode `json:"mode,omitempty"`
+	Name            *string                                 `json:"name,omitempty"`
+	Priority        *int                                    `json:"priority,omitempty"`
+	WanNetworkgroup *WanWanInterfaceWanNetworkgroup         `json:"wan_networkgroup,omitempty"`
+	WanSla          *string                                 `json:"wan_sla,omitempty"`
+	Weight          *int                                    `json:"weight,omitempty"`
 }
 
 // WanWanInterfaceWanNetworkgroup defines model for WanWanInterface.WanNetworkgroup.
@@ -28000,9 +27727,9 @@ type WifiConnectivity struct {
 	ClientGroups                *[]string                              `json:"clientGroups,omitempty"`
 	ClientMacs                  *[]string                              `json:"clientMacs,omitempty"`
 	ClientVendors               *[]int                                 `json:"clientVendors,omitempty"`
-	DestinationChannelWidths    *[]GFEKHUkYjHujLgFBD                   `json:"destinationChannelWidths,omitempty"`
+	DestinationChannelWidths    *[]ApChannelWidth                      `json:"destinationChannelWidths,omitempty"`
 	DestinationDeviceMacs       *[]string                              `json:"destinationDeviceMacs,omitempty"`
-	DestinationRadioBands       *[]GFERYtJfMBbtgWvku                   `json:"destinationRadioBands,omitempty"`
+	DestinationRadioBands       *[]ApBand                              `json:"destinationRadioBands,omitempty"`
 	DestinationSignalMax        *int                                   `json:"destinationSignalMax,omitempty"`
 	DestinationSignalMin        *int                                   `json:"destinationSignalMin,omitempty"`
 	DeviceTags                  *[]string                              `json:"deviceTags,omitempty"`
@@ -28319,13 +28046,13 @@ type WifiStatsDetails struct {
 // WifiStatsDetailsClientDetail defines model for wifi_stats_details_client_detail.
 type WifiStatsDetailsClientDetail struct {
 	ApDeltaAvg             *int                                           `json:"ap_delta_avg,omitempty"`
-	Band                   *GFERYtJfMBbtgWvku                             `json:"band,omitempty"`
+	Band                   *ApBand                                        `json:"band,omitempty"`
 	Channel                *int                                           `json:"channel,omitempty"`
-	ChannelWidth           *GFEKHUkYjHujLgFBD                             `json:"channel_width,omitempty"`
+	ChannelWidth           *ApChannelWidth                                `json:"channel_width,omitempty"`
 	Client                 *InsightsFilteringWatchlistEntrieClient        `json:"client,omitempty"`
 	IsMlo                  *bool                                          `json:"is_mlo,omitempty"`
 	LastApMac              *string                                        `json:"last_ap_mac,omitempty"`
-	Mimo                   *GSKHUkYjHujLgFBD                              `json:"mimo,omitempty"`
+	Mimo                   *WifiStatsDetailsClientDetailMloDetailMimo     `json:"mimo,omitempty"`
 	MloDetails             *[]WifiStatsDetailsClientDetailMloDetail       `json:"mlo_details,omitempty"`
 	PhyModeMostCommon      *WifiStatsDetailsClientDetailPhyModeMostCommon `json:"phy_mode_most_common,omitempty"`
 	PhyRateMax             *int                                           `json:"phy_rate_max,omitempty"`
@@ -28333,7 +28060,7 @@ type WifiStatsDetailsClientDetail struct {
 	RoamsCount             *int                                           `json:"roams_count,omitempty"`
 	SatisfactionAvg        *int                                           `json:"satisfaction_avg,omitempty"`
 	SignalAvg              *int                                           `json:"signal_avg,omitempty"`
-	Standard               *GSAeyOUcXIsMsQw                               `json:"standard,omitempty"`
+	Standard               *WifiStatsDetailsClientDetailMloDetailStandard `json:"standard,omitempty"`
 	TotalTrafficPercentage *float32                                       `json:"total_traffic_percentage,omitempty"`
 	TxRetriesPercentage    *float32                                       `json:"tx_retries_percentage,omitempty"`
 }
@@ -28425,21 +28152,21 @@ type Wifiman2WlanBand string
 
 // Wifiman3 defines model for wifiman_3.
 type Wifiman3 struct {
-	Channel               *int                         `json:"channel,omitempty"`
-	ChannelWidth          *int                         `json:"channel_width,omitempty"`
-	IspDownloadCapability *int                         `json:"isp_download_capability,omitempty"`
-	IspUploadCapability   *int                         `json:"isp_upload_capability,omitempty"`
-	LinkDownloadRateKbps  *int                         `json:"link_download_rate_kbps,omitempty"`
-	LinkUploadRateKbps    *int                         `json:"link_upload_rate_kbps,omitempty"`
-	NearestNeighbors      *[]WifimanNearestNeighbor    `json:"nearest_neighbors,omitempty"`
-	Noise                 *int                         `json:"noise,omitempty"`
-	RadioModulation       *ServiceLECVbZoFIZsWYaVCquTr `json:"radio_modulation,omitempty"`
-	RadioProtocol         *string                      `json:"radio_protocol,omitempty"`
-	Signal                *int                         `json:"signal,omitempty"`
-	Statistics            *[]WifimanStatistic          `json:"statistics,omitempty"`
-	UplinkDevices         *[]WifimanUplinkDevice2      `json:"uplink_devices,omitempty"`
-	WifiExperience        *int                         `json:"wifi_experience,omitempty"`
-	WlanBand              *GBAIGWoWvNEX                `json:"wlan_band,omitempty"`
+	Channel               *int                      `json:"channel,omitempty"`
+	ChannelWidth          *int                      `json:"channel_width,omitempty"`
+	IspDownloadCapability *int                      `json:"isp_download_capability,omitempty"`
+	IspUploadCapability   *int                      `json:"isp_upload_capability,omitempty"`
+	LinkDownloadRateKbps  *int                      `json:"link_download_rate_kbps,omitempty"`
+	LinkUploadRateKbps    *int                      `json:"link_upload_rate_kbps,omitempty"`
+	NearestNeighbors      *[]WifimanNearestNeighbor `json:"nearest_neighbors,omitempty"`
+	Noise                 *int                      `json:"noise,omitempty"`
+	RadioModulation       *WifimanRadioModulation   `json:"radio_modulation,omitempty"`
+	RadioProtocol         *string                   `json:"radio_protocol,omitempty"`
+	Signal                *int                      `json:"signal,omitempty"`
+	Statistics            *[]WifimanStatistic       `json:"statistics,omitempty"`
+	UplinkDevices         *[]WifimanUplinkDevice2   `json:"uplink_devices,omitempty"`
+	WifiExperience        *int                      `json:"wifi_experience,omitempty"`
+	WlanBand              *WlanWlanBand             `json:"wlan_band,omitempty"`
 }
 
 // WifimanDevices defines model for wifiman_devices.
@@ -28467,10 +28194,10 @@ type WifimanFeedback struct {
 // WifimanNearestNeighbor defines model for wifiman_nearest_neighbor.
 type WifimanNearestNeighbor struct {
 	ApMac            *string                         `json:"ap_mac,omitempty"`
-	Band             *GFERYtJfMBbtgWvku              `json:"band,omitempty"`
+	Band             *ApBand                         `json:"band,omitempty"`
 	Bssid            *string                         `json:"bssid,omitempty"`
 	Channel          *int                            `json:"channel,omitempty"`
-	ChannelWidth     *GFEKHUkYjHujLgFBD              `json:"channel_width,omitempty"`
+	ChannelWidth     *ApChannelWidth                 `json:"channel_width,omitempty"`
 	IconDeviceUidbId *string                         `json:"icon_device_uidb_id,omitempty"`
 	LastSeen         *int                            `json:"last_seen,omitempty"`
 	ModelDisplay     *string                         `json:"model_display,omitempty"`
@@ -28481,9 +28208,15 @@ type WifimanNearestNeighbor struct {
 
 // WifimanNearestNeighborSignal defines model for wifiman_nearest_neighbor_signal.
 type WifimanNearestNeighborSignal struct {
-	Signal     *int          `json:"signal,omitempty"`
-	SignalType *GBAHBLwwMKkr `json:"signal_type,omitempty"`
+	Signal     *int                                    `json:"signal,omitempty"`
+	SignalType *WifimanNearestNeighborSignalSignalType `json:"signal_type,omitempty"`
 }
+
+// WifimanNearestNeighborSignalSignalType defines model for wifiman_nearest_neighbor_signal_signal_type.
+type WifimanNearestNeighborSignalSignalType string
+
+// WifimanRadioModulation defines model for wifiman_radio_modulation.
+type WifimanRadioModulation string
 
 // WifimanSpeedTest defines model for wifiman_speed_test.
 type WifimanSpeedTest struct {
@@ -28608,7 +28341,7 @@ type Wlan struct {
 	MinrateNgAdvertisingRates   *bool                      `json:"minrate_ng_advertising_rates,omitempty"`
 	MinrateNgDataRateKbps       *int                       `json:"minrate_ng_data_rate_kbps,omitempty"`
 	MinrateNgEnabled            *bool                      `json:"minrate_ng_enabled,omitempty"`
-	MinrateSettingPreference    *ERYtJfMBbtgWvku           `json:"minrate_setting_preference,omitempty"`
+	MinrateSettingPreference    *WlanSettingPreference     `json:"minrate_setting_preference,omitempty"`
 	Name                        string                     `json:"name"`
 	NasIdentifier               *string                    `json:"nas_identifier,omitempty"`
 	NasIdentifierType           *WlanNasIdentifierType     `json:"nas_identifier_type,omitempty"`
@@ -28656,7 +28389,7 @@ type Wlan struct {
 	VlanEnabled          *bool                       `json:"vlan_enabled,omitempty"`
 	WepIdx               *int                        `json:"wep_idx,omitempty"`
 	WlanBand             WlanWlanBand                `json:"wlan_band"`
-	WlanBands            *[]GBAIGWoWvNEX             `json:"wlan_bands,omitempty"`
+	WlanBands            *[]WlanWlanBand             `json:"wlan_bands,omitempty"`
 	Wpa3Enhanced192      *bool                       `json:"wpa3_enhanced_192,omitempty"`
 	Wpa3FastRoaming      *bool                       `json:"wpa3_fast_roaming,omitempty"`
 	Wpa3Support          *bool                       `json:"wpa3_support,omitempty"`
