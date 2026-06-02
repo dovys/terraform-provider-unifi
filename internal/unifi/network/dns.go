@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
@@ -45,7 +44,7 @@ func (s RecordCollection) Get(ctx context.Context, id string) (*wire.StaticDns, 
 // v2 write contract. The record's _id (UnderscoreId) must be set.
 func (s RecordCollection) Update(ctx context.Context, r *wire.StaticDns) (*wire.StaticDns, error) {
 	if r.UnderscoreId == nil || *r.UnderscoreId == "" {
-		return nil, fmt.Errorf("network: update static-dns record: missing _id")
+		return nil, errMissingID("static-dns record")
 	}
 	return s.V2Collection.Update(ctx, *r.UnderscoreId, r)
 }

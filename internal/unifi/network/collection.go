@@ -81,6 +81,52 @@ func (s LegacyCollection[T]) Delete(ctx context.Context, id string) error {
 	return err
 }
 
+// UpdateMerge performs GET-merge-PUT for a partly-owned legacy document: fetch
+// the existing doc as a raw field map, overlay the owned (omitempty) fields of
+// owned, and PUT the result. Controller-managed and unmodeled fields survive
+// untouched — the invariant for legacy docs whose full surface the provider
+// does not own (never a whole-document PUT). owned is typically a *T or a subset
+// struct whose omitempty fields are exactly the ones the caller intends to set.
+func (s LegacyCollection[T]) UpdateMerge(ctx context.Context, id string, owned any) (*T, error) {
+	existing, err := legacyData[map[string]json.RawMessage](ctx, s.core, http.MethodGet, s.restPath(id), nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(existing) == 0 {
+		return nil, ErrNotFound
+	}
+	doc := existing[0]
+	fields, err := structToRawMap(owned)
+	if err != nil {
+		return nil, err
+	}
+	for k, v := range fields {
+		doc[k] = v
+	}
+	items, err := legacyData[T](ctx, s.core, http.MethodPut, s.restPath(id), doc)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return s.Get(ctx, id)
+	}
+	return &items[0], nil
+}
+
+// structToRawMap marshals v to a JSON field map. omitempty fields drop out, so
+// only set fields overlay onto the fetched document in UpdateMerge.
+func structToRawMap(v any) (map[string]json.RawMessage, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	var m map[string]json.RawMessage
+	if err := json.Unmarshal(b, &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // V2Collection is a CRUD collection over a site-scoped v2 resource (bare JSON).
 // path is the resource segment, e.g. "static-dns".
 type V2Collection[T any] struct {

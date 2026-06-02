@@ -53,6 +53,12 @@ func (c *core) v2Path(suffix string) string {
 // Resources translate it into remove-from-state on Read.
 var ErrNotFound = errors.New("object not found")
 
+// errMissingID is the error for an update/delete called without the object's
+// id — a programmer error in the calling resource, not a controller condition.
+func errMissingID(kind string) error {
+	return fmt.Errorf("network: update %s: missing _id", kind)
+}
+
 // isNotFound reports whether a transport error denotes a missing object. The
 // legacy API is inconsistent: a missing object may be HTTP 404, or HTTP 400/200
 // with rc=error and an "UnknownObject"-class message.

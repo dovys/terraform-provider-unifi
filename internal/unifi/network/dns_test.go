@@ -14,18 +14,27 @@ import (
 // assert the path, method, and the exact bytes the facade hands the transport
 // (the wire contract) without a live session.
 type fakeDoer struct {
-	method, path string
+	method, path string // the most recent call
 	body         any
 	calls        int
 
-	resp *transport.Response
-	err  error
+	resp  *transport.Response   // returned when queue is empty
+	queue []*transport.Response // popped front-to-back (for multi-call flows)
+	err   error
 }
 
 func (f *fakeDoer) Do(_ context.Context, method, path string, body any) (*transport.Response, error) {
 	f.method, f.path, f.body = method, path, body
 	f.calls++
-	return f.resp, f.err
+	if f.err != nil {
+		return nil, f.err
+	}
+	if len(f.queue) > 0 {
+		r := f.queue[0]
+		f.queue = f.queue[1:]
+		return r, nil
+	}
+	return f.resp, nil
 }
 
 func ptr[T any](v T) *T { return &v }
@@ -36,6 +45,16 @@ func newTestClient(f *fakeDoer) *Client {
 
 func okJSON(body string) *transport.Response {
 	return &transport.Response{StatusCode: 200, Body: []byte(body)}
+}
+
+// fakeQueue builds a fake whose calls return the given JSON bodies in order
+// (for multi-call flows like GET-merge-PUT).
+func fakeQueue(bodies ...string) *fakeDoer {
+	f := &fakeDoer{}
+	for _, b := range bodies {
+		f.queue = append(f.queue, okJSON(b))
+	}
+	return f
 }
 
 func TestDNSRecordsList(t *testing.T) {
