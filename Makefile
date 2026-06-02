@@ -24,11 +24,17 @@ lint:
 fmt:
 	gofmt -s -w .
 
-# Regenerate provider documentation from schema + examples (tfplugindocs).
+# Regenerate everything (docs + wire codegen). Needs the sibling ../unifi-specs
+# repo for the wire `go:generate` directives — local dev only, never CI.
 generate:
 	go generate ./...
+
+# Regenerate ONLY the provider docs (tfplugindocs). No wire codegen, no
+# ../unifi-specs needed — mirrors the CI docs-freshness gate in test.yml.
+docs:
+	go tool tfplugindocs generate --provider-name unifi
 
 tidy:
 	go mod tidy
 
-.PHONY: default build test testacc lint fmt generate tidy
+.PHONY: default build test testacc lint fmt generate docs tidy

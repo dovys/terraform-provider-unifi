@@ -1,12 +1,15 @@
 # Changelog
 
-All notable changes to this provider are documented here. The format loosely
-follows [Keep a Changelog](https://keepachangelog.com/); releases are tagged
-`vX.Y.Z`. The repo is private and the provider is **not** published to the
-Terraform Registry — tagged releases ship as GoReleaser artifacts on the
-private repo only.
+All notable changes are documented here as **dated** entries (newest first); add
+yours under today's date in the PR that makes the change. Versioning is decoupled
+from this file: every substantive merge to `main` is auto-released as the next
+patch (`vX.Y.Z`) with binaries attached, and that GitHub Release carries the
+per-version commit list (see [`docs/releasing.md`](docs/releasing.md)). The repo
+is private and the provider is **not** published to the Terraform Registry —
+releases ship as GoReleaser artifacts on the private repo only. Sections tagged
+`[vX.Y.Z]` below predate the date-based convention.
 
-## [Unreleased]
+## 2026-06-02
 
 ### Added
 
@@ -68,10 +71,6 @@ private repo only.
   (`mac`/`model`/`type`/`version`/`ip`/`state`/`adopted`) so `wire.Device`
   surfaces them; the device config write merges `port_overrides` per-port (the
   ported replace-semantics merge) instead of a whole-array PUT.
-
-_Next: the Protect app (`unifi_protect_*`, **0.2.0**) — the design and the
-reverse-engineering workstream have landed; the private-REST client base and the
-resources follow the RE captures._
 
 ## [0.1.0] - 2026-06-02
 

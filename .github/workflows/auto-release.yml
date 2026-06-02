@@ -1,0 +1,107 @@
+name: auto-release
+
+# Zero-effort releases: every substantive merge to main cuts the next patch
+# version, builds binaries for every arch, and publishes a GitHub Release whose
+# notes are auto-derived from the commit log. No human tag, no back-commit.
+#
+# Tagging AND GoReleaser run in this ONE job on purpose: a tag pushed with the
+# default GITHUB_TOKEN does NOT trigger other workflows (GitHub suppresses it to
+# avoid recursion), so a separate tag-triggered release workflow would silently
+# never fire. Keeping both here removes that gap.
+
+on:
+  push:
+    branches: [main]
+    # Skip releases for purely non-functional merges. paths-ignore skips the run
+    # only when EVERY changed file matches — a code change that also touches docs
+    # or go.mod still releases.
+    paths-ignore:
+      - '**/*.md'     # docs / readme / changelog / TODO prose
+      - 'docs/**'     # generated provider docs (kept fresh by the PR docs gate)
+      - '.github/**'  # workflows + dependabot (ci: bumps)
+      - 'go.mod'      # dependabot deps: bumps (a real dep add also touches *.go)
+      - 'go.sum'
+
+# Serialize: two quick merges can't race the tag. Never cancel a release that's
+# already uploading.
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # push the tag, create the GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Manual escape hatch: put [skip release] in the merge commit message.
+    if: ${{ !contains(github.event.head_commit.message, '[skip release]') }}
+    env:
+      HAS_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0          # full history + all tags for version calc + changelog
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          cache: true
+
+      # Insurance: never cut a release from a main that doesn't build / pass units.
+      - name: Build & unit test
+        run: |
+          go build ./...
+          go test ./... -timeout 120s
+
+      - name: Compute next version
+        id: ver
+        run: |
+          set -euo pipefail
+          latest="$(git tag --list 'v*' --sort=-v:refname | head -n1)"
+          if [ -z "$latest" ]; then
+            next="v0.0.1"
+          else
+            ver="${latest#v}"
+            if ! printf '%s' "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error::Latest tag '$latest' is not vX.Y.Z; refusing to guess." >&2
+              exit 1
+            fi
+            IFS=. read -r major minor patch <<EOF
+          $ver
+          EOF
+            next="v${major}.${minor}.$((patch + 1))"
+          fi
+          if git rev-parse -q --verify "refs/tags/${next}" >/dev/null; then
+            echo "::error::Computed tag ${next} already exists." >&2
+            exit 1
+          fi
+          echo "next=${next}" >> "$GITHUB_OUTPUT"
+          echo "Releasing ${next} (was ${latest:-<none>})"
+
+      - name: Create and push tag
+        env:
+          NEXT: ${{ steps.ver.outputs.next }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${NEXT}" -m "Release ${NEXT}"
+          git push origin "refs/tags/${NEXT}"
+
+      # Passphraseless key (a passphrase is dead weight in an automated flow).
+      - name: Import GPG key
+        if: env.HAS_GPG_KEY == 'true'
+        uses: crazy-max/ghaction-import-gpg@v7
+        id: import_gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: '~> v2'
+          args: release --clean ${{ env.HAS_GPG_KEY == 'true' && '' || '--skip=sign' }}
+        env:
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

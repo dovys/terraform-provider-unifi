@@ -1,5 +1,6 @@
 # GoReleaser config for a Terraform Registry provider release.
-# Triggered by pushing a semver tag (vX.Y.Z); see .github/workflows/release.yml.
+# Driven by .github/workflows/auto-release.yml, which tags the next patch on
+# every substantive merge to main and runs `goreleaser release` in the same job.
 version: 2
 
 before:
@@ -56,5 +57,18 @@ release:
     - glob: 'terraform-registry-manifest.json'
       name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
 
+# Release notes are auto-derived from the commit log between tags. The curated
+# human narrative lives in CHANGELOG.md (date-based, maintained in PRs); this is
+# the per-version mechanical list. Filter out non-functional commit prefixes and
+# merge commits.
 changelog:
-  disable: true
+  use: git
+  sort: asc
+  filters:
+    exclude:
+      - '^deps:'
+      - '^ci:'
+      - '^chore:'
+      - '^docs:'
+      - '^test:'
+      - '^Merge '
