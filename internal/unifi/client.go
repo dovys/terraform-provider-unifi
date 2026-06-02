@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/transport"
 )
 
@@ -33,6 +34,11 @@ type Client interface {
 	// Site returns the configured site slug (the legacy/v2 name, e.g.
 	// "default").
 	Site() string
+
+	// Network returns the substruct Network application client
+	// (c.Network().WAN().SLAs()…), the surface new resources are built on
+	// during the rebuild. It shares this client's authenticated session.
+	Network() *network.Client
 
 	// Networks (networkconf) — backs unifi_network_network and unifi_network_wan.
 	ListNetworks(ctx context.Context) ([]NetworkConf, error)
@@ -218,6 +224,12 @@ func NewClient(ctx context.Context, cfg Config) (Client, error) {
 
 func (c *client) Capabilities() *Capabilities { return c.caps }
 func (c *client) Site() string                { return c.cfg.Site }
+
+// Network builds the substruct Network client over this client's authenticated
+// classic session. The old flat methods and the new substruct client share the
+// one session; resources migrate to the substruct client through the rebuild,
+// and the flat methods retire at the R7 cutover.
+func (c *client) Network() *network.Client { return network.New(c.classic, c.cfg.Site) }
 
 func newHTTPClient(cfg Config) *http.Client {
 	timeout := cfg.Timeout
