@@ -20,3 +20,26 @@ func New(session doer) *Client {
 func (c *Client) DoorGroups() *DoorGroupService {
 	return &DoorGroupService{core: c.core}
 }
+
+// AccessPolicies manages Access policies (which subjects may use which resources,
+// on what schedule).
+func (c *Client) AccessPolicies() *AccessPolicyService {
+	return &AccessPolicyService{core: c.core}
+}
+
+// HolidayGroups manages Access holiday groups (named sets of holidays used to
+// scope unlock schedules).
+func (c *Client) HolidayGroups() *HolidayGroupService {
+	return &HolidayGroupService{core: c.core}
+}
+
+// Doors configures discovered Access doors (update-only — doors are not created
+// through the API).
+func (c *Client) Doors() *DoorService {
+	return &DoorService{core: c.core}
+}
+
+// DoorGuards manages the per-door guard user set (update-only, keyed by door id).
+func (c *Client) DoorGuards() *DoorGuardService {
+	return &DoorGuardService{core: c.core}
+}

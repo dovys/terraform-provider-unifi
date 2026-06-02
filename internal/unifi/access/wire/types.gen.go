@@ -59,6 +59,21 @@ type AccessPolicyBoAccessPolicy struct {
 	ValidStartTime  *string                         `json:"valid_start_time,omitempty"`
 }
 
+// AccessPolicyBoAccessPolicyBo defines model for access_policy_bo_AccessPolicyBo.
+type AccessPolicyBoAccessPolicyBo struct {
+	Configs    *AccessPolicyPoConfigs          `json:"configs,omitempty"`
+	CreateTime *int64                          `json:"create_time,omitempty"`
+	Name       *string                         `json:"name,omitempty"`
+	Objects    *[]AccessPolicyPoObject         `json:"objects,omitempty"`
+	Resource   *[]AccessPolicyBoResourceObject `json:"resource,omitempty"`
+	Resources  *[]AccessPolicyPoResource       `json:"resources,omitempty"`
+	Rules      *[]AccessPolicyPoRule           `json:"rules,omitempty"`
+	ScheduleId *string                         `json:"schedule_id,omitempty"`
+	UidId      *string                         `json:"uid_id,omitempty"`
+	UniqueId   *string                         `json:"unique_id,omitempty"`
+	UpdateTime *int64                          `json:"update_time,omitempty"`
+}
+
 // AccessPolicyBoAccessResource defines model for access_policy_bo_AccessResource.
 type AccessPolicyBoAccessResource struct {
 	PolicyResource *PolicyBoPolicyResource     `json:"PolicyResource,omitempty"`
@@ -83,6 +98,50 @@ type AccessPolicyBoResourceCount struct {
 	DoorCount     *int `json:"door_count,omitempty"`
 	ElevatorCount *int `json:"elevator_count,omitempty"`
 	GroupCount    *int `json:"group_count,omitempty"`
+}
+
+// AccessPolicyBoResourceObject defines model for access_policy_bo_ResourceObject.
+type AccessPolicyBoResourceObject struct {
+	Id   *string `json:"id,omitempty"`
+	Type *string `json:"type,omitempty"`
+}
+
+// AccessPolicyPoConfigs defines model for access_policy_po_Configs.
+type AccessPolicyPoConfigs struct {
+	IsActive        *bool `json:"is_active,omitempty"`
+	IsBuilding      *bool `json:"is_building,omitempty"`
+	IsDefAdmin      *bool `json:"is_def_admin,omitempty"`
+	IsDefault       *bool `json:"is_default,omitempty"`
+	IsFirstPersonIn *bool `json:"is_first_person_in,omitempty"`
+	IsLeaveUnlock   *bool `json:"is_leave_unlock,omitempty"`
+	IsSystem        *bool `json:"is_system,omitempty"`
+	ReadOnly        *bool `json:"read_only,omitempty"`
+}
+
+// AccessPolicyPoObject defines model for access_policy_po_Object.
+type AccessPolicyPoObject struct {
+	ObjectExtra *map[string]interface{} `json:"object_extra,omitempty"`
+	ObjectName  *string                 `json:"object_name,omitempty"`
+	ObjectTag   *string                 `json:"object_tag,omitempty"`
+	ObjectType  *string                 `json:"object_type,omitempty"`
+	ObjectValue *string                 `json:"object_value,omitempty"`
+}
+
+// AccessPolicyPoResource defines model for access_policy_po_Resource.
+type AccessPolicyPoResource struct {
+	ResourceExtra *map[string]interface{} `json:"resource_extra,omitempty"`
+	ResourceName  *string                 `json:"resource_name,omitempty"`
+	ResourceType  *string                 `json:"resource_type,omitempty"`
+	ResourceValue *string                 `json:"resource_value,omitempty"`
+	SubResources  *[]interface{}          `json:"sub_resources,omitempty"`
+}
+
+// AccessPolicyPoRule defines model for access_policy_po_Rule.
+type AccessPolicyPoRule struct {
+	IsPrivate *bool   `json:"is_private,omitempty"`
+	RuleName  *string `json:"rule_name,omitempty"`
+	RuleType  *string `json:"rule_type,omitempty"`
+	RuleValue *string `json:"rule_value,omitempty"`
 }
 
 // DoorGroupBoDoorGroup defines model for door_group_bo_DoorGroup.
@@ -111,6 +170,19 @@ type DoorGroupControllerDoorGroupParams struct {
 	Name      *string   `json:"name,omitempty"`
 }
 
+// DoorGuardBoDoorGuardBo defines model for door_guard_bo_DoorGuardBo.
+type DoorGuardBoDoorGuardBo struct {
+	DoorId    *string       `json:"door_id,omitempty"`
+	UserIds   *[]string     `json:"user_ids,omitempty"`
+	UserInfos *[]UserBoUser `json:"user_infos,omitempty"`
+}
+
+// DoorGuardBoUpdateDoorGuard defines model for door_guard_bo_UpdateDoorGuard.
+type DoorGuardBoUpdateDoorGuard struct {
+	DoorId  *string   `json:"door_id,omitempty"`
+	UserIds *[]string `json:"user_ids,omitempty"`
+}
+
 // HolidayBoHoliday defines model for holiday_bo_Holiday.
 type HolidayBoHoliday struct {
 	CreateTime   *time.Time `json:"create_time,omitempty"`
@@ -123,6 +195,85 @@ type HolidayBoHoliday struct {
 	TemplateName *string    `json:"template_name,omitempty"`
 	UniqueId     *string    `json:"unique_id,omitempty"`
 	UpdateTime   *time.Time `json:"update_time,omitempty"`
+}
+
+// HolidayBoHolidayGroupDetail defines model for holiday_bo_HolidayGroupDetail.
+type HolidayBoHolidayGroupDetail struct {
+	CreateTime   *time.Time                `json:"create_time,omitempty"`
+	Description  *string                   `json:"description,omitempty"`
+	Holidays     *[]HolidayBoHolidayParams `json:"holidays,omitempty"`
+	IsDefault    *bool                     `json:"is_default,omitempty"`
+	IsPrivate    *bool                     `json:"is_private,omitempty"`
+	Name         *string                   `json:"name,omitempty"`
+	TemplateName *string                   `json:"template_name,omitempty"`
+	UniqueId     *string                   `json:"unique_id,omitempty"`
+}
+
+// HolidayBoHolidayGroupParams defines model for holiday_bo_HolidayGroupParams.
+type HolidayBoHolidayGroupParams struct {
+	Description  *string                   `json:"description,omitempty"`
+	HolidayIds   *[]string                 `json:"holiday_ids,omitempty"`
+	Holidays     *[]HolidayBoHolidayParams `json:"holidays,omitempty"`
+	IsPrivate    *bool                     `json:"is_private,omitempty"`
+	Name         *string                   `json:"name,omitempty"`
+	TemplateName *string                   `json:"template_name,omitempty"`
+}
+
+// HolidayBoHolidayGroupSimple defines model for holiday_bo_HolidayGroupSimple.
+type HolidayBoHolidayGroupSimple struct {
+	CreateTime   *time.Time `json:"create_time,omitempty"`
+	Description  *string    `json:"description,omitempty"`
+	HolidayCount *int64     `json:"holiday_count,omitempty"`
+	IsDefault    *bool      `json:"is_default,omitempty"`
+	IsPrivate    *bool      `json:"is_private,omitempty"`
+	Name         *string    `json:"name,omitempty"`
+	UniqueId     *string    `json:"unique_id,omitempty"`
+}
+
+// HolidayBoHolidayParams defines model for holiday_bo_HolidayParams.
+type HolidayBoHolidayParams struct {
+	CreateTime  *int64             `json:"create_time,omitempty"`
+	Description *string            `json:"description,omitempty"`
+	EndTime     *time.Time         `json:"end_time,omitempty"`
+	Extra       *map[string]string `json:"extra,omitempty"`
+	Id          *string            `json:"id,omitempty"`
+	IsTemplate  *bool              `json:"is_template,omitempty"`
+	Name        *string            `json:"name,omitempty"`
+	Repeat      *bool              `json:"repeat,omitempty"`
+	StartTime   *time.Time         `json:"start_time,omitempty"`
+	Type        *string            `json:"type,omitempty"`
+	UniqueId    *string            `json:"unique_id,omitempty"`
+}
+
+// LocationBoDoor defines model for location_bo_Door.
+type LocationBoDoor struct {
+	Location     *LocationBoLocation `json:"Location,omitempty"`
+	DpsConnected *bool               `json:"dps_connected,omitempty"`
+	IsOpen       *bool               `json:"is_open,omitempty"`
+}
+
+// LocationBoLocation defines model for location_bo_Location.
+type LocationBoLocation struct {
+	ExtraType    *string                 `json:"extra_type,omitempty"`
+	Extras       *map[string]interface{} `json:"extras,omitempty"`
+	FullName     *string                 `json:"full_name,omitempty"`
+	Level        *int                    `json:"level,omitempty"`
+	LocationType *string                 `json:"location_type,omitempty"`
+	Name         *string                 `json:"name,omitempty"`
+	PreviousName *[]string               `json:"previous_name,omitempty"`
+	Timezone     *string                 `json:"timezone,omitempty"`
+	UniqueId     *string                 `json:"unique_id,omitempty"`
+	UpId         *string                 `json:"up_id,omitempty"`
+	WorkTime     *string                 `json:"work_time,omitempty"`
+	WorkTimeId   *string                 `json:"work_time_id,omitempty"`
+}
+
+// LocationBoUpdateDoorParams defines model for location_bo_UpdateDoorParams.
+type LocationBoUpdateDoorParams struct {
+	DoorId    *string `json:"door_id,omitempty"`
+	DoorName  *string `json:"door_name,omitempty"`
+	ExtraType *string `json:"extra_type,omitempty"`
+	FloorName *string `json:"floor_name,omitempty"`
 }
 
 // PolicyBoPolicy defines model for policy_bo_Policy.
@@ -192,4 +343,50 @@ type PolicyBoPolicySubject struct {
 	SubjectId   *string `json:"subject_id,omitempty"`
 	SubjectType *string `json:"subject_type,omitempty"`
 	UniqueId    *string `json:"unique_id,omitempty"`
+}
+
+// UserBoUidPrivilege defines model for user_bo_UidPrivilege.
+type UserBoUidPrivilege struct {
+	PrivilegeConditionConstKey *string   `json:"privilege_condition_const_key,omitempty"`
+	PrivilegeConditionParams   *string   `json:"privilege_condition_params,omitempty"`
+	PrivilegeConstKey          *string   `json:"privilege_const_key,omitempty"`
+	ResourceIds                *[]string `json:"resource_ids,omitempty"`
+}
+
+// UserBoUser defines model for user_bo_User.
+type UserBoUser struct {
+	Alias              *string                 `json:"alias,omitempty"`
+	AvatarRelativePath *string                 `json:"avatar_relative_path,omitempty"`
+	CreateTime         *int64                  `json:"create_time,omitempty"`
+	Email              *string                 `json:"email,omitempty"`
+	EmailStatus        *string                 `json:"email_status,omitempty"`
+	EmployeeNumber     *string                 `json:"employee_number,omitempty"`
+	Extras             *map[string]interface{} `json:"extras,omitempty"`
+	FirstName          *string                 `json:"first_name,omitempty"`
+	FromOrg            *bool                   `json:"from_org,omitempty"`
+	FullName           *string                 `json:"full_name,omitempty"`
+	LastName           *string                 `json:"last_name,omitempty"`
+	LocalAccountExist  *bool                   `json:"local_account_exist,omitempty"`
+	LoginTime          *int64                  `json:"login_time,omitempty"`
+	OnboardTime        *int64                  `json:"onboard_time,omitempty"`
+	OnlyLocalAccount   *bool                   `json:"only_local_account,omitempty"`
+	OrgRole            *string                 `json:"org_role,omitempty"`
+	OrgUserId          *string                 `json:"org_user_id,omitempty"`
+	PasswordRevision   *int64                  `json:"password_revision,omitempty"`
+	Phone              *string                 `json:"phone,omitempty"`
+	PreviousFullName   *[]string               `json:"previous_full_name,omitempty"`
+	SsoAccount         *string                 `json:"sso_account,omitempty"`
+	SsoPicture         *string                 `json:"sso_picture,omitempty"`
+	SsoUsername        *string                 `json:"sso_username,omitempty"`
+	SsoUuid            *string                 `json:"sso_uuid,omitempty"`
+	Status             *string                 `json:"status,omitempty"`
+	UidAccountStatus   *string                 `json:"uid_account_status,omitempty"`
+	UidPrivileges      *[]UserBoUidPrivilege   `json:"uid_privileges,omitempty"`
+	UidSiteId          *string                 `json:"uid_site_id,omitempty"`
+	UidSiteName        *string                 `json:"uid_site_name,omitempty"`
+	UidSsoAccount      *string                 `json:"uid_sso_account,omitempty"`
+	UidSsoId           *string                 `json:"uid_sso_id,omitempty"`
+	UniqueId           *string                 `json:"unique_id,omitempty"`
+	UserEmail          *string                 `json:"user_email,omitempty"`
+	Username           *string                 `json:"username,omitempty"`
 }
