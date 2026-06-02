@@ -49,3 +49,16 @@ resource "unifi_access_holiday_group" "us" {
     # "<holiday unique_id>", ...
   ]
 }
+
+# Look up a discovered door by name.
+data "unifi_access_door" "front" {
+  name = "Front Entrance"
+}
+
+# Configure an existing (discovered) door. Update/import-only: destroy stops
+# managing it without deleting the door.
+resource "unifi_access_door" "front" {
+  door_id    = data.unifi_access_door.front.id
+  name       = "Front Entrance"
+  floor_name = "Ground Floor"
+}

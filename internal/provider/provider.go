@@ -234,6 +234,7 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewAccessDoorGroupResource,
 		NewAccessPolicyResource,
 		NewAccessHolidayGroupResource,
+		NewAccessDoorResource,
 	}
 }
 
@@ -253,6 +254,7 @@ func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewAccessDoorGroupDataSource,
 		NewAccessPolicyDataSource,
 		NewAccessHolidayGroupDataSource,
+		NewAccessDoorDataSource,
 	}
 }
 
