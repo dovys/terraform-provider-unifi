@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/protect"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/transport"
 )
 
@@ -44,6 +45,12 @@ type Client interface {
 	// on this substruct client; the top-level client carries only the
 	// console-level operations below.
 	Network() *network.Client
+
+	// Protect returns the substruct Protect application client
+	// (c.Protect().Cameras()…). It shares this client's authenticated session
+	// over the private REST API at /proxy/protect/api — the same one cookie
+	// session, no api_key.
+	Protect() *protect.Client
 
 	// Sites (console-level: /api/self/sites read, /cmd/sitemgr writes).
 	ListSites(ctx context.Context) ([]Site, error)
@@ -104,6 +111,10 @@ func (c *client) Site() string                { return c.cfg.Site }
 // Network builds the substruct Network client over this client's authenticated
 // classic session — the single surface every network resource is built on.
 func (c *client) Network() *network.Client { return network.New(c.classic, c.cfg.Site) }
+
+// Protect builds the substruct Protect client over this client's authenticated
+// classic session — the private REST API at /proxy/protect/api, no api_key.
+func (c *client) Protect() *protect.Client { return protect.New(c.classic) }
 
 func newHTTPClient(cfg Config) *http.Client {
 	timeout := cfg.Timeout

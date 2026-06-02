@@ -70,11 +70,18 @@ A resource is checkable only when it meets the Definition of Done ([development.
         a standalone per-port resource would race the device write
   - **out of scope — Registry publish / flip public:** repo stays private; `0.1.0` is a private tag +
         GoReleaser artifacts only
-- [ ] **P5/P6** Protect app (`unifi_protect_*`, ships as **0.2.0**): design ([apps/protect.md](apps/protect.md))
-      + the **reverse-engineering** workstream ([reverse-engineering.md](reverse-engineering.md)), then the
-      private-REST client/transport base over the cookie session (no `api_key`), then `protect_camera`,
-      `protect_light`, `protect_sensor`, `protect_chime`, `protect_viewer`, `protect_liveview`,
-      `protect_nvr_settings`. Field schemas come from RE (private `/proxy/protect/api`); writes HIL-flagged.
+- [~] **P5/P6** Protect app (`unifi_protect_*`, ships as **0.2.0**): design ([apps/protect.md](apps/protect.md))
+      + the **reverse-engineering** workstream ([reverse-engineering.md](reverse-engineering.md)).
+  - [x] **P5a — foundation + first resources:** `Protect()` substruct client over the cookie session
+        (`internal/unifi/protect`, private REST `/proxy/protect/api`, no `api_key`); generated `wire`
+        types projected from the shipped Protect OpenAPI (`../unifi-specs/protect/v7.1.69` →
+        `protect_codegen_spec.py`, 3.1→3.0 + closure-trim + enum/object-hoist). Resources:
+        `unifi_protect_camera` (configure-existing + owned-field PATCH merge) + `data.unifi_protect_camera`,
+        `unifi_protect_nvr_settings` (singleton). Live-read import-clean (camera + NVR exist); **config
+        writes HIL-unverified** (recon console is read-only — see `TODO.md`).
+  - [ ] **P5b — remaining resources:** `unifi_protect_liveview` (the only pure-CRUD object; its `slots`
+        are untyped in the shipped spec — model from a live/HIL capture), and the device resources with
+        no live instance: `protect_light`, `protect_sensor`, `protect_chime`, `protect_viewer` (HIL).
 
 ## Open questions (don't block design)
 

@@ -126,6 +126,37 @@ Open items:
   the actual API (config-blob upload vs a typed doc) on a BGP-capable gateway and
   model it there; deferred until that hardware exists.
 
+- **Protect camera / NVR config writes (`PATCH /proxy/protect/api/{cameras/<id>,nvr}`).**
+  The Protect *read* shapes are recon-confirmed (the live console runs Protect
+  7.1.69 with an adopted camera + the NVR singleton), and the resources import
+  clean read-only. The *writes* are not verified — the recon session is
+  read-only — so confirm on a HIL rig: (a) that a partial PATCH merges
+  server-side and that sending an owned **sub-object** (`osdSettings`,
+  `ledSettings`, `smartDetectSettings`, `recordingSettings`) replaces only that
+  object's keys (the resource sends the full merged sub-object to avoid clearing
+  siblings — confirm this is necessary/sufficient); (b) the doorbell-gated
+  `lcdMessage` accept/reject on a non-doorbell camera (today an unsupported-field
+  write surfaces as the controller's 4xx — a `ModifyPlan`-with-read per-camera
+  capability gate is the eventual fix, see `docs/apps/protect.md` §capability);
+  (c) the camera **unadopt** verb (`POST /cameras/<id>/unadopt`) used by
+  `forget_on_destroy`; (d) the exact accepted `hdrType` values per model.
+- **Protect capability gating not yet wired (invariant 3).** `docs/apps/protect.md`
+  specifies two gates — a Configure-time Protect-version/installed probe, and a
+  per-camera `ModifyPlan`-with-read capability gate (HDR/mic/LED/smart-detect/
+  doorbell-LCD). Neither is wired in P5a: `protect.NVR().Version()` exists as the
+  intended probe source but nothing calls it, and managing Protect on a console
+  without it (or writing `lcd_message`/HDR/smart-detect to an incapable camera)
+  surfaces as the controller's raw 4xx instead of a plan-time diagnostic. Wire the
+  cheap Configure-time probe (set a `caps.Protect` bit, friendly diagnostic when
+  absent) and the per-camera `ModifyPlan` gate in P5b.
+- **Protect liveview (`/proxy/protect/api/liveviews`) — slots untyped.** The
+  shipped Protect OpenAPI types `liveview.slots` as an untyped array (`items:
+  {}`), so the slot object shape (cameras, cycle mode/interval) can't be modeled
+  clean-room from the spec alone. Capture a real liveview (live GET on the cookie
+  session, or a HIL create) to confirm the slot field names before building
+  `unifi_protect_liveview` (P5b). The scalar fields (name, layout, isDefault,
+  isGlobal) are typed and ready.
+
 ## Settings — model as typed resources (not a generic blob)
 
 Site settings are ≈39 singleton `setting/<key>` documents (`ntp`, `mgmt`, `usg`,
