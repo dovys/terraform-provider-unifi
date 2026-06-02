@@ -27,9 +27,17 @@ unifi-inventory.json
 # commit. Redact via scripts/redact-capture.py before sharing (docs/reverse-engineering.md).
 /re-captures/
 
-# Reverse-engineering scratch space — binaries, decompiled source, notes, any
-# RE working files. Local-only dumping ground; never commit.
+# Reverse-engineering scratch space — vendor binaries/firmware, decompiled
+# source, notes, any RE working files. Dumping ground; never commit (both the
+# dot and non-dot forms are covered).
 /.re/
+/re/
+
+# Claude Code local working dir — track shared skills/commands, ignore the rest
+# (worktrees, local settings, scratch). Mirrors the convention in ../infra.
+.claude/*
+!.claude/skills/
+!.claude/commands/
 
 # Editor / OS
 .DS_Store
