@@ -87,6 +87,16 @@ func int64PtrToState(p *int64) types.Int64 {
 	return types.Int64Value(*p)
 }
 
+// f64PtrToState maps a wire *float64 onto a Float64 attribute, preserving
+// fractional values (used for sensor thresholds where truncation would corrupt
+// e.g. a 20.5°C setting).
+func f64PtrToState(p *float64) types.Float64 {
+	if p == nil {
+		return types.Float64Null()
+	}
+	return types.Float64Value(*p)
+}
+
 // float64ToState bridges the Protect wire types, which model integer-valued
 // settings (mic volume, durations, brightness) as JSON numbers (*float64),
 // against Int64 schema attributes. float64 is exact for integers through 2^53,

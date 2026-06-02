@@ -149,13 +149,30 @@ Open items:
   surfaces as the controller's raw 4xx instead of a plan-time diagnostic. Wire the
   cheap Configure-time probe (set a `caps.Protect` bit, friendly diagnostic when
   absent) and the per-camera `ModifyPlan` gate in P5b.
-- **Protect liveview (`/proxy/protect/api/liveviews`) — slots untyped.** The
-  shipped Protect OpenAPI types `liveview.slots` as an untyped array (`items:
-  {}`), so the slot object shape (cameras, cycle mode/interval) can't be modeled
-  clean-room from the spec alone. Capture a real liveview (live GET on the cookie
-  session, or a HIL create) to confirm the slot field names before building
-  `unifi_protect_liveview` (P5b). The scalar fields (name, layout, isDefault,
-  isGlobal) are typed and ready.
+- **Protect liveview (`/proxy/protect/api/liveviews`) — slots shape unverified.**
+  The shipped Protect OpenAPI types `liveview.slots` as an untyped array (`items:
+  {}`). `unifi_protect_liveview` (P5b) ships modeling each slot as a nested block
+  with `cameras` (list) + `cycle_mode` + `cycle_interval`, serialized to the
+  well-known UI shape (`{cameras, cycleMode, cycleInterval}`). **Confirm against a
+  live/HIL capture**: the exact slot key names, whether `cycleMode` is an enum,
+  and that an empty group round-trips (the read parser degrades unknown shapes to
+  partial slots rather than erroring, so a wrong key would silently drop data).
+- **Protect P5b device writes (`PATCH /proxy/protect/api/{lights,sensors,chimes,viewers}/<id>`).**
+  The light/sensor/chime/viewer *read* shapes are spec-typed but there is **no
+  live instance** of any of these on the recon console, so neither reads nor
+  writes are verified. On a HIL rig confirm: (a) the owned sub-object merge
+  semantics (same as camera — `lightDeviceSettings`/`lightModeSettings`, the
+  sensor `*Settings` groups); (b) the device **unadopt** verb used by
+  `forget_on_destroy` (the resources use `DELETE /<group>/<id>` — confirm DELETE
+  unadopts rather than hard-deletes, or switch to a `/unadopt` POST like the
+  camera); (c) accepted enum values (`light.mode`/`enableAt`/`luxSensitivity`,
+  `sensor.mountType`); (d) numeric ranges/units (light `ledLevel` scale,
+  `pirDuration` units; sensor threshold units).
+- **Protect chime `ringSettings` not modeled.** `unifi_protect_chime` models
+  name/volume/repeat_times/camera_ids but **not** the per-doorbell `ringSettings`
+  list (`{cameraId, ringtoneId, volume, repeatTimes}`) — it references uploaded
+  ringtone objects that aren't modeled. Add a nested block once ringtones are
+  modeled (or confirmed referenceable by id) on a HIL rig.
 
 ## Settings — model as typed resources (not a generic blob)
 

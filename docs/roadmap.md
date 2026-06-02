@@ -70,7 +70,7 @@ A resource is checkable only when it meets the Definition of Done ([development.
         a standalone per-port resource would race the device write
   - **out of scope — Registry publish / flip public:** repo stays private; `0.1.0` is a private tag +
         GoReleaser artifacts only
-- [~] **P5/P6** Protect app (`unifi_protect_*`, ships as **0.2.0**): design ([apps/protect.md](apps/protect.md))
+- [x] **P5/P6** Protect app (`unifi_protect_*`, ships as **0.2.0**): design ([apps/protect.md](apps/protect.md))
       + the **reverse-engineering** workstream ([reverse-engineering.md](reverse-engineering.md)).
   - [x] **P5a — foundation + first resources:** `Protect()` substruct client over the cookie session
         (`internal/unifi/protect`, private REST `/proxy/protect/api`, no `api_key`); generated `wire`
@@ -79,9 +79,13 @@ A resource is checkable only when it meets the Definition of Done ([development.
         `unifi_protect_camera` (configure-existing + owned-field PATCH merge) + `data.unifi_protect_camera`,
         `unifi_protect_nvr_settings` (singleton). Live-read import-clean (camera + NVR exist); **config
         writes HIL-unverified** (recon console is read-only — see `TODO.md`).
-  - [ ] **P5b — remaining resources:** `unifi_protect_liveview` (the only pure-CRUD object; its `slots`
-        are untyped in the shipped spec — model from a live/HIL capture), and the device resources with
-        no live instance: `protect_light`, `protect_sensor`, `protect_chime`, `protect_viewer` (HIL).
+  - [x] **P5b — remaining resources:** `unifi_protect_liveview` (pure CRUD; `slots` modeled as a nested
+        block — `cameras` + cycle settings — from the well-known shape, HIL-unverified), plus the
+        configure-existing device resources `unifi_protect_light`, `unifi_protect_sensor`,
+        `unifi_protect_chime`, `unifi_protect_viewer` (over the existing client groups; full settings
+        surface; `forget_on_destroy` unadopts). **All HIL-unverified** (no live device on the recon
+        console — see `TODO.md`); chime per-doorbell `ringSettings` deferred (references unmodeled
+        ringtone objects).
 - [~] **P7** Access app (`unifi_access_*`): design ([apps/access.md](apps/access.md)). Access ships only an
       Integration-API openapi (wrong surface); the private web-UI API is reverse-engineered from the Access
       Go binary (`../unifi-specs/access/v4.2.27`), so fidelity is lower than Protect's vendor OpenAPI and the

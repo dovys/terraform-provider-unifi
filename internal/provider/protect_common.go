@@ -42,6 +42,17 @@ func mergeFloat(plan types.Int64, cur *float64) *float64 {
 	return cur
 }
 
+// mergeF64 is the Float64 analogue of mergeFloat, for fractional settings
+// (sensor temperature/humidity thresholds and margins) that must not be
+// truncated to whole numbers.
+func mergeF64(plan types.Float64, cur *float64) *float64 {
+	if !plan.IsNull() && !plan.IsUnknown() {
+		v := plan.ValueFloat64()
+		return &v
+	}
+	return cur
+}
+
 // macCanonical normalizes a MAC to lowercase colon-separated form (the form the
 // Network app already uses), so a `mac` attribute compares equal regardless of
 // the input separator/case and whatever form the controller returns. The

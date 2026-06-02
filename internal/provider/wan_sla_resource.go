@@ -244,6 +244,24 @@ func strPtrOrNil(v types.String) *string {
 	return &s
 }
 
+func boolPtrOrNil(v types.Bool) *bool {
+	if v.IsNull() || v.IsUnknown() {
+		return nil
+	}
+	b := v.ValueBool()
+	return &b
+}
+
+// intToFloatPtr bridges an Int64 attribute to a wire *float64 (Protect models
+// integer-valued settings as JSON numbers); nil for null/unknown.
+func intToFloatPtr(v types.Int64) *float64 {
+	if v.IsNull() || v.IsUnknown() {
+		return nil
+	}
+	f := float64(v.ValueInt64())
+	return &f
+}
+
 func deref(p *string) string {
 	if p == nil {
 		return ""

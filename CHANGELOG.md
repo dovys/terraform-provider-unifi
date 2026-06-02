@@ -38,8 +38,15 @@ private repo only.
   included; owned-field PATCH merge) + `data.unifi_protect_camera`, and
   `unifi_protect_nvr_settings` (the NVR singleton, import/update-only).
   **Config writes are HIL-unverified** (the recon console is read-only) — see
-  `TODO.md`. Liveviews and the floodlight/sensor/chime/viewer devices are the
-  next Protect phase.
+  `TODO.md`.
+- **UniFi Protect — remaining device + live-view resources (P5b).**
+  `unifi_protect_light`, `unifi_protect_sensor`, `unifi_protect_chime`, and
+  `unifi_protect_viewer` are configure-existing resources keyed by MAC (full
+  settings surface; `forget_on_destroy` unadopts), and `unifi_protect_liveview`
+  is a full-CRUD multi-camera grid (its `slots` modeled as a nested block from
+  the well-known shape). All over the existing `c.Protect()` groups; **all
+  HIL-unverified** — see `TODO.md`. Chime per-doorbell `ringSettings` are
+  deferred (they reference unmodeled ringtone objects).
 
 ### Changed
 
