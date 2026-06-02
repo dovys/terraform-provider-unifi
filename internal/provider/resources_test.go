@@ -723,26 +723,26 @@ func TestUserGroup_RoundTrip(t *testing.T) {
 		QOSRateMaxDown: types.Int64Value(0),
 	}
 	g := m.toUserGroup()
-	if g.Name != "Capped" {
+	if deref(g.Name) != "Capped" {
 		t.Errorf("name mapping wrong: %+v", g)
 	}
-	if g.QOSRateMaxUp == nil || *g.QOSRateMaxUp != 5000 {
-		t.Errorf("qos_rate_max_up should map to &5000, got %v", g.QOSRateMaxUp)
+	if g.QosRateMaxUp == nil || *g.QosRateMaxUp != 5000 {
+		t.Errorf("qos_rate_max_up should map to &5000, got %v", g.QosRateMaxUp)
 	}
-	if g.QOSRateMaxDown == nil || *g.QOSRateMaxDown != 0 {
-		t.Errorf("explicit 0 must map to &0 (not nil), got %v", g.QOSRateMaxDown)
+	if g.QosRateMaxDown == nil || *g.QosRateMaxDown != 0 {
+		t.Errorf("explicit 0 must map to &0 (not nil), got %v", g.QosRateMaxDown)
 	}
 
 	// An unconfigured cap stays nil so GET-merge-PUT leaves the controller's value.
 	m.QOSRateMaxUp = types.Int64Null()
-	if g := m.toUserGroup(); g.QOSRateMaxUp != nil {
-		t.Errorf("null qos_rate_max_up must map to nil, got %v", g.QOSRateMaxUp)
+	if g := m.toUserGroup(); g.QosRateMaxUp != nil {
+		t.Errorf("null qos_rate_max_up must map to nil, got %v", g.QosRateMaxUp)
 	}
 
 	// Wire → state.
 	var out userGroupResourceModel
 	up, down := 10000, 20000
-	out.fromUserGroup(&unifi.UserGroup{ID: "ug9", Name: "Renamed", QOSRateMaxUp: &up, QOSRateMaxDown: &down})
+	out.fromUserGroup(&wire.Usergroup{UnderscoreId: sp("ug9"), Name: sp("Renamed"), QosRateMaxUp: &up, QosRateMaxDown: &down})
 	if out.ID.ValueString() != "ug9" || out.Name.ValueString() != "Renamed" {
 		t.Errorf("fromUserGroup wrong: %+v", out)
 	}
@@ -755,7 +755,7 @@ func TestUserGroup_RoundTrip(t *testing.T) {
 
 	// The protected default group reads attr_no_delete = true (destroy → no-op).
 	protected := true
-	out.fromUserGroup(&unifi.UserGroup{ID: "default", Name: "Default", AttrNoDelete: &protected})
+	out.fromUserGroup(&wire.Usergroup{UnderscoreId: sp("default"), Name: sp("Default"), AttrNoDelete: &protected})
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}
@@ -785,26 +785,28 @@ func TestRadiusProfile_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toRadiusProfile diags: %v", diags)
 	}
-	if p.Name != "Corp" || p.VLANWLANMode != "optional" {
+	if deref(p.Name) != "Corp" || string(derefEnum(p.VlanWlanMode)) != "optional" {
 		t.Errorf("scalar mapping wrong: %+v", p)
 	}
-	if len(p.AuthServers) != 1 || p.AuthServers[0].IP != "10.0.0.9" || p.AuthServers[0].Port != 1812 || p.AuthServers[0].XSecret != "s3cret" {
+	if p.AuthServers == nil || len(*p.AuthServers) != 1 ||
+		deref((*p.AuthServers)[0].Ip) != "10.0.0.9" || intOrZero((*p.AuthServers)[0].Port) != 1812 || deref((*p.AuthServers)[0].XSecret) != "s3cret" {
 		t.Errorf("auth_servers mapping wrong: %+v", p.AuthServers)
 	}
 	// A null server list maps to a non-nil empty slice (full-replace clears it).
-	if p.AcctServers == nil || len(p.AcctServers) != 0 {
+	if p.AcctServers == nil || len(*p.AcctServers) != 0 {
 		t.Errorf("null acct_servers must map to a non-nil empty slice, got %v", p.AcctServers)
 	}
-	if p.UseUSGAuthServer == nil || *p.UseUSGAuthServer {
-		t.Errorf("use_usg_auth_server should map to &false, got %v", p.UseUSGAuthServer)
+	if p.UseUsgAuthServer == nil || *p.UseUsgAuthServer {
+		t.Errorf("use_usg_auth_server should map to &false, got %v", p.UseUsgAuthServer)
 	}
 
 	// Wire → state.
 	var out radiusProfileResourceModel
-	out.fromRadiusProfile(ctx, &unifi.RadiusProfile{
-		ID: "rp9", Name: "Corp",
-		AuthServers: []unifi.RadiusServer{{IP: "10.0.0.9", Port: 1812, XSecret: "s3cret"}},
-		AcctServers: []unifi.RadiusServer{},
+	port := 1812
+	out.fromRadiusProfile(ctx, &wire.Radiusprofile{
+		UnderscoreId: sp("rp9"), Name: sp("Corp"),
+		AuthServers: &[]radiusServer{{Ip: sp("10.0.0.9"), Port: &port, XSecret: sp("s3cret")}},
+		AcctServers: &[]radiusServer{},
 	}, &diags)
 	if out.ID.ValueString() != "rp9" || out.Name.ValueString() != "Corp" {
 		t.Errorf("fromRadiusProfile wrong: %+v", out)
@@ -824,7 +826,7 @@ func TestRadiusProfile_RoundTrip(t *testing.T) {
 
 	// The protected default profile reads attr_no_delete = true.
 	protected := true
-	out.fromRadiusProfile(ctx, &unifi.RadiusProfile{ID: "default", Name: "Default", AttrNoDelete: &protected}, &diags)
+	out.fromRadiusProfile(ctx, &wire.Radiusprofile{UnderscoreId: sp("default"), Name: sp("Default"), AttrNoDelete: &protected}, &diags)
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default profile")
 	}

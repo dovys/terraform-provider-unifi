@@ -16,7 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -28,7 +29,7 @@ var (
 func NewRadiusProfileResource() resource.Resource { return &radiusProfileResource{} }
 
 type radiusProfileResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type radiusProfileResourceModel struct {
@@ -151,7 +152,7 @@ func (r *radiusProfileResource) Schema(_ context.Context, _ resource.SchemaReque
 
 func (r *radiusProfileResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -161,7 +162,7 @@ func (r *radiusProfileResource) Create(ctx context.Context, req resource.CreateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateRadiusProfile(ctx, plan.toRadiusProfile(ctx, &resp.Diagnostics))
+	created, err := r.net.RADIUS().Profiles().Create(ctx, plan.toRadiusProfile(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create RADIUS profile", err.Error())
 		return
@@ -176,7 +177,7 @@ func (r *radiusProfileResource) Read(ctx context.Context, req resource.ReadReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	p, err := r.client.GetRadiusProfile(ctx, state.ID.ValueString())
+	p, err := r.net.RADIUS().Profiles().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -195,7 +196,7 @@ func (r *radiusProfileResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateRadiusProfile(ctx, plan.toRadiusProfile(ctx, &resp.Diagnostics))
+	updated, err := r.net.RADIUS().Profiles().Update(ctx, plan.ID.ValueString(), plan.toRadiusProfile(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update RADIUS profile", err.Error())
 		return
@@ -215,7 +216,7 @@ func (r *radiusProfileResource) Delete(ctx context.Context, req resource.DeleteR
 	if state.AttrNoDelete.ValueBool() {
 		return
 	}
-	if err := r.client.DeleteRadiusProfile(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.RADIUS().Profiles().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete RADIUS profile", err.Error())
 	}
 }
@@ -224,48 +225,59 @@ func (r *radiusProfileResource) ImportState(ctx context.Context, req resource.Im
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *radiusProfileResourceModel) toRadiusProfile(ctx context.Context, diags *diag.Diagnostics) *unifi.RadiusProfile {
-	return &unifi.RadiusProfile{
-		ID:                    m.ID.ValueString(),
-		Name:                  m.Name.ValueString(),
-		AuthServers:           listToRadiusServers(ctx, m.AuthServers, diags),
-		AcctServers:           listToRadiusServers(ctx, m.AcctServers, diags),
-		UseUSGAuthServer:      boolPtr(m.UseUSGAuthServer),
-		UseUSGAcctServer:      boolPtr(m.UseUSGAcctServer),
+func (m *radiusProfileResourceModel) toRadiusProfile(ctx context.Context, diags *diag.Diagnostics) *wire.Radiusprofile {
+	p := &wire.Radiusprofile{
+		UnderscoreId:          strPtrOrNil(m.ID),
+		Name:                  strPtrOrNil(m.Name),
+		UseUsgAuthServer:      boolPtr(m.UseUSGAuthServer),
+		UseUsgAcctServer:      boolPtr(m.UseUSGAcctServer),
 		InterimUpdateEnabled:  boolPtr(m.InterimUpdateEnabled),
 		InterimUpdateInterval: intPtr(m.InterimUpdateInterval),
-		VLANEnabled:           boolPtr(m.VLANEnabled),
-		VLANWLANMode:          strOrEmpty(m.VLANWLANMode),
+		VlanEnabled:           boolPtr(m.VLANEnabled),
+		VlanWlanMode:          (*wire.RadiusprofileVlanWlanMode)(strPtrOrNil(m.VLANWLANMode)),
 	}
+	auth := listToRadiusServers(ctx, m.AuthServers, diags)
+	acct := listToRadiusServers(ctx, m.AcctServers, diags)
+	p.AuthServers = &auth
+	p.AcctServers = &acct
+	return p
 }
 
-func (m *radiusProfileResourceModel) fromRadiusProfile(ctx context.Context, p *unifi.RadiusProfile, diags *diag.Diagnostics) {
-	m.ID = types.StringValue(p.ID)
-	m.Name = types.StringValue(p.Name)
+func (m *radiusProfileResourceModel) fromRadiusProfile(ctx context.Context, p *wire.Radiusprofile, diags *diag.Diagnostics) {
+	m.ID = types.StringValue(deref(p.UnderscoreId))
+	m.Name = types.StringValue(deref(p.Name))
 	m.AuthServers = radiusServersToList(ctx, p.AuthServers, diags)
 	m.AcctServers = radiusServersToList(ctx, p.AcctServers, diags)
-	m.UseUSGAuthServer = boolToState(p.UseUSGAuthServer)
-	m.UseUSGAcctServer = boolToState(p.UseUSGAcctServer)
+	m.UseUSGAuthServer = boolToState(p.UseUsgAuthServer)
+	m.UseUSGAcctServer = boolToState(p.UseUsgAcctServer)
 	m.InterimUpdateEnabled = boolToState(p.InterimUpdateEnabled)
 	m.InterimUpdateInterval = intToState(p.InterimUpdateInterval)
-	m.VLANEnabled = boolToState(p.VLANEnabled)
-	m.VLANWLANMode = strToStateOptional(p.VLANWLANMode)
+	m.VLANEnabled = boolToState(p.VlanEnabled)
+	m.VLANWLANMode = strToStateOptional(string(derefEnum(p.VlanWlanMode)))
 	m.AttrNoDelete = types.BoolValue(p.AttrNoDelete != nil && *p.AttrNoDelete)
 }
 
-// listToRadiusServers decodes the config list into client servers. A null list
+// radiusServer is the wire shape of one auth/acct server entry (the inline
+// anonymous struct on wire.Radiusprofile, shared verbatim by both lists).
+type radiusServer = struct {
+	Ip      *string `json:"ip,omitempty"`
+	Port    *int    `json:"port,omitempty"`
+	XSecret *string `json:"x_secret,omitempty"`
+}
+
+// listToRadiusServers decodes the config list into wire servers. A null list
 // becomes a non-nil empty slice so the full-replace PUT can clear the servers.
-func listToRadiusServers(ctx context.Context, l types.List, diags *diag.Diagnostics) []unifi.RadiusServer {
-	out := []unifi.RadiusServer{}
+func listToRadiusServers(ctx context.Context, l types.List, diags *diag.Diagnostics) []radiusServer {
+	out := []radiusServer{}
 	if l.IsNull() || l.IsUnknown() {
 		return out
 	}
 	var objs []radiusServerObject
 	diags.Append(l.ElementsAs(ctx, &objs, false)...)
 	for _, o := range objs {
-		s := unifi.RadiusServer{IP: o.IP.ValueString(), XSecret: o.XSecret.ValueString()}
+		s := radiusServer{Ip: strPtrOrNil(o.IP), XSecret: strPtrOrNil(o.XSecret)}
 		if !o.Port.IsNull() && !o.Port.IsUnknown() {
-			s.Port = int(o.Port.ValueInt64())
+			s.Port = intPtr(o.Port)
 		}
 		out = append(out, s)
 	}
@@ -274,17 +286,27 @@ func listToRadiusServers(ctx context.Context, l types.List, diags *diag.Diagnost
 
 // radiusServersToList builds the state list. A nil/empty server slice maps to a
 // non-null empty list so an unconfigured (gateway-only) profile doesn't churn.
-func radiusServersToList(ctx context.Context, servers []unifi.RadiusServer, diags *diag.Diagnostics) types.List {
+func radiusServersToList(ctx context.Context, servers *[]radiusServer, diags *diag.Diagnostics) types.List {
 	objType := types.ObjectType{AttrTypes: radiusServerAttrTypes}
-	objs := make([]radiusServerObject, 0, len(servers))
-	for _, s := range servers {
-		objs = append(objs, radiusServerObject{
-			IP:      types.StringValue(s.IP),
-			Port:    types.Int64Value(int64(s.Port)),
-			XSecret: types.StringValue(s.XSecret),
-		})
+	objs := []radiusServerObject{}
+	if servers != nil {
+		for _, s := range *servers {
+			objs = append(objs, radiusServerObject{
+				IP:      types.StringValue(deref(s.Ip)),
+				Port:    types.Int64Value(int64(intOrZero(s.Port))),
+				XSecret: types.StringValue(deref(s.XSecret)),
+			})
+		}
 	}
 	l, d := types.ListValueFrom(ctx, objType, objs)
 	diags.Append(d...)
 	return l
+}
+
+// intOrZero dereferences a *int, treating nil as 0.
+func intOrZero(p *int) int {
+	if p == nil {
+		return 0
+	}
+	return *p
 }
