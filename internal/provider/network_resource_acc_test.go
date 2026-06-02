@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -10,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 )
 
 func init() {
@@ -25,16 +22,18 @@ func init() {
 				return err
 			}
 			ctx := context.Background()
-			nets, err := c.ListNetworks(ctx)
+			nets, err := c.Network().Networks().List(ctx)
 			if err != nil {
 				return err
 			}
 			for i := range nets {
-				if !strings.HasPrefix(nets[i].Name, accNamePrefix) {
+				name := deref(nets[i].Name)
+				if !strings.HasPrefix(name, accNamePrefix) {
 					continue
 				}
-				if err := c.DeleteNetwork(ctx, nets[i].ID); err != nil {
-					return fmt.Errorf("sweep network %s (%s): %w", nets[i].Name, nets[i].ID, err)
+				id := deref(nets[i].UnderscoreId)
+				if err := c.Network().Networks().Delete(ctx, id); err != nil {
+					return fmt.Errorf("sweep network %s (%s): %w", name, id, err)
 				}
 			}
 			return nil
@@ -108,11 +107,11 @@ func testAccCheckNetworkDestroy(s *terraform.State) error {
 		if rs.Type != "unifi_network_network" && rs.Type != "unifi_network_wan" {
 			continue
 		}
-		_, err := c.GetNetwork(ctx, rs.Primary.ID)
+		_, err := c.Network().Networks().Get(ctx, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("network %s still exists after destroy", rs.Primary.ID)
 		}
-		if !errors.Is(err, unifi.ErrNotFound) {
+		if !isNotFoundErr(err) {
 			return fmt.Errorf("checking destroy of %s: %w", rs.Primary.ID, err)
 		}
 	}
