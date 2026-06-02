@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 // sp returns a pointer to s — for building wire fixtures with *string slots.
@@ -857,25 +858,26 @@ func TestStaticRoute_RoundTrip(t *testing.T) {
 		Distance:  types.Int64Value(1),
 		Interface: types.StringNull(),
 	}
-	rt := m.toStaticRoute()
-	if rt.Name != "to-lab" || rt.Network != "192.168.50.0/24" || rt.NextHop != "10.0.0.254" {
+	rt := m.toRouting()
+	if deref(rt.Name) != "to-lab" || deref(rt.StaticRouteNetwork) != "192.168.50.0/24" || deref(rt.StaticRouteNexthop) != "10.0.0.254" {
 		t.Errorf("scalar mapping wrong: %+v", rt)
 	}
 	// The client always stamps the controller's discriminator.
-	if rt.Type != "static-route" {
-		t.Errorf("type should be stamped static-route, got %q", rt.Type)
+	if deref(rt.Type) != "static-route" {
+		t.Errorf("type should be stamped static-route, got %q", deref(rt.Type))
 	}
-	if rt.Enabled == nil || !*rt.Enabled || rt.Distance == nil || *rt.Distance != 1 {
-		t.Errorf("enabled/distance mapping wrong: %v / %v", rt.Enabled, rt.Distance)
+	if rt.Enabled == nil || !*rt.Enabled || rt.StaticRouteDistance == nil || *rt.StaticRouteDistance != 1 {
+		t.Errorf("enabled/distance mapping wrong: %v / %v", rt.Enabled, rt.StaticRouteDistance)
 	}
 
 	var out staticRouteResourceModel
-	out.fromStaticRoute(&unifi.StaticRoute{
-		ID: "rt9", Name: "to-lab", Enabled: boolPtrLit(false), Network: "192.168.50.0/24",
-		RouteType: "blackhole",
+	bhType := wire.RoutingStaticRouteType("blackhole")
+	out.fromRouting(&wire.Routing{
+		UnderscoreId: sp("rt9"), Name: sp("to-lab"), Enabled: boolPtrLit(false),
+		StaticRouteNetwork: sp("192.168.50.0/24"), StaticRouteType: &bhType,
 	})
 	if out.ID.ValueString() != "rt9" || out.RouteType.ValueString() != "blackhole" {
-		t.Errorf("fromStaticRoute wrong: %+v", out)
+		t.Errorf("fromRouting wrong: %+v", out)
 	}
 	if out.Enabled.ValueBool() {
 		t.Errorf("enabled should round-trip false")

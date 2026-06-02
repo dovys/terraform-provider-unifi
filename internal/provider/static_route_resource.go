@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -24,7 +25,7 @@ var (
 func NewStaticRouteResource() resource.Resource { return &staticRouteResource{} }
 
 type staticRouteResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type staticRouteResourceModel struct {
@@ -91,7 +92,7 @@ func (r *staticRouteResource) Schema(_ context.Context, _ resource.SchemaRequest
 
 func (r *staticRouteResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -101,12 +102,12 @@ func (r *staticRouteResource) Create(ctx context.Context, req resource.CreateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateStaticRoute(ctx, plan.toStaticRoute())
+	created, err := r.net.StaticRoutes().Create(ctx, plan.toRouting())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create static route", err.Error())
 		return
 	}
-	plan.fromStaticRoute(created)
+	plan.fromRouting(created)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -116,7 +117,7 @@ func (r *staticRouteResource) Read(ctx context.Context, req resource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	rt, err := r.client.GetStaticRoute(ctx, state.ID.ValueString())
+	rt, err := r.net.StaticRoutes().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -125,7 +126,7 @@ func (r *staticRouteResource) Read(ctx context.Context, req resource.ReadRequest
 		resp.Diagnostics.AddError("Failed to read static route", err.Error())
 		return
 	}
-	state.fromStaticRoute(rt)
+	state.fromRouting(rt)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -135,12 +136,12 @@ func (r *staticRouteResource) Update(ctx context.Context, req resource.UpdateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateStaticRoute(ctx, plan.toStaticRoute())
+	updated, err := r.net.StaticRoutes().Update(ctx, plan.toRouting())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update static route", err.Error())
 		return
 	}
-	plan.fromStaticRoute(updated)
+	plan.fromRouting(updated)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -150,7 +151,7 @@ func (r *staticRouteResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteStaticRoute(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.StaticRoutes().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete static route", err.Error())
 	}
 }
@@ -159,27 +160,28 @@ func (r *staticRouteResource) ImportState(ctx context.Context, req resource.Impo
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *staticRouteResourceModel) toStaticRoute() *unifi.StaticRoute {
-	return &unifi.StaticRoute{
-		ID:        m.ID.ValueString(),
-		Name:      m.Name.ValueString(),
-		Enabled:   boolPtr(m.Enabled),
-		Type:      "static-route", // the controller's discriminator for this doc
-		Network:   strOrEmpty(m.Network),
-		NextHop:   strOrEmpty(m.NextHop),
-		Distance:  intPtr(m.Distance),
-		RouteType: strOrEmpty(m.RouteType),
-		Interface: strOrEmpty(m.Interface),
+func (m *staticRouteResourceModel) toRouting() *wire.Routing {
+	staticType := "static-route" // the controller's discriminator for this doc
+	return &wire.Routing{
+		UnderscoreId:         strPtrOrNil(m.ID), // nil on create, set on update
+		Name:                 strPtrOrNil(m.Name),
+		Enabled:              boolPtr(m.Enabled),
+		Type:                 &staticType,
+		StaticRouteNetwork:   strPtrOrNil(m.Network),
+		StaticRouteNexthop:   strPtrOrNil(m.NextHop),
+		StaticRouteDistance:  intPtr(m.Distance),
+		StaticRouteType:      (*wire.RoutingStaticRouteType)(strPtrOrNil(m.RouteType)),
+		StaticRouteInterface: strPtrOrNil(m.Interface),
 	}
 }
 
-func (m *staticRouteResourceModel) fromStaticRoute(rt *unifi.StaticRoute) {
-	m.ID = types.StringValue(rt.ID)
-	m.Name = types.StringValue(rt.Name)
+func (m *staticRouteResourceModel) fromRouting(rt *wire.Routing) {
+	m.ID = types.StringValue(deref(rt.UnderscoreId))
+	m.Name = types.StringValue(deref(rt.Name))
 	m.Enabled = boolToState(rt.Enabled)
-	m.Network = strToStateOptional(rt.Network)
-	m.RouteType = strToStateOptional(rt.RouteType)
-	m.NextHop = strToStateOptional(rt.NextHop)
-	m.Distance = intToState(rt.Distance)
-	m.Interface = strToStateOptional(rt.Interface)
+	m.Network = strToStateOptional(deref(rt.StaticRouteNetwork))
+	m.RouteType = strToStateOptional(string(derefEnum(rt.StaticRouteType)))
+	m.NextHop = strToStateOptional(deref(rt.StaticRouteNexthop))
+	m.Distance = intToState(rt.StaticRouteDistance)
+	m.Interface = strToStateOptional(deref(rt.StaticRouteInterface))
 }
