@@ -13,8 +13,8 @@ local network fixture's `meta.api_surfaces`).
 
 **One classic session covers both.** v2 is not a separate transport or auth — it's the same cookie
 session, a different URL prefix. Most writes are legacy REST (the widest, most stable surface); v2
-owns only the newer feature areas above. Each typed `Client` method targets its surface directly via
-the `legacy*`/`v2*` helpers — there is no per-operation router.
+owns only the newer feature areas above. The substruct client's generic collections
+(`LegacyCollection`, `V2Collection`) target their surface directly — there is no per-operation router.
 
 The console's official **Integration v1** API (`/integration/v1`, `X-API-KEY`) is **out of scope**:
 it is firmware-gated, read-mostly on the writes the provider needs, and would add a second auth
@@ -28,22 +28,32 @@ The other UniFi OS apps (Access/Talk/Connect/InnerSpace) are out of scope for no
 ## 2. Client
 
 ```
-internal/unifi/
-├── client.go        // Client interface: typed methods per logical operation
+internal/unifi/                  // console session (top-level Client)
+├── client.go        // Client interface: Capabilities/Site/Network()/site CRUD
 ├── transport/
 │   └── classic.go      // cookie+CSRF → /rest (legacy) AND /v2; handles re-auth
-├── surfaces.go      // legacy + v2 request helpers + wire envelopes
-├── networks.go      // NetworkConf struct + network CRUD
-├── dns.go           // StaticDNSRecord struct + local-DNS CRUD
+├── surfaces.go      // legacy envelope decode (legacyData) for console calls
 ├── sites.go         // Site/LegacySite + site CRUD
-└── capabilities.go  // controller version detection
+├── capabilities.go  // controller version detection
+└── network/                     // substruct Network-app client
+    ├── core.go         // session wrapper + path builders
+    ├── collection.go   // LegacyCollection / V2Collection (generic CRUD)
+    ├── networks.go     // c.Networks() — group accessors + custom collections
+    ├── wan.go, dns.go, firewall.go, devices.go, traffic.go, …  // one file per group
+    └── wire/
+        ├── types.gen.go      // oapi-codegen types-only (DO NOT EDIT)
+        └── oapi-codegen.yaml // regenerate from ../../../../unifi-specs
 ```
 
-Request/response structs live beside the methods that use them (no separate `models` package).
-
-Resources call `Client` methods only — never a transport. Each method picks its surface (legacy
-`/rest` or v2) directly through the `legacy*`/`v2*` helpers in `surfaces.go`. Client is hand-written
-and typed (no generated MPL dependency).
+The top-level `unifi.Client` is the **console session**: it owns the classic transport and exposes
+the probed capabilities, the configured site, site management, and a `Network()` accessor. Network
+resource CRUD runs through that substruct client (`c.Network().WAN().SLAs()…`): each group exposes
+generic collections (`LegacyCollection` — id-separate `Update`; `V2Collection` — `_id` in URL *and*
+body) over **generated `wire` types**. A group adds a *custom* collection only where the surface
+needs id-in-body GET-merge-PUT (networkconf, routing, static-dns) or List-filter Read (the v2
+surfaces that lack GET-by-id). The wire types are codegen — regenerated from the version-anchored
+sibling spec ([`../unifi-specs`](../../unifi-specs)), never hand-edited; the hand-written facade is
+the groups and collections. Resources never touch a transport directly.
 
 ### Per-resource surface
 
