@@ -1,0 +1,39 @@
+# Dependabot configuration — weekly dependency updates.
+# https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
+version: 2
+updates:
+  # Go module dependencies (go.mod / go.sum at the repo root).
+  - package-ecosystem: gomod
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    commit-message:
+      # Matches the repo's "<module>: change" convention (deps as the module).
+      prefix: deps
+    groups:
+      # Fold routine minor/patch bumps into one PR; majors stay individual.
+      gomod-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions pinned in .github/workflows/*.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        update-types:
+          - minor
+          - patch
