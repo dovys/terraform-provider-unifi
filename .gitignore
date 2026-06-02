@@ -27,6 +27,10 @@ unifi-inventory.json
 # commit. Redact via scripts/redact-capture.py before sharing (docs/reverse-engineering.md).
 /re-captures/
 
+# Reverse-engineering scratch space — binaries, decompiled source, notes, any
+# RE working files. Local-only dumping ground; never commit.
+/.re/
+
 # Editor / OS
 .DS_Store
 *.swp
