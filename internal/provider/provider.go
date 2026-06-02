@@ -84,7 +84,7 @@ func (p *UnifiProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 			"allow_insecure": schema.BoolAttribute{
 				Optional: true,
 				MarkdownDescription: "Skip TLS certificate verification. UniFi consoles ship self-signed certs on " +
-					"local IPs, so this is commonly needed against a LAN console. Defaults to `false`. Env: `UNIFI_INSECURE`.",
+					"local IPs, so this is commonly needed against a LAN console. Defaults to `false`. Env: `UNIFI_ALLOW_INSECURE`.",
 			},
 			"timeout": schema.StringAttribute{
 				Optional:            true,
@@ -129,7 +129,7 @@ func (p *UnifiProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	username := stringWithEnv(data.Username, "UNIFI_USERNAME")
 	password := stringWithEnv(data.Password, "UNIFI_PASSWORD")
 	site := stringWithEnvDefault(data.Site, "UNIFI_SITE", "default")
-	insecure := boolWithEnv(data.AllowInsecure, "UNIFI_INSECURE")
+	insecure := boolWithEnv(data.AllowInsecure, "UNIFI_ALLOW_INSECURE")
 
 	timeout := 60 * time.Second
 	if v := stringWithEnv(data.Timeout, "UNIFI_TIMEOUT"); v != "" {

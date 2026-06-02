@@ -1,55 +1,131 @@
 # terraform-provider-unifi
 
-A Terraform provider for **UniFi OS** — manage a console as code against the
-latest UniFi APIs, across its apps: **Network**, **Protect**, and **Access**.
-Resources are app-namespaced (`unifi_network_*`, `unifi_protect_*`,
-`unifi_access_*`). Built clean-room.
+A Terraform provider for **UniFi OS** — manage your UniFi console as code. It
+covers the **Network** application today (with **Protect** and **Access** in
+development), is app-namespaced (`unifi_network_*`, `unifi_protect_*`,
+`unifi_access_*`, …), and tracks the latest UniFi APIs.
 
-> **Status: early development.** All three apps share **one** console session.
-> **Network** is the most complete (the full resource catalog). **Protect** has
-> its substruct client + first resources — `unifi_protect_camera` and
-> `unifi_protect_nvr_settings` (+ a camera data source); config writes are
-> HIL-unverified. **Access** has its substruct client + the read-only
-> `data.unifi_access_door_group`; its managed resources await live verification
-> of the reverse-engineered surface. Not yet published to the Terraform Registry.
-> See [`docs/roadmap.md`](docs/roadmap.md).
+The aim is an **up-to-date, feature-complete** provider that models the full
+configurable surface of each app — including surfaces like guest networks — and
+keeps pace with new UniFi releases. It's built with an unusual process:
 
-## How it connects
+- **Every line is written by Claude (an LLM).** Schema, client, tests, and docs
+  are all model-authored, following the charter in
+  [`docs/development.md`](docs/development.md) and
+  [`docs/architecture.md`](docs/architecture.md) — no code is written by hand.
+- **Derived from openly published server software.** The API model comes from
+  UniFi's published server artifacts and from observing the live controller. It's
+  clean-room: the model is derived from UniFi's own software, not from existing
+  code.
+- **Regenerated, not hand-maintained.** Wire types come from a version-anchored
+  spec and are regenerated when we move the provider to a newer UniFi release,
+  rather than maintained by hand.
 
-The provider talks to a console over **one** cookie+CSRF session (a local admin
-account). That single session spans every app — the Network legacy REST and v2
-APIs, plus the Protect (`/proxy/protect/api`) and Access (`/proxy/access/api`)
-private APIs — with **no `api_key`** and no extra credential. Each resource
-targets whichever surface owns its object, with no change to your configuration.
-Details in [`docs/architecture.md`](docs/architecture.md).
+> **Status.** The Network app is built out and usable. Protect ships its client
+> and first resources (`unifi_protect_camera`, `unifi_protect_nvr_settings`);
+> Access ships its client and the read-only `data.unifi_access_door_group`. Both
+> are in active development. See [`docs/roadmap.md`](docs/roadmap.md) for what's
+> shipped and what's next.
 
-A **local UniFi OS admin account** is required (cloud/SSO accounts that force
-2FA are rejected with a clear message).
+## Getting started
+
+### Requirements
+
+- **Terraform 1.5+** (the examples use `import {}` blocks).
+- A **UniFi OS console** reachable on your network.
+- A **local UniFi OS admin account** (username + password). Cloud accounts are
+  not supported.
+
+### Configuration
 
 ```hcl
 terraform {
   required_providers {
-    unifi = { source = "dovys/unifi" }
+    unifi = {
+      source = "dovys/unifi"
+    }
   }
 }
 
 provider "unifi" {
-  host     = "https://192.0.2.1" # or UNIFI_HOST
-  username = var.unifi_username  # local admin; or UNIFI_USERNAME
-  password = var.unifi_password  # or UNIFI_PASSWORD
+  host     = "https://192.0.2.1" # your console; or set UNIFI_HOST
+  username = var.unifi_username   # local admin; or UNIFI_USERNAME
+  password = var.unifi_password   # or UNIFI_PASSWORD
 
   allow_insecure = true # consoles ship self-signed certs on local IPs
 }
 ```
 
+Every setting also reads from an environment variable, so you can keep
+credentials out of your configuration:
+
 | Setting | Env | Notes |
 |---------|-----|-------|
 | `host` | `UNIFI_HOST` | Console URL/host; a bare host is assumed `https://`. |
-| `username` + `password` | `UNIFI_USERNAME` / `UNIFI_PASSWORD` | Local UniFi OS admin. |
+| `username` + `password` | `UNIFI_USERNAME` / `UNIFI_PASSWORD` | Local UniFi OS admin (not cloud). |
 | `site` | `UNIFI_SITE` | Site slug; defaults to `default`. |
-| `allow_insecure` | `UNIFI_INSECURE` | Skip TLS verification. |
+| `allow_insecure` | `UNIFI_ALLOW_INSECURE` | Skip TLS verification (self-signed LAN certs). |
 | `timeout` | `UNIFI_TIMEOUT` | Per-request timeout (Go duration, default `60s`). |
 | `max_retries` | `UNIFI_MAX_RETRIES` | HTTP 429 retries (default `3`). |
+
+See the [`examples/`](examples/) directory for complete, real-world
+configurations organized by use case.
+
+## Supported UniFi versions
+
+The provider is modeled against — and tested against — these UniFi application
+versions:
+
+| App | Modeled against | Provider support |
+|-----|-----------------|------------------|
+| [UniFi Network](docs/apps/network.md) | `10.4.57` | ✅ Supported |
+| [UniFi Protect](docs/apps/protect.md) | `7.1.69` | 🚧 In development |
+| [UniFi Access](docs/apps/access.md) | `4.2.27` | 🚧 In development |
+
+> **We aim at recent UniFi releases and don't support older versions.** The
+> client is generated from a version-anchored spec and updated to track current
+> UniFi, not every release. Older firmware may happen to work but is neither
+> tested nor supported. **If a newer UniFi release adds functionality you need,
+> [open an issue](CONTRIBUTING.md)** and we'll model it against that version.
+
+## Local build
+
+Until the provider is on the Terraform Registry, build it and use it through a
+[development override](https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers).
+
+1. Build and install the binary into your Go bin directory:
+
+   ```bash
+   make build   # go install ./...
+   ```
+
+2. Point Terraform at it with a `dev_overrides` block in your `~/.terraformrc`
+   (use your `go env GOBIN`, or `$(go env GOPATH)/bin` if `GOBIN` is unset):
+
+   ```hcl
+   provider_installation {
+     dev_overrides {
+       "dovys/unifi" = "/path/to/your/go/bin"
+     }
+     direct {}
+   }
+   ```
+
+3. With a dev override in place, **skip `terraform init`** — just run
+   `terraform plan` / `terraform apply`. Terraform prints a warning noting the
+   override is active, which is expected.
+
+See [`docs/development.md`](docs/development.md) for the full workflow.
+
+## How it connects
+
+The provider talks to your console over a **single cookie + CSRF session** (the
+local admin account). That one session spans every app — the Network **legacy
+REST** and **v2** APIs, plus the **Protect** (`/proxy/protect/api`) and
+**Access** (`/proxy/access/api`) private APIs — with **no `api_key`** and no
+extra credential. Each resource targets whichever surface owns its object —
+transparently, with nothing to configure. Details in
+[`docs/architecture.md`](docs/architecture.md).
 
 ## Development
 
@@ -62,7 +138,11 @@ make lint    # go vet + golangci-lint
 make testacc # acceptance tests — needs a controller; never against production
 ```
 
-Design and contributor docs live in [`docs/`](docs/README.md): architecture,
-the resource catalog, the device model, operator flows, the testing tiers, and
-the development charter (invariants + Definition of Done). Distributed under
-[MIT](LICENSE).
+## Contributing
+
+The most valuable contribution is a **detailed issue**, not a pull request — see
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for why and how.
+
+## License
+
+Distributed under the [MIT License](LICENSE).

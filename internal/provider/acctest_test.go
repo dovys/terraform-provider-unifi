@@ -51,7 +51,7 @@ func sweepClient() (unifi.Client, error) {
 		Username:      os.Getenv("UNIFI_USERNAME"),
 		Password:      os.Getenv("UNIFI_PASSWORD"),
 		Site:          envOr("UNIFI_SITE", "default"),
-		AllowInsecure: strings.EqualFold(os.Getenv("UNIFI_INSECURE"), "true") || os.Getenv("UNIFI_INSECURE") == "1",
+		AllowInsecure: strings.EqualFold(os.Getenv("UNIFI_ALLOW_INSECURE"), "true") || os.Getenv("UNIFI_ALLOW_INSECURE") == "1",
 	})
 }
 
