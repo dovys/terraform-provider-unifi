@@ -11,6 +11,13 @@ permissions:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    env:
+      # Step-level `if:` can't read the secrets context directly, so surface its
+      # presence as a job env. When a GPG key is configured the checksum is
+      # signed (Registry-grade); when it isn't, the release still ships unsigned
+      # artifacts — this private repo isn't published to the Registry, the only
+      # consumer that requires the signature.
+      HAS_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -18,6 +25,7 @@ jobs:
           go-version: 'stable'
           cache: true
       - name: Import GPG key
+        if: env.HAS_GPG_KEY == 'true'
         uses: crazy-max/ghaction-import-gpg@v6
         id: import_gpg
         with:
@@ -27,7 +35,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           version: '~> v2'
-          args: release --clean
+          args: release --clean ${{ env.HAS_GPG_KEY == 'true' && '' || '--skip=sign' }}
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

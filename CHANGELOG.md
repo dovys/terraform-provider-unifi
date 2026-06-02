@@ -2,14 +2,34 @@
 
 All notable changes to this provider are documented here. The format loosely
 follows [Keep a Changelog](https://keepachangelog.com/); releases are tagged
-`vX.Y.Z` and published to the Terraform Registry as `dovys/unifi`.
+`vX.Y.Z`. The repo is private and the provider is **not** published to the
+Terraform Registry — tagged releases ship as GoReleaser artifacts on the
+private repo only.
 
 ## [Unreleased]
 
-_Network app build-out continues; the next tagged release is **0.1.0** once the
-network surface is feature-complete._
+_Next: the Protect app (`unifi_protect_*`, **0.2.0**) — the design and the
+reverse-engineering workstream have landed; the private-REST client base and the
+resources follow the RE captures._
+
+## [0.1.0] - 2026-06-02
+
+First tagged release: the complete network app (Phases 0–4), plus the Protect
+**design** and the reverse-engineering workstream. Ships as private GoReleaser
+artifacts — not published to the Terraform Registry.
 
 ### Added
+
+- **Project, docs & tooling.**
+  - Protect app **design** (`docs/apps/protect.md`): the `unifi_protect_*`
+    resources target the private REST API (`/proxy/protect/api/...`) over the
+    same cookie session as Network — one session, no `api_key`.
+  - **Reverse-engineering workstream** (`docs/reverse-engineering.md`): a
+    clean-room method for modeling the private UniFi APIs from the observed
+    contract, plus `scripts/redact-capture.py` to strip secrets/MAC/IP/PII from
+    captures while preserving field names, enums, and structure.
+  - **Dependabot** weekly updates for Go modules and GitHub Actions
+    (`.github/dependabot.yml`).
 
 - **Phase 4 — long tail & release prep.** No new resources; the remaining P4
   candidates are deferred against the live-network bar (invariant 7):
@@ -205,5 +225,4 @@ First development release: the provider base and the core of the network app.
   latest stable Go); dependencies updated to latest. The lint job builds
   golangci-lint from source (`install-mode: goinstall`) so its Go always
   satisfies the module directive. `main` is protected: PRs required, the
-  build/lint/unit checks are mandatory before merge, and merged branches
-  auto-delete.
+  build/lint/unit checks are mandatory before merge.
