@@ -1,17 +1,25 @@
 # terraform-provider-unifi
 
-A Terraform provider for **UniFi OS** — manage a console (the **Network** app
-today; **Protect** later) as code against the latest UniFi APIs. Resources are
-app-namespaced (`unifi_network_*`, `unifi_protect_*`, …). Built clean-room.
+A Terraform provider for **UniFi OS** — manage a console as code against the
+latest UniFi APIs, across its apps: **Network**, **Protect**, and **Access**.
+Resources are app-namespaced (`unifi_network_*`, `unifi_protect_*`,
+`unifi_access_*`). Built clean-room.
 
-> **Status: early development.** The base (provider scaffold + client) is in
-> place; resources are being built out phase by phase. Not yet published to the
-> Terraform Registry. See [`docs/roadmap.md`](docs/roadmap.md).
+> **Status: early development.** All three apps share **one** console session.
+> **Network** is the most complete (the full resource catalog). **Protect** has
+> its substruct client + first resources — `unifi_protect_camera` and
+> `unifi_protect_nvr_settings` (+ a camera data source); config writes are
+> HIL-unverified. **Access** has its substruct client + the read-only
+> `data.unifi_access_door_group`; its managed resources await live verification
+> of the reverse-engineered surface. Not yet published to the Terraform Registry.
+> See [`docs/roadmap.md`](docs/roadmap.md).
 
 ## How it connects
 
-The provider talks to a console over one cookie+CSRF session (a local admin
-account), spanning the legacy REST API and the newer v2 API — each resource
+The provider talks to a console over **one** cookie+CSRF session (a local admin
+account). That single session spans every app — the Network legacy REST and v2
+APIs, plus the Protect (`/proxy/protect/api`) and Access (`/proxy/access/api`)
+private APIs — with **no `api_key`** and no extra credential. Each resource
 targets whichever surface owns its object, with no change to your configuration.
 Details in [`docs/architecture.md`](docs/architecture.md).
 
