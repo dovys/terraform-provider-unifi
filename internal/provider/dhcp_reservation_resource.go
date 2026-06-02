@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -23,7 +24,7 @@ var (
 func NewDHCPReservationResource() resource.Resource { return &dhcpReservationResource{} }
 
 type dhcpReservationResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type dhcpReservationResourceModel struct {
@@ -92,7 +93,7 @@ func (r *dhcpReservationResource) Schema(_ context.Context, _ resource.SchemaReq
 
 func (r *dhcpReservationResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -107,18 +108,18 @@ func (r *dhcpReservationResource) Create(ctx context.Context, req resource.Creat
 	// DHCP lease, in which case we update that record rather than POSTing a new
 	// one (a duplicate MAC would be rejected).
 	desired := plan.toUser()
-	existing, err := r.client.GetUserByMAC(ctx, plan.MAC.ValueString())
+	existing, err := r.net.Clients().GetByMAC(ctx, plan.MAC.ValueString())
 	switch {
 	case err == nil:
-		desired.ID = existing.ID
-		updated, uErr := r.client.UpdateUser(ctx, desired)
+		desired.UnderscoreId = existing.UnderscoreId
+		updated, uErr := r.net.Clients().Users().Update(ctx, deref(existing.UnderscoreId), desired)
 		if uErr != nil {
 			resp.Diagnostics.AddError("Failed to set DHCP reservation", uErr.Error())
 			return
 		}
 		plan.fromUser(updated)
 	case isNotFoundErr(err):
-		created, cErr := r.client.CreateUser(ctx, desired)
+		created, cErr := r.net.Clients().Users().Create(ctx, desired)
 		if cErr != nil {
 			resp.Diagnostics.AddError("Failed to create DHCP reservation", cErr.Error())
 			return
@@ -137,7 +138,7 @@ func (r *dhcpReservationResource) Read(ctx context.Context, req resource.ReadReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	u, err := r.client.GetUser(ctx, state.ID.ValueString())
+	u, err := r.net.Clients().Users().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -156,7 +157,7 @@ func (r *dhcpReservationResource) Update(ctx context.Context, req resource.Updat
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateUser(ctx, plan.toUser())
+	updated, err := r.net.Clients().Users().Update(ctx, plan.ID.ValueString(), plan.toUser())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update DHCP reservation", err.Error())
 		return
@@ -175,7 +176,8 @@ func (r *dhcpReservationResource) Delete(ctx context.Context, req resource.Delet
 	// the client record is already gone, the reservation is gone too — treat that
 	// as success rather than failing the destroy.
 	off := false
-	if _, err := r.client.UpdateUser(ctx, &unifi.User{ID: state.ID.ValueString(), UseFixedIP: &off}); err != nil && !isNotFoundErr(err) {
+	id := state.ID.ValueString()
+	if _, err := r.net.Clients().Users().Update(ctx, id, &wire.User{UnderscoreId: strPtrOrNil(state.ID), UseFixedip: &off}); err != nil && !isNotFoundErr(err) {
 		resp.Diagnostics.AddError("Failed to clear DHCP reservation", err.Error())
 	}
 }
@@ -183,47 +185,48 @@ func (r *dhcpReservationResource) Delete(ctx context.Context, req resource.Delet
 // ImportState accepts either the client MAC (recommended — it's visible in the
 // UI) or the raw controller `_id`, resolving both to the record `_id`.
 func (r *dhcpReservationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	var u *unifi.User
+	var u *wire.User
 	var err error
 	// A controller _id is a 24-char hex Mongo ObjectID (no colons); a MAC always
 	// has colons — so a ":" cleanly disambiguates the two import forms.
 	if strings.Contains(req.ID, ":") {
-		u, err = r.client.GetUserByMAC(ctx, req.ID)
+		u, err = r.net.Clients().GetByMAC(ctx, req.ID)
 	} else {
-		u, err = r.client.GetUser(ctx, req.ID)
+		u, err = r.net.Clients().Users().Get(ctx, req.ID)
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to import DHCP reservation",
 			"No client record found for "+req.ID+": "+err.Error())
 		return
 	}
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), u.ID)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("mac"), strings.ToLower(u.MAC))...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), deref(u.UnderscoreId))...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("mac"), strings.ToLower(deref(u.Mac)))...)
 }
 
-func (m *dhcpReservationResourceModel) toUser() *unifi.User {
+func (m *dhcpReservationResourceModel) toUser() *wire.User {
 	on := true
-	u := &unifi.User{
-		ID:                    m.ID.ValueString(),
-		MAC:                   strings.ToLower(m.MAC.ValueString()),
-		Name:                  strOrEmpty(m.Name),
-		UseFixedIP:            &on,
-		FixedIP:               strOrEmpty(m.IPAddress),
-		NetworkID:             strOrEmpty(m.NetworkID),
-		LocalDNSRecord:        strOrEmpty(m.LocalDNSRecord),
-		LocalDNSRecordEnabled: boolPtr(m.LocalDNSRecordEnabled),
+	mac := strings.ToLower(m.MAC.ValueString())
+	u := &wire.User{
+		UnderscoreId:          strPtrOrNil(m.ID),
+		Mac:                   &mac,
+		Name:                  strPtrOrNil(m.Name),
+		UseFixedip:            &on,
+		FixedIp:               strPtrOrNil(m.IPAddress),
+		NetworkId:             strPtrOrNil(m.NetworkID),
+		LocalDnsRecord:        strPtrOrNil(m.LocalDNSRecord),
+		LocalDnsRecordEnabled: boolPtr(m.LocalDNSRecordEnabled),
 	}
 	return u
 }
 
-func (m *dhcpReservationResourceModel) fromUser(u *unifi.User) {
-	m.ID = types.StringValue(u.ID)
+func (m *dhcpReservationResourceModel) fromUser(u *wire.User) {
+	m.ID = types.StringValue(deref(u.UnderscoreId))
 	// mac is the immutable key — keep the configured/imported value rather than
 	// the controller's echo (it lowercases, which would churn an upper-case config).
-	m.IPAddress = types.StringValue(u.FixedIP) // Required: always a concrete value, never null
-	m.NetworkID = strToStateOptional(u.NetworkID)
-	m.Name = strToStateOptional(u.Name)
-	m.Hostname = strToStateOptional(u.Hostname)
-	m.LocalDNSRecord = strToStateOptional(u.LocalDNSRecord)
-	m.LocalDNSRecordEnabled = boolToState(u.LocalDNSRecordEnabled)
+	m.IPAddress = types.StringValue(deref(u.FixedIp)) // Required: always a concrete value, never null
+	m.NetworkID = strToStateOptional(deref(u.NetworkId))
+	m.Name = strToStateOptional(deref(u.Name))
+	m.Hostname = strToStateOptional(deref(u.Hostname))
+	m.LocalDNSRecord = strToStateOptional(deref(u.LocalDnsRecord))
+	m.LocalDNSRecordEnabled = boolToState(u.LocalDnsRecordEnabled)
 }

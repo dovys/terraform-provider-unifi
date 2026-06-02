@@ -603,19 +603,19 @@ func TestDHCPReservation_RoundTrip(t *testing.T) {
 		LocalDNSRecordEnabled: types.BoolNull(),
 	}
 	u := m.toUser()
-	if u.MAC != "aa:bb:cc:dd:ee:01" {
-		t.Errorf("mac should be lower-cased on the wire, got %q", u.MAC)
+	if deref(u.Mac) != "aa:bb:cc:dd:ee:01" {
+		t.Errorf("mac should be lower-cased on the wire, got %q", deref(u.Mac))
 	}
-	if u.UseFixedIP == nil || !*u.UseFixedIP {
+	if u.UseFixedip == nil || !*u.UseFixedip {
 		t.Errorf("toUser must always assert use_fixedip=true for a reservation")
 	}
-	if u.FixedIP != "10.0.0.10" || u.NetworkID != "net1" || u.Name != "nas" {
+	if deref(u.FixedIp) != "10.0.0.10" || deref(u.NetworkId) != "net1" || deref(u.Name) != "nas" {
 		t.Errorf("scalar mapping wrong: %+v", u)
 	}
 
 	// fromUser must NOT overwrite mac (immutable key, controller lowercases it),
 	// so a mixed-case config doesn't churn.
-	m.fromUser(&unifi.User{ID: "u9", MAC: "aa:bb:cc:dd:ee:01", FixedIP: "10.0.0.10", Hostname: "nas", NetworkID: "net1"})
+	m.fromUser(&wire.User{UnderscoreId: sp("u9"), Mac: sp("aa:bb:cc:dd:ee:01"), FixedIp: sp("10.0.0.10"), Hostname: sp("nas"), NetworkId: sp("net1")})
 	if m.ID.ValueString() != "u9" {
 		t.Errorf("id round-trip wrong: %q", m.ID.ValueString())
 	}
@@ -663,39 +663,42 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toPortProfile diags: %v", diags)
 	}
-	if p.Name != "Trunk" || p.Forward != "customize" || p.NativeNetworkConfID != "net-mgmt" {
+	if deref(p.Name) != "Trunk" || string(derefEnum(p.Forward)) != "customize" || deref(p.NativeNetworkconfId) != "net-mgmt" {
 		t.Errorf("scalar mapping wrong: %+v", p)
 	}
 	// Explicit false on autoneg must be a non-nil *bool so the merge writes it.
-	if p.Autoneg == nil || *p.Autoneg != false || p.STPPortMode == nil || *p.STPPortMode != false {
-		t.Errorf("explicit false bool must be non-nil: autoneg=%v stp_port_mode=%v", p.Autoneg, p.STPPortMode)
+	if p.Autoneg == nil || *p.Autoneg != false || p.StpPortMode == nil || *p.StpPortMode != false {
+		t.Errorf("explicit false bool must be non-nil: autoneg=%v stp_port_mode=%v", p.Autoneg, p.StpPortMode)
 	}
 	if p.Speed == nil || *p.Speed != 1000 {
 		t.Errorf("speed mapping wrong: %v", p.Speed)
 	}
-	if len(p.ExcludedNetworkConfIDs) != 1 || p.ExcludedNetworkConfIDs[0] != "net-iot" {
-		t.Errorf("excluded_network_ids mapping wrong: %v", p.ExcludedNetworkConfIDs)
+	if p.ExcludedNetworkconfIds == nil || len(*p.ExcludedNetworkconfIds) != 1 || (*p.ExcludedNetworkconfIds)[0] != "net-iot" {
+		t.Errorf("excluded_network_ids mapping wrong: %v", p.ExcludedNetworkconfIds)
 	}
 	// Unset scalar optionals stay nil/empty so the merge-PUT leaves the controller's value.
-	if p.FullDuplex != nil || p.Dot1XCtrl != "" {
-		t.Errorf("unset scalar optionals must be empty/nil: full_duplex=%v dot1x=%q", p.FullDuplex, p.Dot1XCtrl)
+	if p.FullDuplex != nil || p.Dot1xCtrl != nil {
+		t.Errorf("unset scalar optionals must be nil: full_duplex=%v dot1x=%v", p.FullDuplex, p.Dot1xCtrl)
 	}
 	// The owned MAC list, unset (null config), must send a concrete empty slice
 	// (not nil) so an explicit `[]` clears it on the wire instead of reading null.
-	if p.PortSecurityMACAddress == nil || len(p.PortSecurityMACAddress) != 0 {
-		t.Errorf("owned port_security_mac_address must be a non-nil empty slice when unset, got %v", p.PortSecurityMACAddress)
+	if p.PortSecurityMacAddress == nil || len(*p.PortSecurityMacAddress) != 0 {
+		t.Errorf("owned port_security_mac_address must be a non-nil empty slice when unset, got %v", p.PortSecurityMacAddress)
 	}
 
 	// An explicit empty exclusion set must reach the wire as a concrete empty slice.
 	m.ExcludedNetworkIDs = sliceToStringSet([]string{})
-	if cleared := m.toPortProfile(ctx, &diags); cleared.ExcludedNetworkConfIDs == nil || len(cleared.ExcludedNetworkConfIDs) != 0 {
-		t.Errorf("explicit empty excluded_network_ids must marshal as []; got %v", cleared.ExcludedNetworkConfIDs)
+	if cleared := m.toPortProfile(ctx, &diags); cleared.ExcludedNetworkconfIds == nil || len(*cleared.ExcludedNetworkconfIds) != 0 {
+		t.Errorf("explicit empty excluded_network_ids must marshal as []; got %v", cleared.ExcludedNetworkconfIds)
 	}
 
 	var out portProfileResourceModel
-	out.fromPortProfile(&unifi.PortProfile{
-		ID: "pc7", Name: "Uplink", Forward: "all", POEMode: "passthrough",
-		Autoneg: boolPtrLit(true), ExcludedNetworkConfIDs: []string{},
+	allEmpty := []string{}
+	allPower := wire.PortconfPoeMode("passthrough")
+	allFwd := wire.PortconfForward("all")
+	out.fromPortProfile(&wire.Portconf{
+		UnderscoreId: sp("pc7"), Name: sp("Uplink"), Forward: &allFwd, PoeMode: &allPower,
+		Autoneg: boolPtrLit(true), ExcludedNetworkconfIds: &allEmpty,
 	})
 	if out.ID.ValueString() != "pc7" || out.Forward.ValueString() != "all" || out.POEMode.ValueString() != "passthrough" {
 		t.Errorf("fromPortProfile wrong: %+v", out)
