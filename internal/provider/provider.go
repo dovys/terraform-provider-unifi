@@ -223,6 +223,11 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		// Protect app (c.Protect()…) — private REST over the one cookie session.
 		NewProtectCameraResource,
 		NewProtectNVRSettingsResource,
+		NewProtectLightResource,
+		NewProtectSensorResource,
+		NewProtectChimeResource,
+		NewProtectViewerResource,
+		NewProtectLiveviewResource,
 		// Access app (c.Access()…) — private web-UI API over the one cookie session.
 		// The managed unifi_access_door_group resource is written
 		// (access_door_group_resource.go) but intentionally NOT registered yet: the

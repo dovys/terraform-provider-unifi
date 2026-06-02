@@ -28,13 +28,14 @@ response structures, write verbs, enums, and behavior come from the RE workstrea
 observation. The resource set and intent below are stable; the **field-level schemas land once RE
 captures them** (this doc is updated then, with the per-resource field tables).
 
-> **Status: P5a shipped.** The `c.Protect()` substruct client is built on the cookie session
+> **Status: P5a + P5b shipped.** The `c.Protect()` substruct client is built on the cookie session
 > (`internal/unifi/protect`, private REST `/proxy/protect/api`, generated `wire` types projected from the
-> shipped Protect OpenAPI). `unifi_protect_camera` (+ `data.unifi_protect_camera`) and
-> `unifi_protect_nvr_settings` ship; both import clean read-only against the live console. **Config writes
-> are HIL-unverified** (recon is read-only — see [`../../TODO.md`](../../TODO.md)). **No `api_key`, one
-> session.** Next (P5b): `unifi_protect_liveview` (slots need a live capture — untyped in the spec) and the
-> floodlight/sensor/chime/viewer device resources (HIL, no live instance).
+> shipped Protect OpenAPI). Resources: `unifi_protect_camera` (+ `data.unifi_protect_camera`) and
+> `unifi_protect_nvr_settings` (P5a); `unifi_protect_light`, `unifi_protect_sensor`,
+> `unifi_protect_chime`, `unifi_protect_viewer` (configure-existing, keyed by MAC), and
+> `unifi_protect_liveview` (full CRUD; `slots` as a nested block) (P5b). **No `api_key`, one session.**
+> **Config writes are HIL-unverified** (recon is read-only — see [`../../TODO.md`](../../TODO.md)); the
+> liveview `slots` shape and chime `ringSettings` (deferred) await a live/HIL capture.
 
 ## Resources
 
