@@ -22,11 +22,12 @@ var (
 	_ resource.ResourceWithImportState = (*accessDoorGroupResource)(nil)
 )
 
-// NewAccessDoorGroupResource constructs the managed door-group resource. It is
-// complete and unit-tested but intentionally NOT registered in provider.go yet:
-// the Access write surface is reverse-engineered and unverified against a live
-// console (invariant 7). Registration is a one-line change once the TODO.md
-// Access verification items are confirmed.
+// NewAccessDoorGroupResource constructs the managed door-group resource. door_group
+// is the one Access object the reverse-engineered spec provides a write DTO for, so
+// it is the Access app's first managed resource. Its CRUD paths and the
+// {code,msg,data} envelope contract are HIL-unverified (no live Access console) —
+// the schema and TODO.md flag this; the verification items in TODO.md should be
+// confirmed against a live console.
 func NewAccessDoorGroupResource() resource.Resource { return &accessDoorGroupResource{} }
 
 type accessDoorGroupResource struct {

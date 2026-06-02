@@ -33,14 +33,14 @@ closure-trim/hoist/widen transforms). Because there is **no live/HIL Access cons
 (X-API-KEY is Network-only), the write surface — CRUD paths, the envelope success-code set, the
 `/door_ids` shape — is **unconfirmed**; see [`../../TODO.md`](../../TODO.md).
 
-> **Status: P7a shipped — foundation + read-only data source.** The `c.Access()` substruct client is built
-> on the cookie session (`internal/unifi/access`, private web-UI API `/proxy/access/api`, `{code,msg,data}`
-> envelope, console-global, no `api_key`); generated `wire` types are projected from the RE'd spec.
-> `data.unifi_access_door_group` ships (look up by `id`/`name`). The **managed** `unifi_access_door_group`
-> resource is written + unit-tested but **intentionally not registered** until a live/HIL console confirms
-> its write surface (invariant 7; the repo's zone-firewall / VPN-BGP deferral precedent) — re-enabling is a
-> one-line change in `provider.go`. Doors, policies, and holidays follow once the read surface is confirmed
-> (their `wire` roots are already projected).
+> **Status: P7a + P7b shipped.** The `c.Access()` substruct client is built on the cookie session
+> (`internal/unifi/access`, private web-UI API `/proxy/access/api`, `{code,msg,data}` envelope,
+> console-global, no `api_key`); generated `wire` types are projected from the RE'd spec. Ships
+> `data.unifi_access_door_group` (look up by `id`/`name`) and the managed `unifi_access_door_group`
+> resource — the one Access object the RE'd spec provides a write DTO for. Its CRUD paths + envelope
+> contract are **HIL-unverified** (no live Access console — see [`../../TODO.md`](../../TODO.md)). Doors,
+> policies, and holidays have **no write DTO** in the spec, so they're blocked until an RE capture adds
+> their controller param types (P7c).
 
 ## Resources
 
@@ -51,5 +51,5 @@ scope until a read path for floor membership is found — the resource models **
 
 | Resource | Backs | Notes |
 |----------|------|-------|
-| `unifi_access_door_group` *(written, not yet registered — gated on live verification)* | `POST/GET/PUT/DELETE /api/v2/access/door_group[/{id}]`, members via `/door_ids` | Keyed by `unique_id`. Manages `name`, `group_type` (controller-assigned), and door membership (`door_ids`). |
+| `unifi_access_door_group` | `POST/GET/PUT/DELETE /api/v2/access/door_group[/{id}]`, members via `/door_ids` | Keyed by `unique_id`. Manages `name`, `group_type` (controller-assigned), and door membership (`door_ids`). HIL-unverified write surface. |
 | `data.unifi_access_door_group` | `GET /api/v2/access/door_groups` (+ `/door_ids`) | Read-only lookup by `id`/`name`: name, group_type, type, member/floor/policy counts, member `door_ids`. |

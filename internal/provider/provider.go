@@ -229,15 +229,12 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewProtectViewerResource,
 		NewProtectLiveviewResource,
 		// Access app (c.Access()…) — private web-UI API over the one cookie session.
-		// The managed unifi_access_door_group resource is written
-		// (access_door_group_resource.go) but intentionally NOT registered yet: the
-		// Access surface is reverse-engineered from the controller binary and cannot
-		// be verified against a live/HIL console this phase, so its mutating CRUD
-		// paths + envelope contract are unconfirmed. Per invariant 7 ("live network
-		// is the bar") and the repo's deferral precedent (zone-firewall, VPN/BGP), we
-		// ship only the read-only data source below until a live Access console
-		// confirms the write surface. Re-enabling is a one-line addition here once
-		// the TODO.md Access verification items are checked off.
+		// door_group is the one Access object the RE'd spec gives a write DTO for
+		// (door_group_controller_DoorGroupParams); its CRUD paths + envelope contract
+		// remain HIL-unverified (the resource schema and TODO.md say so). Doors,
+		// policies, and holidays have no write DTO in the spec and await an RE
+		// capture of their controller param types before they can be modeled.
+		NewAccessDoorGroupResource,
 	}
 }
 
