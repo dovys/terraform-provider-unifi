@@ -1016,15 +1016,28 @@ func TestTrafficRule_RoundTrip(t *testing.T) {
 		t.Fatalf("building nested values: %v", diags)
 	}
 
+	// One domain with a port and a port-range, exercising the nested converters.
+	prList, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: trafficPortRangeAttrTypes}, []trafficPortRangeModel{
+		{PortStart: types.Int64Value(8000), PortStop: types.Int64Value(8010)},
+	})
+	diags.Append(d...)
+	domains, d := types.SetValueFrom(ctx, domainSetType.ElemType, []trafficDomainModel{
+		{Domain: types.StringValue("netflix.com"), Ports: sliceToIntSet([]int{443}), PortRanges: prList},
+	})
+	diags.Append(d...)
+	if diags.HasError() {
+		t.Fatalf("building nested values: %v", diags)
+	}
+
 	m := &trafficRuleResourceModel{
 		ID:             types.StringNull(),
 		Enabled:        types.BoolValue(true),
 		Action:         types.StringValue("SPEED_LIMIT"),
 		MatchingTarget: types.StringValue("DOMAIN"),
 		Description:    types.StringValue("throttle streaming"),
-		Domains:        sliceToStringSet([]string{"netflix.com"}),
-		IPAddresses:    types.SetNull(types.StringType),
-		IPRanges:       types.SetNull(types.StringType),
+		Domains:        domains,
+		IPAddresses:    types.SetNull(ipAddressSetType.ElemType),
+		IPRanges:       types.SetNull(ipRangeSetType.ElemType),
 		Regions:        types.SetNull(types.StringType),
 		AppIDs:         types.SetNull(types.Int64Type),
 		AppCategoryIDs: sliceToIntSet([]int{4, 13}),
@@ -1039,13 +1052,20 @@ func TestTrafficRule_RoundTrip(t *testing.T) {
 	if rule.Action != "SPEED_LIMIT" || rule.MatchingTarget != "DOMAIN" {
 		t.Errorf("scalar mapping wrong: %+v", rule)
 	}
-	if len(rule.Domains) != 1 || rule.Domains[0] != "netflix.com" {
+	if rule.Domains == nil || len(*rule.Domains) != 1 || (*rule.Domains)[0].Domain != "netflix.com" {
 		t.Errorf("domains mapping wrong: %v", rule.Domains)
 	}
-	if len(rule.AppCategoryIDs) != 2 {
-		t.Errorf("app_category_ids mapping wrong: %v", rule.AppCategoryIDs)
+	dm := (*rule.Domains)[0]
+	if dm.Ports == nil || len(*dm.Ports) != 1 || (*dm.Ports)[0] != 443 {
+		t.Errorf("domain ports mapping wrong: %v", dm.Ports)
 	}
-	if len(rule.TargetDevices) != 1 || rule.TargetDevices[0].Type != "CLIENT" || rule.TargetDevices[0].ClientMAC != "aa:bb:cc:00:11:22" {
+	if dm.PortRanges == nil || len(*dm.PortRanges) != 1 || *(*dm.PortRanges)[0].PortStart != 8000 || *(*dm.PortRanges)[0].PortStop != 8010 {
+		t.Errorf("domain port_ranges mapping wrong: %v", dm.PortRanges)
+	}
+	if rule.AppCategoryIds == nil || len(*rule.AppCategoryIds) != 2 {
+		t.Errorf("app_category_ids mapping wrong: %v", rule.AppCategoryIds)
+	}
+	if len(rule.TargetDevices) != 1 || rule.TargetDevices[0].Type != "CLIENT" || deref(rule.TargetDevices[0].ClientMac) != "aa:bb:cc:00:11:22" {
 		t.Errorf("target_devices mapping wrong: %+v", rule.TargetDevices)
 	}
 	if rule.BandwidthLimit == nil || rule.BandwidthLimit.DownloadLimitKbps == nil || *rule.BandwidthLimit.DownloadLimitKbps != 5000 {
@@ -1057,9 +1077,9 @@ func TestTrafficRule_RoundTrip(t *testing.T) {
 	}
 
 	var out trafficRuleResourceModel
-	out.fromTrafficRule(ctx, &unifi.TrafficRule{
-		ID: "tr9", Action: "BLOCK", MatchingTarget: "INTERNET", Enabled: boolPtrLit(true),
-		TargetDevices: []unifi.TrafficTargetDevice{{Type: "ALL_CLIENTS"}},
+	out.fromTrafficRule(ctx, &wire.Trafficrules{
+		UnderscoreId: sp("tr9"), Action: "BLOCK", MatchingTarget: "INTERNET", Enabled: boolPtrLit(true),
+		TargetDevices: []wire.TrafficroutesTargetDevice{{Type: "ALL_CLIENTS"}},
 	}, &diags)
 	if out.ID.ValueString() != "tr9" || out.Action.ValueString() != "BLOCK" {
 		t.Errorf("fromTrafficRule wrong: %+v", out)
@@ -1079,14 +1099,22 @@ func TestTrafficRoute_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 	var diags diag.Diagnostics
 
+	domains, d := types.SetValueFrom(ctx, domainSetType.ElemType, []trafficDomainModel{
+		{Domain: types.StringValue("netflix.com"), Ports: types.SetNull(types.Int64Type), PortRanges: types.ListNull(types.ObjectType{AttrTypes: trafficPortRangeAttrTypes})},
+	})
+	diags.Append(d...)
+	if diags.HasError() {
+		t.Fatalf("building domains: %v", diags)
+	}
+
 	m := &trafficRouteResourceModel{
 		ID:                types.StringNull(),
 		Enabled:           types.BoolValue(true),
 		Description:       types.StringValue("netflix via vpn"),
 		MatchingTarget:    types.StringValue("DOMAIN"),
-		Domains:           sliceToStringSet([]string{"netflix.com"}),
-		IPAddresses:       types.SetNull(types.StringType),
-		IPRanges:          types.SetNull(types.StringType),
+		Domains:           domains,
+		IPAddresses:       types.SetNull(ipAddressSetType.ElemType),
+		IPRanges:          types.SetNull(ipRangeSetType.ElemType),
 		Regions:           types.SetNull(types.StringType),
 		NetworkID:         types.StringValue("vpn1"),
 		TargetDevices:     types.ListNull(types.ObjectType{AttrTypes: trafficTargetDeviceAttrTypes}),
@@ -1096,26 +1124,34 @@ func TestTrafficRoute_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toTrafficRoute diags: %v", diags)
 	}
-	if route.MatchingTarget != "DOMAIN" || route.NetworkID != "vpn1" {
+	if route.MatchingTarget != "DOMAIN" || route.NetworkId != "vpn1" {
 		t.Errorf("scalar mapping wrong: %+v", route)
+	}
+	if route.Domains == nil || len(*route.Domains) != 1 || (*route.Domains)[0].Domain != "netflix.com" {
+		t.Errorf("domains mapping wrong: %v", route.Domains)
 	}
 	if route.KillSwitchEnabled == nil || !*route.KillSwitchEnabled {
 		t.Errorf("kill_switch mapping wrong: %v", route.KillSwitchEnabled)
 	}
-	// Null target_devices maps to a nil slice (omitted on the wire).
-	if route.TargetDevices != nil {
-		t.Errorf("null target_devices should map to nil, got %v", route.TargetDevices)
+	// target_devices is a required (non-omitempty) array; an unset list serializes
+	// as an empty slice, not null.
+	if len(route.TargetDevices) != 0 {
+		t.Errorf("null target_devices should map to empty slice, got %v", route.TargetDevices)
 	}
 
 	var out trafficRouteResourceModel
-	out.fromTrafficRoute(ctx, &unifi.TrafficRoute{
-		ID: "rr9", MatchingTarget: "DOMAIN", Domains: []string{"netflix.com"}, NetworkID: "vpn2", Enabled: boolPtrLit(true),
+	out.fromTrafficRoute(ctx, &wire.Trafficroutes{
+		UnderscoreId: sp("rr9"), MatchingTarget: "DOMAIN",
+		Domains: &[]wire.TrafficroutesDomain{{Domain: "netflix.com"}}, NetworkId: "vpn2", Enabled: boolPtrLit(true),
 	}, &diags)
 	if out.ID.ValueString() != "rr9" || out.NetworkID.ValueString() != "vpn2" {
 		t.Errorf("fromTrafficRoute wrong: %+v", out)
 	}
-	if out.TargetDevices.IsNull() != true {
+	if !out.TargetDevices.IsNull() {
 		t.Errorf("absent target_devices should read back null, got %v", out.TargetDevices)
+	}
+	if out.Domains.IsNull() {
+		t.Errorf("domains should read back set, got null")
 	}
 }
 

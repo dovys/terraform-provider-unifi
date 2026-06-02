@@ -8,7 +8,10 @@ resource "unifi_network_traffic_rule" "block_ads" {
   action          = "BLOCK"
   matching_target = "DOMAIN"
   description     = "Block ads/trackers"
-  domains         = ["ads.example.com", "tracker.example.net"]
+  domains = [
+    { domain = "ads.example.com" },
+    { domain = "tracker.example.net" },
+  ]
 
   target_devices = [
     { type = "ALL_CLIENTS" },
@@ -37,9 +40,12 @@ resource "unifi_network_traffic_rule" "throttle_streaming" {
 # Route Netflix out a VPN network instead of the default WAN, dropping the
 # traffic if the VPN is down (kill switch) rather than leaking over the WAN.
 resource "unifi_network_traffic_route" "netflix_via_vpn" {
-  matching_target     = "DOMAIN"
-  description         = "Netflix via VPN"
-  domains             = ["netflix.com", "nflxvideo.net"]
+  matching_target = "DOMAIN"
+  description     = "Netflix via VPN"
+  domains = [
+    { domain = "netflix.com" },
+    { domain = "nflxvideo.net" },
+  ]
   network_id          = unifi_network_network.iot.id # the VPN/interface network to egress through
   kill_switch_enabled = true
 
