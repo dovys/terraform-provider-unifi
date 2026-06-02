@@ -10,6 +10,22 @@ private repo only.
 
 ### Added
 
+- **UniFi Access app — substruct client foundation + read-only data source
+  (`c.Access()…`).** The console `unifi.Client` gained an `Access()` accessor
+  exposing the Access application over the **same cookie session** as Network and
+  Protect (the private web-UI API at `/proxy/access/api/...`, no `api_key`,
+  console-global). Responses are unwrapped from Access's `{code,msg,data}`
+  envelope inside the client. Object types are generated `wire` structs
+  (`internal/unifi/access/wire`, oapi-codegen types-only) projected from the
+  reverse-engineered Access spec (`../unifi-specs/access/v4.2.27`) by the shared
+  projection (`unifi-specs/tools/access_codegen_spec.py`, reusing the Protect
+  closure-trim/hoist/widen transforms). Ships `data.unifi_access_door_group`
+  (look up a door group by `id` or `name`). The **managed**
+  `unifi_access_door_group` resource is implemented and unit-tested but
+  **intentionally not registered yet**: the Access write surface is RE'd from the
+  controller binary and cannot be verified against a live/HIL console this phase
+  (invariant 7), so per the repo's deferral precedent only the read path ships —
+  see `TODO.md` for the verification items that gate re-enabling it.
 - **UniFi Protect app — first resources on a new substruct client
   (`c.Protect()…`).** The console `unifi.Client` gained a `Protect()` accessor
   exposing the Protect application over the **same cookie session** as Network

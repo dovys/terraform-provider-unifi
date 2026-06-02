@@ -210,3 +210,37 @@ reads back as `null`, which fails the post-apply consistency check. Decide the
 general approach (per-field empty-write allow-list, or always-emit owned keys)
 once empty-string writes are confirmed acceptable per field on a live controller.
 See `docs/roadmap.md` open question #6.
+
+## Access (P7): verify the RE'd surface before registering the managed resource
+
+The Access app is modeled from the **reverse-engineered** private web-UI API
+(`../unifi-specs/access/v4.2.27`, derived from the controller Go binary — no
+vendor OpenAPI for this surface). It **cannot be verified against a live console
+this phase** (no Access console; X-API-KEY is Network-only). The substruct client
+and `data.unifi_access_door_group` ship; the managed `unifi_access_door_group`
+resource is written + unit-tested but **not registered** in `provider.go` until
+the following are confirmed against a live/HIL Access console. Each is a one-line
+re-enable once checked:
+
+- **CRUD paths.** Confirm `GET /api/v2/access/door_groups` (list),
+  `GET|PUT|DELETE /api/v2/access/door_group/{id}`, `POST /api/v2/access/door_group`
+  (create), and `GET /api/v2/access/door_group/{id}/door_ids` exist as modeled
+  (`internal/unifi/access/door_groups.go`).
+- **`{code,msg,data}` envelope success set.** `envelope.ok()` currently treats
+  `0 / 200 / "SUCCESS" / "success" / "" / null` as success (`access/core.go`).
+  This is fail-open (an unmodeled/absent code reads as success). Pin it to the
+  real success sentinel once a live capture shows it.
+- **Not-found signalling.** Whether a missing object is an HTTP 404, a 400 with a
+  not-found message, or a non-zero envelope `code` — replace the message-substring
+  heuristic (`msgNotFound`) with the real code when known.
+- **`/door_ids` response shape.** Modeled as a flat `[]string`; confirm it isn't
+  an object wrapper or array of door objects. Also confirm an **empty** group
+  returns `[]` (not `null`) so an explicit `door_ids = []` config round-trips
+  without a perpetual diff (else normalize nil→empty in `readInto`).
+- **`group_type` enum + `floor_ids`.** Confirm the `group_type` values and whether
+  it's immutable-once-assigned (if so, `UseStateForUnknown`/`RequiresReplace` may
+  be warranted). `floor_ids` is writable in `DoorGroupParams` but has **no read
+  path** in the modeled surface, so floor groups are out of scope until a richer
+  group-detail read view is found — the resource models door-only groups.
+- **DoD on re-enable.** Acceptance create→update→import→destroy + `CheckDestroy` +
+  `tfacc-` sweeper + a clean second-empty plan, per the standard.

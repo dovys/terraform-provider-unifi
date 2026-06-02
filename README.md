@@ -1,9 +1,9 @@
 # terraform-provider-unifi
 
 A Terraform provider for **UniFi OS** — manage your UniFi console as code. It
-covers the **Network** application today (with **Protect** in development), is
-app-namespaced (`unifi_network_*`, `unifi_protect_*`, …), and tracks the latest
-UniFi APIs.
+covers the **Network** application today (with **Protect** and **Access** in
+development), is app-namespaced (`unifi_network_*`, `unifi_protect_*`,
+`unifi_access_*`, …), and tracks the latest UniFi APIs.
 
 The aim is an **up-to-date, feature-complete** provider that models the full
 configurable surface of each app — including surfaces like guest networks — and
@@ -21,9 +21,11 @@ keeps pace with new UniFi releases. It's built with an unusual process:
   spec and are regenerated when we move the provider to a newer UniFi release,
   rather than maintained by hand.
 
-> **Status.** The Network app is built out and usable; Protect is in active
-> development. See [`docs/roadmap.md`](docs/roadmap.md) for what's shipped and
-> what's next.
+> **Status.** The Network app is built out and usable. Protect ships its client
+> and first resources (`unifi_protect_camera`, `unifi_protect_nvr_settings`);
+> Access ships its client and the read-only `data.unifi_access_door_group`. Both
+> are in active development. See [`docs/roadmap.md`](docs/roadmap.md) for what's
+> shipped and what's next.
 
 ## Getting started
 
@@ -78,6 +80,7 @@ versions:
 |-----|-----------------|------------------|
 | [UniFi Network](docs/apps/network.md) | `10.4.57` | ✅ Supported |
 | [UniFi Protect](docs/apps/protect.md) | `7.1.69` | 🚧 In development |
+| [UniFi Access](docs/apps/access.md) | `4.2.27` | 🚧 In development |
 
 > **We aim at recent UniFi releases and don't support older versions.** The
 > client is generated from a version-anchored spec and updated to track current
@@ -117,9 +120,12 @@ See [`docs/development.md`](docs/development.md) for the full workflow.
 ## How it connects
 
 The provider talks to your console over a **single cookie + CSRF session** (the
-local admin account), spanning the **legacy REST** API and the **newer v2** API.
-Each resource targets whichever surface owns its object — transparently, with
-nothing to configure. Details in [`docs/architecture.md`](docs/architecture.md).
+local admin account). That one session spans every app — the Network **legacy
+REST** and **v2** APIs, plus the **Protect** (`/proxy/protect/api`) and
+**Access** (`/proxy/access/api`) private APIs — with **no `api_key`** and no
+extra credential. Each resource targets whichever surface owns its object —
+transparently, with nothing to configure. Details in
+[`docs/architecture.md`](docs/architecture.md).
 
 ## Development
 

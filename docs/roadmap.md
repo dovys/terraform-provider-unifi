@@ -82,6 +82,20 @@ A resource is checkable only when it meets the Definition of Done ([development.
   - [ ] **P5b — remaining resources:** `unifi_protect_liveview` (the only pure-CRUD object; its `slots`
         are untyped in the shipped spec — model from a live/HIL capture), and the device resources with
         no live instance: `protect_light`, `protect_sensor`, `protect_chime`, `protect_viewer` (HIL).
+- [~] **P7** Access app (`unifi_access_*`): design ([apps/access.md](apps/access.md)). Access ships only an
+      Integration-API openapi (wrong surface); the private web-UI API is reverse-engineered from the Access
+      Go binary (`../unifi-specs/access/v4.2.27`), so fidelity is lower than Protect's vendor OpenAPI and the
+      surface **cannot be live-verified** (no Access console; X-API-KEY is Network-only).
+  - [x] **P7a — foundation + read-only data source:** `Access()` substruct client over the cookie session
+        (`internal/unifi/access`, private web-UI API `/proxy/access/api`, `{code,msg,data}` envelope, no
+        `api_key`, console-global); generated `wire` types projected from the RE'd spec via the shared
+        `access_codegen_spec.py` (reuses the Protect closure-trim/hoist/widen transforms). Ships
+        `data.unifi_access_door_group`.
+  - [ ] **P7b — managed resources (gated on live/HIL verification):** `unifi_access_door_group` is written +
+        unit-tested but **not registered** until a live/HIL Access console confirms the CRUD paths, the
+        envelope success-code set, and the `/door_ids` response shape (see `TODO.md`). Re-enabling is a
+        one-line addition in `provider.go`. Floor groups, doors, policies, and holidays follow once the read
+        surface is confirmed (their `wire` roots are already projected).
 
 ## Open questions (don't block design)
 
