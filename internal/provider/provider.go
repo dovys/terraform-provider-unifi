@@ -220,6 +220,9 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		// First resource on the rebuilt substruct client (c.Network().WAN().SLAs());
 		// additive — the remaining resources migrate at the R7 cutover.
 		NewWANSLAResource,
+		// Protect app (c.Protect()…) — private REST over the one cookie session.
+		NewProtectCameraResource,
+		NewProtectNVRSettingsResource,
 	}
 }
 
@@ -233,6 +236,8 @@ func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewDeviceDataSource,
 		// On the rebuilt substruct client (c.Network().WAN().ListNetworkGroups()).
 		NewWANNetworkGroupDataSource,
+		// Protect app (c.Protect()…).
+		NewProtectCameraDataSource,
 	}
 }
 

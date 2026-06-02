@@ -8,6 +8,23 @@ private repo only.
 
 ## [Unreleased]
 
+### Added
+
+- **UniFi Protect app — first resources on a new substruct client
+  (`c.Protect()…`).** The console `unifi.Client` gained a `Protect()` accessor
+  exposing the Protect application over the **same cookie session** as Network
+  (the private REST API at `/proxy/protect/api/...`, no `api_key`). Its object
+  types are generated `wire` structs (`internal/unifi/protect/wire`,
+  oapi-codegen types-only) projected from the spec Protect itself ships
+  (`../unifi-specs/protect/v7.1.69`); a deterministic 3.1→3.0 + closure-trim +
+  enum/object-hoist projection (`unifi-specs/tools/protect_codegen_spec.py`)
+  feeds codegen. New: `unifi_protect_camera` (configure-existing, doorbells
+  included; owned-field PATCH merge) + `data.unifi_protect_camera`, and
+  `unifi_protect_nvr_settings` (the NVR singleton, import/update-only).
+  **Config writes are HIL-unverified** (the recon console is read-only) — see
+  `TODO.md`. Liveviews and the floodlight/sensor/chime/viewer devices are the
+  next Protect phase.
+
 ### Changed
 
 - **Network client rebuilt on a substruct + codegen design (no resource-surface

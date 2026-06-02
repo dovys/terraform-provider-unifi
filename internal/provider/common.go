@@ -11,13 +11,16 @@ import (
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/protect"
 )
 
 // isNotFoundErr reports whether err is a client not-found sentinel, so Read can
-// remove the resource from state (invariant 5: remove-on-404). It matches both
-// the old flat client and the rebuilt substruct client during the migration.
+// remove the resource from state (invariant 5: remove-on-404). It matches the
+// console client and both substruct clients (Network, Protect).
 func isNotFoundErr(err error) bool {
-	return errors.Is(err, unifi.ErrNotFound) || errors.Is(err, network.ErrNotFound)
+	return errors.Is(err, unifi.ErrNotFound) ||
+		errors.Is(err, network.ErrNotFound) ||
+		errors.Is(err, protect.ErrNotFound)
 }
 
 // clientFromProviderData extracts the configured unifi.Client from the value the
@@ -68,6 +71,18 @@ func intPtr(v types.Int64) *int {
 }
 
 func intToState(p *int) types.Int64 {
+	if p == nil {
+		return types.Int64Null()
+	}
+	return types.Int64Value(int64(*p))
+}
+
+// float64ToState bridges the Protect wire types, which model integer-valued
+// settings (mic volume, durations, brightness) as JSON numbers (*float64),
+// against Int64 schema attributes. float64 is exact for integers through 2^53,
+// so the round-trip is lossless for these values. The write direction uses
+// mergeFloat (protect_common.go), which merges the plan over the current value.
+func float64ToState(p *float64) types.Int64 {
 	if p == nil {
 		return types.Int64Null()
 	}

@@ -28,9 +28,13 @@ response structures, write verbs, enums, and behavior come from the RE workstrea
 observation. The resource set and intent below are stable; the **field-level schemas land once RE
 captures them** (this doc is updated then, with the per-resource field tables).
 
-> **Status: design.** Surface decided (private REST over the cookie session). Next: RE-capture the
-> private `/proxy/protect/api` shapes → build the Protect client/transport base on the cookie session →
-> the resources. **No `api_key`, one session.**
+> **Status: P5a shipped.** The `c.Protect()` substruct client is built on the cookie session
+> (`internal/unifi/protect`, private REST `/proxy/protect/api`, generated `wire` types projected from the
+> shipped Protect OpenAPI). `unifi_protect_camera` (+ `data.unifi_protect_camera`) and
+> `unifi_protect_nvr_settings` ship; both import clean read-only against the live console. **Config writes
+> are HIL-unverified** (recon is read-only — see [`../../TODO.md`](../../TODO.md)). **No `api_key`, one
+> session.** Next (P5b): `unifi_protect_liveview` (slots need a live capture — untyped in the spec) and the
+> floodlight/sensor/chime/viewer device resources (HIL, no live instance).
 
 ## Resources
 
