@@ -24314,10 +24314,10 @@ type Portforward struct {
 		DestinationIp *string `json:"destination_ip,omitempty"`
 		Interface     *string `json:"interface,omitempty"`
 	} `json:"destination_ips,omitempty"`
-	DstPort            *int                        `json:"dst_port,omitempty"`
+	DstPort            *string                     `json:"dst_port,omitempty"`
 	Enabled            *bool                       `json:"enabled,omitempty"`
 	Fwd                *string                     `json:"fwd,omitempty"`
-	FwdPort            *int                        `json:"fwd_port,omitempty"`
+	FwdPort            *string                     `json:"fwd_port,omitempty"`
 	Log                *bool                       `json:"log,omitempty"`
 	Name               *string                     `json:"name,omitempty"`
 	PfwdInterface      *string                     `json:"pfwd_interface,omitempty"`

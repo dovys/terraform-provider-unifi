@@ -456,18 +456,19 @@ func TestFirewallGroup_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toFirewallGroup diags: %v", diags)
 	}
-	if g.Name != "Servers" || g.GroupType != "address-group" || g.GroupMembers == nil || len(g.GroupMembers) != 0 {
+	if derefStr(g.Name) != "Servers" || string(derefEnum(g.GroupType)) != "address-group" || g.GroupMembers == nil || len(*g.GroupMembers) != 0 {
 		t.Errorf("null members must become an empty (non-nil) slice: %+v", g)
 	}
 
 	m.Members = sliceToStringSet([]string{"10.0.0.10", "10.0.0.0/24"})
 	g = m.toFirewallGroup(ctx, &diags)
-	if len(g.GroupMembers) != 2 {
+	if g.GroupMembers == nil || len(*g.GroupMembers) != 2 {
 		t.Errorf("members mapping wrong: %v", g.GroupMembers)
 	}
 
 	var out firewallGroupResourceModel
-	out.fromFirewallGroup(&unifi.FirewallGroup{ID: "fg5", Name: "Ports", GroupType: "port-group", GroupMembers: []string{"443"}})
+	portGroup := wire.FirewallgroupGroupType("port-group")
+	out.fromFirewallGroup(&wire.Firewallgroup{UnderscoreId: sp("fg5"), Name: sp("Ports"), GroupType: &portGroup, GroupMembers: &[]string{"443"}})
 	if out.ID.ValueString() != "fg5" || out.Type.ValueString() != "port-group" {
 		t.Errorf("fromFirewallGroup wrong: %+v", out)
 	}
@@ -475,7 +476,8 @@ func TestFirewallGroup_RoundTrip(t *testing.T) {
 	// An empty group (controller echoes `[]`) must read back as an empty set, not
 	// null — otherwise a `members = []` config trips the post-apply consistency check.
 	var empty firewallGroupResourceModel
-	empty.fromFirewallGroup(&unifi.FirewallGroup{ID: "fg6", Name: "Empty", GroupType: "address-group", GroupMembers: []string{}})
+	addrGroup := wire.FirewallgroupGroupType("address-group")
+	empty.fromFirewallGroup(&wire.Firewallgroup{UnderscoreId: sp("fg6"), Name: sp("Empty"), GroupType: &addrGroup, GroupMembers: &[]string{}})
 	if empty.Members.IsNull() || len(empty.Members.Elements()) != 0 {
 		t.Errorf("empty group members should be a non-null empty set, got %v", empty.Members)
 	}
@@ -524,7 +526,7 @@ func TestFirewallRule_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toFirewallRule diags: %v", diags)
 	}
-	if r.Name != "block-iot-to-lan" || r.Ruleset != "LAN_IN" || r.Action != "drop" {
+	if derefStr(r.Name) != "block-iot-to-lan" || string(derefEnum(r.Ruleset)) != "LAN_IN" || string(derefEnum(r.Action)) != "drop" {
 		t.Errorf("scalar mapping wrong: %+v", r)
 	}
 	if r.RuleIndex == nil || *r.RuleIndex != 20010 {
@@ -534,21 +536,24 @@ func TestFirewallRule_RoundTrip(t *testing.T) {
 		t.Errorf("bool mapping wrong: enabled=%v state_new=%v", r.Enabled, r.StateNew)
 	}
 	// Unset optionals stay nil/empty so GET-merge-PUT leaves the controller's value.
-	if r.SrcAddress != "" || r.ProtocolExcepted != nil || r.DstFirewallGroupIDs != nil {
-		t.Errorf("unset optionals must be empty/nil: src_address=%q excepted=%v dst_groups=%v", r.SrcAddress, r.ProtocolExcepted, r.DstFirewallGroupIDs)
+	if r.SrcAddress != nil || r.ProtocolMatchExcepted != nil || r.DstFirewallgroupIds != nil {
+		t.Errorf("unset optionals must be nil: src_address=%v excepted=%v dst_groups=%v", r.SrcAddress, r.ProtocolMatchExcepted, r.DstFirewallgroupIds)
 	}
-	if len(r.SrcFirewallGroupIDs) != 1 || r.SrcFirewallGroupIDs[0] != "fg-iot" {
-		t.Errorf("src_firewall_group_ids mapping wrong: %v", r.SrcFirewallGroupIDs)
+	if r.SrcFirewallgroupIds == nil || len(*r.SrcFirewallgroupIds) != 1 || (*r.SrcFirewallgroupIds)[0] != "fg-iot" {
+		t.Errorf("src_firewall_group_ids mapping wrong: %v", r.SrcFirewallgroupIds)
 	}
-	if r.DstNetworkConfID != "net-lan" {
-		t.Errorf("dst_network_id mapping wrong: %q", r.DstNetworkConfID)
+	if derefStr(r.DstNetworkconfId) != "net-lan" {
+		t.Errorf("dst_network_id mapping wrong: %q", derefStr(r.DstNetworkconfId))
 	}
 
 	var out firewallRuleResourceModel
 	idx := 20010
-	out.fromFirewallRule(&unifi.FirewallRule{
-		ID: "fr9", Name: "block-iot-to-lan", Ruleset: "LAN_IN", RuleIndex: &idx, Action: "drop",
-		Enabled: boolPtrLit(true), SettingPreference: "manual", DstNetworkConfID: "net-lan",
+	lanIn := wire.FirewallruleRuleset("LAN_IN")
+	drop := wire.FirewallruleAction("drop")
+	manual := wire.FirewallruleSettingPreference("manual")
+	out.fromFirewallRule(&wire.Firewallrule{
+		UnderscoreId: sp("fr9"), Name: sp("block-iot-to-lan"), Ruleset: &lanIn, RuleIndex: &idx, Action: &drop,
+		Enabled: boolPtrLit(true), SettingPreference: &manual, DstNetworkconfId: sp("net-lan"),
 	})
 	if out.ID.ValueString() != "fr9" || out.RuleIndex.ValueInt64() != 20010 || out.SettingPreference.ValueString() != "manual" {
 		t.Errorf("fromFirewallRule wrong: %+v", out)
@@ -561,10 +566,12 @@ func TestFirewallRule_RoundTrip(t *testing.T) {
 
 func TestRuleIndexConflict(t *testing.T) {
 	i1, i2 := 20000, 20001
-	rules := []unifi.FirewallRule{
-		{ID: "a", Name: "first", Ruleset: "LAN_IN", RuleIndex: &i1},
-		{ID: "b", Name: "second", Ruleset: "LAN_IN", RuleIndex: &i2},
-		{ID: "c", Name: "wan", Ruleset: "WAN_IN", RuleIndex: &i1},
+	lanIn := wire.FirewallruleRuleset("LAN_IN")
+	wanIn := wire.FirewallruleRuleset("WAN_IN")
+	rules := []wire.Firewallrule{
+		{UnderscoreId: sp("a"), Name: sp("first"), Ruleset: &lanIn, RuleIndex: &i1},
+		{UnderscoreId: sp("b"), Name: sp("second"), Ruleset: &lanIn, RuleIndex: &i2},
+		{UnderscoreId: sp("c"), Name: sp("wan"), Ruleset: &wanIn, RuleIndex: &i1},
 	}
 	// Same ruleset + index as an existing different rule → conflict.
 	if name, conflict := ruleIndexConflict(rules, "LAN_IN", 20000, ""); !conflict || name != "first" {
@@ -909,10 +916,10 @@ func TestPortForward_RoundTrip(t *testing.T) {
 		Log:             types.BoolValue(false),
 	}
 	pf := m.toPortForward()
-	if pf.Name != "https" || pf.PfwdInterface != "wan" || pf.Proto != "tcp" {
+	if deref(pf.Name) != "https" || deref(pf.PfwdInterface) != "wan" || string(derefEnum(pf.Proto)) != "tcp" {
 		t.Errorf("scalar mapping wrong: %+v", pf)
 	}
-	if pf.DstPort != "443" || pf.Fwd != "10.0.0.5" || pf.FwdPort != "8443" {
+	if deref(pf.DstPort) != "443" || deref(pf.Fwd) != "10.0.0.5" || deref(pf.FwdPort) != "8443" {
 		t.Errorf("forward fields mapping wrong: %+v", pf)
 	}
 	if pf.Enabled == nil || !*pf.Enabled || pf.Log == nil || *pf.Log {
@@ -920,9 +927,10 @@ func TestPortForward_RoundTrip(t *testing.T) {
 	}
 
 	var out portForwardResourceModel
-	out.fromPortForward(&unifi.PortForward{
-		ID: "pf9", Name: "https", Enabled: boolPtrLit(true), PfwdInterface: "both",
-		Proto: "tcp_udp", DstPort: "443", Fwd: "10.0.0.5",
+	proto := wire.PortforwardProto("tcp_udp")
+	out.fromPortForward(&wire.Portforward{
+		UnderscoreId: sp("pf9"), Name: sp("https"), Enabled: boolPtrLit(true), PfwdInterface: sp("both"),
+		Proto: &proto, DstPort: sp("443"), Fwd: sp("10.0.0.5"),
 	})
 	if out.ID.ValueString() != "pf9" || out.Interface.ValueString() != "both" || out.Protocol.ValueString() != "tcp_udp" {
 		t.Errorf("fromPortForward wrong: %+v", out)

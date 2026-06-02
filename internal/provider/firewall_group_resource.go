@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 func NewFirewallGroupResource() resource.Resource { return &firewallGroupResource{} }
 
 type firewallGroupResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type firewallGroupResourceModel struct {
@@ -72,7 +73,7 @@ func (r *firewallGroupResource) Schema(_ context.Context, _ resource.SchemaReque
 
 func (r *firewallGroupResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -82,7 +83,7 @@ func (r *firewallGroupResource) Create(ctx context.Context, req resource.CreateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateFirewallGroup(ctx, plan.toFirewallGroup(ctx, &resp.Diagnostics))
+	created, err := r.net.Firewall().Groups().Create(ctx, plan.toFirewallGroup(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create firewall group", err.Error())
 		return
@@ -97,7 +98,7 @@ func (r *firewallGroupResource) Read(ctx context.Context, req resource.ReadReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	g, err := r.client.GetFirewallGroup(ctx, state.ID.ValueString())
+	g, err := r.net.Firewall().Groups().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -116,7 +117,7 @@ func (r *firewallGroupResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateFirewallGroup(ctx, plan.toFirewallGroup(ctx, &resp.Diagnostics))
+	updated, err := r.net.Firewall().Groups().Update(ctx, plan.ID.ValueString(), plan.toFirewallGroup(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update firewall group", err.Error())
 		return
@@ -131,7 +132,7 @@ func (r *firewallGroupResource) Delete(ctx context.Context, req resource.DeleteR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteFirewallGroup(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.Firewall().Groups().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete firewall group", err.Error())
 	}
 }
@@ -140,22 +141,22 @@ func (r *firewallGroupResource) ImportState(ctx context.Context, req resource.Im
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *firewallGroupResourceModel) toFirewallGroup(ctx context.Context, diags *diag.Diagnostics) *unifi.FirewallGroup {
+func (m *firewallGroupResourceModel) toFirewallGroup(ctx context.Context, diags *diag.Diagnostics) *wire.Firewallgroup {
 	members := stringSetToSlice(ctx, m.Members, diags)
 	if members == nil {
-		members = []string{} // group_members is non-omitempty: send an explicit empty array
+		members = []string{} // send an explicit empty array so emptying the set clears the group
 	}
-	return &unifi.FirewallGroup{
-		ID:           m.ID.ValueString(),
-		Name:         m.Name.ValueString(),
-		GroupType:    m.Type.ValueString(),
-		GroupMembers: members,
+	return &wire.Firewallgroup{
+		UnderscoreId: strPtrOrNil(m.ID),
+		Name:         strPtrOrNil(m.Name),
+		GroupType:    (*wire.FirewallgroupGroupType)(strPtrOrNil(m.Type)),
+		GroupMembers: &members,
 	}
 }
 
-func (m *firewallGroupResourceModel) fromFirewallGroup(g *unifi.FirewallGroup) {
-	m.ID = types.StringValue(g.ID)
-	m.Name = types.StringValue(g.Name)
-	m.Type = types.StringValue(g.GroupType)
-	m.Members = sliceToStringSet(g.GroupMembers)
+func (m *firewallGroupResourceModel) fromFirewallGroup(g *wire.Firewallgroup) {
+	m.ID = types.StringValue(deref(g.UnderscoreId))
+	m.Name = types.StringValue(deref(g.Name))
+	m.Type = types.StringValue(string(derefEnum(g.GroupType)))
+	m.Members = sliceToStringSet(derefSlice(g.GroupMembers))
 }

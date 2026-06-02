@@ -15,7 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 // firewallRulesets is the full set of classic firewall chains the controller
@@ -39,7 +40,7 @@ var (
 func NewFirewallRuleResource() resource.Resource { return &firewallRuleResource{} }
 
 type firewallRuleResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 // firewallRuleResourceModel covers the classic firewallrule surface. Match
@@ -162,7 +163,7 @@ func (r *firewallRuleResource) Schema(_ context.Context, _ resource.SchemaReques
 
 func (r *firewallRuleResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -176,7 +177,7 @@ func (r *firewallRuleResource) Create(ctx context.Context, req resource.CreateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateFirewallRule(ctx, plan.toFirewallRule(ctx, &resp.Diagnostics))
+	created, err := r.net.Firewall().Rules().Create(ctx, plan.toFirewallRule(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create firewall rule", err.Error())
 		return
@@ -191,7 +192,7 @@ func (r *firewallRuleResource) Read(ctx context.Context, req resource.ReadReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	rule, err := r.client.GetFirewallRule(ctx, state.ID.ValueString())
+	rule, err := r.net.Firewall().Rules().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -214,7 +215,7 @@ func (r *firewallRuleResource) Update(ctx context.Context, req resource.UpdateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateFirewallRule(ctx, plan.toFirewallRule(ctx, &resp.Diagnostics))
+	updated, err := r.net.Firewall().Rules().Update(ctx, plan.ID.ValueString(), plan.toFirewallRule(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update firewall rule", err.Error())
 		return
@@ -229,7 +230,7 @@ func (r *firewallRuleResource) Delete(ctx context.Context, req resource.DeleteRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteFirewallRule(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.Firewall().Rules().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete firewall rule", err.Error())
 	}
 }
@@ -242,7 +243,7 @@ func (r *firewallRuleResource) ImportState(ctx context.Context, req resource.Imp
 // same ruleset (the controller silently accepts duplicates, which makes ordering
 // ambiguous). selfID is excluded so an in-place update of the same rule passes.
 func (r *firewallRuleResource) assertRuleIndexUnique(ctx context.Context, ruleset string, ruleIndex int64, selfID string, diags *diag.Diagnostics) {
-	rules, err := r.client.ListFirewallRules(ctx)
+	rules, err := r.net.Firewall().Rules().List(ctx)
 	if err != nil {
 		diags.AddError("Failed to validate rule_index uniqueness", err.Error())
 		return
@@ -257,82 +258,82 @@ func (r *firewallRuleResource) assertRuleIndexUnique(ctx context.Context, rulese
 
 // ruleIndexConflict reports the name of an existing rule (other than selfID)
 // that already occupies ruleIndex in ruleset, if any.
-func ruleIndexConflict(rules []unifi.FirewallRule, ruleset string, ruleIndex int64, selfID string) (string, bool) {
+func ruleIndexConflict(rules []wire.Firewallrule, ruleset string, ruleIndex int64, selfID string) (string, bool) {
 	for i := range rules {
-		if rules[i].ID == selfID || rules[i].Ruleset != ruleset || rules[i].RuleIndex == nil {
+		if deref(rules[i].UnderscoreId) == selfID || string(derefEnum(rules[i].Ruleset)) != ruleset || rules[i].RuleIndex == nil {
 			continue
 		}
 		if int64(*rules[i].RuleIndex) == ruleIndex {
-			return rules[i].Name, true
+			return deref(rules[i].Name), true
 		}
 	}
 	return "", false
 }
 
-func (m *firewallRuleResourceModel) toFirewallRule(ctx context.Context, diags *diag.Diagnostics) *unifi.FirewallRule {
-	rule := &unifi.FirewallRule{
-		ID:                 m.ID.ValueString(),
-		Name:               m.Name.ValueString(),
-		Enabled:            boolPtr(m.Enabled),
-		Ruleset:            m.Ruleset.ValueString(),
-		RuleIndex:          intPtr(m.RuleIndex),
-		Action:             m.Action.ValueString(),
-		Protocol:           strOrEmpty(m.Protocol),
-		ProtocolV6:         strOrEmpty(m.ProtocolV6),
-		ProtocolExcepted:   boolPtr(m.ProtocolExcepted),
-		ICMPTypename:       strOrEmpty(m.ICMPTypename),
-		Logging:            boolPtr(m.Logging),
-		IPSec:              strOrEmpty(m.IPSec),
-		StateNew:           boolPtr(m.StateNew),
-		StateEstablished:   boolPtr(m.StateEstablished),
-		StateRelated:       boolPtr(m.StateRelated),
-		StateInvalid:       boolPtr(m.StateInvalid),
-		SrcAddress:         strOrEmpty(m.SrcAddress),
-		SrcPort:            strOrEmpty(m.SrcPort),
-		SrcNetworkConfID:   strOrEmpty(m.SrcNetworkID),
-		SrcNetworkConfType: strOrEmpty(m.SrcNetworkType),
-		DstAddress:         strOrEmpty(m.DstAddress),
-		DstPort:            strOrEmpty(m.DstPort),
-		DstNetworkConfID:   strOrEmpty(m.DstNetworkID),
-		DstNetworkConfType: strOrEmpty(m.DstNetworkType),
+func (m *firewallRuleResourceModel) toFirewallRule(ctx context.Context, diags *diag.Diagnostics) *wire.Firewallrule {
+	rule := &wire.Firewallrule{
+		UnderscoreId:          strPtrOrNil(m.ID),
+		Name:                  strPtrOrNil(m.Name),
+		Enabled:               boolPtr(m.Enabled),
+		Ruleset:               (*wire.FirewallruleRuleset)(strPtrOrNil(m.Ruleset)),
+		RuleIndex:             intPtr(m.RuleIndex),
+		Action:                (*wire.FirewallruleAction)(strPtrOrNil(m.Action)),
+		Protocol:              strPtrOrNil(m.Protocol),
+		ProtocolV6:            strPtrOrNil(m.ProtocolV6),
+		ProtocolMatchExcepted: boolPtr(m.ProtocolExcepted),
+		IcmpTypename:          (*wire.FirewallruleIcmpTypename)(strPtrOrNil(m.ICMPTypename)),
+		Logging:               boolPtr(m.Logging),
+		Ipsec:                 (*wire.FirewallruleIpsec)(strPtrOrNil(m.IPSec)),
+		StateNew:              boolPtr(m.StateNew),
+		StateEstablished:      boolPtr(m.StateEstablished),
+		StateRelated:          boolPtr(m.StateRelated),
+		StateInvalid:          boolPtr(m.StateInvalid),
+		SrcAddress:            strPtrOrNil(m.SrcAddress),
+		SrcPort:               strPtrOrNil(m.SrcPort),
+		SrcNetworkconfId:      strPtrOrNil(m.SrcNetworkID),
+		SrcNetworkconfType:    (*wire.FirewallruleSrcNetworkconfType)(strPtrOrNil(m.SrcNetworkType)),
+		DstAddress:            strPtrOrNil(m.DstAddress),
+		DstPort:               strPtrOrNil(m.DstPort),
+		DstNetworkconfId:      strPtrOrNil(m.DstNetworkID),
+		DstNetworkconfType:    (*wire.FirewallruleDstNetworkconfType)(strPtrOrNil(m.DstNetworkType)),
 	}
 	// Leave the group sets nil when unset so GET-merge-PUT preserves the
-	// controller's value (the fields are omitempty — a nil slice is dropped).
+	// controller's value (the fields are omitempty — a nil pointer is dropped).
 	if g := stringSetToSlice(ctx, m.SrcFirewallGroupIDs, diags); g != nil {
-		rule.SrcFirewallGroupIDs = g
+		rule.SrcFirewallgroupIds = &g
 	}
 	if g := stringSetToSlice(ctx, m.DstFirewallGroupIDs, diags); g != nil {
-		rule.DstFirewallGroupIDs = g
+		rule.DstFirewallgroupIds = &g
 	}
 	return rule
 }
 
-func (m *firewallRuleResourceModel) fromFirewallRule(r *unifi.FirewallRule) {
-	m.ID = types.StringValue(r.ID)
-	m.Name = types.StringValue(r.Name)
+func (m *firewallRuleResourceModel) fromFirewallRule(r *wire.Firewallrule) {
+	m.ID = types.StringValue(deref(r.UnderscoreId))
+	m.Name = types.StringValue(deref(r.Name))
 	m.Enabled = boolToState(r.Enabled)
-	m.Ruleset = types.StringValue(r.Ruleset)
+	m.Ruleset = types.StringValue(string(derefEnum(r.Ruleset)))
 	m.RuleIndex = intToState(r.RuleIndex)
-	m.Action = types.StringValue(r.Action)
-	m.Protocol = strToStateOptional(r.Protocol)
-	m.ProtocolV6 = strToStateOptional(r.ProtocolV6)
-	m.ProtocolExcepted = boolToState(r.ProtocolExcepted)
-	m.ICMPTypename = strToStateOptional(r.ICMPTypename)
+	m.Action = types.StringValue(string(derefEnum(r.Action)))
+	m.Protocol = strToStateOptional(deref(r.Protocol))
+	m.ProtocolV6 = strToStateOptional(deref(r.ProtocolV6))
+	m.ProtocolExcepted = boolToState(r.ProtocolMatchExcepted)
+	m.ICMPTypename = strToStateOptional(string(derefEnum(r.IcmpTypename)))
 	m.Logging = boolToState(r.Logging)
-	m.IPSec = strToStateOptional(r.IPSec)
-	m.SettingPreference = types.StringValue(r.SettingPreference)
+	m.IPSec = strToStateOptional(string(derefEnum(r.Ipsec)))
+	m.SettingPreference = types.StringValue(string(derefEnum(r.SettingPreference)))
 	m.StateNew = boolToState(r.StateNew)
 	m.StateEstablished = boolToState(r.StateEstablished)
 	m.StateRelated = boolToState(r.StateRelated)
 	m.StateInvalid = boolToState(r.StateInvalid)
-	m.SrcAddress = strToStateOptional(r.SrcAddress)
-	m.SrcPort = strToStateOptional(r.SrcPort)
-	m.SrcNetworkID = strToStateOptional(r.SrcNetworkConfID)
-	m.SrcNetworkType = strToStateOptional(r.SrcNetworkConfType)
-	m.SrcFirewallGroupIDs = sliceToStringSet(r.SrcFirewallGroupIDs)
-	m.DstAddress = strToStateOptional(r.DstAddress)
-	m.DstPort = strToStateOptional(r.DstPort)
-	m.DstNetworkID = strToStateOptional(r.DstNetworkConfID)
-	m.DstNetworkType = strToStateOptional(r.DstNetworkConfType)
-	m.DstFirewallGroupIDs = sliceToStringSet(r.DstFirewallGroupIDs)
+	m.SrcAddress = strToStateOptional(deref(r.SrcAddress))
+	m.SrcPort = strToStateOptional(deref(r.SrcPort))
+	m.SrcNetworkID = strToStateOptional(deref(r.SrcNetworkconfId))
+	m.SrcNetworkType = strToStateOptional(string(derefEnum(r.SrcNetworkconfType)))
+	m.SrcFirewallGroupIDs = sliceToStringSet(derefSlice(r.SrcFirewallgroupIds))
+	m.DstAddress = strToStateOptional(deref(r.DstAddress))
+	m.DstPort = strToStateOptional(deref(r.DstPort))
+	m.DstNetworkID = strToStateOptional(deref(r.DstNetworkconfId))
+	m.DstNetworkType = strToStateOptional(string(derefEnum(r.DstNetworkconfType)))
+	m.DstFirewallGroupIDs = sliceToStringSet(derefSlice(r.DstFirewallgroupIds))
 }
