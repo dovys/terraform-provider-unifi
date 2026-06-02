@@ -839,10 +839,10 @@ func TestRadiusAccount_RoundTrip(t *testing.T) {
 		Password:         types.StringValue("pw"),
 		TunnelType:       types.Int64Value(13),
 		TunnelMediumType: types.Int64Value(6),
-		VLAN:             types.StringValue("30"),
+		VLAN:             types.Int64Value(30),
 	}
 	a := m.toRadiusAccount()
-	if a.Name != "alice" || a.XPassword != "pw" || a.VLAN != "30" {
+	if deref(a.Name) != "alice" || deref(a.XPassword) != "pw" || a.Vlan == nil || *a.Vlan != 30 {
 		t.Errorf("scalar mapping wrong: %+v", a)
 	}
 	if a.TunnelType == nil || *a.TunnelType != 13 || a.TunnelMediumType == nil || *a.TunnelMediumType != 6 {
@@ -851,7 +851,8 @@ func TestRadiusAccount_RoundTrip(t *testing.T) {
 
 	// Write-only password: a read that doesn't echo it keeps the configured value.
 	out := radiusAccountResourceModel{Password: types.StringValue("keep-me")}
-	out.fromRadiusAccount(&unifi.RadiusAccount{ID: "ac9", Name: "alice", VLAN: "30"})
+	vlan := 30
+	out.fromRadiusAccount(&wire.Account{UnderscoreId: sp("ac9"), Name: sp("alice"), Vlan: &vlan})
 	if out.ID.ValueString() != "ac9" {
 		t.Errorf("id round-trip wrong: %q", out.ID.ValueString())
 	}

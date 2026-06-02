@@ -24,7 +24,7 @@ A UniFi RADIUS user account (`account`, legacy `/rest`) — a username/password 
 
 - `tunnel_medium_type` (Number) RADIUS Tunnel-Medium-Type attribute (e.g. `6` = IEEE-802).
 - `tunnel_type` (Number) RADIUS Tunnel-Type attribute for dynamic VLAN assignment (e.g. `13` = VLAN). Set together with `tunnel_medium_type` and `vlan`.
-- `vlan` (String) Tunnel-Private-Group-ID — the VLAN id assigned to clients authenticating as this user.
+- `vlan` (Number) Tunnel-Private-Group-ID — the VLAN id assigned to clients authenticating as this user.
 
 ### Read-Only
 

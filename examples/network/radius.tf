@@ -25,7 +25,7 @@ resource "unifi_network_radius_account" "alice" {
   # Put alice on VLAN 30 when she authenticates.
   tunnel_type        = 13
   tunnel_medium_type = 6
-  vlan               = "30"
+  vlan               = 30
 }
 
 # 2) External server: forward auth/accounting to a dedicated RADIUS host. The
