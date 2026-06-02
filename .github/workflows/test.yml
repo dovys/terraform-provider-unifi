@@ -33,6 +33,18 @@ jobs:
             echo "Run: gofmt -s -w ."
             exit 1
           fi
+      # Docs are generated from the provider schema + examples. Keep them current
+      # at merge so every released commit carries fresh docs (the release flow
+      # never regenerates docs). Runs ONLY tfplugindocs — NOT `go generate ./...`,
+      # which would invoke the wire codegen that needs the sibling ../unifi-specs
+      # repo (absent in CI).
+      - name: docs are current
+        run: |
+          go tool tfplugindocs generate --provider-name unifi
+          if ! git diff --exit-code docs/; then
+            echo "::error::docs/ is stale — run 'make docs' and commit the result."
+            exit 1
+          fi
 
   lint:
     name: golangci-lint
