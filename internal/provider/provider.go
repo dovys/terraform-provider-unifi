@@ -231,6 +231,8 @@ func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewSiteDataSource,
 		NewApplicationInfoDataSource,
 		NewDeviceDataSource,
+		// On the rebuilt substruct client (c.Network().WAN().ListNetworkGroups()).
+		NewWANNetworkGroupDataSource,
 	}
 }
 
