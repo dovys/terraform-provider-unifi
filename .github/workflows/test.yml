@@ -47,7 +47,7 @@ jobs:
       # go directive (go 1.26.3). install-mode goinstall builds golangci-lint
       # from source with the setup-go toolchain (latest stable, >= our floor),
       # so the binary's Go always satisfies the directive.
-      - uses: golangci/golangci-lint-action@v7
+      - uses: golangci/golangci-lint-action@v9
         with:
           version: v2.12.2
           install-mode: goinstall
