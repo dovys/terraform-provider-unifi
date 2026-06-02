@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -23,7 +24,7 @@ var (
 func NewWLANGroupResource() resource.Resource { return &wlanGroupResource{} }
 
 type wlanGroupResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type wlanGroupResourceModel struct {
@@ -63,7 +64,7 @@ func (r *wlanGroupResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 
 func (r *wlanGroupResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -73,7 +74,7 @@ func (r *wlanGroupResource) Create(ctx context.Context, req resource.CreateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateWLANGroup(ctx, plan.toWLANGroup())
+	created, err := r.net.WiFi().WLANGroups().Create(ctx, plan.toWLANGroup())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create WLAN group", err.Error())
 		return
@@ -88,7 +89,7 @@ func (r *wlanGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	g, err := r.client.GetWLANGroup(ctx, state.ID.ValueString())
+	g, err := r.net.WiFi().WLANGroups().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -107,7 +108,7 @@ func (r *wlanGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateWLANGroup(ctx, plan.toWLANGroup())
+	updated, err := r.net.WiFi().WLANGroups().Update(ctx, plan.ID.ValueString(), plan.toWLANGroup())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update WLAN group", err.Error())
 		return
@@ -127,7 +128,7 @@ func (r *wlanGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 	if state.AttrNoDelete.ValueBool() {
 		return
 	}
-	if err := r.client.DeleteWLANGroup(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.WiFi().WLANGroups().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete WLAN group", err.Error())
 	}
 }
@@ -136,15 +137,15 @@ func (r *wlanGroupResource) ImportState(ctx context.Context, req resource.Import
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *wlanGroupResourceModel) toWLANGroup() *unifi.WLANGroup {
-	return &unifi.WLANGroup{
-		ID:   m.ID.ValueString(),
-		Name: m.Name.ValueString(),
+func (m *wlanGroupResourceModel) toWLANGroup() *wire.Wlangroup {
+	return &wire.Wlangroup{
+		UnderscoreId: strPtrOrNil(m.ID),
+		Name:         strPtrOrNil(m.Name),
 	}
 }
 
-func (m *wlanGroupResourceModel) fromWLANGroup(g *unifi.WLANGroup) {
-	m.ID = types.StringValue(g.ID)
-	m.Name = types.StringValue(g.Name)
+func (m *wlanGroupResourceModel) fromWLANGroup(g *wire.Wlangroup) {
+	m.ID = types.StringValue(deref(g.UnderscoreId))
+	m.Name = types.StringValue(deref(g.Name))
 	m.AttrNoDelete = types.BoolValue(g.AttrNoDelete != nil && *g.AttrNoDelete)
 }

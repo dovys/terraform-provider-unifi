@@ -352,17 +352,19 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toWLANConf diags: %v", diags)
 	}
-	if conf.Name != "Home" || conf.Security != "wpapsk" || conf.NetworkConfID != "net1" {
+	if derefStr(conf.Name) != "Home" || string(derefEnum(conf.Security)) != "wpapsk" || derefStr(conf.NetworkconfId) != "net1" {
 		t.Errorf("scalar mapping wrong: %+v", conf)
 	}
-	if conf.XPassphrase != "hunter2hunter2" {
-		t.Errorf("passphrase mapping wrong: %q", conf.XPassphrase)
+	if derefStr(conf.XPassphrase) != "hunter2hunter2" {
+		t.Errorf("passphrase mapping wrong: %q", derefStr(conf.XPassphrase))
 	}
 	if conf.Enabled == nil || !*conf.Enabled {
 		t.Errorf("enabled should be &true")
 	}
-	if len(conf.WLANBands) != 2 || len(conf.APGroupIDs) != 1 || len(conf.MACFilterList) != 1 {
-		t.Errorf("set mapping wrong: bands=%v aps=%v macs=%v", conf.WLANBands, conf.APGroupIDs, conf.MACFilterList)
+	if conf.WlanBands == nil || len(*conf.WlanBands) != 2 ||
+		conf.ApGroupIds == nil || len(*conf.ApGroupIds) != 1 ||
+		conf.MacFilterList == nil || len(*conf.MacFilterList) != 1 {
+		t.Errorf("set mapping wrong: bands=%v aps=%v macs=%v", conf.WlanBands, conf.ApGroupIds, conf.MacFilterList)
 	}
 	if conf.GroupRekey == nil || *conf.GroupRekey != 3600 {
 		t.Errorf("group_rekey mapping wrong: %v", conf.GroupRekey)
@@ -371,9 +373,12 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	// Wire → state. The controller commonly echoes an empty x_passphrase on
 	// read; the passphrase must stay whatever the config set rather than wiping.
 	out := *m // carry the configured passphrase
-	out.fromWLANConf(&unifi.WLANConf{
-		ID: "wlan9", Name: "Home", Security: "wpapsk", WPAMode: "wpa2",
-		XPassphrase: "", NetworkConfID: "net1", WLANBands: []string{"2g", "5g"},
+	wpapsk := wire.WlanconfSecurity("wpapsk")
+	wpa2 := wire.WlanconfWpaMode("wpa2")
+	bands := []wire.WlanconfWlanBands{"2g", "5g"}
+	out.fromWLANConf(&wire.Wlanconf{
+		UnderscoreId: sp("wlan9"), Name: sp("Home"), Security: &wpapsk, WpaMode: &wpa2,
+		XPassphrase: sp(""), NetworkconfId: sp("net1"), WlanBands: &bands,
 	})
 	if out.ID.ValueString() != "wlan9" {
 		t.Errorf("id round-trip wrong: %q", out.ID.ValueString())
@@ -383,7 +388,7 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	}
 
 	// When the controller does return a passphrase, adopt it.
-	out.fromWLANConf(&unifi.WLANConf{ID: "wlan9", Name: "Home", XPassphrase: "fromserver1234"})
+	out.fromWLANConf(&wire.Wlanconf{UnderscoreId: sp("wlan9"), Name: sp("Home"), XPassphrase: sp("fromserver1234")})
 	if out.Passphrase.ValueString() != "fromserver1234" {
 		t.Errorf("passphrase should adopt the controller value, got %q", out.Passphrase.ValueString())
 	}
@@ -404,18 +409,18 @@ func TestAPGroup_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toAPGroup diags: %v", diags)
 	}
-	if g.Name != "Upstairs" || g.DeviceMACs == nil || len(g.DeviceMACs) != 0 {
-		t.Errorf("null device_macs must become an empty (non-nil) slice: %+v", g.DeviceMACs)
+	if g.Name != "Upstairs" || g.DeviceMacs == nil || len(g.DeviceMacs) != 0 {
+		t.Errorf("null device_macs must become an empty (non-nil) slice: %+v", g.DeviceMacs)
 	}
 
 	m.DeviceMACs = sliceToStringSet([]string{"aa:bb:cc:00:11:22", "de:ad:be:ef:00:01"})
 	g = m.toAPGroup(ctx, &diags)
-	if len(g.DeviceMACs) != 2 {
-		t.Errorf("device_macs mapping wrong: %v", g.DeviceMACs)
+	if len(g.DeviceMacs) != 2 {
+		t.Errorf("device_macs mapping wrong: %v", g.DeviceMacs)
 	}
 
 	var out apGroupResourceModel
-	out.fromAPGroup(&unifi.APGroup{ID: "ag5", Name: "All APs", DeviceMACs: []string{"aa:bb:cc:00:11:22"}})
+	out.fromAPGroup(&wire.Apgroups{UnderscoreId: sp("ag5"), Name: "All APs", DeviceMacs: []string{"aa:bb:cc:00:11:22"}})
 	if out.ID.ValueString() != "ag5" || out.Name.ValueString() != "All APs" {
 		t.Errorf("fromAPGroup wrong: %+v", out)
 	}
@@ -430,7 +435,7 @@ func TestAPGroup_RoundTrip(t *testing.T) {
 
 	// The protected default group reads attr_no_delete = true (destroy → no-op).
 	protected := true
-	out.fromAPGroup(&unifi.APGroup{ID: "default", Name: "All APs", AttrNoDelete: &protected})
+	out.fromAPGroup(&wire.Apgroups{UnderscoreId: sp("default"), Name: "All APs", AttrNoDelete: &protected})
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}
@@ -964,12 +969,12 @@ func TestWLANGroup_RoundTrip(t *testing.T) {
 		Name: types.StringValue("Guest APs"),
 	}
 	g := m.toWLANGroup()
-	if g.Name != "Guest APs" {
+	if derefStr(g.Name) != "Guest APs" {
 		t.Errorf("name mapping wrong: %+v", g)
 	}
 
 	var out wlanGroupResourceModel
-	out.fromWLANGroup(&unifi.WLANGroup{ID: "wg9", Name: "Guest APs"})
+	out.fromWLANGroup(&wire.Wlangroup{UnderscoreId: sp("wg9"), Name: sp("Guest APs")})
 	if out.ID.ValueString() != "wg9" || out.Name.ValueString() != "Guest APs" {
 		t.Errorf("fromWLANGroup wrong: %+v", out)
 	}
@@ -979,7 +984,7 @@ func TestWLANGroup_RoundTrip(t *testing.T) {
 
 	// The protected default group reads attr_no_delete = true (destroy → no-op).
 	protected := true
-	out.fromWLANGroup(&unifi.WLANGroup{ID: "default", Name: "Default", AttrNoDelete: &protected})
+	out.fromWLANGroup(&wire.Wlangroup{UnderscoreId: sp("default"), Name: sp("Default"), AttrNoDelete: &protected})
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}

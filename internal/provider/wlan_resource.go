@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -26,7 +27,7 @@ var (
 func NewWLANResource() resource.Resource { return &wlanResource{} }
 
 type wlanResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 // wlanResourceModel covers the configurable wlanconf surface. Most attributes
@@ -189,7 +190,7 @@ func (r *wlanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 
 func (r *wlanResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -199,7 +200,7 @@ func (r *wlanResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateWLAN(ctx, plan.toWLANConf(ctx, &resp.Diagnostics))
+	created, err := r.net.WiFi().WLANs().Create(ctx, plan.toWLANConf(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create WLAN", err.Error())
 		return
@@ -214,7 +215,7 @@ func (r *wlanResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	w, err := r.client.GetWLAN(ctx, state.ID.ValueString())
+	w, err := r.net.WiFi().WLANs().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -233,7 +234,7 @@ func (r *wlanResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateWLAN(ctx, plan.toWLANConf(ctx, &resp.Diagnostics))
+	updated, err := r.net.WiFi().WLANs().Update(ctx, plan.ID.ValueString(), plan.toWLANConf(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update WLAN", err.Error())
 		return
@@ -248,7 +249,7 @@ func (r *wlanResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteWLAN(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.WiFi().WLANs().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete WLAN", err.Error())
 	}
 }
@@ -257,100 +258,127 @@ func (r *wlanResource) ImportState(ctx context.Context, req resource.ImportState
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *wlanResourceModel) toWLANConf(ctx context.Context, diags *diag.Diagnostics) *unifi.WLANConf {
-	w := &unifi.WLANConf{
-		ID:                    m.ID.ValueString(),
-		Name:                  m.Name.ValueString(),
+func (m *wlanResourceModel) toWLANConf(ctx context.Context, diags *diag.Diagnostics) *wire.Wlanconf {
+	w := &wire.Wlanconf{
+		UnderscoreId:          strPtrOrNil(m.ID),
+		Name:                  strPtrOrNil(m.Name),
 		Enabled:               boolPtr(m.Enabled),
-		NetworkConfID:         strOrEmpty(m.NetworkID),
-		Security:              strOrEmpty(m.Security),
-		WPAMode:               strOrEmpty(m.WPAMode),
-		XPassphrase:           strOrEmpty(m.Passphrase),
-		WPA3Support:           boolPtr(m.WPA3Support),
-		WPA3Transition:        boolPtr(m.WPA3Transition),
-		WPA3Enhanced192:       boolPtr(m.WPA3Enhanced192),
-		PMFMode:               strOrEmpty(m.PMFMode),
-		APGroupMode:           strOrEmpty(m.APGroupMode),
-		UserGroupID:           strOrEmpty(m.UserGroupID),
-		HideSSID:              boolPtr(m.HideSSID),
+		NetworkconfId:         strPtrOrNil(m.NetworkID),
+		Security:              (*wire.WlanconfSecurity)(strPtrOrNil(m.Security)),
+		WpaMode:               (*wire.WlanconfWpaMode)(strPtrOrNil(m.WPAMode)),
+		XPassphrase:           strPtrOrNil(m.Passphrase),
+		Wpa3Support:           boolPtr(m.WPA3Support),
+		Wpa3Transition:        boolPtr(m.WPA3Transition),
+		Wpa3Enhanced192:       boolPtr(m.WPA3Enhanced192),
+		PmfMode:               (*wire.WlanconfPmfMode)(strPtrOrNil(m.PMFMode)),
+		ApGroupMode:           (*wire.WlanconfApGroupMode)(strPtrOrNil(m.APGroupMode)),
+		UsergroupId:           strPtrOrNil(m.UserGroupID),
+		HideSsid:              boolPtr(m.HideSSID),
 		IsGuest:               boolPtr(m.IsGuest),
 		L2Isolation:           boolPtr(m.L2Isolation),
-		ProxyARP:              boolPtr(m.ProxyARP),
-		BSSTransition:         boolPtr(m.BSSTransition),
-		UAPSDEnabled:          boolPtr(m.UAPSDEnabled),
+		ProxyArp:              boolPtr(m.ProxyARP),
+		BssTransition:         boolPtr(m.BSSTransition),
+		UapsdEnabled:          boolPtr(m.UAPSDEnabled),
 		FastRoamingEnabled:    boolPtr(m.FastRoamingEnabled),
-		MCastEnhanceEnabled:   boolPtr(m.MCastEnhanceEnabled),
-		No2GHzOUI:             boolPtr(m.No2GHzOUI),
-		MLOEnabled:            boolPtr(m.MLOEnabled),
-		MACFilterEnabled:      boolPtr(m.MACFilterEnabled),
-		MACFilterPolicy:       strOrEmpty(m.MACFilterPolicy),
-		MinrateNGEnabled:      boolPtr(m.MinrateNGEnabled),
-		MinrateNGDataRateKbps: intPtr(m.MinrateNGDataRateKbps),
-		MinrateNAEnabled:      boolPtr(m.MinrateNAEnabled),
-		MinrateNADataRateKbps: intPtr(m.MinrateNADataRateKbps),
+		McastenhanceEnabled:   boolPtr(m.MCastEnhanceEnabled),
+		No2ghzOui:             boolPtr(m.No2GHzOUI),
+		MloEnabled:            boolPtr(m.MLOEnabled),
+		MacFilterEnabled:      boolPtr(m.MACFilterEnabled),
+		MacFilterPolicy:       (*wire.WlanconfMacFilterPolicy)(strPtrOrNil(m.MACFilterPolicy)),
+		MinrateNgEnabled:      boolPtr(m.MinrateNGEnabled),
+		MinrateNgDataRateKbps: intPtr(m.MinrateNGDataRateKbps),
+		MinrateNaEnabled:      boolPtr(m.MinrateNAEnabled),
+		MinrateNaDataRateKbps: intPtr(m.MinrateNADataRateKbps),
 		GroupRekey:            intPtr(m.GroupRekey),
-		RADIUSMACAuthEnabled:  boolPtr(m.RADIUSMACAuthEnabled),
+		RadiusMacAuthEnabled:  boolPtr(m.RADIUSMACAuthEnabled),
 		Hotspot2confEnabled:   boolPtr(m.Hotspot2Enabled),
 	}
 	// Leave these slices nil when the config is null so GET-merge-PUT preserves
 	// the controller's bands/groups/filter rather than clearing them (the fields
-	// are omitempty — a nil slice is dropped from the overlay).
+	// are omitempty — a nil pointer is dropped from the overlay).
 	if b := stringSetToSlice(ctx, m.Bands, diags); b != nil {
-		w.WLANBands = b
+		bands := make([]wire.WlanconfWlanBands, len(b))
+		for i, v := range b {
+			bands[i] = wire.WlanconfWlanBands(v)
+		}
+		w.WlanBands = &bands
 	}
 	if g := stringSetToSlice(ctx, m.APGroupIDs, diags); g != nil {
-		w.APGroupIDs = g
+		w.ApGroupIds = &g
 	}
 	if l := stringSetToSlice(ctx, m.MACFilterList, diags); l != nil {
-		w.MACFilterList = l
+		w.MacFilterList = &l
 	}
 	return w
 }
 
-func (m *wlanResourceModel) fromWLANConf(w *unifi.WLANConf) {
-	m.ID = types.StringValue(w.ID)
-	m.Name = types.StringValue(w.Name)
+func (m *wlanResourceModel) fromWLANConf(w *wire.Wlanconf) {
+	m.ID = types.StringValue(deref(w.UnderscoreId))
+	m.Name = types.StringValue(deref(w.Name))
 	m.Enabled = boolToState(w.Enabled)
-	m.NetworkID = strToStateOptional(w.NetworkConfID)
-	m.SettingPreference = types.StringValue(w.SettingPreference)
-	m.Security = types.StringValue(w.Security)
-	m.WPAMode = types.StringValue(w.WPAMode)
+	m.NetworkID = strToStateOptional(deref(w.NetworkconfId))
+	m.SettingPreference = types.StringValue(string(derefEnum(w.SettingPreference)))
+	m.Security = types.StringValue(string(derefEnum(w.Security)))
+	m.WPAMode = types.StringValue(string(derefEnum(w.WpaMode)))
 	// passphrase is Optional+Computed and write-preserving. Adopt the controller's
 	// value when it echoes one; if it echoes empty, keep the configured/prior key
 	// rather than wiping it, and fall back to "" only when nothing was set (so a
 	// Computed value is always known after apply — never unknown/null).
 	switch {
-	case w.XPassphrase != "":
-		m.Passphrase = types.StringValue(w.XPassphrase)
+	case deref(w.XPassphrase) != "":
+		m.Passphrase = types.StringValue(deref(w.XPassphrase))
 	case m.Passphrase.IsNull() || m.Passphrase.IsUnknown():
 		m.Passphrase = types.StringValue("")
 	}
-	m.WPA3Support = boolToState(w.WPA3Support)
-	m.WPA3Transition = boolToState(w.WPA3Transition)
-	m.WPA3Enhanced192 = boolToState(w.WPA3Enhanced192)
-	m.PMFMode = types.StringValue(w.PMFMode)
-	m.Bands = sliceToStringSet(w.WLANBands)
-	m.APGroupIDs = sliceToStringSet(w.APGroupIDs)
-	m.APGroupMode = types.StringValue(w.APGroupMode)
-	m.UserGroupID = strToStateOptional(w.UserGroupID)
-	m.HideSSID = boolToState(w.HideSSID)
+	m.WPA3Support = boolToState(w.Wpa3Support)
+	m.WPA3Transition = boolToState(w.Wpa3Transition)
+	m.WPA3Enhanced192 = boolToState(w.Wpa3Enhanced192)
+	m.PMFMode = types.StringValue(string(derefEnum(w.PmfMode)))
+	m.Bands = wlanBandsToStringSet(w.WlanBands)
+	m.APGroupIDs = sliceToStringSet(derefSlice(w.ApGroupIds))
+	m.APGroupMode = types.StringValue(string(derefEnum(w.ApGroupMode)))
+	m.UserGroupID = strToStateOptional(deref(w.UsergroupId))
+	m.HideSSID = boolToState(w.HideSsid)
 	m.IsGuest = boolToState(w.IsGuest)
 	m.L2Isolation = boolToState(w.L2Isolation)
-	m.ProxyARP = boolToState(w.ProxyARP)
-	m.BSSTransition = boolToState(w.BSSTransition)
-	m.UAPSDEnabled = boolToState(w.UAPSDEnabled)
+	m.ProxyARP = boolToState(w.ProxyArp)
+	m.BSSTransition = boolToState(w.BssTransition)
+	m.UAPSDEnabled = boolToState(w.UapsdEnabled)
 	m.FastRoamingEnabled = boolToState(w.FastRoamingEnabled)
-	m.MCastEnhanceEnabled = boolToState(w.MCastEnhanceEnabled)
-	m.No2GHzOUI = boolToState(w.No2GHzOUI)
-	m.MLOEnabled = boolToState(w.MLOEnabled)
-	m.MACFilterEnabled = boolToState(w.MACFilterEnabled)
-	m.MACFilterPolicy = types.StringValue(w.MACFilterPolicy)
-	m.MACFilterList = sliceToStringSet(w.MACFilterList)
-	m.MinrateNGEnabled = boolToState(w.MinrateNGEnabled)
-	m.MinrateNGDataRateKbps = intToState(w.MinrateNGDataRateKbps)
-	m.MinrateNAEnabled = boolToState(w.MinrateNAEnabled)
-	m.MinrateNADataRateKbps = intToState(w.MinrateNADataRateKbps)
+	m.MCastEnhanceEnabled = boolToState(w.McastenhanceEnabled)
+	m.No2GHzOUI = boolToState(w.No2ghzOui)
+	m.MLOEnabled = boolToState(w.MloEnabled)
+	m.MACFilterEnabled = boolToState(w.MacFilterEnabled)
+	m.MACFilterPolicy = types.StringValue(string(derefEnum(w.MacFilterPolicy)))
+	m.MACFilterList = sliceToStringSet(derefSlice(w.MacFilterList))
+	m.MinrateNGEnabled = boolToState(w.MinrateNgEnabled)
+	m.MinrateNGDataRateKbps = intToState(w.MinrateNgDataRateKbps)
+	m.MinrateNAEnabled = boolToState(w.MinrateNaEnabled)
+	m.MinrateNADataRateKbps = intToState(w.MinrateNaDataRateKbps)
 	m.GroupRekey = intToState(w.GroupRekey)
-	m.RADIUSMACAuthEnabled = boolToState(w.RADIUSMACAuthEnabled)
+	m.RADIUSMACAuthEnabled = boolToState(w.RadiusMacAuthEnabled)
 	m.Hotspot2Enabled = boolToState(w.Hotspot2confEnabled)
+}
+
+// derefSlice returns the pointed-to slice, or nil for a nil pointer — so the
+// nil/null and explicit-empty distinction sliceToStringSet relies on survives
+// the wire type's *[]string fields.
+func derefSlice(p *[]string) []string {
+	if p == nil {
+		return nil
+	}
+	return *p
+}
+
+// wlanBandsToStringSet maps the wire enum-band slice (*[]WlanconfWlanBands) back
+// to a framework string set, preserving the nil→null distinction.
+func wlanBandsToStringSet(p *[]wire.WlanconfWlanBands) types.Set {
+	if p == nil {
+		return sliceToStringSet(nil)
+	}
+	out := make([]string, len(*p))
+	for i, b := range *p {
+		out[i] = string(b)
+	}
+	return sliceToStringSet(out)
 }

@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -24,7 +25,7 @@ var (
 func NewAPGroupResource() resource.Resource { return &apGroupResource{} }
 
 type apGroupResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type apGroupResourceModel struct {
@@ -71,7 +72,7 @@ func (r *apGroupResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 
 func (r *apGroupResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -81,7 +82,7 @@ func (r *apGroupResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateAPGroup(ctx, plan.toAPGroup(ctx, &resp.Diagnostics))
+	created, err := r.net.WiFi().APGroups().Create(ctx, plan.toAPGroup(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create AP group", err.Error())
 		return
@@ -96,16 +97,26 @@ func (r *apGroupResource) Read(ctx context.Context, req resource.ReadRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	g, err := r.client.GetAPGroup(ctx, state.ID.ValueString())
+	// The v2 surface has no GET-by-id (the old GetAPGroup itself listed and
+	// filtered) — list and find the group by _id, removing the resource if it's
+	// gone (invariant 5: remove-on-404).
+	groups, err := r.net.WiFi().APGroups().List(ctx)
 	if err != nil {
-		if isNotFoundErr(err) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
 		resp.Diagnostics.AddError("Failed to read AP group", err.Error())
 		return
 	}
-	state.fromAPGroup(g)
+	var found *wire.Apgroups
+	for i := range groups {
+		if deref(groups[i].UnderscoreId) == state.ID.ValueString() {
+			found = &groups[i]
+			break
+		}
+	}
+	if found == nil {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+	state.fromAPGroup(found)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -115,7 +126,7 @@ func (r *apGroupResource) Update(ctx context.Context, req resource.UpdateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateAPGroup(ctx, plan.toAPGroup(ctx, &resp.Diagnostics))
+	updated, err := r.net.WiFi().APGroups().Update(ctx, plan.ID.ValueString(), plan.toAPGroup(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update AP group", err.Error())
 		return
@@ -136,7 +147,7 @@ func (r *apGroupResource) Delete(ctx context.Context, req resource.DeleteRequest
 	if state.AttrNoDelete.ValueBool() {
 		return
 	}
-	if err := r.client.DeleteAPGroup(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.WiFi().APGroups().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete AP group", err.Error())
 	}
 }
@@ -145,21 +156,21 @@ func (r *apGroupResource) ImportState(ctx context.Context, req resource.ImportSt
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *apGroupResourceModel) toAPGroup(ctx context.Context, diags *diag.Diagnostics) *unifi.APGroup {
+func (m *apGroupResourceModel) toAPGroup(ctx context.Context, diags *diag.Diagnostics) *wire.Apgroups {
 	macs := stringSetToSlice(ctx, m.DeviceMACs, diags)
 	if macs == nil {
 		macs = []string{} // device_macs is non-omitempty: send an explicit empty array
 	}
-	return &unifi.APGroup{
-		ID:         m.ID.ValueString(),
-		Name:       m.Name.ValueString(),
-		DeviceMACs: macs,
+	return &wire.Apgroups{
+		UnderscoreId: strPtrOrNil(m.ID),
+		Name:         m.Name.ValueString(),
+		DeviceMacs:   macs,
 	}
 }
 
-func (m *apGroupResourceModel) fromAPGroup(g *unifi.APGroup) {
-	m.ID = types.StringValue(g.ID)
+func (m *apGroupResourceModel) fromAPGroup(g *wire.Apgroups) {
+	m.ID = types.StringValue(deref(g.UnderscoreId))
 	m.Name = types.StringValue(g.Name)
-	m.DeviceMACs = sliceToStringSet(g.DeviceMACs)
+	m.DeviceMACs = sliceToStringSet(g.DeviceMacs)
 	m.AttrNoDelete = types.BoolValue(g.AttrNoDelete != nil && *g.AttrNoDelete)
 }
