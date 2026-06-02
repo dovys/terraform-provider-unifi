@@ -193,19 +193,20 @@ func TestDNSRecord_RoundTrip(t *testing.T) {
 		Weight:   types.Int64Null(),
 	}
 	rec := m.toRecord()
-	if rec.Key != "host.example.com" || rec.RecordType != "A" || rec.Value != "10.0.0.5" {
+	if rec.Key != "host.example.com" || derefEnum(rec.RecordType) != "A" || rec.Value != "10.0.0.5" {
 		t.Errorf("toRecord wrong: %+v", rec)
 	}
 	if rec.Enabled == nil || !*rec.Enabled {
 		t.Errorf("enabled should be &true")
 	}
-	if rec.TTL != nil || rec.Port != nil {
-		t.Errorf("unset int optionals must be nil: ttl=%v port=%v", rec.TTL, rec.Port)
+	if rec.Ttl != nil || rec.Port != nil {
+		t.Errorf("unset int optionals must be nil: ttl=%v port=%v", rec.Ttl, rec.Port)
 	}
 
 	var out dnsRecordResourceModel
 	ttl := 300
-	out.fromRecord(&unifi.StaticDNSRecord{ID: "d1", Key: "k", RecordType: "CNAME", Value: "t", Enabled: boolPtrLit(false), TTL: &ttl})
+	cname := wire.StaticDnsRecordType("CNAME")
+	out.fromRecord(&wire.StaticDns{UnderscoreId: sp("d1"), Key: "k", RecordType: &cname, Value: "t", Enabled: boolPtrLit(false), Ttl: &ttl})
 	if out.ID.ValueString() != "d1" || out.Type.ValueString() != "CNAME" || out.TTL.ValueInt64() != 300 {
 		t.Errorf("fromRecord wrong: %+v", out)
 	}
@@ -952,13 +953,14 @@ func TestDynamicDNS_RoundTrip(t *testing.T) {
 		Interface: types.StringValue("wan"),
 	}
 	d := m.toDynamicDNS()
-	if d.Service != "dyndns" || d.HostName != "home.example.com" || d.Login != "user" || d.XPassword != "pw" {
+	if derefEnum(d.Service) != "dyndns" || derefStr(d.HostName) != "home.example.com" || derefStr(d.Login) != "user" || derefStr(d.XPassword) != "pw" {
 		t.Errorf("scalar mapping wrong: %+v", d)
 	}
 
 	// Write-only password: a read that doesn't echo it keeps the configured value.
 	out := dynamicDNSResourceModel{Password: types.StringValue("keep-me")}
-	out.fromDynamicDNS(&unifi.DynamicDNS{ID: "dd9", Service: "dyndns", HostName: "home.example.com", Interface: "wan"})
+	dyndns := wire.DynamicdnsService("dyndns")
+	out.fromDynamicDNS(&wire.Dynamicdns{UnderscoreId: sp("dd9"), Service: &dyndns, HostName: sp("home.example.com"), Interface: sp("wan")})
 	if out.ID.ValueString() != "dd9" || out.Service.ValueString() != "dyndns" {
 		t.Errorf("fromDynamicDNS wrong: %+v", out)
 	}

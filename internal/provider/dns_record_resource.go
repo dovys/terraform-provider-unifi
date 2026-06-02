@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -26,7 +27,7 @@ var (
 func NewDNSRecordResource() resource.Resource { return &dnsRecordResource{} }
 
 type dnsRecordResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type dnsRecordResourceModel struct {
@@ -101,7 +102,7 @@ func (r *dnsRecordResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 
 func (r *dnsRecordResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -111,7 +112,7 @@ func (r *dnsRecordResource) Create(ctx context.Context, req resource.CreateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateDNSRecord(ctx, plan.toRecord())
+	created, err := r.net.DNS().Records().Create(ctx, plan.toRecord())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create DNS record", err.Error())
 		return
@@ -126,7 +127,7 @@ func (r *dnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	rec, err := r.client.GetDNSRecord(ctx, state.ID.ValueString())
+	rec, err := r.net.DNS().Records().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -145,7 +146,7 @@ func (r *dnsRecordResource) Update(ctx context.Context, req resource.UpdateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateDNSRecord(ctx, plan.toRecord())
+	updated, err := r.net.DNS().Records().Update(ctx, plan.toRecord())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update DNS record", err.Error())
 		return
@@ -160,7 +161,7 @@ func (r *dnsRecordResource) Delete(ctx context.Context, req resource.DeleteReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteDNSRecord(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.DNS().Records().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete DNS record", err.Error())
 	}
 }
@@ -169,27 +170,27 @@ func (r *dnsRecordResource) ImportState(ctx context.Context, req resource.Import
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *dnsRecordResourceModel) toRecord() *unifi.StaticDNSRecord {
-	return &unifi.StaticDNSRecord{
-		ID:         m.ID.ValueString(),
-		Key:        m.Name.ValueString(),
-		RecordType: strOrEmpty(m.Type),
-		Value:      m.Value.ValueString(),
-		Enabled:    boolPtr(m.Enabled),
-		TTL:        intPtr(m.TTL),
-		Port:       intPtr(m.Port),
-		Priority:   intPtr(m.Priority),
-		Weight:     intPtr(m.Weight),
+func (m *dnsRecordResourceModel) toRecord() *wire.StaticDns {
+	return &wire.StaticDns{
+		UnderscoreId: strPtrOrNil(m.ID),
+		Key:          m.Name.ValueString(),
+		RecordType:   (*wire.StaticDnsRecordType)(strPtrOrNil(m.Type)),
+		Value:        m.Value.ValueString(),
+		Enabled:      boolPtr(m.Enabled),
+		Ttl:          intPtr(m.TTL),
+		Port:         intPtr(m.Port),
+		Priority:     intPtr(m.Priority),
+		Weight:       intPtr(m.Weight),
 	}
 }
 
-func (m *dnsRecordResourceModel) fromRecord(rec *unifi.StaticDNSRecord) {
-	m.ID = types.StringValue(rec.ID)
+func (m *dnsRecordResourceModel) fromRecord(rec *wire.StaticDns) {
+	m.ID = types.StringValue(deref(rec.UnderscoreId))
 	m.Name = types.StringValue(rec.Key)
-	m.Type = types.StringValue(rec.RecordType)
+	m.Type = types.StringValue(string(derefEnum(rec.RecordType)))
 	m.Value = types.StringValue(rec.Value)
 	m.Enabled = boolToState(rec.Enabled)
-	m.TTL = intToState(rec.TTL)
+	m.TTL = intToState(rec.Ttl)
 	m.Port = intToState(rec.Port)
 	m.Priority = intToState(rec.Priority)
 	m.Weight = intToState(rec.Weight)
