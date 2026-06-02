@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
@@ -1223,7 +1223,7 @@ func TestDevice_PortOverrideRoundTrip(t *testing.T) {
 	}
 
 	// from-direction: build the map for the managed key (5) only, ignoring port 9.
-	built := buildPortOverridesMap(ctx, []unifi.PortOverride{
+	built := buildPortOverridesMap(ctx, []network.PortOverride{
 		{PortIdx: 5, Name: "camera", PoEMode: "auto"},
 		{PortIdx: 9, Name: "other"},
 	}, []int{5}, nil, &diags)
@@ -1239,13 +1239,13 @@ func TestDevice_PortOverrideRoundTrip(t *testing.T) {
 
 	// A managed port the controller hasn't echoed yet is kept via the fallback
 	// (the just-written desired value), so it can't vanish post-apply.
-	kept := buildPortOverridesMap(ctx, nil, []int{5}, []unifi.PortOverride{{PortIdx: 5, Name: "camera"}}, &diags)
+	kept := buildPortOverridesMap(ctx, nil, []int{5}, []network.PortOverride{{PortIdx: 5, Name: "camera"}}, &diags)
 	if _, ok := kept.Elements()["5"]; !ok {
 		t.Errorf("declared port 5 should be kept via fallback, got %v", kept)
 	}
 
 	// On Read (nil fallback), a managed port the controller no longer has is dropped.
-	gone := buildPortOverridesMap(ctx, []unifi.PortOverride{{PortIdx: 9}}, []int{5}, nil, &diags)
+	gone := buildPortOverridesMap(ctx, []network.PortOverride{{PortIdx: 9}}, []int{5}, nil, &diags)
 	if _, ok := gone.Elements()["5"]; ok {
 		t.Errorf("port 5 absent on the controller (no fallback) should drop from the map, got %v", gone)
 	}

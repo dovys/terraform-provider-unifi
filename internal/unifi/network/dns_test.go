@@ -17,6 +17,7 @@ type fakeDoer struct {
 	method, path string // the most recent call
 	body         any
 	calls        int
+	bodies       []any // every call's body, in order (for multi-call flows)
 
 	resp  *transport.Response   // returned when queue is empty
 	queue []*transport.Response // popped front-to-back (for multi-call flows)
@@ -25,6 +26,7 @@ type fakeDoer struct {
 
 func (f *fakeDoer) Do(_ context.Context, method, path string, body any) (*transport.Response, error) {
 	f.method, f.path, f.body = method, path, body
+	f.bodies = append(f.bodies, body)
 	f.calls++
 	if f.err != nil {
 		return nil, f.err

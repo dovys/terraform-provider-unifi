@@ -16,7 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -28,7 +29,7 @@ var (
 func NewDeviceResource() resource.Resource { return &deviceResource{} }
 
 type deviceResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type deviceResourceModel struct {
@@ -127,7 +128,7 @@ func (r *deviceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 
 func (r *deviceResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -139,7 +140,7 @@ func (r *deviceResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	mac := strings.ToLower(strings.TrimSpace(plan.MAC.ValueString()))
-	dev, err := r.client.GetDeviceByMAC(ctx, mac)
+	dev, err := r.net.Devices().GetByMAC(ctx, mac)
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.Diagnostics.AddError("Device not found",
@@ -153,16 +154,16 @@ func (r *deviceResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	// Adopt if the controller sees the device but hasn't adopted it yet.
 	if dev.Adopted == nil || !*dev.Adopted {
-		if err := r.client.AdoptDevice(ctx, mac); err != nil {
+		if err := r.net.Devices().Adopt(ctx, mac); err != nil {
 			resp.Diagnostics.AddError("Failed to adopt device", err.Error())
 			return
 		}
-		if re, err := r.client.GetDeviceByMAC(ctx, mac); err == nil {
+		if re, err := r.net.Devices().GetByMAC(ctx, mac); err == nil {
 			dev = re
 		}
 	}
 
-	r.applyConfig(ctx, &plan, dev.ID, nil, &resp.Diagnostics)
+	r.applyConfig(ctx, &plan, deref(dev.UnderscoreId), nil, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -175,7 +176,7 @@ func (r *deviceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	dev, err := r.client.GetDevice(ctx, state.ID.ValueString())
+	dev, err := r.net.Devices().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -215,7 +216,7 @@ func (r *deviceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 	if state.ForgetOnDestroy.ValueBool() {
-		if err := r.client.ForgetDevice(ctx, state.MAC.ValueString()); err != nil {
+		if err := r.net.Devices().Forget(ctx, state.MAC.ValueString()); err != nil {
 			resp.Diagnostics.AddError("Failed to forget device", err.Error())
 		}
 		return
@@ -226,8 +227,8 @@ func (r *deviceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	if len(priorKeys) == 0 {
 		return
 	}
-	dev := &unifi.Device{ID: state.ID.ValueString()}
-	if _, err := r.client.UpdateDevice(ctx, dev, priorKeys); err != nil && !isNotFoundErr(err) {
+	// Empty config + the prior owned ports → the merge drops them (reverts).
+	if _, err := r.net.Devices().UpdateConfig(ctx, state.ID.ValueString(), network.DeviceConfig{}, priorKeys); err != nil && !isNotFoundErr(err) {
 		resp.Diagnostics.AddError("Failed to revert device port overrides", err.Error())
 	}
 }
@@ -236,13 +237,13 @@ func (r *deviceResource) ImportState(ctx context.Context, req resource.ImportSta
 	id := strings.TrimSpace(req.ID)
 	// Accept either a controller _id or a MAC (containing ':').
 	if strings.Contains(id, ":") {
-		dev, err := r.client.GetDeviceByMAC(ctx, id)
+		dev, err := r.net.Devices().GetByMAC(ctx, id)
 		if err != nil {
 			resp.Diagnostics.AddError("Import failed", fmt.Sprintf("no device with MAC %q: %s", id, err))
 			return
 		}
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), dev.ID)...)
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("mac"), dev.MAC)...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), deref(dev.UnderscoreId))...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("mac"), deref(dev.Mac))...)
 		return
 	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
@@ -258,17 +259,16 @@ func (r *deviceResource) applyConfig(ctx context.Context, plan *deviceResourceMo
 	}
 	owned := unionInts(priorKeys, planKeys)
 
-	dev := &unifi.Device{
-		ID:               id,
-		Name:             strOrEmpty(plan.Name),
-		LEDOverride:      strOrEmpty(plan.LEDOverride),
-		LEDOverrideColor: strOrEmpty(plan.LEDOverrideColor),
-		MgmtNetworkID:    strOrEmpty(plan.MgmtNetworkID),
-		PortOverrides:    desired,
+	cfg := network.DeviceConfig{
+		Name:                       strOrEmpty(plan.Name),
+		LEDOverride:                strOrEmpty(plan.LEDOverride),
+		LEDOverrideColor:           strOrEmpty(plan.LEDOverrideColor),
+		LEDOverrideColorBrightness: intPtr(plan.LEDOverrideColorBrightness),
+		MgmtNetworkID:              strOrEmpty(plan.MgmtNetworkID),
+		PortOverrides:              desired,
 	}
-	dev.LEDOverrideColorBrightness = intPtr(plan.LEDOverrideColorBrightness)
 
-	updated, err := r.client.UpdateDevice(ctx, dev, owned)
+	updated, err := r.net.Devices().UpdateConfig(ctx, id, cfg, owned)
 	if err != nil {
 		diags.AddError("Failed to apply device config", err.Error())
 		return
@@ -276,32 +276,38 @@ func (r *deviceResource) applyConfig(ctx context.Context, plan *deviceResourceMo
 	plan.fromDevice(ctx, updated, planKeys, desired, diags)
 }
 
-// fromDevice maps a client Device onto the model. keys selects which ports to
+// fromDevice maps a wire Device onto the model. keys selects which ports to
 // surface in port_overrides (the Terraform-managed set); others are ignored.
 // fallback (the just-written desired overrides, nil on Read) keeps a declared
 // port in state when the controller hasn't echoed it back yet.
-func (m *deviceResourceModel) fromDevice(ctx context.Context, d *unifi.Device, keys []int, fallback []unifi.PortOverride, diags *diag.Diagnostics) {
-	m.ID = types.StringValue(d.ID)
+func (m *deviceResourceModel) fromDevice(ctx context.Context, d *wire.Device, keys []int, fallback []network.PortOverride, diags *diag.Diagnostics) {
+	m.ID = types.StringValue(deref(d.UnderscoreId))
 	if m.MAC.IsNull() || m.MAC.IsUnknown() {
-		m.MAC = types.StringValue(d.MAC) // import path; otherwise keep the configured value
+		m.MAC = types.StringValue(deref(d.Mac)) // import path; otherwise keep the configured value
 	}
-	m.Name = strToStateOptional(d.Name)
-	m.LEDOverride = strToStateOptional(d.LEDOverride)
-	m.LEDOverrideColor = strToStateOptional(d.LEDOverrideColor)
-	m.LEDOverrideColorBrightness = intToState(d.LEDOverrideColorBrightness)
-	m.MgmtNetworkID = strToStateOptional(d.MgmtNetworkID)
-	m.Model = types.StringValue(d.Model)
-	m.Type = types.StringValue(d.Type)
-	m.Version = types.StringValue(d.Version)
-	m.IP = types.StringValue(d.IP)
+	m.Name = strToStateOptional(deref(d.Name))
+	m.LEDOverride = strToStateOptional(string(derefEnum(d.LedOverride)))
+	m.LEDOverrideColor = strToStateOptional(deref(d.LedOverrideColor))
+	m.LEDOverrideColorBrightness = intToState(d.LedOverrideColorBrightness)
+	m.MgmtNetworkID = strToStateOptional(deref(d.MgmtNetworkId))
+	m.Model = types.StringValue(deref(d.Model))
+	m.Type = types.StringValue(deref(d.Type))
+	m.Version = types.StringValue(deref(d.Version))
+	m.IP = types.StringValue(deref(d.Ip))
 	m.State = intToState(d.State)
 	m.Adopted = boolToState(d.Adopted)
-	m.PortOverrides = buildPortOverridesMap(ctx, d.PortOverrides, keys, fallback, diags)
+
+	overrides, err := network.PortOverridesOf(d)
+	if err != nil {
+		diags.AddError("Failed to decode device port overrides", err.Error())
+		return
+	}
+	m.PortOverrides = buildPortOverridesMap(ctx, overrides, keys, fallback, diags)
 }
 
 // desiredPortOverrides decodes the config map into client port overrides and
 // returns them with the sorted list of port numbers.
-func desiredPortOverrides(ctx context.Context, m types.Map, diags *diag.Diagnostics) ([]unifi.PortOverride, []int) {
+func desiredPortOverrides(ctx context.Context, m types.Map, diags *diag.Diagnostics) ([]network.PortOverride, []int) {
 	if m.IsNull() || m.IsUnknown() {
 		return nil, nil
 	}
@@ -310,7 +316,7 @@ func desiredPortOverrides(ctx context.Context, m types.Map, diags *diag.Diagnost
 	if diags.HasError() {
 		return nil, nil
 	}
-	out := make([]unifi.PortOverride, 0, len(elems))
+	out := make([]network.PortOverride, 0, len(elems))
 	keys := make([]int, 0, len(elems))
 	for k, o := range elems {
 		idx, err := strconv.Atoi(k)
@@ -318,7 +324,7 @@ func desiredPortOverrides(ctx context.Context, m types.Map, diags *diag.Diagnost
 			diags.AddError("Invalid port number", fmt.Sprintf("port_overrides key %q must be an integer port number", k))
 			continue
 		}
-		out = append(out, portOverrideToUnifi(ctx, idx, o, diags))
+		out = append(out, portOverrideToNet(ctx, idx, o, diags))
 		keys = append(keys, idx)
 	}
 	sort.Ints(keys)
@@ -331,16 +337,16 @@ func desiredPortOverrides(ctx context.Context, m types.Map, diags *diag.Diagnost
 // applied immediately after adoption): without it that key would vanish from
 // state and trip the post-apply consistency check. On Read fallback is nil, so a
 // managed port the controller genuinely lost is dropped (drift the next plan fixes).
-func buildPortOverridesMap(ctx context.Context, overrides []unifi.PortOverride, keys []int, fallback []unifi.PortOverride, diags *diag.Diagnostics) types.Map {
+func buildPortOverridesMap(ctx context.Context, overrides []network.PortOverride, keys []int, fallback []network.PortOverride, diags *diag.Diagnostics) types.Map {
 	objType := types.ObjectType{AttrTypes: portOverrideAttrTypes}
 	if len(keys) == 0 {
 		return types.MapValueMust(objType, map[string]attr.Value{})
 	}
-	byIdx := make(map[int]unifi.PortOverride, len(overrides))
+	byIdx := make(map[int]network.PortOverride, len(overrides))
 	for _, po := range overrides {
 		byIdx[po.PortIdx] = po
 	}
-	fbIdx := make(map[int]unifi.PortOverride, len(fallback))
+	fbIdx := make(map[int]network.PortOverride, len(fallback))
 	for _, po := range fallback {
 		fbIdx[po.PortIdx] = po
 	}
@@ -352,7 +358,7 @@ func buildPortOverridesMap(ctx context.Context, overrides []unifi.PortOverride, 
 				continue
 			}
 		}
-		obj, d := types.ObjectValueFrom(ctx, portOverrideAttrTypes, portOverrideFromUnifi(po))
+		obj, d := types.ObjectValueFrom(ctx, portOverrideAttrTypes, portOverrideFromNet(po))
 		diags.Append(d...)
 		elems[strconv.Itoa(k)] = obj
 	}

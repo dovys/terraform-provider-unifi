@@ -10,7 +10,8 @@ import (
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -21,7 +22,7 @@ var (
 func NewDeviceDataSource() datasource.DataSource { return &deviceDataSource{} }
 
 type deviceDataSource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 // deviceDataSourceModel is the read-only view: look up by mac or id, expose the
@@ -86,7 +87,7 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 
 func (d *deviceDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		d.client = c
+		d.net = c.Network()
 	}
 }
 
@@ -105,13 +106,13 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	var (
-		dev *unifi.Device
+		dev *wire.Device
 		err error
 	)
 	if id != "" {
-		dev, err = d.client.GetDevice(ctx, id)
+		dev, err = d.net.Devices().Get(ctx, id)
 	} else {
-		dev, err = d.client.GetDeviceByMAC(ctx, mac)
+		dev, err = d.net.Devices().GetByMAC(ctx, mac)
 	}
 	if err != nil {
 		if isNotFoundErr(err) {
@@ -122,27 +123,32 @@ func (d *deviceDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	cfg.ID = types.StringValue(dev.ID)
-	cfg.MAC = types.StringValue(dev.MAC)
-	cfg.Name = strToStateOptional(dev.Name)
-	cfg.LEDOverride = strToStateOptional(dev.LEDOverride)
-	cfg.LEDOverrideColor = strToStateOptional(dev.LEDOverrideColor)
-	cfg.LEDOverrideColorBrightness = intToState(dev.LEDOverrideColorBrightness)
-	cfg.MgmtNetworkID = strToStateOptional(dev.MgmtNetworkID)
-	cfg.Model = types.StringValue(dev.Model)
-	cfg.Type = types.StringValue(dev.Type)
-	cfg.Version = types.StringValue(dev.Version)
-	cfg.IP = types.StringValue(dev.IP)
+	cfg.ID = types.StringValue(deref(dev.UnderscoreId))
+	cfg.MAC = types.StringValue(deref(dev.Mac))
+	cfg.Name = strToStateOptional(deref(dev.Name))
+	cfg.LEDOverride = strToStateOptional(string(derefEnum(dev.LedOverride)))
+	cfg.LEDOverrideColor = strToStateOptional(deref(dev.LedOverrideColor))
+	cfg.LEDOverrideColorBrightness = intToState(dev.LedOverrideColorBrightness)
+	cfg.MgmtNetworkID = strToStateOptional(deref(dev.MgmtNetworkId))
+	cfg.Model = types.StringValue(deref(dev.Model))
+	cfg.Type = types.StringValue(deref(dev.Type))
+	cfg.Version = types.StringValue(deref(dev.Version))
+	cfg.IP = types.StringValue(deref(dev.Ip))
 	cfg.State = intToState(dev.State)
 	cfg.Adopted = boolToState(dev.Adopted)
 
+	overrides, err := network.PortOverridesOf(dev)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to decode device port overrides", err.Error())
+		return
+	}
 	// Expose every port the controller has an override for.
-	keys := make([]int, 0, len(dev.PortOverrides))
-	for _, po := range dev.PortOverrides {
+	keys := make([]int, 0, len(overrides))
+	for _, po := range overrides {
 		keys = append(keys, po.PortIdx)
 	}
 	sort.Ints(keys)
-	cfg.PortOverrides = buildPortOverridesMap(ctx, dev.PortOverrides, keys, nil, &resp.Diagnostics)
+	cfg.PortOverrides = buildPortOverridesMap(ctx, overrides, keys, nil, &resp.Diagnostics)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &cfg)...)
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 )
 
 // portOverrideAttrTypes is the object type for one entry of the device
@@ -87,10 +87,10 @@ func portOverrideSchemaAttrs(computed bool) map[string]schema.Attribute {
 	}
 }
 
-// portOverrideToUnifi converts one decoded port-override object (with its port
+// portOverrideToNet converts one decoded port-override object (with its port
 // number) into the client struct. diags collects set-conversion errors.
-func portOverrideToUnifi(ctx context.Context, portIdx int, o portOverrideObject, diags *diag.Diagnostics) unifi.PortOverride {
-	po := unifi.PortOverride{
+func portOverrideToNet(ctx context.Context, portIdx int, o portOverrideObject, diags *diag.Diagnostics) network.PortOverride {
+	po := network.PortOverride{
 		PortIdx:                portIdx,
 		PortconfID:             strOrEmpty(o.PortProfileID),
 		Name:                   strOrEmpty(o.Name),
@@ -116,9 +116,10 @@ func portOverrideToUnifi(ctx context.Context, portIdx int, o portOverrideObject,
 		MulticastRouterMode:    strOrEmpty(o.MulticastRouterMode),
 	}
 	// Unlike unifi_network_port_profile (which forces []string{} to clear), these
-	// stay nil when unset: a per-port override is applied by merge (devices.go
-	// mergePortOverrides overlays omitempty fields onto the existing entry), so a
-	// nil slice correctly preserves the controller's value rather than clearing it.
+	// stay nil when unset: a per-port override is applied by merge (the network
+	// client's mergePortOverrides overlays omitempty fields onto the existing
+	// entry), so a nil slice correctly preserves the controller's value rather
+	// than clearing it.
 	po.ExcludedNetworkConfIDs = stringSetToSlice(ctx, o.ExcludedNetworkIDs, diags)
 	po.PortSecurityMACAddress = stringSetToSlice(ctx, o.PortSecurityMACAddresses, diags)
 	return po
@@ -153,8 +154,8 @@ type portOverrideObject struct {
 	MulticastRouterMode      types.String `tfsdk:"multicast_router_mode"`
 }
 
-// portOverrideFromUnifi builds the framework object for one controller override.
-func portOverrideFromUnifi(po unifi.PortOverride) portOverrideObject {
+// portOverrideFromNet builds the framework object for one controller override.
+func portOverrideFromNet(po network.PortOverride) portOverrideObject {
 	return portOverrideObject{
 		PortProfileID:            strToStateOptional(po.PortconfID),
 		Name:                     strToStateOptional(po.Name),

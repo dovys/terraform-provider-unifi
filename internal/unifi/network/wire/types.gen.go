@@ -21187,6 +21187,7 @@ type DescribedFeaturesLimitationRequiredVersion struct {
 // Device defines model for device.
 type Device struct {
 	UnderscoreId *string `json:"_id,omitempty"`
+	Adopted      *bool   `json:"adopted,omitempty"`
 	AfcEnabled   *bool   `json:"afc_enabled,omitempty"`
 	AtfEnabled   *bool   `json:"atf_enabled,omitempty"`
 	AttrHidden   *bool   `json:"attr_hidden,omitempty"`
@@ -21246,6 +21247,7 @@ type Device struct {
 		Up          *bool                 `json:"up,omitempty"`
 	} `json:"hdmi_ports,omitempty"`
 	Hostname                    *string                       `json:"hostname,omitempty"`
+	Ip                          *string                       `json:"ip,omitempty"`
 	JumboframeEnabled           *bool                         `json:"jumboframe_enabled,omitempty"`
 	LcmBrightness               *int                          `json:"lcm_brightness,omitempty"`
 	LcmBrightnessOverride       *bool                         `json:"lcm_brightness_override,omitempty"`
@@ -21275,6 +21277,7 @@ type Device struct {
 	LteSimPin                   *int                          `json:"lte_sim_pin,omitempty"`
 	LteSoftLimit                *int                          `json:"lte_soft_limit,omitempty"`
 	LteUsername                 *string                       `json:"lte_username,omitempty"`
+	Mac                         *string                       `json:"mac,omitempty"`
 	MbbOverrides                *struct {
 		PrimarySlot *DeviceMbbOverridesPrimarySlot `json:"primary_slot,omitempty"`
 		Sim         *[]struct {
@@ -21300,6 +21303,7 @@ type Device struct {
 	MeshMloEnabled    *bool   `json:"mesh_mlo_enabled,omitempty"`
 	MeshStaVapEnabled *bool   `json:"mesh_sta_vap_enabled,omitempty"`
 	MgmtNetworkId     *string `json:"mgmt_network_id,omitempty"`
+	Model             *string `json:"model,omitempty"`
 	Name              *string `json:"name,omitempty"`
 	NutServer         *struct {
 		CredentialRequired *bool   `json:"credential_required,omitempty"`
@@ -21469,12 +21473,15 @@ type Device struct {
 	} `json:"sma_port_config,omitempty"`
 	SnmpContact                 *string            `json:"snmp_contact,omitempty"`
 	SnmpLocation                *string            `json:"snmp_location,omitempty"`
+	State                       *int               `json:"state,omitempty"`
 	StationMode                 *DeviceStationMode `json:"station_mode,omitempty"`
 	StpPriority                 *DeviceStpPriority `json:"stp_priority,omitempty"`
 	StpVersion                  *DeviceStpVersion  `json:"stp_version,omitempty"`
 	SwitchVlanEnabled           *bool              `json:"switch_vlan_enabled,omitempty"`
+	Type                        *string            `json:"type,omitempty"`
 	UbbPairName                 *string            `json:"ubb_pair_name,omitempty"`
 	UpsShutdownRemainingMinutes *int               `json:"ups_shutdown_remaining_minutes,omitempty"`
+	Version                     *string            `json:"version,omitempty"`
 	VideoInfo                   *struct {
 		AudioEnabled  *bool                       `json:"audio_enabled,omitempty"`
 		AudioMode     *DeviceVideoInfoAudioMode   `json:"audio_mode,omitempty"`
