@@ -10,12 +10,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 )
 
-// isNotFoundErr reports whether err is the client's not-found sentinel, so Read
-// can remove the resource from state (invariant 5: remove-on-404).
+// isNotFoundErr reports whether err is a client not-found sentinel, so Read can
+// remove the resource from state (invariant 5: remove-on-404). It matches both
+// the old flat client and the rebuilt substruct client during the migration.
 func isNotFoundErr(err error) bool {
-	return errors.Is(err, unifi.ErrNotFound)
+	return errors.Is(err, unifi.ErrNotFound) || errors.Is(err, network.ErrNotFound)
 }
 
 // clientFromProviderData extracts the configured unifi.Client from the value the

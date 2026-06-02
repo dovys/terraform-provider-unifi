@@ -10,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -22,7 +23,7 @@ var (
 func NewRadiusAccountResource() resource.Resource { return &radiusAccountResource{} }
 
 type radiusAccountResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type radiusAccountResourceModel struct {
@@ -31,7 +32,7 @@ type radiusAccountResourceModel struct {
 	Password         types.String `tfsdk:"password"` // x_password (write-only; controller doesn't echo it)
 	TunnelType       types.Int64  `tfsdk:"tunnel_type"`
 	TunnelMediumType types.Int64  `tfsdk:"tunnel_medium_type"`
-	VLAN             types.String `tfsdk:"vlan"`
+	VLAN             types.Int64  `tfsdk:"vlan"`
 }
 
 func (r *radiusAccountResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -68,7 +69,7 @@ func (r *radiusAccountResource) Schema(_ context.Context, _ resource.SchemaReque
 				Optional:            true,
 				MarkdownDescription: "RADIUS Tunnel-Medium-Type attribute (e.g. `6` = IEEE-802).",
 			},
-			"vlan": schema.StringAttribute{
+			"vlan": schema.Int64Attribute{
 				Optional:            true,
 				MarkdownDescription: "Tunnel-Private-Group-ID — the VLAN id assigned to clients authenticating as this user.",
 			},
@@ -78,7 +79,7 @@ func (r *radiusAccountResource) Schema(_ context.Context, _ resource.SchemaReque
 
 func (r *radiusAccountResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -88,7 +89,7 @@ func (r *radiusAccountResource) Create(ctx context.Context, req resource.CreateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateRadiusAccount(ctx, plan.toRadiusAccount())
+	created, err := r.net.RADIUS().Accounts().Create(ctx, plan.toRadiusAccount())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create RADIUS account", err.Error())
 		return
@@ -103,7 +104,7 @@ func (r *radiusAccountResource) Read(ctx context.Context, req resource.ReadReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	a, err := r.client.GetRadiusAccount(ctx, state.ID.ValueString())
+	a, err := r.net.RADIUS().Accounts().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -122,7 +123,7 @@ func (r *radiusAccountResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateRadiusAccount(ctx, plan.toRadiusAccount())
+	updated, err := r.net.RADIUS().Accounts().Update(ctx, plan.ID.ValueString(), plan.toRadiusAccount())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update RADIUS account", err.Error())
 		return
@@ -137,7 +138,7 @@ func (r *radiusAccountResource) Delete(ctx context.Context, req resource.DeleteR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteRadiusAccount(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.RADIUS().Accounts().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete RADIUS account", err.Error())
 	}
 }
@@ -146,26 +147,26 @@ func (r *radiusAccountResource) ImportState(ctx context.Context, req resource.Im
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *radiusAccountResourceModel) toRadiusAccount() *unifi.RadiusAccount {
-	return &unifi.RadiusAccount{
-		ID:               m.ID.ValueString(),
-		Name:             m.Name.ValueString(),
-		XPassword:        m.Password.ValueString(),
+func (m *radiusAccountResourceModel) toRadiusAccount() *wire.Account {
+	return &wire.Account{
+		UnderscoreId:     strPtrOrNil(m.ID),
+		Name:             strPtrOrNil(m.Name),
+		XPassword:        strPtrOrNil(m.Password),
 		TunnelType:       intPtr(m.TunnelType),
 		TunnelMediumType: intPtr(m.TunnelMediumType),
-		VLAN:             strOrEmpty(m.VLAN),
+		Vlan:             intPtr(m.VLAN),
 	}
 }
 
-func (m *radiusAccountResourceModel) fromRadiusAccount(a *unifi.RadiusAccount) {
-	m.ID = types.StringValue(a.ID)
-	m.Name = types.StringValue(a.Name)
+func (m *radiusAccountResourceModel) fromRadiusAccount(a *wire.Account) {
+	m.ID = types.StringValue(deref(a.UnderscoreId))
+	m.Name = types.StringValue(deref(a.Name))
 	// password is write-only: keep the configured value if the controller echoes
 	// it empty (the usual case), otherwise adopt what it returned.
-	if a.XPassword != "" {
-		m.Password = types.StringValue(a.XPassword)
+	if deref(a.XPassword) != "" {
+		m.Password = types.StringValue(deref(a.XPassword))
 	}
 	m.TunnelType = intToState(a.TunnelType)
 	m.TunnelMediumType = intToState(a.TunnelMediumType)
-	m.VLAN = strToStateOptional(a.VLAN)
+	m.VLAN = intToState(a.Vlan)
 }

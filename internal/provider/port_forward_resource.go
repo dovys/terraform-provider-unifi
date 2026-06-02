@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -24,7 +25,7 @@ var (
 func NewPortForwardResource() resource.Resource { return &portForwardResource{} }
 
 type portForwardResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type portForwardResourceModel struct {
@@ -104,7 +105,7 @@ func (r *portForwardResource) Schema(_ context.Context, _ resource.SchemaRequest
 
 func (r *portForwardResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -114,7 +115,7 @@ func (r *portForwardResource) Create(ctx context.Context, req resource.CreateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreatePortForward(ctx, plan.toPortForward())
+	created, err := r.net.PortForwards().Create(ctx, plan.toPortForward())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create port forward", err.Error())
 		return
@@ -129,7 +130,7 @@ func (r *portForwardResource) Read(ctx context.Context, req resource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	pf, err := r.client.GetPortForward(ctx, state.ID.ValueString())
+	pf, err := r.net.PortForwards().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -148,7 +149,7 @@ func (r *portForwardResource) Update(ctx context.Context, req resource.UpdateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdatePortForward(ctx, plan.toPortForward())
+	updated, err := r.net.PortForwards().Update(ctx, plan.ID.ValueString(), plan.toPortForward())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update port forward", err.Error())
 		return
@@ -163,7 +164,7 @@ func (r *portForwardResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeletePortForward(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.PortForwards().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete port forward", err.Error())
 	}
 }
@@ -172,30 +173,30 @@ func (r *portForwardResource) ImportState(ctx context.Context, req resource.Impo
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *portForwardResourceModel) toPortForward() *unifi.PortForward {
-	return &unifi.PortForward{
-		ID:            m.ID.ValueString(),
-		Name:          m.Name.ValueString(),
+func (m *portForwardResourceModel) toPortForward() *wire.Portforward {
+	return &wire.Portforward{
+		UnderscoreId:  strPtrOrNil(m.ID),
+		Name:          strPtrOrNil(m.Name),
 		Enabled:       boolPtr(m.Enabled),
-		PfwdInterface: strOrEmpty(m.Interface),
-		Proto:         strOrEmpty(m.Protocol),
-		Src:           strOrEmpty(m.Source),
-		DstPort:       strOrEmpty(m.DestinationPort),
-		Fwd:           strOrEmpty(m.ForwardIP),
-		FwdPort:       strOrEmpty(m.ForwardPort),
+		PfwdInterface: strPtrOrNil(m.Interface),
+		Proto:         (*wire.PortforwardProto)(strPtrOrNil(m.Protocol)),
+		Src:           strPtrOrNil(m.Source),
+		DstPort:       strPtrOrNil(m.DestinationPort),
+		Fwd:           strPtrOrNil(m.ForwardIP),
+		FwdPort:       strPtrOrNil(m.ForwardPort),
 		Log:           boolPtr(m.Log),
 	}
 }
 
-func (m *portForwardResourceModel) fromPortForward(pf *unifi.PortForward) {
-	m.ID = types.StringValue(pf.ID)
-	m.Name = types.StringValue(pf.Name)
+func (m *portForwardResourceModel) fromPortForward(pf *wire.Portforward) {
+	m.ID = types.StringValue(deref(pf.UnderscoreId))
+	m.Name = types.StringValue(deref(pf.Name))
 	m.Enabled = boolToState(pf.Enabled)
-	m.Interface = strToStateOptional(pf.PfwdInterface)
-	m.Protocol = strToStateOptional(pf.Proto)
-	m.Source = strToStateOptional(pf.Src)
-	m.DestinationPort = strToStateOptional(pf.DstPort)
-	m.ForwardIP = strToStateOptional(pf.Fwd)
-	m.ForwardPort = strToStateOptional(pf.FwdPort)
+	m.Interface = strToStateOptional(deref(pf.PfwdInterface))
+	m.Protocol = strToStateOptional(string(derefEnum(pf.Proto)))
+	m.Source = strToStateOptional(deref(pf.Src))
+	m.DestinationPort = strToStateOptional(deref(pf.DstPort))
+	m.ForwardIP = strToStateOptional(deref(pf.Fwd))
+	m.ForwardPort = strToStateOptional(deref(pf.FwdPort))
 	m.Log = boolToState(pf.Log)
 }

@@ -16,7 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -28,7 +29,7 @@ var (
 func NewWANResource() resource.Resource { return &wanResource{} }
 
 type wanResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type wanResourceModel struct {
@@ -38,7 +39,6 @@ type wanResourceModel struct {
 	NetworkGroup      types.String `tfsdk:"network_group"`      // WAN | WAN2 — which uplink interface
 	Enabled           types.Bool   `tfsdk:"enabled"`            // uplink enabled on/off
 	SettingPreference types.String `tfsdk:"setting_preference"` // controller auto/manual toggle (computed)
-	RoutingTableID    types.Int64  `tfsdk:"routing_table_id"`   // policy-routing table ID (computed)
 	SingleNetworkLAN  types.String `tfsdk:"single_network_lan"` // LAN this uplink is bound to (computed)
 
 	DNSServers     types.List `tfsdk:"dns_servers"`      // up to 2 IPv4 DNS (manual when set, else auto)
@@ -69,7 +69,6 @@ type wanResourceModel struct {
 	MACOverride       types.String `tfsdk:"mac_override"`        // cloned WAN MAC (empty disables clone)
 	ReportWANEvent    types.Bool   `tfsdk:"report_wan_event"`    // report WAN up/down events
 
-	IPv6Enabled        types.Bool   `tfsdk:"ipv6_enabled"`         // IPv6 on the uplink on/off
 	IPv6Type           types.String `tfsdk:"ipv6_type"`            // wan_type_v6: disabled | dhcpv6 | static
 	IPv6DelegationType types.String `tfsdk:"ipv6_delegation_type"` // IPv6 PD delegation type
 	IPv6PDSize         types.Int64  `tfsdk:"ipv6_pd_size"`         // delegated IPv6 prefix size
@@ -114,7 +113,6 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 			},
 			"enabled":            optBool("Whether the uplink is enabled."),
 			"setting_preference": schema.StringAttribute{Computed: true, MarkdownDescription: "Controller auto/manual settings toggle (read-only)."},
-			"routing_table_id":   schema.Int64Attribute{Computed: true, MarkdownDescription: "Routing table ID assigned by the controller (read-only)."},
 			"single_network_lan": schema.StringAttribute{Computed: true, MarkdownDescription: "LAN this uplink is bound to (read-only)."},
 
 			"dns_servers": schema.ListAttribute{
@@ -175,8 +173,7 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 			"mac_override":        optStr("Clone this MAC address on the WAN interface (empty disables MAC override)."),
 			"report_wan_event":    optBool("Whether WAN up/down events are reported."),
 
-			"ipv6_enabled":         optBool("Whether IPv6 is enabled on the uplink."),
-			"ipv6_type":            optStr("IPv6 uplink type (`wan_type_v6`, e.g. `disabled`, `dhcpv6`, `static`)."),
+			"ipv6_type":            optStr("IPv6 uplink type (`wan_type_v6`, e.g. `disabled`, `dhcpv6`, `static`). Set to `disabled` to turn IPv6 off on the uplink."),
 			"ipv6_delegation_type": optStr("IPv6 prefix-delegation type (`none`, `dhcpv6`, …)."),
 			"ipv6_pd_size":         optInt("IPv6 prefix-delegation size."),
 		},
@@ -185,7 +182,7 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 
 func (r *wanResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -195,7 +192,7 @@ func (r *wanResource) Create(ctx context.Context, req resource.CreateRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateNetwork(ctx, plan.toNetworkConf(ctx, &resp.Diagnostics))
+	created, err := r.net.Networks().Create(ctx, plan.toNetworkConf(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create WAN", err.Error())
 		return
@@ -210,7 +207,7 @@ func (r *wanResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	conf, err := r.client.GetNetwork(ctx, state.ID.ValueString())
+	conf, err := r.net.Networks().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -229,7 +226,7 @@ func (r *wanResource) Update(ctx context.Context, req resource.UpdateRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateNetwork(ctx, plan.toNetworkConf(ctx, &resp.Diagnostics))
+	updated, err := r.net.Networks().Update(ctx, plan.toNetworkConf(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update WAN", err.Error())
 		return
@@ -244,7 +241,7 @@ func (r *wanResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteNetwork(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.Networks().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete WAN", err.Error())
 	}
 }
@@ -253,55 +250,57 @@ func (r *wanResource) ImportState(ctx context.Context, req resource.ImportStateR
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *unifi.NetworkConf {
-	conf := &unifi.NetworkConf{
-		ID:                    m.ID.ValueString(),
-		Name:                  m.Name.ValueString(),
-		Purpose:               "wan",
-		WANType:               strOrEmpty(m.WANType),
-		WANNetworkGroup:       strOrEmpty(m.NetworkGroup),
+func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *wire.Networkconf {
+	wanPurpose := wire.NetworkconfPurpose("wan")
+	conf := &wire.Networkconf{
+		UnderscoreId:          strPtrOrNil(m.ID),
+		Name:                  strPtrOrNil(m.Name),
+		Purpose:               &wanPurpose,
+		WanType:               (*wire.NetworkconfWanType)(strPtrOrNil(m.WANType)),
+		WanNetworkgroup:       strPtrOrNil(m.NetworkGroup),
 		Enabled:               boolPtr(m.Enabled),
-		WANIP:                 strOrEmpty(m.IP),
-		WANNetmask:            strOrEmpty(m.Netmask),
-		WANGateway:            strOrEmpty(m.Gateway),
-		WANLoadBalanceType:    strOrEmpty(m.LoadBalanceType),
-		WANLoadBalanceWeight:  intPtr(m.LoadBalanceWeight),
-		WANFailoverPriority:   intPtr(m.FailoverPriority),
-		WANSmartQEnabled:      boolPtr(m.SmartQEnabled),
-		WANSmartQUpRate:       intPtr(m.SmartQUpRate),
-		WANSmartQDownRate:     intPtr(m.SmartQDownRate),
-		IGMPProxyUpstream:     boolPtr(m.IGMPProxyUpstream),
-		IGMPProxyFor:          strOrEmpty(m.IGMPProxyFor),
-		ReportWANEvent:        boolPtr(m.ReportWANEvent),
-		IPv6Enabled:           boolPtr(m.IPv6Enabled),
-		WANTypeV6:             strOrEmpty(m.IPv6Type),
-		IPv6WANDelegationType: strOrEmpty(m.IPv6DelegationType),
-		WANDHCPv6PDSize:       intPtr(m.IPv6PDSize),
+		WanIp:                 strPtrOrNil(m.IP),
+		WanNetmask:            strPtrOrNil(m.Netmask),
+		WanGateway:            strPtrOrNil(m.Gateway),
+		WanLoadBalanceType:    (*wire.NetworkconfWanLoadBalanceType)(strPtrOrNil(m.LoadBalanceType)),
+		WanLoadBalanceWeight:  intPtr(m.LoadBalanceWeight),
+		WanFailoverPriority:   intPtr(m.FailoverPriority),
+		WanSmartqEnabled:      boolPtr(m.SmartQEnabled),
+		WanSmartqUpRate:       intPtr(m.SmartQUpRate),
+		WanSmartqDownRate:     intPtr(m.SmartQDownRate),
+		IgmpProxyUpstream:     boolPtr(m.IGMPProxyUpstream),
+		IgmpProxyFor:          (*wire.NetworkconfIgmpProxyFor)(strPtrOrNil(m.IGMPProxyFor)),
+		ReportWanEvent:        boolPtr(m.ReportWANEvent),
+		WanTypeV6:             (*wire.NetworkconfWanTypeV6)(strPtrOrNil(m.IPv6Type)),
+		Ipv6WanDelegationType: (*wire.NetworkconfIpv6WanDelegationType)(strPtrOrNil(m.IPv6DelegationType)),
+		WanDhcpv6PdSize:       intPtr(m.IPv6PDSize),
 	}
 
 	// PPPoE credentials + their enable flags.
-	conf.WANUsername = strOrEmpty(m.PPPoEUsername)
-	conf.XWANPassword = strOrEmpty(m.PPPoEPassword)
-	uEnabled := conf.WANUsername != ""
-	pEnabled := conf.XWANPassword != ""
-	conf.WANPPPoEUsernameEnabled = &uEnabled
-	conf.WANPPPoEPasswordEnabled = &pEnabled
+	wanUsername := strOrEmpty(m.PPPoEUsername)
+	xWanPassword := strOrEmpty(m.PPPoEPassword)
+	conf.WanUsername = &wanUsername
+	conf.XWanPassword = &xWanPassword
+	uEnabled := wanUsername != ""
+	pEnabled := xWanPassword != ""
+	conf.WanPppoeUsernameEnabled = &uEnabled
+	conf.WanPppoePasswordEnabled = &pEnabled
 
 	// MAC clone: a value enables the override, empty disables it.
 	mac := strOrEmpty(m.MACOverride)
 	macEnabled := mac != ""
-	conf.MACOverride = mac
-	conf.MACOverrideEnabled = &macEnabled
+	conf.MacOverride = &mac
+	conf.MacOverrideEnabled = &macEnabled
 
 	// WAN VLAN tag.
 	if !m.VLANID.IsNull() && !m.VLANID.IsUnknown() {
 		v := int(m.VLANID.ValueInt64())
-		conf.WANVLAN = &v
+		conf.WanVlan = &v
 		on := true
-		conf.WANVLANEnabled = &on
+		conf.WanVlanEnabled = &on
 	} else {
 		off := false
-		conf.WANVLANEnabled = &off
+		conf.WanVlanEnabled = &off
 	}
 
 	// IPv4 DNS: any server → manual, else auto. Only touch the slots when the
@@ -309,31 +308,34 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 	// the second server clears wan_dns2 on GET-merge-PUT.
 	if !m.DNSServers.IsNull() && !m.DNSServers.IsUnknown() {
 		dns := stringListToSlice(ctx, m.DNSServers, diags)
+		pref := wire.NetworkconfWanDnsPreference("auto")
 		if len(dns) > 0 {
-			conf.WANDNSPreference = "manual"
-		} else {
-			conf.WANDNSPreference = "auto"
+			pref = "manual"
 		}
-		conf.WANDNS1 = dnsSlotPtr(dns, 0)
-		conf.WANDNS2 = dnsSlotPtr(dns, 1)
+		conf.WanDnsPreference = &pref
+		conf.WanDns1 = dnsSlotPtr(dns, 0)
+		conf.WanDns2 = dnsSlotPtr(dns, 1)
 	}
 
 	// IPv6 DNS: same shape.
 	if !m.IPv6DNSServers.IsNull() && !m.IPv6DNSServers.IsUnknown() {
 		dns6 := stringListToSlice(ctx, m.IPv6DNSServers, diags)
+		pref6 := wire.NetworkconfWanIpv6DnsPreference("auto")
 		if len(dns6) > 0 {
-			conf.WANIPv6DNSPreference = "manual"
-		} else {
-			conf.WANIPv6DNSPreference = "auto"
+			pref6 = "manual"
 		}
-		conf.WANIPv6DNS1 = dnsSlotPtr(dns6, 0)
-		conf.WANIPv6DNS2 = dnsSlotPtr(dns6, 1)
+		conf.WanIpv6DnsPreference = &pref6
+		conf.WanIpv6Dns1 = dnsSlotPtr(dns6, 0)
+		conf.WanIpv6Dns2 = dnsSlotPtr(dns6, 1)
 	}
 
 	up := intPtr(m.UploadKilobits)
 	down := intPtr(m.DownloadKilobits)
 	if up != nil || down != nil {
-		conf.WANProviderCapabilities = &unifi.WANProviderCapabilities{
+		conf.WanProviderCapabilities = &struct {
+			DownloadKilobitsPerSecond *int `json:"download_kilobits_per_second,omitempty"`
+			UploadKilobitsPerSecond   *int `json:"upload_kilobits_per_second,omitempty"`
+		}{
 			UploadKilobitsPerSecond:   up,
 			DownloadKilobitsPerSecond: down,
 		}
@@ -341,64 +343,62 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 	return conf
 }
 
-func (m *wanResourceModel) fromNetworkConf(conf *unifi.NetworkConf) {
-	m.ID = types.StringValue(conf.ID)
-	m.Name = types.StringValue(conf.Name)
-	m.WANType = types.StringValue(conf.WANType)
-	m.NetworkGroup = types.StringValue(conf.WANNetworkGroup)
+func (m *wanResourceModel) fromNetworkConf(conf *wire.Networkconf) {
+	m.ID = types.StringValue(deref(conf.UnderscoreId))
+	m.Name = types.StringValue(deref(conf.Name))
+	m.WANType = types.StringValue(string(derefEnum(conf.WanType)))
+	m.NetworkGroup = types.StringValue(deref(conf.WanNetworkgroup))
 	m.Enabled = boolToState(conf.Enabled)
-	m.SettingPreference = types.StringValue(conf.SettingPreference)
-	m.RoutingTableID = intToState(conf.RoutingTableID)
-	m.SingleNetworkLAN = types.StringValue(conf.SingleNetworkLAN)
+	m.SettingPreference = types.StringValue(string(derefEnum(conf.SettingPreference)))
+	m.SingleNetworkLAN = types.StringValue(deref(conf.SingleNetworkLan))
 
-	m.IP = types.StringValue(conf.WANIP)
-	m.Netmask = types.StringValue(conf.WANNetmask)
-	m.Gateway = types.StringValue(conf.WANGateway)
+	m.IP = types.StringValue(deref(conf.WanIp))
+	m.Netmask = types.StringValue(deref(conf.WanNetmask))
+	m.Gateway = types.StringValue(deref(conf.WanGateway))
 
-	m.LoadBalanceType = types.StringValue(conf.WANLoadBalanceType)
-	m.LoadBalanceWeight = intToState(conf.WANLoadBalanceWeight)
-	m.FailoverPriority = intToState(conf.WANFailoverPriority)
-	m.SmartQEnabled = boolToState(conf.WANSmartQEnabled)
-	m.SmartQUpRate = intToState(conf.WANSmartQUpRate)
-	m.SmartQDownRate = intToState(conf.WANSmartQDownRate)
-	m.IGMPProxyUpstream = boolToState(conf.IGMPProxyUpstream)
-	m.IGMPProxyFor = types.StringValue(conf.IGMPProxyFor)
-	m.MACOverride = types.StringValue(conf.MACOverride)
-	m.ReportWANEvent = boolToState(conf.ReportWANEvent)
-	m.IPv6Enabled = boolToState(conf.IPv6Enabled)
-	m.IPv6Type = types.StringValue(conf.WANTypeV6)
-	m.IPv6DelegationType = types.StringValue(conf.IPv6WANDelegationType)
-	m.IPv6PDSize = intToState(conf.WANDHCPv6PDSize)
+	m.LoadBalanceType = types.StringValue(string(derefEnum(conf.WanLoadBalanceType)))
+	m.LoadBalanceWeight = intToState(conf.WanLoadBalanceWeight)
+	m.FailoverPriority = intToState(conf.WanFailoverPriority)
+	m.SmartQEnabled = boolToState(conf.WanSmartqEnabled)
+	m.SmartQUpRate = intToState(conf.WanSmartqUpRate)
+	m.SmartQDownRate = intToState(conf.WanSmartqDownRate)
+	m.IGMPProxyUpstream = boolToState(conf.IgmpProxyUpstream)
+	m.IGMPProxyFor = types.StringValue(string(derefEnum(conf.IgmpProxyFor)))
+	m.MACOverride = types.StringValue(deref(conf.MacOverride))
+	m.ReportWANEvent = boolToState(conf.ReportWanEvent)
+	m.IPv6Type = types.StringValue(string(derefEnum(conf.WanTypeV6)))
+	m.IPv6DelegationType = types.StringValue(string(derefEnum(conf.Ipv6WanDelegationType)))
+	m.IPv6PDSize = intToState(conf.WanDhcpv6PdSize)
 
-	m.PPPoEUsername = types.StringValue(conf.WANUsername)
+	m.PPPoEUsername = types.StringValue(deref(conf.WanUsername))
 	// Write-only secret: the controller doesn't echo it, so keep the existing
 	// (plan/state) value rather than nulling it on read.
-	if conf.XWANPassword != "" {
-		m.PPPoEPassword = types.StringValue(conf.XWANPassword)
+	if deref(conf.XWanPassword) != "" {
+		m.PPPoEPassword = types.StringValue(deref(conf.XWanPassword))
 	}
 
-	if conf.WANVLANEnabled != nil && *conf.WANVLANEnabled && conf.WANVLAN != nil {
-		m.VLANID = types.Int64Value(int64(*conf.WANVLAN))
+	if conf.WanVlanEnabled != nil && *conf.WanVlanEnabled && conf.WanVlan != nil {
+		m.VLANID = types.Int64Value(int64(*conf.WanVlan))
 	} else {
 		m.VLANID = types.Int64Null()
 	}
 
 	// Only surface manual DNS as managed values; in "auto" the controller may
 	// hold DHCP-learned servers in these slots that we must not adopt.
-	if conf.WANDNSPreference == "manual" {
-		m.DNSServers = sliceToStringList(dnsSlots(conf.WANDNS1, conf.WANDNS2))
+	if string(derefEnum(conf.WanDnsPreference)) == "manual" {
+		m.DNSServers = sliceToStringList(dnsSlots(conf.WanDns1, conf.WanDns2))
 	} else {
 		m.DNSServers = sliceToStringList(nil)
 	}
-	if conf.WANIPv6DNSPreference == "manual" {
-		m.IPv6DNSServers = sliceToStringList(dnsSlots(conf.WANIPv6DNS1, conf.WANIPv6DNS2))
+	if string(derefEnum(conf.WanIpv6DnsPreference)) == "manual" {
+		m.IPv6DNSServers = sliceToStringList(dnsSlots(conf.WanIpv6Dns1, conf.WanIpv6Dns2))
 	} else {
 		m.IPv6DNSServers = sliceToStringList(nil)
 	}
 
-	if conf.WANProviderCapabilities != nil {
-		m.UploadKilobits = intToState(conf.WANProviderCapabilities.UploadKilobitsPerSecond)
-		m.DownloadKilobits = intToState(conf.WANProviderCapabilities.DownloadKilobitsPerSecond)
+	if conf.WanProviderCapabilities != nil {
+		m.UploadKilobits = intToState(conf.WanProviderCapabilities.UploadKilobitsPerSecond)
+		m.DownloadKilobits = intToState(conf.WanProviderCapabilities.DownloadKilobitsPerSecond)
 	} else {
 		m.UploadKilobits = types.Int64Null()
 		m.DownloadKilobits = types.Int64Null()

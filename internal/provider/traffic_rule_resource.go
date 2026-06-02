@@ -15,7 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 // stringSetAttr / int64SetAttr are small builders for the Optional element-typed
@@ -37,7 +38,7 @@ var (
 func NewTrafficRuleResource() resource.Resource { return &trafficRuleResource{} }
 
 type trafficRuleResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type trafficRuleResourceModel struct {
@@ -144,9 +145,9 @@ func (r *trafficRuleResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Optional:            true,
 				MarkdownDescription: "Human-readable description.",
 			},
-			"domains":          stringSetAttr("Domains to match when `matching_target = DOMAIN`."),
-			"ip_addresses":     stringSetAttr("IP addresses to match when `matching_target = IP`."),
-			"ip_ranges":        stringSetAttr("IP ranges/CIDRs to match when `matching_target = IP`."),
+			"domains":          domainsSchema("Domains to match when `matching_target = DOMAIN`."),
+			"ip_addresses":     ipAddressesSchema("IP addresses to match when `matching_target = IP`."),
+			"ip_ranges":        ipRangesSchema("IP ranges to match when `matching_target = IP`."),
 			"regions":          stringSetAttr("Region codes to match when `matching_target = REGION`."),
 			"network_ids":      stringSetAttr("Network ids the rule is scoped to."),
 			"app_ids":          int64SetAttr("Application ids to match when `matching_target = APP`."),
@@ -176,7 +177,7 @@ func (r *trafficRuleResource) Schema(_ context.Context, _ resource.SchemaRequest
 
 func (r *trafficRuleResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -186,7 +187,7 @@ func (r *trafficRuleResource) Create(ctx context.Context, req resource.CreateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateTrafficRule(ctx, plan.toTrafficRule(ctx, &resp.Diagnostics))
+	created, err := r.net.Traffic().Rules().Create(ctx, plan.toTrafficRule(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create traffic rule", err.Error())
 		return
@@ -201,16 +202,25 @@ func (r *trafficRuleResource) Read(ctx context.Context, req resource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	rule, err := r.client.GetTrafficRule(ctx, state.ID.ValueString())
+	// The v2 collection has no GET-by-id; list and find by _id, removing the
+	// resource if it's gone (invariant 5: remove-on-404).
+	rules, err := r.net.Traffic().Rules().List(ctx)
 	if err != nil {
-		if isNotFoundErr(err) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
 		resp.Diagnostics.AddError("Failed to read traffic rule", err.Error())
 		return
 	}
-	state.fromTrafficRule(ctx, rule, &resp.Diagnostics)
+	var found *wire.Trafficrules
+	for i := range rules {
+		if deref(rules[i].UnderscoreId) == state.ID.ValueString() {
+			found = &rules[i]
+			break
+		}
+	}
+	if found == nil {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+	state.fromTrafficRule(ctx, found, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -220,7 +230,7 @@ func (r *trafficRuleResource) Update(ctx context.Context, req resource.UpdateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateTrafficRule(ctx, plan.toTrafficRule(ctx, &resp.Diagnostics))
+	updated, err := r.net.Traffic().Rules().Update(ctx, plan.ID.ValueString(), plan.toTrafficRule(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update traffic rule", err.Error())
 		return
@@ -235,7 +245,7 @@ func (r *trafficRuleResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteTrafficRule(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.Traffic().Rules().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete traffic rule", err.Error())
 	}
 }
@@ -244,62 +254,65 @@ func (r *trafficRuleResource) ImportState(ctx context.Context, req resource.Impo
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *trafficRuleResourceModel) toTrafficRule(ctx context.Context, diags *diag.Diagnostics) *unifi.TrafficRule {
-	return &unifi.TrafficRule{
-		ID:             m.ID.ValueString(),
+func (m *trafficRuleResourceModel) toTrafficRule(ctx context.Context, diags *diag.Diagnostics) *wire.Trafficrules {
+	return &wire.Trafficrules{
+		UnderscoreId:   strPtrOrNil(m.ID),
 		Enabled:        boolPtr(m.Enabled),
-		Action:         strOrEmpty(m.Action),
-		MatchingTarget: strOrEmpty(m.MatchingTarget),
-		Description:    strOrEmpty(m.Description),
-		Domains:        stringSetToSlice(ctx, m.Domains, diags),
-		IPAddresses:    stringSetToSlice(ctx, m.IPAddresses, diags),
-		IPRanges:       stringSetToSlice(ctx, m.IPRanges, diags),
-		Regions:        stringSetToSlice(ctx, m.Regions, diags),
-		AppIDs:         intSetToSlice(ctx, m.AppIDs, diags),
-		AppCategoryIDs: intSetToSlice(ctx, m.AppCategoryIDs, diags),
-		NetworkIDs:     stringSetToSlice(ctx, m.NetworkIDs, diags),
+		Action:         wire.TrafficrulesAction(strOrEmpty(m.Action)),
+		MatchingTarget: wire.TrafficrulesMatchingTarget(strOrEmpty(m.MatchingTarget)),
+		Description:    strPtrOrNil(m.Description),
+		Domains:        setToDomains(ctx, m.Domains, diags),
+		IpAddresses:    setToIPAddresses(ctx, m.IPAddresses, diags),
+		IpRanges:       setToIPRanges(ctx, m.IPRanges, diags),
+		Regions:        stringSetToSlicePtr(ctx, m.Regions, diags),
+		AppIds:         setToPorts(ctx, m.AppIDs, diags),
+		AppCategoryIds: setToPorts(ctx, m.AppCategoryIDs, diags),
+		NetworkIds:     stringSetToSlicePtr(ctx, m.NetworkIDs, diags),
 		TargetDevices:  listToTargetDevices(ctx, m.TargetDevices, diags),
 		BandwidthLimit: objectToBandwidthLimit(ctx, m.BandwidthLimit, diags),
 	}
 }
 
-func (m *trafficRuleResourceModel) fromTrafficRule(ctx context.Context, t *unifi.TrafficRule, diags *diag.Diagnostics) {
-	m.ID = types.StringValue(t.ID)
+func (m *trafficRuleResourceModel) fromTrafficRule(ctx context.Context, t *wire.Trafficrules, diags *diag.Diagnostics) {
+	m.ID = types.StringValue(deref(t.UnderscoreId))
 	m.Enabled = boolToState(t.Enabled)
-	m.Action = strToStateOptional(t.Action)
-	m.MatchingTarget = strToStateOptional(t.MatchingTarget)
-	m.Description = strToStateOptional(t.Description)
-	m.Domains = sliceToStringSet(t.Domains)
-	m.IPAddresses = sliceToStringSet(t.IPAddresses)
-	m.IPRanges = sliceToStringSet(t.IPRanges)
-	m.Regions = sliceToStringSet(t.Regions)
-	m.AppIDs = sliceToIntSet(t.AppIDs)
-	m.AppCategoryIDs = sliceToIntSet(t.AppCategoryIDs)
-	m.NetworkIDs = sliceToStringSet(t.NetworkIDs)
+	m.Action = strToStateOptional(string(t.Action))
+	m.MatchingTarget = strToStateOptional(string(t.MatchingTarget))
+	m.Description = strToStateOptional(deref(t.Description))
+	m.Domains = domainsToSet(ctx, t.Domains, diags)
+	m.IPAddresses = ipAddressesToSet(ctx, t.IpAddresses, diags)
+	m.IPRanges = ipRangesToSet(ctx, t.IpRanges, diags)
+	m.Regions = slicePtrToStringSet(t.Regions)
+	m.AppIDs = portsToSet(t.AppIds)
+	m.AppCategoryIDs = portsToSet(t.AppCategoryIds)
+	m.NetworkIDs = slicePtrToStringSet(t.NetworkIds)
 	m.TargetDevices = targetDevicesToList(ctx, t.TargetDevices, diags)
 	m.BandwidthLimit = bandwidthLimitToObject(ctx, t.BandwidthLimit, diags)
 }
 
 // --- shared target_devices conversion (used by traffic_rule and traffic_route) ---
 
-func listToTargetDevices(ctx context.Context, l types.List, diags *diag.Diagnostics) []unifi.TrafficTargetDevice {
+// listToTargetDevices builds the controller's required target_devices array. The
+// wire field is a non-pointer slice (required, non-omitempty), so an unset/empty
+// list serializes as [] rather than null.
+func listToTargetDevices(ctx context.Context, l types.List, diags *diag.Diagnostics) []wire.TrafficroutesTargetDevice {
+	out := []wire.TrafficroutesTargetDevice{}
 	if l.IsNull() || l.IsUnknown() {
-		return nil
+		return out
 	}
 	var objs []trafficTargetDeviceObject
 	diags.Append(l.ElementsAs(ctx, &objs, false)...)
-	out := make([]unifi.TrafficTargetDevice, 0, len(objs))
 	for _, o := range objs {
-		out = append(out, unifi.TrafficTargetDevice{
-			Type:      o.Type.ValueString(),
-			ClientMAC: strOrEmpty(o.ClientMAC),
-			NetworkID: strOrEmpty(o.NetworkID),
+		out = append(out, wire.TrafficroutesTargetDevice{
+			Type:      wire.TrafficroutesTargetDeviceType(o.Type.ValueString()),
+			ClientMac: strPtrOrNil(o.ClientMAC),
+			NetworkId: strPtrOrNil(o.NetworkID),
 		})
 	}
 	return out
 }
 
-func targetDevicesToList(ctx context.Context, devices []unifi.TrafficTargetDevice, diags *diag.Diagnostics) types.List {
+func targetDevicesToList(ctx context.Context, devices []wire.TrafficroutesTargetDevice, diags *diag.Diagnostics) types.List {
 	objType := types.ObjectType{AttrTypes: trafficTargetDeviceAttrTypes}
 	if devices == nil {
 		return types.ListNull(objType)
@@ -307,9 +320,9 @@ func targetDevicesToList(ctx context.Context, devices []unifi.TrafficTargetDevic
 	objs := make([]trafficTargetDeviceObject, 0, len(devices))
 	for _, d := range devices {
 		objs = append(objs, trafficTargetDeviceObject{
-			Type:      types.StringValue(d.Type),
-			ClientMAC: strToStateOptional(d.ClientMAC),
-			NetworkID: strToStateOptional(d.NetworkID),
+			Type:      types.StringValue(string(d.Type)),
+			ClientMAC: strToStateOptional(deref(d.ClientMac)),
+			NetworkID: strToStateOptional(deref(d.NetworkId)),
 		})
 	}
 	l, d := types.ListValueFrom(ctx, objType, objs)
@@ -317,20 +330,20 @@ func targetDevicesToList(ctx context.Context, devices []unifi.TrafficTargetDevic
 	return l
 }
 
-func objectToBandwidthLimit(ctx context.Context, o types.Object, diags *diag.Diagnostics) *unifi.TrafficBandwidthLimit {
+func objectToBandwidthLimit(ctx context.Context, o types.Object, diags *diag.Diagnostics) *wire.TrafficruleBandwidthLimit {
 	if o.IsNull() || o.IsUnknown() {
 		return nil
 	}
 	var obj bandwidthLimitObject
 	diags.Append(o.As(ctx, &obj, basetypes.ObjectAsOptions{})...)
-	return &unifi.TrafficBandwidthLimit{
+	return &wire.TrafficruleBandwidthLimit{
 		Enabled:           boolPtr(obj.Enabled),
 		DownloadLimitKbps: intPtr(obj.DownloadLimitKbps),
 		UploadLimitKbps:   intPtr(obj.UploadLimitKbps),
 	}
 }
 
-func bandwidthLimitToObject(ctx context.Context, b *unifi.TrafficBandwidthLimit, diags *diag.Diagnostics) types.Object {
+func bandwidthLimitToObject(ctx context.Context, b *wire.TrafficruleBandwidthLimit, diags *diag.Diagnostics) types.Object {
 	objType := types.ObjectType{AttrTypes: bandwidthLimitAttrTypes}
 	if b == nil {
 		return types.ObjectNull(bandwidthLimitAttrTypes)

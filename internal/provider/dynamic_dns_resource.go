@@ -10,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -22,7 +23,7 @@ var (
 func NewDynamicDNSResource() resource.Resource { return &dynamicDNSResource{} }
 
 type dynamicDNSResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type dynamicDNSResourceModel struct {
@@ -83,7 +84,7 @@ func (r *dynamicDNSResource) Schema(_ context.Context, _ resource.SchemaRequest,
 
 func (r *dynamicDNSResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -93,7 +94,7 @@ func (r *dynamicDNSResource) Create(ctx context.Context, req resource.CreateRequ
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateDynamicDNS(ctx, plan.toDynamicDNS())
+	created, err := r.net.DynamicDNS().Create(ctx, plan.toDynamicDNS())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create dynamic DNS", err.Error())
 		return
@@ -108,7 +109,7 @@ func (r *dynamicDNSResource) Read(ctx context.Context, req resource.ReadRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	d, err := r.client.GetDynamicDNS(ctx, state.ID.ValueString())
+	d, err := r.net.DynamicDNS().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -127,7 +128,7 @@ func (r *dynamicDNSResource) Update(ctx context.Context, req resource.UpdateRequ
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateDynamicDNS(ctx, plan.toDynamicDNS())
+	updated, err := r.net.DynamicDNS().Update(ctx, plan.ID.ValueString(), plan.toDynamicDNS())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update dynamic DNS", err.Error())
 		return
@@ -142,7 +143,7 @@ func (r *dynamicDNSResource) Delete(ctx context.Context, req resource.DeleteRequ
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeleteDynamicDNS(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.DynamicDNS().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete dynamic DNS", err.Error())
 	}
 }
@@ -151,28 +152,28 @@ func (r *dynamicDNSResource) ImportState(ctx context.Context, req resource.Impor
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *dynamicDNSResourceModel) toDynamicDNS() *unifi.DynamicDNS {
-	return &unifi.DynamicDNS{
-		ID:        m.ID.ValueString(),
-		Service:   strOrEmpty(m.Service),
-		HostName:  strOrEmpty(m.Hostname),
-		Server:    strOrEmpty(m.Server),
-		Login:     strOrEmpty(m.Login),
-		XPassword: strOrEmpty(m.Password),
-		Interface: strOrEmpty(m.Interface),
+func (m *dynamicDNSResourceModel) toDynamicDNS() *wire.Dynamicdns {
+	return &wire.Dynamicdns{
+		UnderscoreId: strPtrOrNil(m.ID),
+		Service:      (*wire.DynamicdnsService)(strPtrOrNil(m.Service)),
+		HostName:     strPtrOrNil(m.Hostname),
+		Server:       strPtrOrNil(m.Server),
+		Login:        strPtrOrNil(m.Login),
+		XPassword:    strPtrOrNil(m.Password),
+		Interface:    strPtrOrNil(m.Interface),
 	}
 }
 
-func (m *dynamicDNSResourceModel) fromDynamicDNS(d *unifi.DynamicDNS) {
-	m.ID = types.StringValue(d.ID)
-	m.Service = strToStateOptional(d.Service)
-	m.Hostname = strToStateOptional(d.HostName)
-	m.Server = strToStateOptional(d.Server)
-	m.Login = strToStateOptional(d.Login)
+func (m *dynamicDNSResourceModel) fromDynamicDNS(d *wire.Dynamicdns) {
+	m.ID = types.StringValue(deref(d.UnderscoreId))
+	m.Service = strToStateOptional(string(derefEnum(d.Service)))
+	m.Hostname = strToStateOptional(deref(d.HostName))
+	m.Server = strToStateOptional(deref(d.Server))
+	m.Login = strToStateOptional(deref(d.Login))
 	// password is write-only: keep the configured value if the controller echoes
 	// it empty (the usual case), otherwise adopt what it returned.
-	if d.XPassword != "" {
-		m.Password = types.StringValue(d.XPassword)
+	if pw := deref(d.XPassword); pw != "" {
+		m.Password = types.StringValue(pw)
 	}
-	m.Interface = strToStateOptional(d.Interface)
+	m.Interface = strToStateOptional(deref(d.Interface))
 }

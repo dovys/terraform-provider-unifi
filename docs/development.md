@@ -9,12 +9,14 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 
 ## Invariants (don't violate without an explicit, reviewed decision)
 
-1. **Resources call the `Client` interface, never a transport.** Each typed client method targets its
-   surface (legacy `/rest` or v2) directly via the `legacy*`/`v2*` helpers in `surfaces.go`; both run
-   over one cookie+CSRF session. There is no per-op router and no Integration/X-API-KEY surface.
+1. **Resources call the substruct `network.Client` (`c.Network()…`), never a transport.** The
+   console-session `unifi.Client` owns the session and exposes `Network()`; CRUD runs through the
+   network groups' generic collections (`LegacyCollection`/`V2Collection`), which target the legacy
+   `/rest` or v2 surface directly over one cookie+CSRF session. There is no per-op router and no
+   Integration/X-API-KEY surface.
 2. **Surface choice is an implementation detail.** Moving a resource between legacy and v2 (or a new
-   firmware moving an object's wire shape) changes only the client method — never rename or
-   re-architect the resource. Schema stays stable across the API's evolution.
+   firmware moving an object's wire shape) changes only the group's collection/codegen — never rename
+   or re-architect the resource. Schema stays stable across the API's evolution.
 3. **Capability-gate, don't assume firmware.** Missing capability → plan-time diagnostic, never a
    raw 4xx mid-apply.
 4. **Safe by default; danger is isolated + guarded.** `unifi_network_device` destroy reverts config and
@@ -44,10 +46,12 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 
 1. Confirm the surface (legacy `/rest` vs v2) + wire shape against the live network fixture (and
    UniFi OS Server if needed).
-2. Typed structs beside their client methods in `internal/unifi` (e.g. `NetworkConf` in `networks.go`,
-   `StaticDNSRecord` in `dns.go`) — no separate `models` package, and no `map[string]any` except the
-   generic `unifi_network_setting` and raw passthrough of unmodeled fields in GET-merge-PUT. v2 writes
-   use minimal structs honoring the [v2 write contract](architecture.md).
+2. Map the TF model to the generated `wire.<Type>` (`internal/unifi/network/wire`); if a field is
+   missing or mistyped, fix the per-object spec in [`../unifi-specs`](../unifi-specs) and regenerate —
+   never hand-edit `types.gen.go`. Add the group accessor + collection in `internal/unifi/network`
+   (custom collection only for id-in-body merge or List-filter Read). No separate `models` package, and
+   no `map[string]any` except the generic `unifi_network_setting` and raw passthrough of unmodeled
+   fields in GET-merge-PUT. v2 writes honor the [v2 write contract](architecture.md).
 3. Schema: nested **attributes** (not blocks); Map/Set keyed by a natural key, not List;
    `Optional+Computed` for API-defaulted; `UseStateForUnknown` only on post-create-immutable values;
    `RequiresReplace` immutables; controller-accurate validators; `Sensitive` secrets.

@@ -3,6 +3,17 @@
 Tracked improvements that aren't blocking a phase. Phase-scoped work lives in
 [`docs/roadmap.md`](docs/roadmap.md); cross-cutting polish lives here.
 
+## Spec: enrich `device.json` with read-only `/stat/device` fields
+
+The rebuilt client's generated `wire.Device` is typed from the **writable**
+`api/fields` set, so it omits read-only stat/identity fields the client needs —
+notably `mac` (the natural key), plus `state`, `model`, `version`, `adopted`,
+`ip`, etc. `network.Devices().GetByMAC` currently works around this by scanning
+the raw `/stat/device` documents and decoding the matched one. Fix at the source:
+add the observed stat fields to `objects/device.json` (as `server_fields`/
+read-only) in `../unifi-specs`, regenerate, then drop the raw-scan workaround.
+Other stat-heavy legacy objects (clients, etc.) may have the same gap.
+
 ## Verify against hardware
 
 The live console allows **read-only** recon, so anything that needs a real write

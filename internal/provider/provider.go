@@ -217,6 +217,9 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewWLANGroupResource,
 		NewTrafficRuleResource,
 		NewTrafficRouteResource,
+		// First resource on the rebuilt substruct client (c.Network().WAN().SLAs());
+		// additive — the remaining resources migrate at the R7 cutover.
+		NewWANSLAResource,
 	}
 }
 
@@ -228,6 +231,8 @@ func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewSiteDataSource,
 		NewApplicationInfoDataSource,
 		NewDeviceDataSource,
+		// On the rebuilt substruct client (c.Network().WAN().ListNetworkGroups()).
+		NewWANNetworkGroupDataSource,
 	}
 }
 

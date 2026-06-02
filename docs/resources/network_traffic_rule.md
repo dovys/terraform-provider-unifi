@@ -26,10 +26,10 @@ A UniFi traffic rule (v2 `trafficrules`) — block, allow, or rate-limit traffic
 - `app_ids` (Set of Number) Application ids to match when `matching_target = APP`.
 - `bandwidth_limit` (Attributes) Rate cap applied when `action = SPEED_LIMIT`. (see [below for nested schema](#nestedatt--bandwidth_limit))
 - `description` (String) Human-readable description.
-- `domains` (Set of String) Domains to match when `matching_target = DOMAIN`.
+- `domains` (Attributes Set) Domains to match when `matching_target = DOMAIN`. (see [below for nested schema](#nestedatt--domains))
 - `enabled` (Boolean) Whether the rule is active. Defaults to `true`.
-- `ip_addresses` (Set of String) IP addresses to match when `matching_target = IP`.
-- `ip_ranges` (Set of String) IP ranges/CIDRs to match when `matching_target = IP`.
+- `ip_addresses` (Attributes Set) IP addresses to match when `matching_target = IP`. (see [below for nested schema](#nestedatt--ip_addresses))
+- `ip_ranges` (Attributes Set) IP ranges to match when `matching_target = IP`. (see [below for nested schema](#nestedatt--ip_ranges))
 - `network_ids` (Set of String) Network ids the rule is scoped to.
 - `regions` (Set of String) Region codes to match when `matching_target = REGION`.
 - `target_devices` (Attributes List) Which devices the rule applies to. Each entry is all clients, a specific client (by MAC), or a whole network. (see [below for nested schema](#nestedatt--target_devices))
@@ -46,6 +46,61 @@ Optional:
 - `download_limit_kbps` (Number) Download cap in kbps.
 - `enabled` (Boolean) Whether the limit is enforced.
 - `upload_limit_kbps` (Number) Upload cap in kbps.
+
+
+<a id="nestedatt--domains"></a>
+### Nested Schema for `domains`
+
+Required:
+
+- `domain` (String) Domain to match (e.g. `example.com`).
+
+Optional:
+
+- `port_ranges` (Attributes List) Optional destination port ranges to narrow the match. (see [below for nested schema](#nestedatt--domains--port_ranges))
+- `ports` (Set of Number) Optional destination ports to narrow the match.
+
+<a id="nestedatt--domains--port_ranges"></a>
+### Nested Schema for `domains.port_ranges`
+
+Required:
+
+- `port_start` (Number) First port in the range.
+- `port_stop` (Number) Last port in the range.
+
+
+
+<a id="nestedatt--ip_addresses"></a>
+### Nested Schema for `ip_addresses`
+
+Required:
+
+- `ip_or_subnet` (String) IP address or CIDR to match.
+- `ip_version` (String) IP version: `v4` or `v6`.
+
+Optional:
+
+- `port_ranges` (Attributes List) Optional destination port ranges to narrow the match. (see [below for nested schema](#nestedatt--ip_addresses--port_ranges))
+- `ports` (Set of Number) Optional destination ports to narrow the match.
+
+<a id="nestedatt--ip_addresses--port_ranges"></a>
+### Nested Schema for `ip_addresses.port_ranges`
+
+Required:
+
+- `port_start` (Number) First port in the range.
+- `port_stop` (Number) Last port in the range.
+
+
+
+<a id="nestedatt--ip_ranges"></a>
+### Nested Schema for `ip_ranges`
+
+Required:
+
+- `ip_start` (String) First address of the range.
+- `ip_stop` (String) Last address of the range.
+- `ip_version` (String) IP version: `v4` or `v6`.
 
 
 <a id="nestedatt--target_devices"></a>

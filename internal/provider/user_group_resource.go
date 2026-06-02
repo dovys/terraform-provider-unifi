@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 func NewUserGroupResource() resource.Resource { return &userGroupResource{} }
 
 type userGroupResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 type userGroupResourceModel struct {
@@ -81,7 +82,7 @@ func (r *userGroupResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 
 func (r *userGroupResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -91,7 +92,7 @@ func (r *userGroupResource) Create(ctx context.Context, req resource.CreateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreateUserGroup(ctx, plan.toUserGroup())
+	created, err := r.net.UserGroups().Create(ctx, plan.toUserGroup())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create user group", err.Error())
 		return
@@ -106,7 +107,7 @@ func (r *userGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	g, err := r.client.GetUserGroup(ctx, state.ID.ValueString())
+	g, err := r.net.UserGroups().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -125,7 +126,7 @@ func (r *userGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdateUserGroup(ctx, plan.toUserGroup())
+	updated, err := r.net.UserGroups().Update(ctx, plan.ID.ValueString(), plan.toUserGroup())
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update user group", err.Error())
 		return
@@ -145,7 +146,7 @@ func (r *userGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 	if state.AttrNoDelete.ValueBool() {
 		return
 	}
-	if err := r.client.DeleteUserGroup(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.UserGroups().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete user group", err.Error())
 	}
 }
@@ -154,19 +155,19 @@ func (r *userGroupResource) ImportState(ctx context.Context, req resource.Import
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *userGroupResourceModel) toUserGroup() *unifi.UserGroup {
-	return &unifi.UserGroup{
-		ID:             m.ID.ValueString(),
-		Name:           m.Name.ValueString(),
-		QOSRateMaxUp:   intPtr(m.QOSRateMaxUp),
-		QOSRateMaxDown: intPtr(m.QOSRateMaxDown),
+func (m *userGroupResourceModel) toUserGroup() *wire.Usergroup {
+	return &wire.Usergroup{
+		UnderscoreId:   strPtrOrNil(m.ID),
+		Name:           strPtrOrNil(m.Name),
+		QosRateMaxUp:   intPtr(m.QOSRateMaxUp),
+		QosRateMaxDown: intPtr(m.QOSRateMaxDown),
 	}
 }
 
-func (m *userGroupResourceModel) fromUserGroup(g *unifi.UserGroup) {
-	m.ID = types.StringValue(g.ID)
-	m.Name = types.StringValue(g.Name)
-	m.QOSRateMaxUp = intToState(g.QOSRateMaxUp)
-	m.QOSRateMaxDown = intToState(g.QOSRateMaxDown)
+func (m *userGroupResourceModel) fromUserGroup(g *wire.Usergroup) {
+	m.ID = types.StringValue(deref(g.UnderscoreId))
+	m.Name = types.StringValue(deref(g.Name))
+	m.QOSRateMaxUp = intToState(g.QosRateMaxUp)
+	m.QOSRateMaxDown = intToState(g.QosRateMaxDown)
 	m.AttrNoDelete = types.BoolValue(g.AttrNoDelete != nil && *g.AttrNoDelete)
 }

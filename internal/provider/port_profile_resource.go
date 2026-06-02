@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 func NewPortProfileResource() resource.Resource { return &portProfileResource{} }
 
 type portProfileResource struct {
-	client unifi.Client
+	net *network.Client
 }
 
 // portProfileResourceModel covers the configurable portconf surface. Match the
@@ -161,7 +162,7 @@ func (r *portProfileResource) Schema(_ context.Context, _ resource.SchemaRequest
 
 func (r *portProfileResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
-		r.client = c
+		r.net = c.Network()
 	}
 }
 
@@ -171,7 +172,7 @@ func (r *portProfileResource) Create(ctx context.Context, req resource.CreateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	created, err := r.client.CreatePortProfile(ctx, plan.toPortProfile(ctx, &resp.Diagnostics))
+	created, err := r.net.PortProfiles().Create(ctx, plan.toPortProfile(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create port profile", err.Error())
 		return
@@ -186,7 +187,7 @@ func (r *portProfileResource) Read(ctx context.Context, req resource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	p, err := r.client.GetPortProfile(ctx, state.ID.ValueString())
+	p, err := r.net.PortProfiles().Get(ctx, state.ID.ValueString())
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -205,7 +206,7 @@ func (r *portProfileResource) Update(ctx context.Context, req resource.UpdateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	updated, err := r.client.UpdatePortProfile(ctx, plan.toPortProfile(ctx, &resp.Diagnostics))
+	updated, err := r.net.PortProfiles().Update(ctx, plan.ID.ValueString(), plan.toPortProfile(ctx, &resp.Diagnostics))
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to update port profile", err.Error())
 		return
@@ -220,7 +221,7 @@ func (r *portProfileResource) Delete(ctx context.Context, req resource.DeleteReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if err := r.client.DeletePortProfile(ctx, state.ID.ValueString()); err != nil {
+	if err := r.net.PortProfiles().Delete(ctx, state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete port profile", err.Error())
 	}
 }
@@ -229,72 +230,72 @@ func (r *portProfileResource) ImportState(ctx context.Context, req resource.Impo
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func (m *portProfileResourceModel) toPortProfile(ctx context.Context, diags *diag.Diagnostics) *unifi.PortProfile {
-	p := &unifi.PortProfile{
-		ID:                     m.ID.ValueString(),
-		Name:                   m.Name.ValueString(),
-		Forward:                strOrEmpty(m.Forward),
-		NativeNetworkConfID:    strOrEmpty(m.NativeNetworkID),
-		TaggedVLANMgmt:         strOrEmpty(m.TaggedVLANMgmt),
-		VoiceNetworkConfID:     strOrEmpty(m.VoiceNetworkID),
-		POEMode:                strOrEmpty(m.POEMode),
-		Autoneg:                boolPtr(m.Autoneg),
-		Speed:                  intPtr(m.Speed),
-		FullDuplex:             boolPtr(m.FullDuplex),
-		OpMode:                 strOrEmpty(m.OpMode),
-		PortSecurityEnabled:    boolPtr(m.PortSecurityEnabled),
-		Dot1XCtrl:              strOrEmpty(m.Dot1XCtrl),
-		Dot1XIdleTimeout:       intPtr(m.Dot1XIdleTimeout),
-		Isolation:              boolPtr(m.Isolation),
-		EgressRateLimitEnabled: boolPtr(m.EgressRateLimitEnabled),
-		EgressRateLimitKbps:    intPtr(m.EgressRateLimitKbps),
-		STPPortMode:            boolPtr(m.STPPortMode),
-		STPBPDUGuard:           boolPtr(m.STPBPDUGuard),
-		STPEdgeState:           strOrEmpty(m.STPEdgeState),
-		LLDPMEDEnabled:         boolPtr(m.LLDPMEDEnabled),
-		PortKeepaliveOn:        boolPtr(m.PortKeepaliveEnabled),
-		MulticastRouterMode:    strOrEmpty(m.MulticastRouterMode),
+func (m *portProfileResourceModel) toPortProfile(ctx context.Context, diags *diag.Diagnostics) *wire.Portconf {
+	p := &wire.Portconf{
+		UnderscoreId:               strPtrOrNil(m.ID),
+		Name:                       strPtrOrNil(m.Name),
+		Forward:                    (*wire.PortconfForward)(strPtrOrNil(m.Forward)),
+		NativeNetworkconfId:        strPtrOrNil(m.NativeNetworkID),
+		TaggedVlanMgmt:             (*wire.PortconfTaggedVlanMgmt)(strPtrOrNil(m.TaggedVLANMgmt)),
+		VoiceNetworkconfId:         strPtrOrNil(m.VoiceNetworkID),
+		PoeMode:                    (*wire.PortconfPoeMode)(strPtrOrNil(m.POEMode)),
+		Autoneg:                    boolPtr(m.Autoneg),
+		Speed:                      (*wire.PortconfSpeed)(intPtr(m.Speed)),
+		FullDuplex:                 boolPtr(m.FullDuplex),
+		OpMode:                     strPtrOrNil(m.OpMode),
+		PortSecurityEnabled:        boolPtr(m.PortSecurityEnabled),
+		Dot1xCtrl:                  (*wire.PortconfDot1xCtrl)(strPtrOrNil(m.Dot1XCtrl)),
+		Dot1xIdleTimeout:           intPtr(m.Dot1XIdleTimeout),
+		Isolation:                  boolPtr(m.Isolation),
+		EgressRateLimitKbpsEnabled: boolPtr(m.EgressRateLimitEnabled),
+		EgressRateLimitKbps:        intPtr(m.EgressRateLimitKbps),
+		StpPortMode:                boolPtr(m.STPPortMode),
+		StpBpduGuardEnabled:        boolPtr(m.STPBPDUGuard),
+		StpEdgeState:               (*wire.PortconfStpEdgeState)(strPtrOrNil(m.STPEdgeState)),
+		LldpmedEnabled:             boolPtr(m.LLDPMEDEnabled),
+		PortKeepaliveEnabled:       boolPtr(m.PortKeepaliveEnabled),
+		MulticastRouterMode:        (*wire.PortconfMulticastRouterMode)(strPtrOrNil(m.MulticastRouterMode)),
 	}
 	// These two lists are owned (non-omitempty on the wire): always send a concrete
 	// slice so an explicit empty set clears the value instead of reading back null
 	// (which would trip the post-apply consistency check). Mirrors firewall_group.
-	if e := stringSetToSlice(ctx, m.ExcludedNetworkIDs, diags); e != nil {
-		p.ExcludedNetworkConfIDs = e
-	} else {
-		p.ExcludedNetworkConfIDs = []string{}
+	excluded := stringSetToSlice(ctx, m.ExcludedNetworkIDs, diags)
+	if excluded == nil {
+		excluded = []string{}
 	}
-	if s := stringSetToSlice(ctx, m.PortSecurityMACAddresses, diags); s != nil {
-		p.PortSecurityMACAddress = s
-	} else {
-		p.PortSecurityMACAddress = []string{}
+	p.ExcludedNetworkconfIds = &excluded
+	macs := stringSetToSlice(ctx, m.PortSecurityMACAddresses, diags)
+	if macs == nil {
+		macs = []string{}
 	}
+	p.PortSecurityMacAddress = &macs
 	return p
 }
 
-func (m *portProfileResourceModel) fromPortProfile(p *unifi.PortProfile) {
-	m.ID = types.StringValue(p.ID)
-	m.Name = types.StringValue(p.Name)
-	m.Forward = strToStateOptional(p.Forward)
-	m.NativeNetworkID = strToStateOptional(p.NativeNetworkConfID)
-	m.TaggedVLANMgmt = strToStateOptional(p.TaggedVLANMgmt)
-	m.ExcludedNetworkIDs = sliceToStringSet(p.ExcludedNetworkConfIDs)
-	m.VoiceNetworkID = strToStateOptional(p.VoiceNetworkConfID)
-	m.POEMode = strToStateOptional(p.POEMode)
+func (m *portProfileResourceModel) fromPortProfile(p *wire.Portconf) {
+	m.ID = types.StringValue(deref(p.UnderscoreId))
+	m.Name = types.StringValue(deref(p.Name))
+	m.Forward = strToStateOptional(string(derefEnum(p.Forward)))
+	m.NativeNetworkID = strToStateOptional(deref(p.NativeNetworkconfId))
+	m.TaggedVLANMgmt = strToStateOptional(string(derefEnum(p.TaggedVlanMgmt)))
+	m.ExcludedNetworkIDs = sliceToStringSet(derefSlice(p.ExcludedNetworkconfIds))
+	m.VoiceNetworkID = strToStateOptional(deref(p.VoiceNetworkconfId))
+	m.POEMode = strToStateOptional(string(derefEnum(p.PoeMode)))
 	m.Autoneg = boolToState(p.Autoneg)
-	m.Speed = intToState(p.Speed)
+	m.Speed = intToState((*int)(p.Speed))
 	m.FullDuplex = boolToState(p.FullDuplex)
-	m.OpMode = strToStateOptional(p.OpMode)
+	m.OpMode = strToStateOptional(deref(p.OpMode))
 	m.PortSecurityEnabled = boolToState(p.PortSecurityEnabled)
-	m.PortSecurityMACAddresses = sliceToStringSet(p.PortSecurityMACAddress)
-	m.Dot1XCtrl = strToStateOptional(p.Dot1XCtrl)
-	m.Dot1XIdleTimeout = intToState(p.Dot1XIdleTimeout)
+	m.PortSecurityMACAddresses = sliceToStringSet(derefSlice(p.PortSecurityMacAddress))
+	m.Dot1XCtrl = strToStateOptional(string(derefEnum(p.Dot1xCtrl)))
+	m.Dot1XIdleTimeout = intToState(p.Dot1xIdleTimeout)
 	m.Isolation = boolToState(p.Isolation)
-	m.EgressRateLimitEnabled = boolToState(p.EgressRateLimitEnabled)
+	m.EgressRateLimitEnabled = boolToState(p.EgressRateLimitKbpsEnabled)
 	m.EgressRateLimitKbps = intToState(p.EgressRateLimitKbps)
-	m.STPPortMode = boolToState(p.STPPortMode)
-	m.STPBPDUGuard = boolToState(p.STPBPDUGuard)
-	m.STPEdgeState = strToStateOptional(p.STPEdgeState)
-	m.LLDPMEDEnabled = boolToState(p.LLDPMEDEnabled)
-	m.PortKeepaliveEnabled = boolToState(p.PortKeepaliveOn)
-	m.MulticastRouterMode = strToStateOptional(p.MulticastRouterMode)
+	m.STPPortMode = boolToState(p.StpPortMode)
+	m.STPBPDUGuard = boolToState(p.StpBpduGuardEnabled)
+	m.STPEdgeState = strToStateOptional(string(derefEnum(p.StpEdgeState)))
+	m.LLDPMEDEnabled = boolToState(p.LldpmedEnabled)
+	m.PortKeepaliveEnabled = boolToState(p.PortKeepaliveEnabled)
+	m.MulticastRouterMode = strToStateOptional(string(derefEnum(p.MulticastRouterMode)))
 }

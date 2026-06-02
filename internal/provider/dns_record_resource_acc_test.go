@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -10,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 )
 
 func init() {
@@ -23,7 +20,7 @@ func init() {
 				return err
 			}
 			ctx := context.Background()
-			recs, err := c.ListDNSRecords(ctx)
+			recs, err := c.Network().DNS().Records().List(ctx)
 			if err != nil {
 				return err
 			}
@@ -31,8 +28,9 @@ func init() {
 				if !strings.HasPrefix(recs[i].Key, accNamePrefix) {
 					continue
 				}
-				if err := c.DeleteDNSRecord(ctx, recs[i].ID); err != nil {
-					return fmt.Errorf("sweep dns %s (%s): %w", recs[i].Key, recs[i].ID, err)
+				id := deref(recs[i].UnderscoreId)
+				if err := c.Network().DNS().Records().Delete(ctx, id); err != nil {
+					return fmt.Errorf("sweep dns %s (%s): %w", recs[i].Key, id, err)
 				}
 			}
 			return nil
@@ -96,11 +94,11 @@ func testAccCheckDNSRecordDestroy(s *terraform.State) error {
 		if rs.Type != "unifi_network_dns_record" {
 			continue
 		}
-		_, err := c.GetDNSRecord(ctx, rs.Primary.ID)
+		_, err := c.Network().DNS().Records().Get(ctx, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("dns record %s still exists after destroy", rs.Primary.ID)
 		}
-		if !errors.Is(err, unifi.ErrNotFound) {
+		if !isNotFoundErr(err) {
 			return fmt.Errorf("checking destroy of %s: %w", rs.Primary.ID, err)
 		}
 	}

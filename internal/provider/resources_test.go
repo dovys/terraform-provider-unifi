@@ -10,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 
-	"github.com/dovys/terraform-provider-unifi/internal/unifi"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 // sp returns a pointer to s — for building wire fixtures with *string slots.
@@ -78,30 +79,31 @@ func TestNetworkConf_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toNetworkConf diags: %v", diags)
 	}
-	if conf.VLAN == nil || *conf.VLAN != 30 || conf.VLANEnabled == nil || !*conf.VLANEnabled {
-		t.Errorf("VLAN mapping wrong: VLAN=%v Enabled=%v", conf.VLAN, conf.VLANEnabled)
+	if conf.Vlan == nil || *conf.Vlan != 30 || conf.VlanEnabled == nil || !*conf.VlanEnabled {
+		t.Errorf("VLAN mapping wrong: VLAN=%v Enabled=%v", conf.Vlan, conf.VlanEnabled)
 	}
-	if derefStr(conf.DHCPDDNS1) != "1.1.1.1" || derefStr(conf.DHCPDDNS2) != "8.8.8.8" {
-		t.Errorf("dhcp dns mapping wrong: %v %v", conf.DHCPDDNS1, conf.DHCPDDNS2)
+	if derefStr(conf.DhcpdDns1) != "1.1.1.1" || derefStr(conf.DhcpdDns2) != "8.8.8.8" {
+		t.Errorf("dhcp dns mapping wrong: %v %v", conf.DhcpdDns1, conf.DhcpdDns2)
 	}
-	if conf.DHCPDDNSEnabled == nil || !*conf.DHCPDDNSEnabled {
-		t.Errorf("DHCPDDNSEnabled should be true when servers are set")
+	if conf.DhcpdDnsEnabled == nil || !*conf.DhcpdDnsEnabled {
+		t.Errorf("DhcpdDnsEnabled should be true when servers are set")
 	}
 
 	// No VLAN ID → vlan disabled explicitly (not left nil).
 	m.VLANID = types.Int64Null()
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.VLAN != nil || conf.VLANEnabled == nil || *conf.VLANEnabled {
-		t.Errorf("untagged network: VLAN=%v Enabled=%v, want nil/false", conf.VLAN, conf.VLANEnabled)
+	if conf.Vlan != nil || conf.VlanEnabled == nil || *conf.VlanEnabled {
+		t.Errorf("untagged network: VLAN=%v Enabled=%v, want nil/false", conf.Vlan, conf.VlanEnabled)
 	}
 
 	// Wire → state.
 	on := true
 	vid := 40
+	guestPurpose := wire.NetworkconfPurpose("guest")
 	var out networkResourceModel
-	out.fromNetworkConf(&unifi.NetworkConf{
-		ID: "net9", Name: "guests", Purpose: "guest", NetworkGroup: "LAN",
-		VLANEnabled: &on, VLAN: &vid, DHCPDDNS1: sp("9.9.9.9"),
+	out.fromNetworkConf(&wire.Networkconf{
+		UnderscoreId: sp("net9"), Name: sp("guests"), Purpose: &guestPurpose, Networkgroup: sp("LAN"),
+		VlanEnabled: &on, Vlan: &vid, DhcpdDns1: sp("9.9.9.9"),
 	})
 	if out.ID.ValueString() != "net9" || out.VLANID.ValueInt64() != 40 || out.NetworkGroup.ValueString() != "LAN" {
 		t.Errorf("fromNetworkConf wrong: %+v", out)
@@ -132,15 +134,15 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toNetworkConf diags: %v", diags)
 	}
-	if conf.Purpose != "wan" {
-		t.Errorf("purpose = %q, want wan", conf.Purpose)
+	if string(derefEnum(conf.Purpose)) != "wan" {
+		t.Errorf("purpose = %q, want wan", string(derefEnum(conf.Purpose)))
 	}
-	if conf.WANDNSPreference != "manual" || derefStr(conf.WANDNS1) != "1.1.1.1" || derefStr(conf.WANDNS2) != "8.8.8.8" {
-		t.Errorf("manual DNS mapping wrong: pref=%q dns1=%v dns2=%v", conf.WANDNSPreference, conf.WANDNS1, conf.WANDNS2)
+	if string(derefEnum(conf.WanDnsPreference)) != "manual" || derefStr(conf.WanDns1) != "1.1.1.1" || derefStr(conf.WanDns2) != "8.8.8.8" {
+		t.Errorf("manual DNS mapping wrong: pref=%q dns1=%v dns2=%v", string(derefEnum(conf.WanDnsPreference)), conf.WanDns1, conf.WanDns2)
 	}
-	if conf.WANProviderCapabilities == nil || conf.WANProviderCapabilities.UploadKilobitsPerSecond == nil ||
-		*conf.WANProviderCapabilities.UploadKilobitsPerSecond != 1000 {
-		t.Errorf("provider caps wrong: %+v", conf.WANProviderCapabilities)
+	if conf.WanProviderCapabilities == nil || conf.WanProviderCapabilities.UploadKilobitsPerSecond == nil ||
+		*conf.WanProviderCapabilities.UploadKilobitsPerSecond != 1000 {
+		t.Errorf("provider caps wrong: %+v", conf.WanProviderCapabilities)
 	}
 
 	// Narrowing the list to one server must explicitly clear the freed slot
@@ -148,16 +150,16 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	// leaving it — otherwise the controller echoes a perpetual extra server.
 	m.DNSServers = sliceToStringList([]string{"1.1.1.1"})
 	conf = m.toNetworkConf(ctx, &diags)
-	if derefStr(conf.WANDNS1) != "1.1.1.1" || conf.WANDNS2 == nil || *conf.WANDNS2 != "" {
-		t.Errorf("narrowed DNS must clear slot 2: dns1=%v dns2=%v", conf.WANDNS1, conf.WANDNS2)
+	if derefStr(conf.WanDns1) != "1.1.1.1" || conf.WanDns2 == nil || *conf.WanDns2 != "" {
+		t.Errorf("narrowed DNS must clear slot 2: dns1=%v dns2=%v", conf.WanDns1, conf.WanDns2)
 	}
 
 	// A null list (unconfigured) is left untouched — the controller keeps its
 	// own preference rather than being forced to auto.
 	m.DNSServers = sliceToStringList(nil)
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.WANDNSPreference != "" || conf.WANDNS1 != nil {
-		t.Errorf("null DNS must not touch the slots: pref=%q dns1=%v", conf.WANDNSPreference, conf.WANDNS1)
+	if conf.WanDnsPreference != nil || conf.WanDns1 != nil {
+		t.Errorf("null DNS must not touch the slots: pref=%v dns1=%v", conf.WanDnsPreference, conf.WanDns1)
 	}
 
 	// Only upload set: download must round-trip back to null (not 0), or the
@@ -165,8 +167,8 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	m.UploadKilobits = types.Int64Value(1000)
 	m.DownloadKilobits = types.Int64Null()
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.WANProviderCapabilities == nil || conf.WANProviderCapabilities.DownloadKilobitsPerSecond != nil {
-		t.Errorf("unset download must stay nil on the wire: %+v", conf.WANProviderCapabilities)
+	if conf.WanProviderCapabilities == nil || conf.WanProviderCapabilities.DownloadKilobitsPerSecond != nil {
+		t.Errorf("unset download must stay nil on the wire: %+v", conf.WanProviderCapabilities)
 	}
 	var out wanResourceModel
 	out.fromNetworkConf(conf)
@@ -191,19 +193,20 @@ func TestDNSRecord_RoundTrip(t *testing.T) {
 		Weight:   types.Int64Null(),
 	}
 	rec := m.toRecord()
-	if rec.Key != "host.example.com" || rec.RecordType != "A" || rec.Value != "10.0.0.5" {
+	if rec.Key != "host.example.com" || derefEnum(rec.RecordType) != "A" || rec.Value != "10.0.0.5" {
 		t.Errorf("toRecord wrong: %+v", rec)
 	}
 	if rec.Enabled == nil || !*rec.Enabled {
 		t.Errorf("enabled should be &true")
 	}
-	if rec.TTL != nil || rec.Port != nil {
-		t.Errorf("unset int optionals must be nil: ttl=%v port=%v", rec.TTL, rec.Port)
+	if rec.Ttl != nil || rec.Port != nil {
+		t.Errorf("unset int optionals must be nil: ttl=%v port=%v", rec.Ttl, rec.Port)
 	}
 
 	var out dnsRecordResourceModel
 	ttl := 300
-	out.fromRecord(&unifi.StaticDNSRecord{ID: "d1", Key: "k", RecordType: "CNAME", Value: "t", Enabled: boolPtrLit(false), TTL: &ttl})
+	cname := wire.StaticDnsRecordType("CNAME")
+	out.fromRecord(&wire.StaticDns{UnderscoreId: sp("d1"), Key: "k", RecordType: &cname, Value: "t", Enabled: boolPtrLit(false), Ttl: &ttl})
 	if out.ID.ValueString() != "d1" || out.Type.ValueString() != "CNAME" || out.TTL.ValueInt64() != 300 {
 		t.Errorf("fromRecord wrong: %+v", out)
 	}
@@ -266,15 +269,15 @@ func TestWAN_PPPoEStaticAndSecrets(t *testing.T) {
 		MACOverride: types.StringValue("02:00:00:00:00:01"),
 	}
 	conf := m.toNetworkConf(ctx, &diags)
-	if conf.WANUsername != "user@isp" || conf.XWANPassword != "s3cret" {
-		t.Errorf("pppoe creds wrong: %q / %q", conf.WANUsername, conf.XWANPassword)
+	if derefStr(conf.WanUsername) != "user@isp" || derefStr(conf.XWanPassword) != "s3cret" {
+		t.Errorf("pppoe creds wrong: %q / %q", derefStr(conf.WanUsername), derefStr(conf.XWanPassword))
 	}
-	if conf.WANPPPoEUsernameEnabled == nil || !*conf.WANPPPoEUsernameEnabled ||
-		conf.WANPPPoEPasswordEnabled == nil || !*conf.WANPPPoEPasswordEnabled {
+	if conf.WanPppoeUsernameEnabled == nil || !*conf.WanPppoeUsernameEnabled ||
+		conf.WanPppoePasswordEnabled == nil || !*conf.WanPppoePasswordEnabled {
 		t.Errorf("pppoe enable flags should be true when creds set")
 	}
-	if conf.MACOverride != "02:00:00:00:00:01" || conf.MACOverrideEnabled == nil || !*conf.MACOverrideEnabled {
-		t.Errorf("mac override should be enabled with value: %+v", conf.MACOverrideEnabled)
+	if derefStr(conf.MacOverride) != "02:00:00:00:00:01" || conf.MacOverrideEnabled == nil || !*conf.MacOverrideEnabled {
+		t.Errorf("mac override should be enabled with value: %+v", conf.MacOverrideEnabled)
 	}
 
 	// Static uplink fields.
@@ -284,13 +287,14 @@ func TestWAN_PPPoEStaticAndSecrets(t *testing.T) {
 		Gateway: types.StringValue("203.0.113.1"),
 	}
 	conf = m.toNetworkConf(ctx, &diags)
-	if conf.WANIP != "203.0.113.2" || conf.WANNetmask != "255.255.255.0" || conf.WANGateway != "203.0.113.1" {
+	if derefStr(conf.WanIp) != "203.0.113.2" || derefStr(conf.WanNetmask) != "255.255.255.0" || derefStr(conf.WanGateway) != "203.0.113.1" {
 		t.Errorf("static WAN mapping wrong: %+v", conf)
 	}
 
 	// Write-only password: a read that doesn't echo it must keep the prior value.
+	pppoeType := wire.NetworkconfWanType("pppoe")
 	out := wanResourceModel{PPPoEPassword: types.StringValue("keep-me")}
-	out.fromNetworkConf(&unifi.NetworkConf{Name: "wan", WANType: "pppoe", WANUsername: "u"})
+	out.fromNetworkConf(&wire.Networkconf{Name: sp("wan"), WanType: &pppoeType, WanUsername: sp("u")})
 	if out.PPPoEPassword.ValueString() != "keep-me" {
 		t.Errorf("write-only password should be preserved on read, got %q", out.PPPoEPassword.ValueString())
 	}
@@ -304,17 +308,17 @@ func TestNetwork_DHCPOptionsRoundTrip(t *testing.T) {
 		Name: types.StringValue("lan"), Purpose: types.StringValue("corporate"),
 		DHCPLeaseTime:  types.Int64Value(86400),
 		DHCPNTPEnabled: types.BoolValue(true), DHCPNTPServer1: types.StringValue("10.0.0.1"),
-		DHCPGuardEnabled: types.BoolValue(true), MDNSEnabled: types.BoolValue(true),
+		DHCPGuardEnabled: types.BoolValue(true),
 	}
 	conf := m.toNetworkConf(ctx, &diags)
-	if conf.DHCPDLeaseTime == nil || *conf.DHCPDLeaseTime != 86400 {
-		t.Errorf("lease time wrong: %v", conf.DHCPDLeaseTime)
+	if conf.DhcpdLeasetime == nil || *conf.DhcpdLeasetime != 86400 {
+		t.Errorf("lease time wrong: %v", conf.DhcpdLeasetime)
 	}
-	if conf.DHCPDNTPEnabled == nil || !*conf.DHCPDNTPEnabled || conf.DHCPDNTP1 != "10.0.0.1" {
-		t.Errorf("dhcp ntp wrong: %v / %q", conf.DHCPDNTPEnabled, conf.DHCPDNTP1)
+	if conf.DhcpdNtpEnabled == nil || !*conf.DhcpdNtpEnabled || derefStr(conf.DhcpdNtp1) != "10.0.0.1" {
+		t.Errorf("dhcp ntp wrong: %v / %q", conf.DhcpdNtpEnabled, derefStr(conf.DhcpdNtp1))
 	}
-	if conf.DHCPGuardEnabled == nil || !*conf.DHCPGuardEnabled || conf.MDNSEnabled == nil || !*conf.MDNSEnabled {
-		t.Errorf("guard/mdns flags wrong")
+	if conf.DhcpguardEnabled == nil || !*conf.DhcpguardEnabled {
+		t.Errorf("guard flag wrong")
 	}
 
 	var out networkResourceModel
@@ -349,17 +353,19 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toWLANConf diags: %v", diags)
 	}
-	if conf.Name != "Home" || conf.Security != "wpapsk" || conf.NetworkConfID != "net1" {
+	if derefStr(conf.Name) != "Home" || string(derefEnum(conf.Security)) != "wpapsk" || derefStr(conf.NetworkconfId) != "net1" {
 		t.Errorf("scalar mapping wrong: %+v", conf)
 	}
-	if conf.XPassphrase != "hunter2hunter2" {
-		t.Errorf("passphrase mapping wrong: %q", conf.XPassphrase)
+	if derefStr(conf.XPassphrase) != "hunter2hunter2" {
+		t.Errorf("passphrase mapping wrong: %q", derefStr(conf.XPassphrase))
 	}
 	if conf.Enabled == nil || !*conf.Enabled {
 		t.Errorf("enabled should be &true")
 	}
-	if len(conf.WLANBands) != 2 || len(conf.APGroupIDs) != 1 || len(conf.MACFilterList) != 1 {
-		t.Errorf("set mapping wrong: bands=%v aps=%v macs=%v", conf.WLANBands, conf.APGroupIDs, conf.MACFilterList)
+	if conf.WlanBands == nil || len(*conf.WlanBands) != 2 ||
+		conf.ApGroupIds == nil || len(*conf.ApGroupIds) != 1 ||
+		conf.MacFilterList == nil || len(*conf.MacFilterList) != 1 {
+		t.Errorf("set mapping wrong: bands=%v aps=%v macs=%v", conf.WlanBands, conf.ApGroupIds, conf.MacFilterList)
 	}
 	if conf.GroupRekey == nil || *conf.GroupRekey != 3600 {
 		t.Errorf("group_rekey mapping wrong: %v", conf.GroupRekey)
@@ -368,9 +374,12 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	// Wire → state. The controller commonly echoes an empty x_passphrase on
 	// read; the passphrase must stay whatever the config set rather than wiping.
 	out := *m // carry the configured passphrase
-	out.fromWLANConf(&unifi.WLANConf{
-		ID: "wlan9", Name: "Home", Security: "wpapsk", WPAMode: "wpa2",
-		XPassphrase: "", NetworkConfID: "net1", WLANBands: []string{"2g", "5g"},
+	wpapsk := wire.WlanconfSecurity("wpapsk")
+	wpa2 := wire.WlanconfWpaMode("wpa2")
+	bands := []wire.WlanconfWlanBands{"2g", "5g"}
+	out.fromWLANConf(&wire.Wlanconf{
+		UnderscoreId: sp("wlan9"), Name: sp("Home"), Security: &wpapsk, WpaMode: &wpa2,
+		XPassphrase: sp(""), NetworkconfId: sp("net1"), WlanBands: &bands,
 	})
 	if out.ID.ValueString() != "wlan9" {
 		t.Errorf("id round-trip wrong: %q", out.ID.ValueString())
@@ -380,7 +389,7 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	}
 
 	// When the controller does return a passphrase, adopt it.
-	out.fromWLANConf(&unifi.WLANConf{ID: "wlan9", Name: "Home", XPassphrase: "fromserver1234"})
+	out.fromWLANConf(&wire.Wlanconf{UnderscoreId: sp("wlan9"), Name: sp("Home"), XPassphrase: sp("fromserver1234")})
 	if out.Passphrase.ValueString() != "fromserver1234" {
 		t.Errorf("passphrase should adopt the controller value, got %q", out.Passphrase.ValueString())
 	}
@@ -401,18 +410,18 @@ func TestAPGroup_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toAPGroup diags: %v", diags)
 	}
-	if g.Name != "Upstairs" || g.DeviceMACs == nil || len(g.DeviceMACs) != 0 {
-		t.Errorf("null device_macs must become an empty (non-nil) slice: %+v", g.DeviceMACs)
+	if g.Name != "Upstairs" || g.DeviceMacs == nil || len(g.DeviceMacs) != 0 {
+		t.Errorf("null device_macs must become an empty (non-nil) slice: %+v", g.DeviceMacs)
 	}
 
 	m.DeviceMACs = sliceToStringSet([]string{"aa:bb:cc:00:11:22", "de:ad:be:ef:00:01"})
 	g = m.toAPGroup(ctx, &diags)
-	if len(g.DeviceMACs) != 2 {
-		t.Errorf("device_macs mapping wrong: %v", g.DeviceMACs)
+	if len(g.DeviceMacs) != 2 {
+		t.Errorf("device_macs mapping wrong: %v", g.DeviceMacs)
 	}
 
 	var out apGroupResourceModel
-	out.fromAPGroup(&unifi.APGroup{ID: "ag5", Name: "All APs", DeviceMACs: []string{"aa:bb:cc:00:11:22"}})
+	out.fromAPGroup(&wire.Apgroups{UnderscoreId: sp("ag5"), Name: "All APs", DeviceMacs: []string{"aa:bb:cc:00:11:22"}})
 	if out.ID.ValueString() != "ag5" || out.Name.ValueString() != "All APs" {
 		t.Errorf("fromAPGroup wrong: %+v", out)
 	}
@@ -427,7 +436,7 @@ func TestAPGroup_RoundTrip(t *testing.T) {
 
 	// The protected default group reads attr_no_delete = true (destroy → no-op).
 	protected := true
-	out.fromAPGroup(&unifi.APGroup{ID: "default", Name: "All APs", AttrNoDelete: &protected})
+	out.fromAPGroup(&wire.Apgroups{UnderscoreId: sp("default"), Name: "All APs", AttrNoDelete: &protected})
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}
@@ -448,18 +457,19 @@ func TestFirewallGroup_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toFirewallGroup diags: %v", diags)
 	}
-	if g.Name != "Servers" || g.GroupType != "address-group" || g.GroupMembers == nil || len(g.GroupMembers) != 0 {
+	if derefStr(g.Name) != "Servers" || string(derefEnum(g.GroupType)) != "address-group" || g.GroupMembers == nil || len(*g.GroupMembers) != 0 {
 		t.Errorf("null members must become an empty (non-nil) slice: %+v", g)
 	}
 
 	m.Members = sliceToStringSet([]string{"10.0.0.10", "10.0.0.0/24"})
 	g = m.toFirewallGroup(ctx, &diags)
-	if len(g.GroupMembers) != 2 {
+	if g.GroupMembers == nil || len(*g.GroupMembers) != 2 {
 		t.Errorf("members mapping wrong: %v", g.GroupMembers)
 	}
 
 	var out firewallGroupResourceModel
-	out.fromFirewallGroup(&unifi.FirewallGroup{ID: "fg5", Name: "Ports", GroupType: "port-group", GroupMembers: []string{"443"}})
+	portGroup := wire.FirewallgroupGroupType("port-group")
+	out.fromFirewallGroup(&wire.Firewallgroup{UnderscoreId: sp("fg5"), Name: sp("Ports"), GroupType: &portGroup, GroupMembers: &[]string{"443"}})
 	if out.ID.ValueString() != "fg5" || out.Type.ValueString() != "port-group" {
 		t.Errorf("fromFirewallGroup wrong: %+v", out)
 	}
@@ -467,7 +477,8 @@ func TestFirewallGroup_RoundTrip(t *testing.T) {
 	// An empty group (controller echoes `[]`) must read back as an empty set, not
 	// null — otherwise a `members = []` config trips the post-apply consistency check.
 	var empty firewallGroupResourceModel
-	empty.fromFirewallGroup(&unifi.FirewallGroup{ID: "fg6", Name: "Empty", GroupType: "address-group", GroupMembers: []string{}})
+	addrGroup := wire.FirewallgroupGroupType("address-group")
+	empty.fromFirewallGroup(&wire.Firewallgroup{UnderscoreId: sp("fg6"), Name: sp("Empty"), GroupType: &addrGroup, GroupMembers: &[]string{}})
 	if empty.Members.IsNull() || len(empty.Members.Elements()) != 0 {
 		t.Errorf("empty group members should be a non-null empty set, got %v", empty.Members)
 	}
@@ -516,7 +527,7 @@ func TestFirewallRule_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toFirewallRule diags: %v", diags)
 	}
-	if r.Name != "block-iot-to-lan" || r.Ruleset != "LAN_IN" || r.Action != "drop" {
+	if derefStr(r.Name) != "block-iot-to-lan" || string(derefEnum(r.Ruleset)) != "LAN_IN" || string(derefEnum(r.Action)) != "drop" {
 		t.Errorf("scalar mapping wrong: %+v", r)
 	}
 	if r.RuleIndex == nil || *r.RuleIndex != 20010 {
@@ -526,21 +537,24 @@ func TestFirewallRule_RoundTrip(t *testing.T) {
 		t.Errorf("bool mapping wrong: enabled=%v state_new=%v", r.Enabled, r.StateNew)
 	}
 	// Unset optionals stay nil/empty so GET-merge-PUT leaves the controller's value.
-	if r.SrcAddress != "" || r.ProtocolExcepted != nil || r.DstFirewallGroupIDs != nil {
-		t.Errorf("unset optionals must be empty/nil: src_address=%q excepted=%v dst_groups=%v", r.SrcAddress, r.ProtocolExcepted, r.DstFirewallGroupIDs)
+	if r.SrcAddress != nil || r.ProtocolMatchExcepted != nil || r.DstFirewallgroupIds != nil {
+		t.Errorf("unset optionals must be nil: src_address=%v excepted=%v dst_groups=%v", r.SrcAddress, r.ProtocolMatchExcepted, r.DstFirewallgroupIds)
 	}
-	if len(r.SrcFirewallGroupIDs) != 1 || r.SrcFirewallGroupIDs[0] != "fg-iot" {
-		t.Errorf("src_firewall_group_ids mapping wrong: %v", r.SrcFirewallGroupIDs)
+	if r.SrcFirewallgroupIds == nil || len(*r.SrcFirewallgroupIds) != 1 || (*r.SrcFirewallgroupIds)[0] != "fg-iot" {
+		t.Errorf("src_firewall_group_ids mapping wrong: %v", r.SrcFirewallgroupIds)
 	}
-	if r.DstNetworkConfID != "net-lan" {
-		t.Errorf("dst_network_id mapping wrong: %q", r.DstNetworkConfID)
+	if derefStr(r.DstNetworkconfId) != "net-lan" {
+		t.Errorf("dst_network_id mapping wrong: %q", derefStr(r.DstNetworkconfId))
 	}
 
 	var out firewallRuleResourceModel
 	idx := 20010
-	out.fromFirewallRule(&unifi.FirewallRule{
-		ID: "fr9", Name: "block-iot-to-lan", Ruleset: "LAN_IN", RuleIndex: &idx, Action: "drop",
-		Enabled: boolPtrLit(true), SettingPreference: "manual", DstNetworkConfID: "net-lan",
+	lanIn := wire.FirewallruleRuleset("LAN_IN")
+	drop := wire.FirewallruleAction("drop")
+	manual := wire.FirewallruleSettingPreference("manual")
+	out.fromFirewallRule(&wire.Firewallrule{
+		UnderscoreId: sp("fr9"), Name: sp("block-iot-to-lan"), Ruleset: &lanIn, RuleIndex: &idx, Action: &drop,
+		Enabled: boolPtrLit(true), SettingPreference: &manual, DstNetworkconfId: sp("net-lan"),
 	})
 	if out.ID.ValueString() != "fr9" || out.RuleIndex.ValueInt64() != 20010 || out.SettingPreference.ValueString() != "manual" {
 		t.Errorf("fromFirewallRule wrong: %+v", out)
@@ -553,10 +567,12 @@ func TestFirewallRule_RoundTrip(t *testing.T) {
 
 func TestRuleIndexConflict(t *testing.T) {
 	i1, i2 := 20000, 20001
-	rules := []unifi.FirewallRule{
-		{ID: "a", Name: "first", Ruleset: "LAN_IN", RuleIndex: &i1},
-		{ID: "b", Name: "second", Ruleset: "LAN_IN", RuleIndex: &i2},
-		{ID: "c", Name: "wan", Ruleset: "WAN_IN", RuleIndex: &i1},
+	lanIn := wire.FirewallruleRuleset("LAN_IN")
+	wanIn := wire.FirewallruleRuleset("WAN_IN")
+	rules := []wire.Firewallrule{
+		{UnderscoreId: sp("a"), Name: sp("first"), Ruleset: &lanIn, RuleIndex: &i1},
+		{UnderscoreId: sp("b"), Name: sp("second"), Ruleset: &lanIn, RuleIndex: &i2},
+		{UnderscoreId: sp("c"), Name: sp("wan"), Ruleset: &wanIn, RuleIndex: &i1},
 	}
 	// Same ruleset + index as an existing different rule → conflict.
 	if name, conflict := ruleIndexConflict(rules, "LAN_IN", 20000, ""); !conflict || name != "first" {
@@ -587,19 +603,19 @@ func TestDHCPReservation_RoundTrip(t *testing.T) {
 		LocalDNSRecordEnabled: types.BoolNull(),
 	}
 	u := m.toUser()
-	if u.MAC != "aa:bb:cc:dd:ee:01" {
-		t.Errorf("mac should be lower-cased on the wire, got %q", u.MAC)
+	if deref(u.Mac) != "aa:bb:cc:dd:ee:01" {
+		t.Errorf("mac should be lower-cased on the wire, got %q", deref(u.Mac))
 	}
-	if u.UseFixedIP == nil || !*u.UseFixedIP {
+	if u.UseFixedip == nil || !*u.UseFixedip {
 		t.Errorf("toUser must always assert use_fixedip=true for a reservation")
 	}
-	if u.FixedIP != "10.0.0.10" || u.NetworkID != "net1" || u.Name != "nas" {
+	if deref(u.FixedIp) != "10.0.0.10" || deref(u.NetworkId) != "net1" || deref(u.Name) != "nas" {
 		t.Errorf("scalar mapping wrong: %+v", u)
 	}
 
 	// fromUser must NOT overwrite mac (immutable key, controller lowercases it),
 	// so a mixed-case config doesn't churn.
-	m.fromUser(&unifi.User{ID: "u9", MAC: "aa:bb:cc:dd:ee:01", FixedIP: "10.0.0.10", Hostname: "nas", NetworkID: "net1"})
+	m.fromUser(&wire.User{UnderscoreId: sp("u9"), Mac: sp("aa:bb:cc:dd:ee:01"), FixedIp: sp("10.0.0.10"), Hostname: sp("nas"), NetworkId: sp("net1")})
 	if m.ID.ValueString() != "u9" {
 		t.Errorf("id round-trip wrong: %q", m.ID.ValueString())
 	}
@@ -647,39 +663,42 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toPortProfile diags: %v", diags)
 	}
-	if p.Name != "Trunk" || p.Forward != "customize" || p.NativeNetworkConfID != "net-mgmt" {
+	if deref(p.Name) != "Trunk" || string(derefEnum(p.Forward)) != "customize" || deref(p.NativeNetworkconfId) != "net-mgmt" {
 		t.Errorf("scalar mapping wrong: %+v", p)
 	}
 	// Explicit false on autoneg must be a non-nil *bool so the merge writes it.
-	if p.Autoneg == nil || *p.Autoneg != false || p.STPPortMode == nil || *p.STPPortMode != false {
-		t.Errorf("explicit false bool must be non-nil: autoneg=%v stp_port_mode=%v", p.Autoneg, p.STPPortMode)
+	if p.Autoneg == nil || *p.Autoneg != false || p.StpPortMode == nil || *p.StpPortMode != false {
+		t.Errorf("explicit false bool must be non-nil: autoneg=%v stp_port_mode=%v", p.Autoneg, p.StpPortMode)
 	}
 	if p.Speed == nil || *p.Speed != 1000 {
 		t.Errorf("speed mapping wrong: %v", p.Speed)
 	}
-	if len(p.ExcludedNetworkConfIDs) != 1 || p.ExcludedNetworkConfIDs[0] != "net-iot" {
-		t.Errorf("excluded_network_ids mapping wrong: %v", p.ExcludedNetworkConfIDs)
+	if p.ExcludedNetworkconfIds == nil || len(*p.ExcludedNetworkconfIds) != 1 || (*p.ExcludedNetworkconfIds)[0] != "net-iot" {
+		t.Errorf("excluded_network_ids mapping wrong: %v", p.ExcludedNetworkconfIds)
 	}
 	// Unset scalar optionals stay nil/empty so the merge-PUT leaves the controller's value.
-	if p.FullDuplex != nil || p.Dot1XCtrl != "" {
-		t.Errorf("unset scalar optionals must be empty/nil: full_duplex=%v dot1x=%q", p.FullDuplex, p.Dot1XCtrl)
+	if p.FullDuplex != nil || p.Dot1xCtrl != nil {
+		t.Errorf("unset scalar optionals must be nil: full_duplex=%v dot1x=%v", p.FullDuplex, p.Dot1xCtrl)
 	}
 	// The owned MAC list, unset (null config), must send a concrete empty slice
 	// (not nil) so an explicit `[]` clears it on the wire instead of reading null.
-	if p.PortSecurityMACAddress == nil || len(p.PortSecurityMACAddress) != 0 {
-		t.Errorf("owned port_security_mac_address must be a non-nil empty slice when unset, got %v", p.PortSecurityMACAddress)
+	if p.PortSecurityMacAddress == nil || len(*p.PortSecurityMacAddress) != 0 {
+		t.Errorf("owned port_security_mac_address must be a non-nil empty slice when unset, got %v", p.PortSecurityMacAddress)
 	}
 
 	// An explicit empty exclusion set must reach the wire as a concrete empty slice.
 	m.ExcludedNetworkIDs = sliceToStringSet([]string{})
-	if cleared := m.toPortProfile(ctx, &diags); cleared.ExcludedNetworkConfIDs == nil || len(cleared.ExcludedNetworkConfIDs) != 0 {
-		t.Errorf("explicit empty excluded_network_ids must marshal as []; got %v", cleared.ExcludedNetworkConfIDs)
+	if cleared := m.toPortProfile(ctx, &diags); cleared.ExcludedNetworkconfIds == nil || len(*cleared.ExcludedNetworkconfIds) != 0 {
+		t.Errorf("explicit empty excluded_network_ids must marshal as []; got %v", cleared.ExcludedNetworkconfIds)
 	}
 
 	var out portProfileResourceModel
-	out.fromPortProfile(&unifi.PortProfile{
-		ID: "pc7", Name: "Uplink", Forward: "all", POEMode: "passthrough",
-		Autoneg: boolPtrLit(true), ExcludedNetworkConfIDs: []string{},
+	allEmpty := []string{}
+	allPower := wire.PortconfPoeMode("passthrough")
+	allFwd := wire.PortconfForward("all")
+	out.fromPortProfile(&wire.Portconf{
+		UnderscoreId: sp("pc7"), Name: sp("Uplink"), Forward: &allFwd, PoeMode: &allPower,
+		Autoneg: boolPtrLit(true), ExcludedNetworkconfIds: &allEmpty,
 	})
 	if out.ID.ValueString() != "pc7" || out.Forward.ValueString() != "all" || out.POEMode.ValueString() != "passthrough" {
 		t.Errorf("fromPortProfile wrong: %+v", out)
@@ -707,26 +726,26 @@ func TestUserGroup_RoundTrip(t *testing.T) {
 		QOSRateMaxDown: types.Int64Value(0),
 	}
 	g := m.toUserGroup()
-	if g.Name != "Capped" {
+	if deref(g.Name) != "Capped" {
 		t.Errorf("name mapping wrong: %+v", g)
 	}
-	if g.QOSRateMaxUp == nil || *g.QOSRateMaxUp != 5000 {
-		t.Errorf("qos_rate_max_up should map to &5000, got %v", g.QOSRateMaxUp)
+	if g.QosRateMaxUp == nil || *g.QosRateMaxUp != 5000 {
+		t.Errorf("qos_rate_max_up should map to &5000, got %v", g.QosRateMaxUp)
 	}
-	if g.QOSRateMaxDown == nil || *g.QOSRateMaxDown != 0 {
-		t.Errorf("explicit 0 must map to &0 (not nil), got %v", g.QOSRateMaxDown)
+	if g.QosRateMaxDown == nil || *g.QosRateMaxDown != 0 {
+		t.Errorf("explicit 0 must map to &0 (not nil), got %v", g.QosRateMaxDown)
 	}
 
 	// An unconfigured cap stays nil so GET-merge-PUT leaves the controller's value.
 	m.QOSRateMaxUp = types.Int64Null()
-	if g := m.toUserGroup(); g.QOSRateMaxUp != nil {
-		t.Errorf("null qos_rate_max_up must map to nil, got %v", g.QOSRateMaxUp)
+	if g := m.toUserGroup(); g.QosRateMaxUp != nil {
+		t.Errorf("null qos_rate_max_up must map to nil, got %v", g.QosRateMaxUp)
 	}
 
 	// Wire → state.
 	var out userGroupResourceModel
 	up, down := 10000, 20000
-	out.fromUserGroup(&unifi.UserGroup{ID: "ug9", Name: "Renamed", QOSRateMaxUp: &up, QOSRateMaxDown: &down})
+	out.fromUserGroup(&wire.Usergroup{UnderscoreId: sp("ug9"), Name: sp("Renamed"), QosRateMaxUp: &up, QosRateMaxDown: &down})
 	if out.ID.ValueString() != "ug9" || out.Name.ValueString() != "Renamed" {
 		t.Errorf("fromUserGroup wrong: %+v", out)
 	}
@@ -739,7 +758,7 @@ func TestUserGroup_RoundTrip(t *testing.T) {
 
 	// The protected default group reads attr_no_delete = true (destroy → no-op).
 	protected := true
-	out.fromUserGroup(&unifi.UserGroup{ID: "default", Name: "Default", AttrNoDelete: &protected})
+	out.fromUserGroup(&wire.Usergroup{UnderscoreId: sp("default"), Name: sp("Default"), AttrNoDelete: &protected})
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}
@@ -769,26 +788,28 @@ func TestRadiusProfile_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toRadiusProfile diags: %v", diags)
 	}
-	if p.Name != "Corp" || p.VLANWLANMode != "optional" {
+	if deref(p.Name) != "Corp" || string(derefEnum(p.VlanWlanMode)) != "optional" {
 		t.Errorf("scalar mapping wrong: %+v", p)
 	}
-	if len(p.AuthServers) != 1 || p.AuthServers[0].IP != "10.0.0.9" || p.AuthServers[0].Port != 1812 || p.AuthServers[0].XSecret != "s3cret" {
+	if p.AuthServers == nil || len(*p.AuthServers) != 1 ||
+		deref((*p.AuthServers)[0].Ip) != "10.0.0.9" || intOrZero((*p.AuthServers)[0].Port) != 1812 || deref((*p.AuthServers)[0].XSecret) != "s3cret" {
 		t.Errorf("auth_servers mapping wrong: %+v", p.AuthServers)
 	}
 	// A null server list maps to a non-nil empty slice (full-replace clears it).
-	if p.AcctServers == nil || len(p.AcctServers) != 0 {
+	if p.AcctServers == nil || len(*p.AcctServers) != 0 {
 		t.Errorf("null acct_servers must map to a non-nil empty slice, got %v", p.AcctServers)
 	}
-	if p.UseUSGAuthServer == nil || *p.UseUSGAuthServer {
-		t.Errorf("use_usg_auth_server should map to &false, got %v", p.UseUSGAuthServer)
+	if p.UseUsgAuthServer == nil || *p.UseUsgAuthServer {
+		t.Errorf("use_usg_auth_server should map to &false, got %v", p.UseUsgAuthServer)
 	}
 
 	// Wire → state.
 	var out radiusProfileResourceModel
-	out.fromRadiusProfile(ctx, &unifi.RadiusProfile{
-		ID: "rp9", Name: "Corp",
-		AuthServers: []unifi.RadiusServer{{IP: "10.0.0.9", Port: 1812, XSecret: "s3cret"}},
-		AcctServers: []unifi.RadiusServer{},
+	port := 1812
+	out.fromRadiusProfile(ctx, &wire.Radiusprofile{
+		UnderscoreId: sp("rp9"), Name: sp("Corp"),
+		AuthServers: &[]radiusServer{{Ip: sp("10.0.0.9"), Port: &port, XSecret: sp("s3cret")}},
+		AcctServers: &[]radiusServer{},
 	}, &diags)
 	if out.ID.ValueString() != "rp9" || out.Name.ValueString() != "Corp" {
 		t.Errorf("fromRadiusProfile wrong: %+v", out)
@@ -808,7 +829,7 @@ func TestRadiusProfile_RoundTrip(t *testing.T) {
 
 	// The protected default profile reads attr_no_delete = true.
 	protected := true
-	out.fromRadiusProfile(ctx, &unifi.RadiusProfile{ID: "default", Name: "Default", AttrNoDelete: &protected}, &diags)
+	out.fromRadiusProfile(ctx, &wire.Radiusprofile{UnderscoreId: sp("default"), Name: sp("Default"), AttrNoDelete: &protected}, &diags)
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default profile")
 	}
@@ -821,10 +842,10 @@ func TestRadiusAccount_RoundTrip(t *testing.T) {
 		Password:         types.StringValue("pw"),
 		TunnelType:       types.Int64Value(13),
 		TunnelMediumType: types.Int64Value(6),
-		VLAN:             types.StringValue("30"),
+		VLAN:             types.Int64Value(30),
 	}
 	a := m.toRadiusAccount()
-	if a.Name != "alice" || a.XPassword != "pw" || a.VLAN != "30" {
+	if deref(a.Name) != "alice" || deref(a.XPassword) != "pw" || a.Vlan == nil || *a.Vlan != 30 {
 		t.Errorf("scalar mapping wrong: %+v", a)
 	}
 	if a.TunnelType == nil || *a.TunnelType != 13 || a.TunnelMediumType == nil || *a.TunnelMediumType != 6 {
@@ -833,7 +854,8 @@ func TestRadiusAccount_RoundTrip(t *testing.T) {
 
 	// Write-only password: a read that doesn't echo it keeps the configured value.
 	out := radiusAccountResourceModel{Password: types.StringValue("keep-me")}
-	out.fromRadiusAccount(&unifi.RadiusAccount{ID: "ac9", Name: "alice", VLAN: "30"})
+	vlan := 30
+	out.fromRadiusAccount(&wire.Account{UnderscoreId: sp("ac9"), Name: sp("alice"), Vlan: &vlan})
 	if out.ID.ValueString() != "ac9" {
 		t.Errorf("id round-trip wrong: %q", out.ID.ValueString())
 	}
@@ -857,25 +879,26 @@ func TestStaticRoute_RoundTrip(t *testing.T) {
 		Distance:  types.Int64Value(1),
 		Interface: types.StringNull(),
 	}
-	rt := m.toStaticRoute()
-	if rt.Name != "to-lab" || rt.Network != "192.168.50.0/24" || rt.NextHop != "10.0.0.254" {
+	rt := m.toRouting()
+	if deref(rt.Name) != "to-lab" || deref(rt.StaticRouteNetwork) != "192.168.50.0/24" || deref(rt.StaticRouteNexthop) != "10.0.0.254" {
 		t.Errorf("scalar mapping wrong: %+v", rt)
 	}
 	// The client always stamps the controller's discriminator.
-	if rt.Type != "static-route" {
-		t.Errorf("type should be stamped static-route, got %q", rt.Type)
+	if deref(rt.Type) != "static-route" {
+		t.Errorf("type should be stamped static-route, got %q", deref(rt.Type))
 	}
-	if rt.Enabled == nil || !*rt.Enabled || rt.Distance == nil || *rt.Distance != 1 {
-		t.Errorf("enabled/distance mapping wrong: %v / %v", rt.Enabled, rt.Distance)
+	if rt.Enabled == nil || !*rt.Enabled || rt.StaticRouteDistance == nil || *rt.StaticRouteDistance != 1 {
+		t.Errorf("enabled/distance mapping wrong: %v / %v", rt.Enabled, rt.StaticRouteDistance)
 	}
 
 	var out staticRouteResourceModel
-	out.fromStaticRoute(&unifi.StaticRoute{
-		ID: "rt9", Name: "to-lab", Enabled: boolPtrLit(false), Network: "192.168.50.0/24",
-		RouteType: "blackhole",
+	bhType := wire.RoutingStaticRouteType("blackhole")
+	out.fromRouting(&wire.Routing{
+		UnderscoreId: sp("rt9"), Name: sp("to-lab"), Enabled: boolPtrLit(false),
+		StaticRouteNetwork: sp("192.168.50.0/24"), StaticRouteType: &bhType,
 	})
 	if out.ID.ValueString() != "rt9" || out.RouteType.ValueString() != "blackhole" {
-		t.Errorf("fromStaticRoute wrong: %+v", out)
+		t.Errorf("fromRouting wrong: %+v", out)
 	}
 	if out.Enabled.ValueBool() {
 		t.Errorf("enabled should round-trip false")
@@ -900,10 +923,10 @@ func TestPortForward_RoundTrip(t *testing.T) {
 		Log:             types.BoolValue(false),
 	}
 	pf := m.toPortForward()
-	if pf.Name != "https" || pf.PfwdInterface != "wan" || pf.Proto != "tcp" {
+	if deref(pf.Name) != "https" || deref(pf.PfwdInterface) != "wan" || string(derefEnum(pf.Proto)) != "tcp" {
 		t.Errorf("scalar mapping wrong: %+v", pf)
 	}
-	if pf.DstPort != "443" || pf.Fwd != "10.0.0.5" || pf.FwdPort != "8443" {
+	if deref(pf.DstPort) != "443" || deref(pf.Fwd) != "10.0.0.5" || deref(pf.FwdPort) != "8443" {
 		t.Errorf("forward fields mapping wrong: %+v", pf)
 	}
 	if pf.Enabled == nil || !*pf.Enabled || pf.Log == nil || *pf.Log {
@@ -911,9 +934,10 @@ func TestPortForward_RoundTrip(t *testing.T) {
 	}
 
 	var out portForwardResourceModel
-	out.fromPortForward(&unifi.PortForward{
-		ID: "pf9", Name: "https", Enabled: boolPtrLit(true), PfwdInterface: "both",
-		Proto: "tcp_udp", DstPort: "443", Fwd: "10.0.0.5",
+	proto := wire.PortforwardProto("tcp_udp")
+	out.fromPortForward(&wire.Portforward{
+		UnderscoreId: sp("pf9"), Name: sp("https"), Enabled: boolPtrLit(true), PfwdInterface: sp("both"),
+		Proto: &proto, DstPort: sp("443"), Fwd: sp("10.0.0.5"),
 	})
 	if out.ID.ValueString() != "pf9" || out.Interface.ValueString() != "both" || out.Protocol.ValueString() != "tcp_udp" {
 		t.Errorf("fromPortForward wrong: %+v", out)
@@ -935,13 +959,14 @@ func TestDynamicDNS_RoundTrip(t *testing.T) {
 		Interface: types.StringValue("wan"),
 	}
 	d := m.toDynamicDNS()
-	if d.Service != "dyndns" || d.HostName != "home.example.com" || d.Login != "user" || d.XPassword != "pw" {
+	if derefEnum(d.Service) != "dyndns" || derefStr(d.HostName) != "home.example.com" || derefStr(d.Login) != "user" || derefStr(d.XPassword) != "pw" {
 		t.Errorf("scalar mapping wrong: %+v", d)
 	}
 
 	// Write-only password: a read that doesn't echo it keeps the configured value.
 	out := dynamicDNSResourceModel{Password: types.StringValue("keep-me")}
-	out.fromDynamicDNS(&unifi.DynamicDNS{ID: "dd9", Service: "dyndns", HostName: "home.example.com", Interface: "wan"})
+	dyndns := wire.DynamicdnsService("dyndns")
+	out.fromDynamicDNS(&wire.Dynamicdns{UnderscoreId: sp("dd9"), Service: &dyndns, HostName: sp("home.example.com"), Interface: sp("wan")})
 	if out.ID.ValueString() != "dd9" || out.Service.ValueString() != "dyndns" {
 		t.Errorf("fromDynamicDNS wrong: %+v", out)
 	}
@@ -960,12 +985,12 @@ func TestWLANGroup_RoundTrip(t *testing.T) {
 		Name: types.StringValue("Guest APs"),
 	}
 	g := m.toWLANGroup()
-	if g.Name != "Guest APs" {
+	if derefStr(g.Name) != "Guest APs" {
 		t.Errorf("name mapping wrong: %+v", g)
 	}
 
 	var out wlanGroupResourceModel
-	out.fromWLANGroup(&unifi.WLANGroup{ID: "wg9", Name: "Guest APs"})
+	out.fromWLANGroup(&wire.Wlangroup{UnderscoreId: sp("wg9"), Name: sp("Guest APs")})
 	if out.ID.ValueString() != "wg9" || out.Name.ValueString() != "Guest APs" {
 		t.Errorf("fromWLANGroup wrong: %+v", out)
 	}
@@ -975,7 +1000,7 @@ func TestWLANGroup_RoundTrip(t *testing.T) {
 
 	// The protected default group reads attr_no_delete = true (destroy → no-op).
 	protected := true
-	out.fromWLANGroup(&unifi.WLANGroup{ID: "default", Name: "Default", AttrNoDelete: &protected})
+	out.fromWLANGroup(&wire.Wlangroup{UnderscoreId: sp("default"), Name: sp("Default"), AttrNoDelete: &protected})
 	if !out.AttrNoDelete.ValueBool() {
 		t.Errorf("attr_no_delete should round-trip true for the protected default group")
 	}
@@ -997,15 +1022,28 @@ func TestTrafficRule_RoundTrip(t *testing.T) {
 		t.Fatalf("building nested values: %v", diags)
 	}
 
+	// One domain with a port and a port-range, exercising the nested converters.
+	prList, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: trafficPortRangeAttrTypes}, []trafficPortRangeModel{
+		{PortStart: types.Int64Value(8000), PortStop: types.Int64Value(8010)},
+	})
+	diags.Append(d...)
+	domains, d := types.SetValueFrom(ctx, domainSetType.ElemType, []trafficDomainModel{
+		{Domain: types.StringValue("netflix.com"), Ports: sliceToIntSet([]int{443}), PortRanges: prList},
+	})
+	diags.Append(d...)
+	if diags.HasError() {
+		t.Fatalf("building nested values: %v", diags)
+	}
+
 	m := &trafficRuleResourceModel{
 		ID:             types.StringNull(),
 		Enabled:        types.BoolValue(true),
 		Action:         types.StringValue("SPEED_LIMIT"),
 		MatchingTarget: types.StringValue("DOMAIN"),
 		Description:    types.StringValue("throttle streaming"),
-		Domains:        sliceToStringSet([]string{"netflix.com"}),
-		IPAddresses:    types.SetNull(types.StringType),
-		IPRanges:       types.SetNull(types.StringType),
+		Domains:        domains,
+		IPAddresses:    types.SetNull(ipAddressSetType.ElemType),
+		IPRanges:       types.SetNull(ipRangeSetType.ElemType),
 		Regions:        types.SetNull(types.StringType),
 		AppIDs:         types.SetNull(types.Int64Type),
 		AppCategoryIDs: sliceToIntSet([]int{4, 13}),
@@ -1020,13 +1058,20 @@ func TestTrafficRule_RoundTrip(t *testing.T) {
 	if rule.Action != "SPEED_LIMIT" || rule.MatchingTarget != "DOMAIN" {
 		t.Errorf("scalar mapping wrong: %+v", rule)
 	}
-	if len(rule.Domains) != 1 || rule.Domains[0] != "netflix.com" {
+	if rule.Domains == nil || len(*rule.Domains) != 1 || (*rule.Domains)[0].Domain != "netflix.com" {
 		t.Errorf("domains mapping wrong: %v", rule.Domains)
 	}
-	if len(rule.AppCategoryIDs) != 2 {
-		t.Errorf("app_category_ids mapping wrong: %v", rule.AppCategoryIDs)
+	dm := (*rule.Domains)[0]
+	if dm.Ports == nil || len(*dm.Ports) != 1 || (*dm.Ports)[0] != 443 {
+		t.Errorf("domain ports mapping wrong: %v", dm.Ports)
 	}
-	if len(rule.TargetDevices) != 1 || rule.TargetDevices[0].Type != "CLIENT" || rule.TargetDevices[0].ClientMAC != "aa:bb:cc:00:11:22" {
+	if dm.PortRanges == nil || len(*dm.PortRanges) != 1 || *(*dm.PortRanges)[0].PortStart != 8000 || *(*dm.PortRanges)[0].PortStop != 8010 {
+		t.Errorf("domain port_ranges mapping wrong: %v", dm.PortRanges)
+	}
+	if rule.AppCategoryIds == nil || len(*rule.AppCategoryIds) != 2 {
+		t.Errorf("app_category_ids mapping wrong: %v", rule.AppCategoryIds)
+	}
+	if len(rule.TargetDevices) != 1 || rule.TargetDevices[0].Type != "CLIENT" || deref(rule.TargetDevices[0].ClientMac) != "aa:bb:cc:00:11:22" {
 		t.Errorf("target_devices mapping wrong: %+v", rule.TargetDevices)
 	}
 	if rule.BandwidthLimit == nil || rule.BandwidthLimit.DownloadLimitKbps == nil || *rule.BandwidthLimit.DownloadLimitKbps != 5000 {
@@ -1038,9 +1083,9 @@ func TestTrafficRule_RoundTrip(t *testing.T) {
 	}
 
 	var out trafficRuleResourceModel
-	out.fromTrafficRule(ctx, &unifi.TrafficRule{
-		ID: "tr9", Action: "BLOCK", MatchingTarget: "INTERNET", Enabled: boolPtrLit(true),
-		TargetDevices: []unifi.TrafficTargetDevice{{Type: "ALL_CLIENTS"}},
+	out.fromTrafficRule(ctx, &wire.Trafficrules{
+		UnderscoreId: sp("tr9"), Action: "BLOCK", MatchingTarget: "INTERNET", Enabled: boolPtrLit(true),
+		TargetDevices: []wire.TrafficroutesTargetDevice{{Type: "ALL_CLIENTS"}},
 	}, &diags)
 	if out.ID.ValueString() != "tr9" || out.Action.ValueString() != "BLOCK" {
 		t.Errorf("fromTrafficRule wrong: %+v", out)
@@ -1060,14 +1105,22 @@ func TestTrafficRoute_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 	var diags diag.Diagnostics
 
+	domains, d := types.SetValueFrom(ctx, domainSetType.ElemType, []trafficDomainModel{
+		{Domain: types.StringValue("netflix.com"), Ports: types.SetNull(types.Int64Type), PortRanges: types.ListNull(types.ObjectType{AttrTypes: trafficPortRangeAttrTypes})},
+	})
+	diags.Append(d...)
+	if diags.HasError() {
+		t.Fatalf("building domains: %v", diags)
+	}
+
 	m := &trafficRouteResourceModel{
 		ID:                types.StringNull(),
 		Enabled:           types.BoolValue(true),
 		Description:       types.StringValue("netflix via vpn"),
 		MatchingTarget:    types.StringValue("DOMAIN"),
-		Domains:           sliceToStringSet([]string{"netflix.com"}),
-		IPAddresses:       types.SetNull(types.StringType),
-		IPRanges:          types.SetNull(types.StringType),
+		Domains:           domains,
+		IPAddresses:       types.SetNull(ipAddressSetType.ElemType),
+		IPRanges:          types.SetNull(ipRangeSetType.ElemType),
 		Regions:           types.SetNull(types.StringType),
 		NetworkID:         types.StringValue("vpn1"),
 		TargetDevices:     types.ListNull(types.ObjectType{AttrTypes: trafficTargetDeviceAttrTypes}),
@@ -1077,26 +1130,34 @@ func TestTrafficRoute_RoundTrip(t *testing.T) {
 	if diags.HasError() {
 		t.Fatalf("toTrafficRoute diags: %v", diags)
 	}
-	if route.MatchingTarget != "DOMAIN" || route.NetworkID != "vpn1" {
+	if route.MatchingTarget != "DOMAIN" || route.NetworkId != "vpn1" {
 		t.Errorf("scalar mapping wrong: %+v", route)
+	}
+	if route.Domains == nil || len(*route.Domains) != 1 || (*route.Domains)[0].Domain != "netflix.com" {
+		t.Errorf("domains mapping wrong: %v", route.Domains)
 	}
 	if route.KillSwitchEnabled == nil || !*route.KillSwitchEnabled {
 		t.Errorf("kill_switch mapping wrong: %v", route.KillSwitchEnabled)
 	}
-	// Null target_devices maps to a nil slice (omitted on the wire).
-	if route.TargetDevices != nil {
-		t.Errorf("null target_devices should map to nil, got %v", route.TargetDevices)
+	// target_devices is a required (non-omitempty) array; an unset list serializes
+	// as an empty slice, not null.
+	if len(route.TargetDevices) != 0 {
+		t.Errorf("null target_devices should map to empty slice, got %v", route.TargetDevices)
 	}
 
 	var out trafficRouteResourceModel
-	out.fromTrafficRoute(ctx, &unifi.TrafficRoute{
-		ID: "rr9", MatchingTarget: "DOMAIN", Domains: []string{"netflix.com"}, NetworkID: "vpn2", Enabled: boolPtrLit(true),
+	out.fromTrafficRoute(ctx, &wire.Trafficroutes{
+		UnderscoreId: sp("rr9"), MatchingTarget: "DOMAIN",
+		Domains: &[]wire.TrafficroutesDomain{{Domain: "netflix.com"}}, NetworkId: "vpn2", Enabled: boolPtrLit(true),
 	}, &diags)
 	if out.ID.ValueString() != "rr9" || out.NetworkID.ValueString() != "vpn2" {
 		t.Errorf("fromTrafficRoute wrong: %+v", out)
 	}
-	if out.TargetDevices.IsNull() != true {
+	if !out.TargetDevices.IsNull() {
 		t.Errorf("absent target_devices should read back null, got %v", out.TargetDevices)
+	}
+	if out.Domains.IsNull() {
+		t.Errorf("domains should read back set, got null")
 	}
 }
 
@@ -1162,7 +1223,7 @@ func TestDevice_PortOverrideRoundTrip(t *testing.T) {
 	}
 
 	// from-direction: build the map for the managed key (5) only, ignoring port 9.
-	built := buildPortOverridesMap(ctx, []unifi.PortOverride{
+	built := buildPortOverridesMap(ctx, []network.PortOverride{
 		{PortIdx: 5, Name: "camera", PoEMode: "auto"},
 		{PortIdx: 9, Name: "other"},
 	}, []int{5}, nil, &diags)
@@ -1178,13 +1239,13 @@ func TestDevice_PortOverrideRoundTrip(t *testing.T) {
 
 	// A managed port the controller hasn't echoed yet is kept via the fallback
 	// (the just-written desired value), so it can't vanish post-apply.
-	kept := buildPortOverridesMap(ctx, nil, []int{5}, []unifi.PortOverride{{PortIdx: 5, Name: "camera"}}, &diags)
+	kept := buildPortOverridesMap(ctx, nil, []int{5}, []network.PortOverride{{PortIdx: 5, Name: "camera"}}, &diags)
 	if _, ok := kept.Elements()["5"]; !ok {
 		t.Errorf("declared port 5 should be kept via fallback, got %v", kept)
 	}
 
 	// On Read (nil fallback), a managed port the controller no longer has is dropped.
-	gone := buildPortOverridesMap(ctx, []unifi.PortOverride{{PortIdx: 9}}, []int{5}, nil, &diags)
+	gone := buildPortOverridesMap(ctx, []network.PortOverride{{PortIdx: 9}}, []int{5}, nil, &diags)
 	if _, ok := gone.Elements()["5"]; ok {
 		t.Errorf("port 5 absent on the controller (no fallback) should drop from the map, got %v", gone)
 	}

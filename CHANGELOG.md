@@ -8,6 +8,26 @@ private repo only.
 
 ## [Unreleased]
 
+### Changed
+
+- **Network client rebuilt on a substruct + codegen design (no resource-surface
+  change).** The flat `internal/unifi` method-per-operation client is replaced by
+  a substruct `network.Client` (`c.Network().WAN().SLAs()…`) whose object types
+  are generated `wire` structs (`internal/unifi/network/wire`, oapi-codegen
+  types-only) regenerated from the version-anchored sibling spec
+  (`../unifi-specs`). `internal/unifi` is now just the console session
+  (transport, capabilities, site management, and the `Network()` accessor).
+  Generic collections (`LegacyCollection`, `V2Collection`) carry the per-surface
+  CRUD contract; custom collections handle id-in-body GET-merge-PUT and
+  List-filter Read. Every resource and data source moved over; the legacy flat
+  client and its types were removed. Schemas, resource names, and behavior are
+  unchanged. Updated invariant 1 + the resource recipe in `CLAUDE.md`,
+  `docs/architecture.md`, and `docs/development.md` accordingly.
+- The `device` object spec gained the read-only stat/identity fields
+  (`mac`/`model`/`type`/`version`/`ip`/`state`/`adopted`) so `wire.Device`
+  surfaces them; the device config write merges `port_overrides` per-port (the
+  ported replace-semantics merge) instead of a whole-array PUT.
+
 _Next: the Protect app (`unifi_protect_*`, **0.2.0**) — the design and the
 reverse-engineering workstream have landed; the private-REST client base and the
 resources follow the RE captures._

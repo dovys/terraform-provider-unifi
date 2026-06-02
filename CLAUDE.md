@@ -1,17 +1,22 @@
 # CLAUDE.md — terraform-provider-unifi
 
 Always-loaded operating instructions. Condensed form of [`docs/development.md`](docs/development.md);
-read that + [`docs/architecture.md`](docs/architecture.md) before coding. **Status: in development —
-Phase 0 base (provider scaffold + `internal/unifi` client) landed; resources build per
+read that + [`docs/architecture.md`](docs/architecture.md) before coding. **Status: Network app
+(P1–P4) shipped on the rebuilt client — a console-session `unifi.Client` + a substruct
+`network.Client` (`c.Network().WAN().SLAs()…`) over generated `wire` types
+([`../unifi-specs`](../unifi-specs)); Protect (P5/P6) next per
 [`docs/roadmap.md`](docs/roadmap.md).** Full design in [`docs/`](docs/README.md).
 
 A Terraform provider for **UniFi OS** (Network + Protect today; Access/others later), latest APIs,
 clean-room, Registry `dovys/unifi`. Resources are **app-namespaced**: `unifi_network_*`, `unifi_protect_*`, ….
 
 ## Invariants (don't violate without an explicit, reviewed decision)
-1. **Resources call the `internal/unifi` `Client` interface — never an HTTP transport.** Each typed
-   client method targets its surface directly (`legacy*` / `v2*` helpers in `surfaces.go`); there is
-   no per-op router.
+1. **Resources call the substruct `network.Client` (`c.Network().<Group>().<Collection>()`) — never an
+   HTTP transport.** The console-session `unifi.Client` owns the authenticated session and exposes
+   `Network()`; CRUD goes through generic collections (`LegacyCollection` id-separate-Update,
+   `V2Collection` id-in-url+body) carrying the per-surface contract — no per-op router. Object types are
+   generated `wire` structs (oapi-codegen, types-only) regenerated from [`../unifi-specs`](../unifi-specs);
+   the hand-written facade is the groups/collections, never the types.
 2. **One cookie+CSRF session over legacy `/rest` + v2.** A **local admin account (username+password)
    is required.** Most writes are legacy REST (widest, most stable); v2 carries the newer
    zone-firewall / traffic / static-DNS / AP-group surfaces — same session, different URL prefix. No
@@ -46,15 +51,20 @@ invariant: update the docs in-PR + `CHANGELOG` + explain in the PR description.
 Two surfaces, one session: **legacy** (`/api/s/<site>/rest` + `/stat` + `/cmd`, the widest, most
 stable writes) and **v2** (`/v2/api/site`: zone-firewall, traffic, static-dns, ap-groups — note the
 **v2 write contract** in architecture.md). Both run over the **classic** cookie+CSRF transport
-(handles CSRF + ~2h JWT re-auth). Client = `Client` interface + `classic` transport + `surfaces.go`
-(`legacy*`/`v2*` helpers) + `capabilities` (controller version). **Protect** reuses the same client +
-console key under `/proxy/protect/...` (see [docs/apps/protect.md](docs/apps/protect.md)). The
-Integration/X-API-KEY and Cloud Site Manager APIs are out of scope.
+(handles CSRF + ~2h JWT re-auth). The top-level `unifi.Client` is the **console session**: the classic
+transport + probed `capabilities` + site management + a `Network()` accessor. **`internal/unifi/network`**
+is the substruct Network-app client: groups (`WAN`, `WiFi`, `Firewall`, `Traffic`, `DNS`, `Devices`, …)
+→ CRUD collections over generated **`wire`** types (`internal/unifi/network/wire`, codegen from the
+sibling spec). **Protect** reuses the console session under `/proxy/protect/...` (see
+[docs/apps/protect.md](docs/apps/protect.md)). The Integration/X-API-KEY and Cloud Site Manager APIs are
+out of scope.
 
 ## Resource recipe
 1. Confirm the surface (legacy `/rest` vs v2) and wire shape against the live network fixture.
-2. Typed structs beside their client methods in `internal/unifi` (e.g. `NetworkConf` in `networks.go`,
-   `StaticDNSRecord` in `dns.go`) — minimal structs for v2 writes. No separate `models` package.
+2. Map the TF model to the generated `wire.<Type>` (regenerate from [`../unifi-specs`](../unifi-specs)
+   if a field is missing/mistyped — fix the spec, never hand-edit `types.gen.go`). Add the group
+   accessor + collection in `internal/unifi/network` (a custom collection only when the surface needs
+   id-in-body merge or List-filter Read). No hand-written per-type structs, no `models` package.
 3. Schema: nested attributes; Map/Set keyed by natural key (not List); `Optional+Computed`;
    `UseStateForUnknown` only on post-create-immutable; `RequiresReplace` immutables; controller-accurate
    validators; `Sensitive`.
@@ -67,7 +77,7 @@ Integration/X-API-KEY and Cloud Site Manager APIs are out of scope.
 7. Update `docs/apps/network.md` + `docs/roadmap.md` checklist.
 
 ## Definition of Done
-Routes via `Client` · schema per recipe · unit tests (serialization/validators/plan-modifiers) ·
+Routes via the substruct `network.Client` (`c.Network()…`) · schema per recipe · unit tests (serialization/validators/plan-modifiers) ·
 acceptance create→update→import(`ImportStateVerify`)→destroy with clean + **second empty** plan +
 `CheckDestroy` + `tfacc-` sweeper · HIL test if hardware-dependent · live instance imports clean ·
 example + generated docs · checklist updated.

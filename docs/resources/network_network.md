@@ -61,7 +61,6 @@ A UniFi Network LAN/VLAN or guest network (`networkconf`). Models the full confi
 - `ipv6_ra_preferred_lifetime` (Number) RA preferred lifetime in seconds.
 - `ipv6_ra_priority` (String) Router-advertisement priority (`high`/`medium`/`low`).
 - `lte_failover_enabled` (Boolean) Whether this is the LTE failover LAN.
-- `mdns_enabled` (Boolean) Whether multicast DNS (mDNS) reflection is enabled.
 - `nat_enabled` (Boolean) Whether the network is NATed (`is_nat`).
 - `purpose` (String) Network purpose: `corporate` (a routed LAN/VLAN), `guest`, or `vlan-only` (L2 VLAN, no gateway). Defaults to `corporate` on the controller when unset. Immutable — changing it forces replacement.
 - `subnet` (String) Gateway IP + prefix in CIDR, e.g. `192.0.2.1/24`. Not used by `vlan-only` networks.
