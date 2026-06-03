@@ -17,3 +17,25 @@ resource "unifi_access_door_group" "staff" {
     data.unifi_access_door_group.lobby.door_ids[0],
   ]
 }
+
+# Manage an access policy: grant a set of resources (doors / door groups), in
+# effect on an optional schedule. The subject/rule graph is controller-managed.
+resource "unifi_access_policy" "staff_hours" {
+  name    = "Staff — business hours"
+  enabled = true
+  # schedule_id = "<schedule unique_id>"  # optional: gate the policy to a schedule
+
+  resources {
+    type = "door_group"
+    id   = unifi_access_door_group.staff.id
+  }
+}
+
+# Reference an existing policy by name (read-only).
+data "unifi_access_policy" "contractors" {
+  name = "Contractors"
+}
+
+output "contractor_door_count" {
+  value = data.unifi_access_policy.contractors.door_count
+}

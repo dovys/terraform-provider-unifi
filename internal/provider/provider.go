@@ -229,12 +229,10 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewProtectViewerResource,
 		NewProtectLiveviewResource,
 		// Access app (c.Access()…) — private web-UI API over the one cookie session.
-		// door_group is the one Access object the RE'd spec gives a write DTO for
-		// (door_group_controller_DoorGroupParams); its CRUD paths + envelope contract
-		// remain HIL-unverified (the resource schema and TODO.md say so). Doors,
-		// policies, and holidays have no write DTO in the spec and await an RE
-		// capture of their controller param types before they can be modeled.
+		// All Access write surfaces are reverse-engineered and HIL-unverified (no
+		// live Access console; X-API-KEY is Network-only) — see TODO.md.
 		NewAccessDoorGroupResource,
+		NewAccessPolicyResource,
 	}
 }
 
@@ -252,6 +250,7 @@ func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewProtectCameraDataSource,
 		// Access app (c.Access()…).
 		NewAccessDoorGroupDataSource,
+		NewAccessPolicyDataSource,
 	}
 }
 
