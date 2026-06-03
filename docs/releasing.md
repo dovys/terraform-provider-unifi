@@ -19,9 +19,9 @@ Open a fix PR against **`main`**. On merge, `.github/workflows/auto-release.yml`
 1. Builds and unit-tests `main` (a broken `main` never releases).
 2. Computes the next version: newest `vX.Y.Z` tag with **patch +1** (`v0.1.2` → `v0.1.3`).
 3. Creates an annotated tag and pushes it.
-4. Runs GoReleaser → binaries for every OS/arch, `..._SHA256SUMS`, the
-   `terraform-registry-manifest.json`, an (optional) GPG signature, and the
-   **GitHub Release**.
+4. Runs GoReleaser → binaries for the supported platforms (linux/macOS/windows ×
+   amd64/arm64), `..._SHA256SUMS`, the `terraform-registry-manifest.json`, an
+   (optional) GPG signature, and the **GitHub Release**.
 
 Tagging and GoReleaser run in the **same job** on purpose: a tag pushed with the
 default `GITHUB_TOKEN` does not trigger other workflows, so a separate
@@ -38,9 +38,10 @@ them release. When the feature is ready, ship it by merging `next` into `main`
    gh pr create --base main --head next --title "release: <feature>"
    ```
    (or use GitHub's *Compare & pull request*). For a **breaking** release, add the
-   **`release:major`** label; otherwise it's a minor. (Both `release:major` and a
-   cosmetic `release:minor` label are pre-created in the repo — only `release:major`
-   changes the bump; minor is the default for any `next → main` merge.)
+   **`release:major`** label; otherwise it's a minor. (The `release:major`, cosmetic
+   `release:minor`, and `release:skip` labels are pre-created in the repo —
+   `release:major` makes the bump major, `release:skip` skips the release entirely,
+   and minor is the default for any `next → main` merge.)
 2. `test.yml` runs on the PR and tests the **merged result** — so a feature that
    breaks the build literally cannot land on `main`. Merge only when green, using
    **"Create a merge commit"** (keeps the per-feature commits in the release notes).
@@ -70,8 +71,9 @@ before merging.
   *entirely* within `**/*.md`, `docs/**`, `.github/**`, or `go.mod`/`go.sum` does
   not release (dependabot bumps, CI tweaks, docs-only changes). A change that also
   touches Go source still releases.
-- Manual override: put **`[skip release]`** in the merge commit message to skip a
-  release you don't want.
+- Manual override: add the **`release:skip`** label to a PR to land its change on
+  `main` without cutting a release (e.g. a build-config tweak not worth a version).
+  Skip is a PR label, same axis as the bump — no magic commit strings to remember.
 - The bump is decided purely by the merged PR's source branch (`next` → minor/major,
   anything else → patch) — there is no automatic minor without a `next → main` merge.
 

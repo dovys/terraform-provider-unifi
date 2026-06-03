@@ -6,24 +6,29 @@ name: auto-release
 #   main  — only released code. Every substantive push auto-cuts a release.
 #   next  — staging for features (possibly many PRs). Never releases.
 #
-# The bump is derived from how the commit reached main:
+# Everything is driven by the merged PR's branch + labels:
 #   • a fix PR merged straight into main          → PATCH  (v0.1.2 → v0.1.3)
 #   • a PR from `next` merged into main           → MINOR  (v0.1.x → v0.2.0)
 #   • …same, carrying the `release:major` label   → MAJOR  (v0.x.y → v1.0.0)
+#   • any merge carrying the `release:skip` label → no release at all
 #
-# So a feature ships by merging a `next → main` PR (its CI tests the merged result
-# first). minor/major reset the lower parts to 0, so features land on vX.Y.0.
+# `release:skip` is the manual escape hatch — label the PR to land a code change
+# on main without cutting a release (e.g. a build-config tweak). It unifies the
+# skip control with the bump control: both are PR labels, no magic commit strings.
 #
-# Tagging AND GoReleaser run in this ONE job on purpose: a tag pushed with the
-# default GITHUB_TOKEN does NOT trigger other workflows (GitHub suppresses it to
-# avoid recursion), so a separate tag-triggered release workflow would never fire.
+# Two jobs: `gate` reads the PR (a job-level `if` can't query the PR API) and
+# decides release-or-not + the bump; `release` is gated on that and does the work.
+# Tagging AND GoReleaser run in the ONE `release` job on purpose: a tag pushed with
+# the default GITHUB_TOKEN does NOT trigger other workflows (GitHub suppresses it
+# to avoid recursion), so a separate tag-triggered release workflow would never fire.
 
 on:
   push:
     branches: [main]
     # Skip releases for purely non-functional merges. paths-ignore skips the run
     # only when EVERY changed file matches — a code change that also touches docs
-    # or go.mod still releases.
+    # or go.mod still releases. (For a code change you still don't want released,
+    # use the `release:skip` label.)
     paths-ignore:
       - '**/*.md'     # docs / readme / changelog / TODO prose
       - 'docs/**'     # generated provider docs (kept fresh by the PR docs gate)
@@ -39,13 +44,52 @@ concurrency:
 
 permissions:
   contents: write        # push the tag, create the GitHub Release
-  pull-requests: read    # look up the merged PR to pick the bump
+  pull-requests: read    # look up the merged PR to read its branch + labels
 
 jobs:
-  release:
+  # Decide release-or-not and the bump purely from the merged PR's head branch and
+  # labels. Kept separate because the whole release job is gated on its output and a
+  # job-level `if:` expression cannot call the PR API.
+  gate:
     runs-on: ubuntu-latest
-    # Manual escape hatch: put [skip release] in the merge commit message.
-    if: ${{ !contains(github.event.head_commit.message, '[skip release]') }}
+    outputs:
+      release: ${{ steps.decide.outputs.release }}
+      bump: ${{ steps.decide.outputs.bump }}
+    steps:
+      - name: Decide release + bump from the merged PR
+        id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          resp="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" 2>/dev/null || echo '[]')"
+          head="$(printf '%s' "$resp"   | jq -r  'if length>0 then .[0].head.ref else "" end')"
+          labels="$(printf '%s' "$resp" | jq -c  'if length>0 then [.[0].labels[].name] else [] end')"
+          has() { printf '%s' "$labels" | jq -e --arg l "$1" 'index($l) != null' >/dev/null 2>&1; }
+
+          # Manual escape hatch: the `release:skip` label on the merged PR.
+          if has "release:skip"; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "bump=none"      >> "$GITHUB_OUTPUT"
+            echo "::notice::release:skip label present on the merged PR — skipping the release."
+            exit 0
+          fi
+
+          # Bump: from `next` → minor (major with the release:major label); a fix PR
+          # merged straight to main or a direct push → patch.
+          if [ "$head" = "next" ]; then
+            if has "release:major"; then bump=major; else bump=minor; fi
+          else
+            bump=patch
+          fi
+          echo "release=true"  >> "$GITHUB_OUTPUT"
+          echo "bump=${bump}"  >> "$GITHUB_OUTPUT"
+          echo "Release: yes — bump ${bump} (merged PR head: ${head:-<none, direct push → patch>})"
+
+  release:
+    needs: gate
+    if: ${{ needs.gate.outputs.release == 'true' }}
+    runs-on: ubuntu-latest
     env:
       HAS_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY != '' }}
     steps:
@@ -58,25 +102,6 @@ jobs:
           go-version: 'stable'
           cache: true
 
-      # Pick the bump from the PR this push merged: from `next` → minor (major if
-      # labelled release:major); anything else (a fix PR, a direct push) → patch.
-      - name: Determine bump
-        id: bump
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          resp="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" 2>/dev/null || echo '[]')"
-          head="$(printf '%s' "$resp"  | jq -r 'if length>0 then .[0].head.ref else "" end')"
-          major="$(printf '%s' "$resp" | jq -r 'if length>0 then (([.[0].labels[].name] | index("release:major")) != null) else false end')"
-          if [ "$head" = "next" ]; then
-            [ "$major" = "true" ] && bump=major || bump=minor
-          else
-            bump=patch
-          fi
-          echo "bump=${bump}" >> "$GITHUB_OUTPUT"
-          echo "Bump: ${bump} (merged PR head: ${head:-<none, treated as a direct fix>})"
-
       # Insurance: never cut a release from a tree that doesn't build / pass units.
       - name: Build & unit test
         run: |
@@ -86,7 +111,7 @@ jobs:
       - name: Compute next version
         id: ver
         env:
-          BUMP: ${{ steps.bump.outputs.bump }}
+          BUMP: ${{ needs.gate.outputs.bump }}
         run: |
           set -euo pipefail
           latest="$(git tag --list 'v*' --sort=-v:refname | head -n1)"

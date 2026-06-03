@@ -23,6 +23,15 @@ below predate the date-based convention.
   feature ships by merging a `next → main` PR (its CI tests the merged result
   first), stopping multi-PR features from emitting a release per PR. See
   [`docs/releasing.md`](docs/releasing.md).
+- **Release skipping is now a PR label, not a commit string.** Add the
+  `release:skip` label to a PR to land its change on `main` without cutting a
+  release — replacing the old `[skip release]` merge-commit marker. Skip now lives
+  on the same axis as the bump (`release:major`/`release:minor`): both are PR
+  labels read off the merged PR, so there are no magic commit messages to remember.
+- **Slimmed the release build matrix** to the platforms real Terraform users run —
+  linux, macOS, and Windows on `amd64` (x86-64) and `arm64`. Dropped `freebsd`,
+  `386`, and 32-bit `arm`, taking the matrix from 13 archives to 6 (the repo isn't
+  on the Terraform Registry, so there's no platform-coverage requirement).
 
 ## 2026-06-02
 
