@@ -119,13 +119,15 @@ A resource is checkable only when it meets the Definition of Done ([development.
    high-value next: `mgmt`, `guest_access`, `global_switch`, `global_ap`, `mdns`, `ips`, `radius` — see `TODO.md`).
 5. **Protect (P5):** exact PATCH field set per device type + which need a legacy `/bootstrap` fallback;
    whether detection **zones** are in initial scope; confirm doorbell `feature_flags` names.
-6. **Clearing owned `omitempty` fields on GET-merge-PUT.** `structToRawMap` drops zero-valued owned
-   fields, so the overlay can *set* but not *clear* a plain `string`/`*bool` value by emitting its zero
-   (affects clearing `domain_name`, `dhcp_gateway`, etc.). The DNS-slot lists (`dhcp_dns`/`dns_servers`/
-   `ipv6_dns_servers`) are already handled — those slots are `*string`, so a shrunk list writes a non-nil
-   `&""` to overwrite the freed slot. Optional+Computed hides the remaining cases for the common path
-   (removing from config keeps the controller value); a full clear of the other fields needs confirming
-   on a live controller that empty-string writes are accepted per field before emitting them.
+6. **Clearing owned `omitempty` fields under sparse PUT.** A sparse PUT (and the `port_overrides`
+   `structToRawMap` overlay) drops zero-valued owned fields, so it can *set* but not *clear* a plain
+   `string`/`*bool` by emitting its zero (affects clearing `domain_name`, `dhcp_gateway`, etc.). The
+   DNS-slot lists (`dhcp_dns`/`dns_servers`/`ipv6_dns_servers`) are already handled — those slots are
+   `*string`, so a shrunk list writes a non-nil `&""` to overwrite the freed slot. Optional+Computed
+   hides the remaining cases for the common path (removing from config keeps the controller value). Note
+   live testing confirmed the controller *rejects* an empty string on some fields (`wan_ip`/`wan_netmask`/
+   `wan_gateway`/`igmp_proxy_for` → `api.err.InvalidValue`), so those are omitted, not clearable to `""`;
+   any per-field clear needs the same live check before emitting an empty value.
 7. **WAN field mutability.** Whether `wan_type` (dhcp↔pppoe↔static) and `network_group` (WAN↔WAN2) are
     editable in place or need `RequiresReplace` — confirm against a live controller before adding plan
     modifiers (network `purpose` is known-immutable and already `RequiresReplace`).

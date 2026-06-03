@@ -33,8 +33,9 @@ type wlanResource struct {
 // wlanResourceModel covers the configurable wlanconf surface. Most attributes
 // are Optional+Computed: unset leaves the controller's value and reads back what
 // it computes, so plans stay clean. Per-client PSKs (private_preshared_keys),
-// schedules, and Hotspot 2.0 detail are carried through by GET-merge-PUT but not
-// yet modeled as attributes.
+// schedules, and Hotspot 2.0 detail are left untouched — the sparse PUT omits
+// them, so the controller keeps its stored value — but not yet modeled as
+// attributes.
 type wlanResourceModel struct {
 	ID                types.String `tfsdk:"id"`                 // controller _id; import key (computed)
 	Name              types.String `tfsdk:"name"`               // the SSID (required)
@@ -296,9 +297,9 @@ func (m *wlanResourceModel) toWLANConf(ctx context.Context, diags *diag.Diagnost
 		RadiusprofileId:       strPtrOrNil(m.RADIUSProfileID),
 		Hotspot2confEnabled:   boolPtr(m.Hotspot2Enabled),
 	}
-	// Leave these slices nil when the config is null so GET-merge-PUT preserves
-	// the controller's bands/groups/filter rather than clearing them (the fields
-	// are omitempty — a nil pointer is dropped from the overlay).
+	// Leave these slices nil when the config is null so the sparse PUT omits them
+	// and the controller keeps its bands/groups/filter rather than clearing them
+	// (the fields are omitempty — a nil pointer is dropped from the body).
 	if b := stringSetToSlice(ctx, m.Bands, diags); b != nil {
 		bands := make([]wire.WlanconfWlanBands, len(b))
 		for i, v := range b {

@@ -27,14 +27,26 @@ below predate the date-based convention.
   `terraform import unifi_network_wan.primary name=WAN1`) and resolve it to the
   controller id — no more hunting for the 24-character `_id`. The raw `_id` still
   works and remains the state `id`.
-- **`UNIFI_DEBUG_HTTP` wire-level debug dump.** Set it to any non-empty value to
-  dump every request/response — method, URL, exact JSON body — to stderr, with
+- **Wire-level HTTP debug logging.** Every request/response — method, URL, exact
+  JSON body — is logged through `tflog` at DEBUG (message `wire HTTP`) with
   secret-bearing fields masked. The tool for reverse-engineering which fields a
-  surface accepts on PUT/POST vs only returns on GET. Off by default. See
+  surface accepts on PUT/POST vs only returns on GET. Capture with
+  `TF_LOG_PROVIDER=debug tofu apply 2>&1 | grep 'wire HTTP'`. See
   [`docs/development.md`](docs/development.md).
 
 ### Changed
 
+- **Network writes are now sparse PUTs; GET-merge-PUT is gone.** The legacy
+  `/rest` PUT shallow-merges server-side — verified against a live controller, a
+  `{_id, field}` body returns 200 and preserves every omitted field — so
+  `networkconf` updates now send only the provider-owned fields instead of
+  fetching the controller's full document, stripping a denylist of
+  controller-managed fields, and PUTting the whole thing back. This removes a
+  class of `InvalidPayload` / `InvalidValue` failures where the controller
+  rejected fields it returns on GET but won't accept on PUT (`attr_no_delete`,
+  `site_id`, `routing_table_id`, …). The device `port_overrides` array — which
+  the controller replaces wholesale rather than merging — keeps its targeted
+  per-port merge; the `unifi_network_settings` sections already wrote sparsely.
 - **UniFi Protect resources now capability-gate at plan time.** The provider
   probes the console for Protect on configure; a Protect resource used on a
   console without Protect (and per-camera, a field the camera's hardware doesn't
@@ -74,17 +86,17 @@ below predate the date-based convention.
   apply` on every plan. These are user-set knobs the controller doesn't mutate on
   its own, and `Read` still reconciles drift.
 - **`unifi_network_wan` update no longer blanks a stored PPPoE password.**
-  `pppoe_password` is write-only; an update that left it unset previously PUT an
-  empty `x_wan_password`, which GET-merge-PUT overlaid onto the controller and
-  could drop a live PPPoE uplink. The field is now omitted when unset (set it to
-  `""` to deliberately clear it).
-- **GET-merge-PUT no longer fails with `api.err.InvalidPayload` on protected
-  networks.** Updating a network the controller marks as a built-in — the WAN
-  configs and the protected `Default` network — returned the server-managed meta
-  fields `attr_no_delete` / `attr_hidden_id` on GET, and the merge PUT them
-  straight back, which the controller rejects. These fields are never
-  provider-owned, so `UpdateMerge` now strips them from the merged document
-  before the write.
+  `pppoe_password` is write-only; an update that left it unset previously sent an
+  empty `x_wan_password`, which the controller would store and could drop a live
+  PPPoE uplink. The field is now omitted when unset (set it to `""` to clear it)
+  and is never read back into state.
+- **`unifi_network_wan` apply no longer fails with `api.err.InvalidValue`, and a
+  PPPoE WAN no longer returns an "inconsistent result after apply".** A non-static
+  WAN sent empty `wan_ip` / `wan_netmask` / `wan_gateway` / `igmp_proxy_for`,
+  which the controller validates and rejects — these are now omitted when unset
+  (and read back as null, not `""`). `pppoe_username` is now `Computed` so an
+  imported PPPoE WAN round-trips its login, and `pppoe_password` is no longer
+  adopted from the controller's echo (keeping the secret out of state).
 - **`unifi_network_device` import now captures live port overrides.** Importing a
   switch (or `terraform plan -generate-config-out`) previously produced
   `port_overrides = {}`, dropping every per-port VLAN/profile/PoE assignment and

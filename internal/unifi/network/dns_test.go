@@ -50,7 +50,7 @@ func okJSON(body string) *transport.Response {
 }
 
 // fakeQueue builds a fake whose calls return the given JSON bodies in order
-// (for multi-call flows like GET-merge-PUT).
+// (for multi-call flows like the device port_overrides GET-then-merge).
 func fakeQueue(bodies ...string) *fakeDoer {
 	f := &fakeDoer{}
 	for _, b := range bodies {

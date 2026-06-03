@@ -50,8 +50,13 @@ the probed capabilities, the configured site, site management, and a `Network()`
 resource CRUD runs through that substruct client (`c.Network().WAN().SLAs()…`): each group exposes
 generic collections (`LegacyCollection` — id-separate `Update`; `V2Collection` — `_id` in URL *and*
 body) over **generated `wire` types**. A group adds a *custom* collection only where the surface
-needs id-in-body GET-merge-PUT (networkconf, routing, static-dns) or List-filter Read (the v2
-surfaces that lack GET-by-id). The wire types are codegen — regenerated from the version-anchored
+needs a List-filter Read (a surface that lacks GET-by-id) or an array-field merge (device
+`port_overrides`). Writes are sparse PUTs of owned fields — the legacy `/rest` PUT shallow-merges
+server-side, so omitted fields keep their stored value and we never echo the full GET document back.
+**That merge is top-level-only:** the controller replaces a nested object or array *wholesale*
+(verified — PUTting one key of `wan_provider_capabilities` drops the sibling key). So a resource may
+send a nested object/array only if it owns *every* key/element; a partially-owned collection (device
+`port_overrides`) must GET-merge it instead. The wire types are codegen — regenerated from the version-anchored
 sibling spec ([`../unifi-specs`](../../unifi-specs)), never hand-edited; the hand-written facade is
 the groups and collections. Resources never touch a transport directly.
 
@@ -62,7 +67,7 @@ the groups and collections. Resources never touch a transport directly.
 | networks/VLANs, WAN | legacy `/rest/networkconf` | **legacy** `/rest/networkconf` |
 | WLAN, WLAN group | legacy `/rest/wlanconf`, `/rest/wlangroup` | legacy |
 | AP group | **v2** `/apgroups` | **v2** |
-| device (adopt + config + ports) | legacy `/stat/device` (+ read-only `data.unifi_network_device`) | adopt: legacy `/cmd/devmgr`; config: **legacy** `PUT /rest/device/<id>` (GET-merge-PUT, owned fields) |
+| device (adopt + config + ports) | legacy `/stat/device` (+ read-only `data.unifi_network_device`) | adopt: legacy `/cmd/devmgr`; config: **legacy** `PUT /rest/device/<id>` (sparse owned-field PUT; `port_overrides` array GET-merged) |
 | port profile | legacy `/rest/portconf` | legacy |
 | firewall group/rule (classic) | legacy `/rest/firewallgroup`,`/rest/firewallrule` | legacy |
 | firewall zone/policy, traffic rule/route | **v2** | **v2** |

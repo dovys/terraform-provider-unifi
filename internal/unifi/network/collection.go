@@ -10,8 +10,10 @@ import (
 
 // The generic CRUD primitives every group builds on. A group embeds the
 // collection for its surface and adds object-specific behavior (Get-by-filter
-// where the API lacks GET-by-id, merge-update for partly-owned legacy docs,
-// the v2 _id-in-url-and-body contract). T is the generated wire type.
+// where the API lacks GET-by-id, the device port_overrides array merge, the v2
+// _id-in-url-and-body contract). Update is a sparse PUT — the legacy /rest PUT
+// shallow-merges server-side, so a body carrying only the owned fields is
+// enough. T is the generated wire type.
 
 // LegacyCollection is a CRUD collection over a legacy /rest/<type> object,
 // keyed by the controller's collection-name token (e.g. "networkconf").
@@ -58,8 +60,11 @@ func (s LegacyCollection[T]) Create(ctx context.Context, body *T) (*T, error) {
 }
 
 // Update PUTs the object by id. The body is the typed object; omitempty fields
-// drop out, so only set fields are written. Partly-owned documents that must
-// not be whole-PUT use a group-level merge-update instead (added per group).
+// drop out, so only the fields the provider sets are written. The legacy /rest
+// PUT is a server-side partial merge — fields the body omits keep their stored
+// value — so a sparse body is sufficient and we never echo the controller's full
+// document back (which would drag controller-managed and unmodeled fields into a
+// write the controller may reject).
 func (s LegacyCollection[T]) Update(ctx context.Context, id string, body *T) (*T, error) {
 	items, err := legacyData[T](ctx, s.core, http.MethodPut, s.restPath(id), body)
 	if err != nil {
@@ -81,54 +86,9 @@ func (s LegacyCollection[T]) Delete(ctx context.Context, id string) error {
 	return err
 }
 
-// serverManagedKeys are fields the legacy controller emits on GET but rejects on
-// PUT with api.err.InvalidPayload. They are never provider-owned, so UpdateMerge
-// strips them from the merged document before the write. attr_no_delete /
-// attr_hidden_id mark protected built-ins (the Default network, the WAN configs).
-var serverManagedKeys = []string{"attr_no_delete", "attr_hidden_id"}
-
-// UpdateMerge performs GET-merge-PUT for a partly-owned legacy document: fetch
-// the existing doc as a raw field map, overlay the owned (omitempty) fields of
-// owned, and PUT the result. Unmodeled fields survive untouched — the invariant
-// for legacy docs whose full surface the provider does not own (never a
-// whole-document PUT) — except serverManagedKeys, which the controller emits on
-// GET but rejects on PUT and so must be dropped. owned is typically a *T or a
-// subset struct whose omitempty fields are exactly the ones the caller sets.
-func (s LegacyCollection[T]) UpdateMerge(ctx context.Context, id string, owned any) (*T, error) {
-	existing, err := legacyData[map[string]json.RawMessage](ctx, s.core, http.MethodGet, s.restPath(id), nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(existing) == 0 {
-		return nil, ErrNotFound
-	}
-	doc := existing[0]
-	fields, err := structToRawMap(owned)
-	if err != nil {
-		return nil, err
-	}
-	for k, v := range fields {
-		doc[k] = v
-	}
-	// Drop controller-managed meta fields the legacy API returns on GET but
-	// rejects on PUT with api.err.InvalidPayload (e.g. attr_no_delete /
-	// attr_hidden_id on the protected Default network and the WAN configs). They
-	// are never provider-owned, so they must not ride back in the merged document.
-	for _, k := range serverManagedKeys {
-		delete(doc, k)
-	}
-	items, err := legacyData[T](ctx, s.core, http.MethodPut, s.restPath(id), doc)
-	if err != nil {
-		return nil, err
-	}
-	if len(items) == 0 {
-		return s.Get(ctx, id)
-	}
-	return &items[0], nil
-}
-
 // structToRawMap marshals v to a JSON field map. omitempty fields drop out, so
-// only set fields overlay onto the fetched document in UpdateMerge.
+// only the set fields appear — used to overlay a typed struct onto an existing
+// raw document (e.g. the per-port device override merge).
 func structToRawMap(v any) (map[string]json.RawMessage, error) {
 	b, err := json.Marshal(v)
 	if err != nil {

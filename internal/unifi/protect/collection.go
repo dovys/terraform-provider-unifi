@@ -17,8 +17,9 @@ import (
 // so marshaling a full read object on PATCH would clobber state. Create/Update
 // therefore take an owned-field overlay (a small struct with omitempty tags
 // holding exactly the modeled fields) — the Protect analogue of the Network
-// GET-merge-PUT discipline. PATCH is itself partial server-side, so no GET-merge
-// round-trip is needed: the overlay is sent as-is.
+// sparse PUT. PATCH is partial server-side, so no read-then-merge round-trip is
+// needed for top-level fields: the overlay is sent as-is. (Nested sub-objects
+// the controller replaces wholesale are merged client-side by the resource.)
 type Collection[T any] struct {
 	core *core
 	name string // plural resource segment, e.g. "cameras", "liveviews"

@@ -147,8 +147,8 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	}
 
 	// Narrowing the list to one server must explicitly clear the freed slot
-	// (non-nil &"") so GET-merge-PUT overwrites the stale wan_dns2 rather than
-	// leaving it — otherwise the controller echoes a perpetual extra server.
+	// (non-nil &"") so the sparse PUT overwrites the stale wan_dns2 — omitting it
+	// would leave the controller's server-side merge holding the extra server.
 	m.DNSServers = sliceToStringList([]string{"1.1.1.1"})
 	conf = m.toNetworkConf(ctx, &diags)
 	if derefStr(conf.WanDns1) != "1.1.1.1" || conf.WanDns2 == nil || *conf.WanDns2 != "" {
@@ -178,6 +178,48 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	}
 	if out.UploadKilobits.ValueInt64() != 1000 {
 		t.Errorf("upload_kilobits should round-trip to 1000, got %v", out.UploadKilobits)
+	}
+}
+
+// TestWANConf_OmitsEmptyStaticFields proves the overlay omits wan_ip / netmask /
+// gateway / igmp_proxy_for when unset rather than sending "". The controller
+// validates these and rejects an empty string (api.err.InvalidValue) on a
+// non-static WAN, so a sparse PUT must leave them out entirely.
+func TestWANConf_OmitsEmptyStaticFields(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	// DHCP WAN, static-IP fields unset: must be omitted from the wire.
+	dhcp := (&wanResourceModel{
+		Name:         types.StringValue("uplink"),
+		WANType:      types.StringValue("dhcp"),
+		NetworkGroup: types.StringValue("WAN"),
+		Enabled:      types.BoolValue(true),
+		IP:           types.StringNull(),
+		Netmask:      types.StringNull(),
+		Gateway:      types.StringNull(),
+		IGMPProxyFor: types.StringNull(),
+	}).toNetworkConf(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toNetworkConf diags: %v", diags)
+	}
+	if dhcp.WanIp != nil || dhcp.WanNetmask != nil || dhcp.WanGateway != nil || dhcp.IgmpProxyFor != nil {
+		t.Errorf("static-IP / igmp fields must be omitted on a DHCP WAN, got ip=%v mask=%v gw=%v igmp=%v",
+			dhcp.WanIp, dhcp.WanNetmask, dhcp.WanGateway, dhcp.IgmpProxyFor)
+	}
+
+	// Static WAN with real values: the fields must be sent.
+	static := (&wanResourceModel{
+		Name:         types.StringValue("uplink"),
+		WANType:      types.StringValue("static"),
+		NetworkGroup: types.StringValue("WAN"),
+		Enabled:      types.BoolValue(true),
+		IP:           types.StringValue("203.0.113.2"),
+		Netmask:      types.StringValue("255.255.255.0"),
+		Gateway:      types.StringValue("203.0.113.1"),
+	}).toNetworkConf(ctx, &diags)
+	if derefStr(static.WanIp) != "203.0.113.2" || derefStr(static.WanNetmask) != "255.255.255.0" || derefStr(static.WanGateway) != "203.0.113.1" {
+		t.Errorf("static WAN must send ip/netmask/gateway, got ip=%v mask=%v gw=%v", static.WanIp, static.WanNetmask, static.WanGateway)
 	}
 }
 
@@ -305,8 +347,8 @@ func TestWAN_PPPoEPasswordOmittedWhenUnset(t *testing.T) {
 	ctx := context.Background()
 	var diags diag.Diagnostics
 
-	// Unset password (null): must be omitted from the wire conf so GET-merge-PUT
-	// preserves the controller's stored secret rather than blanking it. The
+	// Unset password (null): must be omitted from the wire conf so the sparse PUT
+	// leaves the controller's stored secret rather than blanking it. The
 	// username (read back) is still sent.
 	m := &wanResourceModel{
 		Name: types.StringValue("wan"), WANType: types.StringValue("pppoe"),
@@ -595,7 +637,7 @@ func TestFirewallRule_RoundTrip(t *testing.T) {
 	if r.Enabled == nil || !*r.Enabled || r.StateNew == nil || !*r.StateNew {
 		t.Errorf("bool mapping wrong: enabled=%v state_new=%v", r.Enabled, r.StateNew)
 	}
-	// Unset optionals stay nil/empty so GET-merge-PUT leaves the controller's value.
+	// Unset optionals stay nil/empty so the sparse PUT leaves the controller's value.
 	if r.SrcAddress != nil || r.ProtocolMatchExcepted != nil || r.DstFirewallgroupIds != nil {
 		t.Errorf("unset optionals must be nil: src_address=%v excepted=%v dst_groups=%v", r.SrcAddress, r.ProtocolMatchExcepted, r.DstFirewallgroupIds)
 	}
@@ -701,7 +743,7 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 		Autoneg:            types.BoolValue(false),
 		Speed:              types.Int64Value(1000),
 		STPPortMode:        types.BoolValue(false),
-		// leave the rest null so GET-merge-PUT preserves the controller's value
+		// leave the rest null so the sparse PUT leaves the controller's value
 		VoiceNetworkID:           types.StringNull(),
 		FullDuplex:               types.BoolNull(),
 		OpMode:                   types.StringNull(),
@@ -725,7 +767,7 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 	if deref(p.Name) != "Trunk" || string(derefEnum(p.Forward)) != "customize" || deref(p.NativeNetworkconfId) != "net-mgmt" {
 		t.Errorf("scalar mapping wrong: %+v", p)
 	}
-	// Explicit false on autoneg must be a non-nil *bool so the merge writes it.
+	// Explicit false on autoneg must be a non-nil *bool so the per-port merge writes it.
 	if p.Autoneg == nil || *p.Autoneg != false || p.StpPortMode == nil || *p.StpPortMode != false {
 		t.Errorf("explicit false bool must be non-nil: autoneg=%v stp_port_mode=%v", p.Autoneg, p.StpPortMode)
 	}
@@ -735,7 +777,7 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 	if p.ExcludedNetworkconfIds == nil || len(*p.ExcludedNetworkconfIds) != 1 || (*p.ExcludedNetworkconfIds)[0] != "net-iot" {
 		t.Errorf("excluded_network_ids mapping wrong: %v", p.ExcludedNetworkconfIds)
 	}
-	// Unset scalar optionals stay nil/empty so the merge-PUT leaves the controller's value.
+	// Unset scalar optionals stay nil/empty so the per-port merge leaves the controller's value.
 	if p.FullDuplex != nil || p.Dot1xCtrl != nil {
 		t.Errorf("unset scalar optionals must be nil: full_duplex=%v dot1x=%v", p.FullDuplex, p.Dot1xCtrl)
 	}
@@ -795,7 +837,7 @@ func TestUserGroup_RoundTrip(t *testing.T) {
 		t.Errorf("explicit 0 must map to &0 (not nil), got %v", g.QosRateMaxDown)
 	}
 
-	// An unconfigured cap stays nil so GET-merge-PUT leaves the controller's value.
+	// An unconfigured cap stays nil so the sparse PUT leaves the controller's value.
 	m.QOSRateMaxUp = types.Int64Null()
 	if g := m.toUserGroup(); g.QosRateMaxUp != nil {
 		t.Errorf("null qos_rate_max_up must map to nil, got %v", g.QosRateMaxUp)

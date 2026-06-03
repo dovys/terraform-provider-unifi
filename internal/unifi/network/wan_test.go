@@ -116,43 +116,36 @@ func TestNetworksGetByName(t *testing.T) {
 	}
 }
 
-// TestNetworksUpdateMerge proves GET-merge-PUT: the live doc is fetched, the
-// owned fields overlaid, and the merged document PUT back. Genuinely unmodeled
-// fields (here vlan) survive untouched, but server-managed meta fields the
-// controller rejects on PUT (attr_no_delete) are stripped from the merged doc.
-func TestNetworksUpdateMerge(t *testing.T) {
-	f := fakeQueue(
-		`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN","attr_no_delete":true,"attr_hidden_id":"WAN","vlan":10}]}`,
-		`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN-renamed","vlan":10}]}`,
-	)
+// TestNetworksUpdateSparse proves the write is a single sparse PUT of only the
+// provider-owned fields — no GET-then-merge. The legacy /rest PUT is a
+// server-side partial merge, so the controller keeps every field the body omits
+// (controller-managed and unmodeled alike); the provider never fetches and
+// re-sends the full document.
+func TestNetworksUpdateSparse(t *testing.T) {
+	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN-renamed"}]}`)}
 	_, err := newTestClient(f).Networks().Update(context.Background(),
 		&wire.Networkconf{UnderscoreId: ptr("n1"), Name: ptr("LAN-renamed")})
 	if err != nil {
 		t.Fatalf("Update: %v", err)
 	}
-	if f.calls != 2 {
-		t.Fatalf("merge should GET then PUT (2 calls), got %d", f.calls)
+	if f.calls != 1 {
+		t.Fatalf("sparse update should be a single PUT (no GET-merge), got %d calls", f.calls)
 	}
 	if f.method != "PUT" {
-		t.Errorf("last call = %q, want PUT", f.method)
+		t.Errorf("method = %q, want PUT", f.method)
 	}
 	if want := "/proxy/network/api/s/default/rest/networkconf/n1"; f.path != want {
 		t.Errorf("path = %q, want %q", f.path, want)
 	}
-	doc, ok := f.body.(map[string]json.RawMessage)
-	if !ok {
-		t.Fatalf("PUT body should be the merged raw doc, got %T", f.body)
+	// The body is the typed wire object; omitempty drops the unset fields, so
+	// only _id and the owned name are serialized — nothing the controller would
+	// reject (no attr_no_delete, no echoed GET document).
+	raw, _ := json.Marshal(f.body)
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatalf("PUT body not an object: %v (%s)", err, raw)
 	}
-	if string(doc["name"]) != `"LAN-renamed"` {
-		t.Errorf("owned field not overlaid: name = %s", doc["name"])
-	}
-	if string(doc["vlan"]) != "10" {
-		t.Errorf("genuinely unmodeled field not preserved: vlan = %s", doc["vlan"])
-	}
-	if _, present := doc["attr_no_delete"]; present {
-		t.Errorf("server-managed attr_no_delete must be stripped from PUT body, got %s", doc["attr_no_delete"])
-	}
-	if _, present := doc["attr_hidden_id"]; present {
-		t.Errorf("server-managed attr_hidden_id must be stripped from PUT body, got %s", doc["attr_hidden_id"])
+	if len(got) != 2 || got["_id"] != "n1" || got["name"] != "LAN-renamed" {
+		t.Errorf("PUT body = %s, want only {_id, name}", raw)
 	}
 }

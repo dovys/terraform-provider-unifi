@@ -51,15 +51,18 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 2. Map the TF model to the generated `wire.<Type>` (`internal/unifi/network/wire`); if a field is
    missing or mistyped, fix the per-object spec in [`../unifi-specs`](../unifi-specs) and regenerate —
    never hand-edit `types.gen.go`. Add the group accessor + collection in `internal/unifi/network`
-   (custom collection only for id-in-body merge or List-filter Read). No separate `models` package, and
-   no `map[string]any` except the generic `unifi_network_setting` and raw passthrough of unmodeled
-   fields in GET-merge-PUT. v2 writes honor the [v2 write contract](architecture.md).
+   (custom collection only for a List-filter Read or an array-field merge). No separate `models` package,
+   and no `map[string]any` except the generic `unifi_network_setting` and the raw passthrough in the
+   device `port_overrides` array merge. v2 writes honor the [v2 write contract](architecture.md).
 3. Schema: nested **attributes** (not blocks); Map/Set keyed by a natural key, not List;
    `Optional+Computed` for API-defaulted, with `UseStateForUnknown` on the knobs so a partially-configured
    import still reaches a clean plan; `RequiresReplace` immutables; controller-accurate validators;
    `Sensitive` secrets.
-4. CRUD + ImportState: Read reconciles + removes-on-404; Create/Update match the plan (GET-merge-PUT
-   for partly-owned docs); document the import key + state `id`.
+4. CRUD + ImportState: Read reconciles + removes-on-404; Create/Update match the plan with a **sparse
+   PUT of owned fields** — the legacy `/rest` PUT shallow-merges server-side, so omitted fields keep
+   their stored value and we never echo the controller's full GET document back (only an array the
+   controller replaces wholesale, e.g. device `port_overrides`, is GET-merged); document the import key
+   + state `id`.
 5. Hand-written real-use-case examples in `examples/<use-case>/*.tf` (+ `examples/data/`), not
    per-resource snippets; use `import {}` blocks for resources you import rather than create (WANs, the
    Default network). `go generate` produces the schema-reference docs (examples are not template-injected).
@@ -67,20 +70,24 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 6. Tests to the Definition of Done.
 7. Update [apps/network.md](apps/network.md) + the [roadmap.md](roadmap.md) checklist.
 
-## Wire-level debugging (`UNIFI_DEBUG_HTTP`)
+## Wire-level debugging (`TF_LOG_PROVIDER`)
 
-Set `UNIFI_DEBUG_HTTP=1` to dump every request/response — method, URL, and the
-exact JSON body — to stderr, with secret-bearing fields (`password`,
-`passphrase`, `psk`, `token`, …) masked. This is the tool for **reverse-engineering
-a surface**: which fields the controller actually accepts on PUT/POST vs only
-returns on GET. The recipe step-1 confirmation ("confirm the surface + wire
-shape") is exactly this — capture the live GET, then watch what a write
-round-trips or rejects (`api.err.InvalidPayload` names a field the surface won't
-take). Off by default; never on in normal runs.
+Every request/response — method, URL, and the exact JSON body, with
+secret-bearing fields (`password`, `passphrase`, `psk`, `token`, …) masked — is
+logged through `tflog` at DEBUG under the `wire HTTP` message. This is the tool
+for **reverse-engineering a surface**: which fields the controller actually
+accepts on PUT/POST vs only returns on GET. The recipe step-1 confirmation
+("confirm the surface + wire shape") is exactly this — capture the live GET, then
+watch what a write round-trips or rejects (`api.err.InvalidValue` /
+`InvalidPayload` flag a field the surface won't take).
 
 ```
-UNIFI_DEBUG_HTTP=1 tofu apply 2>capture.log   # stderr carries the dump
+TF_LOG_PROVIDER=debug tofu apply 2>&1 | grep 'wire HTTP'
 ```
+
+Routing through `tflog` (not raw stderr) is deliberate: the provider runs as a
+go-plugin child whose stderr the host discards without `TF_LOG`, so a raw write
+never surfaces — `tflog` rides the hclog sink the host parses.
 
 ## Definition of Done
 

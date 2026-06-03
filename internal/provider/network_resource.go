@@ -341,7 +341,7 @@ func (m *networkResourceModel) toNetworkConf(ctx context.Context, diags *diag.Di
 
 	// Only touch the DHCP DNS slots when the list is configured. When set, write
 	// every owned slot (freed ones as "") so shrinking the list clears the
-	// trailing slot on GET-merge-PUT instead of leaving it stale.
+	// trailing slot via the sparse PUT instead of leaving it stale.
 	if !m.DHCPDNS.IsNull() && !m.DHCPDNS.IsUnknown() {
 		dns := stringListToSlice(ctx, m.DHCPDNS, diags)
 		enabled := len(dns) > 0

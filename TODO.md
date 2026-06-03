@@ -164,7 +164,7 @@ Open items:
   camera); (c) accepted enum values (`light.mode`/`enableAt`/`luxSensitivity`,
   `sensor.mountType`); (d) numeric ranges/units (light `ledLevel` scale,
   `pirDuration` units; sensor threshold units).
-- **Clear owned `omitempty` fields on GET-merge-PUT (beyond DNS slots).**
+- **Clear owned `omitempty` fields under sparse PUT (beyond DNS slots).**
   `structToRawMap` drops zero-valued owned fields, so the overlay can set but not
   clear a plain `string`/`*bool` back to its zero (e.g. clearing `domain_name`,
   `dhcp_gateway`); likewise an explicit empty list `[]` reads back as `null` and

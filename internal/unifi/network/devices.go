@@ -12,8 +12,10 @@ import (
 
 // DevicesService is the devices group: UniFi hardware (APs, switches, gateways).
 // Reads come from the authoritative legacy /stat/device list (telemetry + the
-// full config document); config writes are a partial PUT to /rest/device/<id>
-// (GET-merge-PUT, owned fields only); adopt/forget go through /cmd/devmgr.
+// full config document); config writes are a sparse PUT to /rest/device/<id>
+// (owned fields only; the controller shallow-merges, and the port_overrides
+// array is GET-merged since the controller replaces it wholesale); adopt/forget
+// go through /cmd/devmgr.
 // The adopt/forget verbs are HIL-unverified (no adoptable hardware on the recon
 // network) — see TODO.md.
 type DevicesService struct{ core *core }

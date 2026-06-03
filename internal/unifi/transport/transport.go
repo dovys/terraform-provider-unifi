@@ -18,6 +18,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Response is the raw result of a transport request, after the HTTP exchange
@@ -138,46 +140,53 @@ func sleep(ctx context.Context, d time.Duration) error {
 	}
 }
 
-// --- wire-level HTTP debug (UNIFI_DEBUG_HTTP) ---
+// --- wire-level HTTP debug ---
 
-// debugHTTPEnabled reports whether wire-level request/response dumping is on,
-// gated by a non-empty UNIFI_DEBUG_HTTP so it never fires in normal runs.
-func debugHTTPEnabled() bool { return os.Getenv("UNIFI_DEBUG_HTTP") != "" }
-
-// debugHTTP dumps one request/response pair to stderr, with secret-bearing JSON
-// fields masked, when UNIFI_DEBUG_HTTP is set. Every classic request and the
-// login pass through it, so it captures the exact body the controller accepts or
-// rejects — the tool for reverse-engineering which fields a surface will
-// PUT/POST vs only GET. status 0 / nil respBody denotes a transport-level
-// failure (no response). Output goes to stderr, never stdout: stdout carries the
-// go-plugin gRPC handshake, while Terraform forwards plugin stderr to the
-// operator.
-func debugHTTP(method, url string, reqBody any, status int, respBody []byte) {
-	if !debugHTTPEnabled() {
+// debugHTTP logs one request/response pair — method, URL, JSON body, with
+// secret-bearing fields masked — through tflog at DEBUG. Every classic request
+// and the login pass through it, so it captures the exact body the controller
+// accepts or rejects: the tool for reverse-engineering which fields a surface
+// will PUT/POST vs only GET. status 0 / nil respBody denotes a transport-level
+// failure (no response).
+//
+// Routing through tflog (not raw stderr) is what makes it surface under
+// `terraform`/`tofu`: the provider runs as a go-plugin child whose stderr the
+// host discards without TF_LOG, but tflog rides the hclog sink the host parses.
+// Capture it with `TF_LOG_PROVIDER=debug tofu apply 2>&1 | grep 'wire HTTP'`.
+func debugHTTP(ctx context.Context, method, url string, reqBody any, status int, respBody []byte) {
+	// Skip the marshal+redact work entirely when no provider logging is
+	// configured — tflog.Debug would no-op anyway, but the fields (incl. the
+	// JSON round-trip in redactJSON) are built eagerly before that gate. TF_LOG /
+	// TF_LOG_PROVIDER is the same control tflog itself honors.
+	if os.Getenv("TF_LOG") == "" && os.Getenv("TF_LOG_PROVIDER") == "" {
 		return
 	}
-	var sb strings.Builder
-	fmt.Fprintf(&sb, "\n=== UNIFI HTTP %s %s ===\n", method, url)
+	fields := map[string]any{"method": method, "url": url}
 	if reqBody != nil {
 		if b, err := json.Marshal(reqBody); err == nil {
-			fmt.Fprintf(&sb, "--> request:\n%s\n", redactJSON(b))
+			fields["request"] = redactJSON(b)
 		}
 	}
 	if status != 0 {
-		fmt.Fprintf(&sb, "<-- status: %d\n", status)
+		fields["status"] = status
 	}
 	if len(respBody) > 0 {
-		fmt.Fprintf(&sb, "<-- response:\n%s\n", redactJSON(respBody))
+		fields["response"] = redactJSON(respBody)
 	}
-	fmt.Fprint(os.Stderr, sb.String())
+	tflog.Debug(ctx, "wire HTTP", fields)
 }
 
 // secretKeyHints are JSON field-name substrings (case-insensitive) whose values
-// debugHTTP masks. Credentials — login body, write-only passphrases the
-// controller echoes — must never reach the debug stream.
+// debugHTTP masks. Credentials — the login body, and the passphrases / key
+// material the controller echoes on GET (WLAN PSKs, IPsec/WireGuard preshared
+// keys, CA and server private keys) — must never reach the debug stream. The
+// "_key" hint covers the controller's *_key fields (x_ca_key, x_server_key,
+// wireguard_client_preshared_key, …) without masking the bare "key" field
+// (a static-DNS record's hostname).
 var secretKeyHints = []string{
 	"password", "passwd", "passphrase", "psk", "secret",
 	"token", "cookie", "authorization", "privkey", "private_key", "wpa_psk",
+	"_key", "pre_shared_key", "preshared_key",
 }
 
 // redactJSON pretty-prints JSON with secret-bearing values masked. On a parse

@@ -297,8 +297,8 @@ func (m *firewallRuleResourceModel) toFirewallRule(ctx context.Context, diags *d
 		DstNetworkconfId:      strPtrOrNil(m.DstNetworkID),
 		DstNetworkconfType:    (*wire.FirewallruleDstNetworkconfType)(strPtrOrNil(m.DstNetworkType)),
 	}
-	// Leave the group sets nil when unset so GET-merge-PUT preserves the
-	// controller's value (the fields are omitempty — a nil pointer is dropped).
+	// Leave the group sets nil when unset so the sparse PUT omits them and the
+	// controller keeps its value (the fields are omitempty — a nil pointer is dropped).
 	if g := stringSetToSlice(ctx, m.SrcFirewallGroupIDs, diags); g != nil {
 		rule.SrcFirewallgroupIds = &g
 	}

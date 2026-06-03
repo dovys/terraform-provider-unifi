@@ -133,6 +133,18 @@ func strOrEmpty(v types.String) string {
 	return v.ValueString()
 }
 
+// strPtrIfSet returns a pointer to the string only when it is set to a non-empty
+// value, else nil — so omitempty drops it. Use it for fields the controller
+// rejects when sent empty (e.g. wan_ip on a non-static WAN): an unset field must
+// be omitted, not sent as "".
+func strPtrIfSet(v types.String) *string {
+	if v.IsNull() || v.IsUnknown() || v.ValueString() == "" {
+		return nil
+	}
+	s := v.ValueString()
+	return &s
+}
+
 // strToStateOptional maps an empty API string to null, so an unset optional
 // attribute stays unset across reads.
 func strToStateOptional(s string) types.String {

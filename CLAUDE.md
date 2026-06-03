@@ -40,9 +40,11 @@ clean-room, Registry `dovys/unifi`. Resources are **app-namespaced**: `unifi_net
 
 ## Hard "don'ts"
 ❌ HTTP from resource code. ❌ Integration/X-API-KEY surface (single classic session only).
-❌ `map[string]any` schemas (except generic `unifi_network_setting` + raw passthrough in GET-merge-PUT).
-❌ client/end-user device modeling. ❌ reused provider/client source. ❌ whole-document PUT
-(GET-merge-PUT owned fields only). ❌ List for keyed collections (use Map/Set).
+❌ `map[string]any` schemas (except generic `unifi_network_setting` + the raw passthrough in the device
+`port_overrides` array merge). ❌ client/end-user device modeling. ❌ reused provider/client source.
+❌ whole-document PUT or GET-then-merge of a full doc — the legacy `/rest` PUT **shallow-merges
+server-side**, so send only the fields the provider owns (a sparse PUT); never echo the controller's GET
+back. ❌ List for keyed collections (use Map/Set).
 ❌ over-tight validators.
 
 ## Docs hygiene
@@ -67,12 +69,14 @@ out of scope.
 2. Map the TF model to the generated `wire.<Type>` (regenerate from [`../unifi-specs`](../unifi-specs)
    if a field is missing/mistyped — fix the spec, never hand-edit `types.gen.go`). Add the group
    accessor + collection in `internal/unifi/network` (a custom collection only when the surface needs
-   id-in-body merge or List-filter Read). No hand-written per-type structs, no `models` package.
+   a List-filter Read or an array-field merge). No hand-written per-type structs, no `models` package.
 3. Schema: nested attributes; Map/Set keyed by natural key (not List); `Optional+Computed` with
    `UseStateForUnknown` on the knobs (no post-import churn — invariant 6); `RequiresReplace` immutables;
    controller-accurate validators; `Sensitive`.
-4. CRUD + ImportState: Read reconciles + removes-on-404; GET-merge-PUT for partly-owned docs; document
-   import key + state `id`.
+4. CRUD + ImportState: Read reconciles + removes-on-404; Update is a **sparse PUT of owned fields** (the
+   legacy `/rest` PUT shallow-merges server-side, so omitted fields keep their stored value); GET-merge
+   only an array field that the controller replaces wholesale (device `port_overrides`); document import
+   key + state `id`.
 5. Hand-written real-use-case examples in `examples/<use-case>/*.tf` (+ `examples/data/`), not
    per-resource snippets; use `import {}` blocks for resources you import rather than create (WANs, the
    Default network). `go generate` for the schema-reference docs (examples are not template-injected).

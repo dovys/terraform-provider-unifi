@@ -144,11 +144,11 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 				Validators:          []validator.List{listvalidator.SizeAtMost(2)},
 			},
 
-			"pppoe_username": optStr("PPPoE username (`wan_type=pppoe`)."),
+			"pppoe_username": optStr("PPPoE username (`wan_type=pppoe`). Read back from the controller when not set in config."),
 			"pppoe_password": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "PPPoE password (`wan_type=pppoe`). Write-only — the controller does not return it, so it is not refreshed on read or recoverable on import.",
+				MarkdownDescription: "PPPoE password (`wan_type=pppoe`). The provider never reads it back, so the secret stays out of state; set it in config to change it, and it is not recoverable on import.",
 			},
 
 			"ip":      optStr("Static WAN IP address (`wan_type=static`)."),
@@ -283,9 +283,9 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 		WanType:               (*wire.NetworkconfWanType)(strPtrOrNil(m.WANType)),
 		WanNetworkgroup:       strPtrOrNil(m.NetworkGroup),
 		Enabled:               boolPtr(m.Enabled),
-		WanIp:                 strPtrOrNil(m.IP),
-		WanNetmask:            strPtrOrNil(m.Netmask),
-		WanGateway:            strPtrOrNil(m.Gateway),
+		WanIp:                 strPtrIfSet(m.IP),
+		WanNetmask:            strPtrIfSet(m.Netmask),
+		WanGateway:            strPtrIfSet(m.Gateway),
 		WanLoadBalanceType:    (*wire.NetworkconfWanLoadBalanceType)(strPtrOrNil(m.LoadBalanceType)),
 		WanLoadBalanceWeight:  intPtr(m.LoadBalanceWeight),
 		WanFailoverPriority:   intPtr(m.FailoverPriority),
@@ -293,7 +293,7 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 		WanSmartqUpRate:       intPtr(m.SmartQUpRate),
 		WanSmartqDownRate:     intPtr(m.SmartQDownRate),
 		IgmpProxyUpstream:     boolPtr(m.IGMPProxyUpstream),
-		IgmpProxyFor:          (*wire.NetworkconfIgmpProxyFor)(strPtrOrNil(m.IGMPProxyFor)),
+		IgmpProxyFor:          (*wire.NetworkconfIgmpProxyFor)(strPtrIfSet(m.IGMPProxyFor)),
 		ReportWanEvent:        boolPtr(m.ReportWANEvent),
 		WanTypeV6:             (*wire.NetworkconfWanTypeV6)(strPtrOrNil(m.IPv6Type)),
 		Ipv6WanDelegationType: (*wire.NetworkconfIpv6WanDelegationType)(strPtrOrNil(m.IPv6DelegationType)),
@@ -306,10 +306,10 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 	uEnabled := wanUsername != ""
 	conf.WanPppoeUsernameEnabled = &uEnabled
 
-	// pppoe_password is write-only (the controller never echoes it). Send it only
-	// when explicitly set in config: an unset password must be left untouched so
-	// GET-merge-PUT preserves the stored secret — sending "" would blank it and
-	// drop a live PPPoE uplink on any update. Set it to "" explicitly to clear it.
+	// pppoe_password is write-only here (we never read it back). Send it only when
+	// explicitly set in config: an unset password is omitted from the sparse PUT,
+	// so the controller's server-side merge keeps the stored secret — sending ""
+	// would blank it and drop a live PPPoE uplink. Set it to "" to clear it.
 	if !m.PPPoEPassword.IsNull() && !m.PPPoEPassword.IsUnknown() {
 		xWanPassword := m.PPPoEPassword.ValueString()
 		conf.XWanPassword = &xWanPassword
@@ -336,7 +336,7 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 
 	// IPv4 DNS: any server → manual, else auto. Only touch the slots when the
 	// list is configured; write both owned slots (freed ones as "") so dropping
-	// the second server clears wan_dns2 on GET-merge-PUT.
+	// the second server clears wan_dns2 — the sparse PUT sends the freed slot.
 	if !m.DNSServers.IsNull() && !m.DNSServers.IsUnknown() {
 		dns := stringListToSlice(ctx, m.DNSServers, diags)
 		pref := wire.NetworkconfWanDnsPreference("auto")
@@ -383,9 +383,9 @@ func (m *wanResourceModel) fromNetworkConf(conf *wire.Networkconf) {
 	m.SettingPreference = types.StringValue(string(derefEnum(conf.SettingPreference)))
 	m.SingleNetworkLAN = types.StringValue(deref(conf.SingleNetworkLan))
 
-	m.IP = types.StringValue(deref(conf.WanIp))
-	m.Netmask = types.StringValue(deref(conf.WanNetmask))
-	m.Gateway = types.StringValue(deref(conf.WanGateway))
+	m.IP = strToStateOptional(deref(conf.WanIp))
+	m.Netmask = strToStateOptional(deref(conf.WanNetmask))
+	m.Gateway = strToStateOptional(deref(conf.WanGateway))
 
 	m.LoadBalanceType = types.StringValue(string(derefEnum(conf.WanLoadBalanceType)))
 	m.LoadBalanceWeight = intToState(conf.WanLoadBalanceWeight)
@@ -394,19 +394,20 @@ func (m *wanResourceModel) fromNetworkConf(conf *wire.Networkconf) {
 	m.SmartQUpRate = intToState(conf.WanSmartqUpRate)
 	m.SmartQDownRate = intToState(conf.WanSmartqDownRate)
 	m.IGMPProxyUpstream = boolToState(conf.IgmpProxyUpstream)
-	m.IGMPProxyFor = types.StringValue(string(derefEnum(conf.IgmpProxyFor)))
+	m.IGMPProxyFor = strToStateOptional(string(derefEnum(conf.IgmpProxyFor)))
 	m.MACOverride = types.StringValue(deref(conf.MacOverride))
 	m.ReportWANEvent = boolToState(conf.ReportWanEvent)
 	m.IPv6Type = types.StringValue(string(derefEnum(conf.WanTypeV6)))
 	m.IPv6DelegationType = types.StringValue(string(derefEnum(conf.Ipv6WanDelegationType)))
 	m.IPv6PDSize = intToState(conf.WanDhcpv6PdSize)
 
+	// Read username back as-is (not null-mapped like the static-IP fields): it is
+	// always sent on write (the enable flag tracks emptiness, the controller
+	// accepts ""), and it's Optional+Computed so a pinned "" never churns.
 	m.PPPoEUsername = types.StringValue(deref(conf.WanUsername))
-	// Write-only secret: the controller doesn't echo it, so keep the existing
-	// (plan/state) value rather than nulling it on read.
-	if deref(conf.XWanPassword) != "" {
-		m.PPPoEPassword = types.StringValue(deref(conf.XWanPassword))
-	}
+	// pppoe_password is deliberately never read back: the controller does echo
+	// x_wan_password, but adopting it would pull the secret into state and make
+	// the value diverge from config (the field mirrors config/plan only).
 
 	if conf.WanVlanEnabled != nil && *conf.WanVlanEnabled && conf.WanVlan != nil {
 		m.VLANID = types.Int64Value(int64(*conf.WanVlan))
@@ -450,9 +451,9 @@ func dnsSlots(vals ...*string) []string {
 }
 
 // dnsSlotPtr returns the i-th DNS server as a pointer, or a pointer to "" when
-// the list has no i-th element. A non-nil &"" overwrites (clears) a freed slot
-// on GET-merge-PUT; a nil pointer would be dropped by omitempty and leave the
-// controller's stale value in place.
+// the list has no i-th element. A non-nil &"" is sent by the sparse PUT to
+// overwrite (clear) a freed slot; a nil pointer would be dropped by omitempty,
+// leaving the controller's stale value in place.
 func dnsSlotPtr(vals []string, i int) *string {
 	if i < len(vals) {
 		v := vals[i]

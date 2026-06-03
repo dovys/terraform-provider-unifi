@@ -16,8 +16,9 @@ func (c *Client) Networks() NetworkCollection {
 
 // NetworkCollection is the networkconf CRUD collection. networkconf is a
 // partly-owned legacy document (the controller manages and returns fields the
-// provider does not model), so updates go through GET-merge-PUT (Update,
-// overridden here) rather than a whole-document PUT.
+// provider does not model), so Update (overridden here) sends a sparse PUT of
+// only the owned fields — the legacy /rest PUT shallow-merges server-side, so
+// omitted fields keep their stored value — never the controller's full document.
 type NetworkCollection struct {
 	LegacyCollection[wire.Networkconf]
 }
@@ -38,9 +39,11 @@ func (s NetworkCollection) GetByName(ctx context.Context, name string) (*wire.Ne
 	return nil, ErrNotFound
 }
 
-// Update applies the owned fields of n onto the live networkconf document via
-// GET-merge-PUT, leaving controller-managed and unmodeled fields intact. n must
-// carry its _id.
+// Update writes the provider-owned fields of n with a sparse PUT. The legacy
+// /rest PUT is a server-side partial merge, so omitted fields — both
+// controller-managed (attr_no_delete, routing_table_id, …) and unmodeled — keep
+// their stored value untouched. n carries only what the provider sets (its
+// omitempty fields) plus its _id; never the controller's full GET document.
 func (s NetworkCollection) Update(ctx context.Context, n *wire.Networkconf) (*wire.Networkconf, error) {
 	id := ""
 	if n.UnderscoreId != nil {
@@ -49,5 +52,5 @@ func (s NetworkCollection) Update(ctx context.Context, n *wire.Networkconf) (*wi
 	if id == "" {
 		return nil, errMissingID("networkconf")
 	}
-	return s.UpdateMerge(ctx, id, n)
+	return s.LegacyCollection.Update(ctx, id, n)
 }
