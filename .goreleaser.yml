@@ -3,9 +3,9 @@
 # every substantive merge to main and runs `goreleaser release` in the same job.
 version: 2
 
-before:
-  hooks:
-    - go mod tidy
+# No `before.hooks` (it used to run `go mod tidy`). The release must not mutate
+# the module graph — go.mod/go.sum tidiness is enforced by the PR `test.yml`
+# gate, and the release build runs with GOFLAGS=-mod=readonly.
 
 builds:
   - env:

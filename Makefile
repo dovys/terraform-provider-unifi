@@ -20,9 +20,21 @@ lint:
 	go vet ./...
 	golangci-lint run ./...
 
-# Format Go sources in place.
+# Format Go sources and example HCL in place.
 fmt:
 	gofmt -s -w .
+	terraform fmt -recursive examples/
+
+# Check example HCL formatting (mirrors the CI `terraform fmt` gate).
+tffmt:
+	terraform fmt -check -recursive examples/
+
+# Scan for known vulnerabilities reachable from our call graph — deps and the Go
+# standard library (mirrors the CI govulncheck gate). GOTOOLCHAIN pins the scan
+# to the security-patched 1.26.4 stdlib (see test.yml); pinned tool version;
+# advisory DB fetched from vuln.go.dev.
+vulncheck:
+	GOTOOLCHAIN=go1.26.4 go run golang.org/x/vuln/cmd/govulncheck@v1.3.0 ./...
 
 # Regenerate everything (docs + wire codegen). Needs the sibling ../unifi-specs
 # repo for the wire `go:generate` directives — local dev only, never CI.
@@ -37,4 +49,16 @@ docs:
 tidy:
 	go mod tidy
 
-.PHONY: default build test testacc lint fmt generate docs tidy
+# Run the full PR gate locally before pushing — mirrors .github/workflows/test.yml
+# (build/vet, gofmt, go mod tidy, govulncheck, terraform fmt, docs, lint, unit).
+check: build
+	go vet ./...
+	test -z "$$(gofmt -s -l .)" || { echo "gofmt: run 'make fmt'"; exit 1; }
+	go mod tidy && git diff --exit-code go.mod go.sum
+	$(MAKE) vulncheck
+	$(MAKE) tffmt
+	$(MAKE) docs && git diff --exit-code docs/
+	golangci-lint run ./...
+	$(MAKE) test
+
+.PHONY: default build test testacc lint fmt tffmt vulncheck generate docs tidy check

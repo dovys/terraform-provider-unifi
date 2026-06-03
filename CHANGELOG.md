@@ -33,6 +33,25 @@ below predate the date-based convention.
   `386`, and 32-bit `arm`, taking the matrix from 13 archives to 6 (the repo isn't
   on the Terraform Registry, so there's no platform-coverage requirement).
 
+### Security
+
+- **CI supply-chain hardening.** Every GitHub Action is pinned to a full commit
+  SHA — a mutable `@vN` tag can be re-pointed at malicious code, and the release
+  job runs with `contents: write` and (once configured) the GPG signing key in
+  memory. The acceptance Mongo + controller service-container images are pinned
+  by digest. Dependabot bumps both. The release build now runs with
+  `GOFLAGS=-mod=readonly` and no longer runs `go mod tidy`, so a tampered or
+  stale module graph fails the build instead of being rewritten mid-release.
+- **New PR gates** (`make check` runs the full set locally): `go mod tidy`
+  cleanliness, **govulncheck** (dependencies **and** the build toolchain's
+  standard library), and **terraform fmt** on `examples/` — alongside the
+  existing build/vet, gofmt, docs-freshness, golangci-lint and unit checks.
+- The govulncheck gate scans under the security-patched Go standard library
+  (1.26.4), pinned via `GOTOOLCHAIN` in the job until setup-go's `stable`
+  manifest reaches it — it flagged two stdlib advisories (GO-2026-5037
+  `crypto/x509`, GO-2026-5039 `net/textproto`) fixed there. The build/release
+  toolchain stays on `stable` and picks up the fix automatically.
+
 ## 2026-06-02
 
 ### Added

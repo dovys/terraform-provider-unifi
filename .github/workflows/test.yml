@@ -13,13 +13,17 @@ on:
 permissions:
   contents: read
 
+# Every action is pinned to a full commit SHA — mutable tags (@v6) can be
+# re-pointed at malicious code in a repo compromise, the classic Actions
+# supply-chain vector. Dependabot (github-actions) bumps the SHA and the
+# trailing version comment together.
 jobs:
   build:
     name: build & vet
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version: 'stable' # always build/test on the latest stable Go
           cache: true
@@ -31,6 +35,16 @@ jobs:
           if [ -n "$unformatted" ]; then
             echo "These files are not gofmt-ed:"; echo "$unformatted"
             echo "Run: gofmt -s -w ."
+            exit 1
+          fi
+      # go.mod / go.sum must already be tidy. The release build runs with
+      # -mod=readonly and no `go mod tidy`, so an untidy module would otherwise
+      # only surface at release time — catch it here, on every PR.
+      - name: go mod tidy is clean
+        run: |
+          go mod tidy
+          if ! git diff --exit-code go.mod go.sum; then
+            echo "::error::go.mod/go.sum not tidy — run 'go mod tidy' and commit."
             exit 1
           fi
       # Docs are generated from the provider schema + examples. Keep them current
@@ -50,8 +64,8 @@ jobs:
     name: golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version: 'stable'
           cache: true
@@ -59,18 +73,55 @@ jobs:
       # go directive (go 1.26.3). install-mode goinstall builds golangci-lint
       # from source with the setup-go toolchain (latest stable, >= our floor),
       # so the binary's Go always satisfies the directive.
-      - uses: golangci/golangci-lint-action@v9
+      - uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
           version: v2.12.2
           install-mode: goinstall
+
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+        with:
+          go-version: 'stable'
+          cache: true
+      # Fail the PR on any known vulnerability reachable from our call graph —
+      # third-party deps AND the Go standard library. Tool version pinned; the
+      # advisory DB is fetched from vuln.go.dev at run time.
+      - name: govulncheck
+        # Scan under the security-patched toolchain. setup-go's `stable` manifest
+        # still serves 1.26.3, which carries two stdlib advisories (GO-2026-5037
+        # crypto/x509, GO-2026-5039 net/textproto, both fixed in 1.26.4); pinning
+        # GOTOOLCHAIN here makes Go fetch 1.26.4 directly (its own toolchain
+        # mechanism, independent of setup-go's manifest) so the scan reflects the
+        # fixed stdlib. Drop this override once `stable` reaches >= 1.26.4.
+        env:
+          GOTOOLCHAIN: go1.26.4
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
+          govulncheck ./...
+
+  terraform-fmt:
+    name: terraform fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_wrapper: false
+      # Example HCL is the documentation source (tfplugindocs renders it) and is
+      # shipped to users — keep it canonically formatted.
+      - run: terraform fmt -check -recursive examples/
 
   unit:
     name: unit tests
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version: 'stable'
           cache: true
