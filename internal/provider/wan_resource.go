@@ -111,8 +111,8 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 				Validators:          []validator.String{stringvalidator.OneOf("WAN", "WAN2")},
 			},
 			"enabled":            optBool("Whether the uplink is enabled."),
-			"setting_preference": schema.StringAttribute{Computed: true, MarkdownDescription: "Controller auto/manual settings toggle (read-only)."},
-			"single_network_lan": schema.StringAttribute{Computed: true, MarkdownDescription: "LAN this uplink is bound to (read-only)."},
+			"setting_preference": schema.StringAttribute{Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}, MarkdownDescription: "Controller auto/manual settings toggle (read-only)."},
+			"single_network_lan": schema.StringAttribute{Computed: true, PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}, MarkdownDescription: "LAN this uplink is bound to (read-only)."},
 
 			"dns_servers": schema.ListAttribute{
 				Optional:            true,

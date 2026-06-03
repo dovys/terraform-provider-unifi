@@ -1,0 +1,10 @@
+# Everything live-derived stays local — real controller object IDs + state must
+# never be committed (docs/testing.md: the live console is a gitignored fixture).
+imports.tf
+generated.tf
+plan.out
+dev.tfrc
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl

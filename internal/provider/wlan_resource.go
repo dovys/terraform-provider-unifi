@@ -352,7 +352,9 @@ func (m *wlanResourceModel) fromWLANConf(w *wire.Wlanconf) {
 	m.No2GHzOUI = boolToState(w.No2ghzOui)
 	m.MLOEnabled = boolToState(w.MloEnabled)
 	m.MACFilterEnabled = boolToState(w.MacFilterEnabled)
-	m.MACFilterPolicy = types.StringValue(string(derefEnum(w.MacFilterPolicy)))
+	// Empty when MAC filtering is off — represent as null (not "") so an imported
+	// WLAN doesn't fail the allow/deny enum validator via -generate-config-out.
+	m.MACFilterPolicy = stringOrNull(string(derefEnum(w.MacFilterPolicy)))
 	m.MACFilterList = sliceToStringSet(derefSlice(w.MacFilterList))
 	m.MinrateNGEnabled = boolToState(w.MinrateNgEnabled)
 	m.MinrateNGDataRateKbps = intToState(w.MinrateNgDataRateKbps)

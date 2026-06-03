@@ -400,6 +400,17 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	if out.Passphrase.ValueString() != "fromserver1234" {
 		t.Errorf("passphrase should adopt the controller value, got %q", out.Passphrase.ValueString())
 	}
+
+	// mac_filter_policy is empty when filtering is off — Read must null it (not
+	// "") so an imported WLAN doesn't trip the allow/deny enum validator (HIL).
+	if !out.MACFilterPolicy.IsNull() {
+		t.Errorf("mac_filter_policy must be null when the controller returns none, got %q", out.MACFilterPolicy.ValueString())
+	}
+	allow := wire.WlanconfMacFilterPolicy("allow")
+	out.fromWLANConf(&wire.Wlanconf{UnderscoreId: sp("wlan9"), Name: sp("Home"), MacFilterPolicy: &allow})
+	if out.MACFilterPolicy.ValueString() != "allow" {
+		t.Errorf("mac_filter_policy should adopt the controller value, got %q", out.MACFilterPolicy.ValueString())
+	}
 }
 
 func TestAPGroup_RoundTrip(t *testing.T) {
