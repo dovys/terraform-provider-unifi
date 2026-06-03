@@ -6,26 +6,24 @@ body:
     attributes:
       value: |
         The more you fill in, the faster this gets fixed — especially the
-        **sample Terraform** and **versions**. A bug we can't reproduce from your
+        **reproduce config** and **versions**. A bug we can't reproduce from your
         config usually can't be fixed.
 
         > **Scrub secrets** — API keys, passwords, PSKs, public IPs, MACs — from
-        > configs and logs before posting.
+        > the config and logs before posting.
 
   - type: textarea
-    id: expected
+    id: problem
     attributes:
-      label: Expected behavior
-      placeholder: A second `terraform plan` should be empty after apply.
-    validations:
-      required: true
+      label: Describe the problem in detail
+      value: |
+        Expected behavior:
 
-  - type: textarea
-    id: actual
-    attributes:
-      label: What happened instead
-      description: The error, wrong value, perpetual diff, or failed import. Include the exact message.
-      placeholder: plan shows a permanent diff on `security` flipping wpapsk -> wpa3, which I never set.
+
+        What happened instead:
+
+
+        Logs:
     validations:
       required: true
 
@@ -47,25 +45,11 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: affected_apps
-    attributes:
-      label: Affected app(s)
-      description: Which application's resources are involved. Pick all that apply.
-      multiple: true
-      options:
-        - Network
-        - Protect
-        - Access
-        - Not sure
-    validations:
-      required: true
-
   - type: textarea
     id: stack_versions
     attributes:
       label: UniFi stack versions
-      description: For the affected apps above, plus the console. Find them in the UniFi OS UI or via `unifi_network_application_info`. Drop the lines that don't apply.
+      description: The console plus the affected app(s). Find them in the UniFi OS UI or via `unifi_network_application_info`. Drop the lines that don't apply.
       value: |
         - Console hardware: (e.g. UCG-Max, UDM-Pro, Cloud Key Gen2+)
         - UniFi OS:
@@ -76,46 +60,21 @@ body:
       required: true
 
   - type: textarea
-    id: terraform_config
+    id: reproduce
     attributes:
-      label: Sample Terraform to reproduce
-      description: The smallest config that triggers the bug.
-      render: terraform
+      label: How to reproduce
+      description: The smallest Terraform config that triggers the bug, plus the commands you ran.
       placeholder: |
         resource "unifi_network_wlan" "example" {
           name       = "example"
           security   = "wpapsk"
           passphrase = "REDACTED"
         }
-    validations:
-      required: true
 
-  - type: textarea
-    id: steps
-    attributes:
-      label: Steps to reproduce
-      placeholder: |
         1. terraform apply
         2. terraform plan   # <- unexpected diff
     validations:
-      required: false
-
-  - type: textarea
-    id: logs
-    attributes:
-      label: Plan / apply output or logs
-      description: Relevant output, or the error. `TF_LOG=DEBUG` output helps for provider-internal errors. Scrub secrets.
-      render: shell
-    validations:
-      required: false
-
-  - type: textarea
-    id: additional_context
-    attributes:
-      label: Anything else?
-      description: Workarounds, whether it's a regression, topology quirks — whatever helps.
-    validations:
-      required: false
+      required: true
 
   - type: checkboxes
     id: checks
