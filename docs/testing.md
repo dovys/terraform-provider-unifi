@@ -55,50 +55,49 @@ PPPoE-WAN passwords) or a singleton-with-à-la-carte-blocks import (`network_set
 hand-written config, and `device` is excluded (runtime-volatile `ip`/`state` telemetry can't be
 clean in a plan-only flow). See [`test/hil/README.md`](../test/hil/README.md).
 
-### Write verification — ephemeral, additive, opt-in (planned)
+### Write verification — ephemeral, additive, opt-in (planned, staged)
 
-The read-only rungs can't reach two things: the **write paths** of resources whose live collection
-is *empty* (so there's nothing to import — `port_profile`, `radius_account`/`radius_profile`,
-`static_route`, `port_forward`, `traffic_rule`/`traffic_route` are modeled from docs, never seen
-populated — the biggest provisional risk in [`../TODO.md`](../TODO.md)), and **write semantics**
-(GET-merge-PUT, partial-merge, replace-vs-merge). Verifying these needs a write — which we can do
-*safely* against the operator's own home console by making every test object **additive, inert, and
-guaranteed-torn-down**:
+The read-only rungs can't reach two things: the **write paths** of resources whose live collection is
+*empty* (nothing to import — `port_profile`, `radius_account`/`radius_profile`, `static_route`,
+`port_forward`, `traffic_rule`/`traffic_route` are modeled from docs, never seen populated — the
+biggest provisional risk in [`../TODO.md`](../TODO.md)), and **write semantics** (GET-merge-PUT,
+partial-merge, replace-vs-merge). Verifying these needs a write — done *safely* against the operator's
+**own active home console** (no separate test site) by making every test object **additive, inert, and
+guaranteed-torn-down**. It is a **deliberate one-shot** from the workstation (`run.sh`, gated), **not** a
+CI gate — the `tier3-hil` job stays a stub; an occasional leaked-and-swept object or momentary blip is
+acceptable.
+
+**Five rails.**
 
 1. **Additive only — never mutate an existing object.** Create brand-new objects; never PUT/modify
-   anything already on the console. The worst case of a failed teardown is one orphaned *new* object,
-   never a corrupted existing one.
-2. **Inert by construction — zero effect on live traffic/RF/clients while it exists.** Traffic rule /
-   port forward / firewall rule → `enabled = false`; static route → a blackhole to a **RFC 5737**
-   documentation prefix (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) that nothing routes to;
-   port profile / firewall group / RADIUS account/profile / user group → created **unreferenced** (not
-   bound to any port/rule/WLAN), so they change no behavior.
-3. **Unmistakable naming + sweeper.** Every object's name carries a `tfacc-hil-` prefix (extends the
-   Tier-2 `tfacc-` sweeper). A **pre-run sweep** removes leftovers from a crashed run; a **post-run
-   sweep** is the final safety net.
-4. **Guaranteed teardown.** Drive with `terraform apply` then *always* `terraform destroy` in a
-   `t.Cleanup` (runs on panic/failure too); the sweeper backstops anything destroy missed.
-5. **Explicit, separate opt-in.** A distinct gate (`UNIFI_HIL_ALLOW_WRITES=1`) plus an interactive
-   confirmation in the runner — separate from the read rungs, which never write. Prefer a dedicated
-   **test site** on the console when one exists, so writes are isolated from the default site.
+   anything already on the console. Worst case of a failed teardown is one orphaned *new* object, never
+   a corrupted existing one.
+2. **Inert by construction, enforced as a runtime precondition.** Each test asserts its inertness
+   invariant *before* `apply` and refuses otherwise (the tier table's last column) — "inert" is a
+   literal guard a careless future edit can't slip past, not a convention.
+3. **Unmistakable naming + sweeper.** Every object name carries a `tfacc-hil-` prefix (extends the
+   Tier-2 `tfacc-` sweeper). A **pre-run sweep** clears leftovers from a crashed run; a **post-run
+   sweep** is the net. A leaked object is non-fatal — logged, swept next run.
+4. **Guaranteed teardown.** `apply` then *always* `destroy` in a LIFO `t.Cleanup` (runs on
+   panic/failure too, reverse dependency order); the sweeper backstops anything destroy missed.
+5. **Triple gate.** `UNIFI_HIL_ALLOW_WRITES=1` **and** an interactive `type 'I understand'` confirm
+   (which names the AP-reprovision blip) **and** a **host allowlist** (refuse unless `UNIFI_HOST` is the
+   known home console) — a mistyped prod host can't be written to. A dry-run `plan` prints the additive
+   diff before any `apply`.
 
-Per-object lifecycle (the full Definition of Done, against live firmware): pre-sweep → `apply` (verify
-create + wire decode + field round-trip) → `plan` clean (idempotency) → mutate one field + `apply`
-(update path) → fresh `import` + `ImportStateVerify` → `t.Cleanup` `destroy` + `CheckDestroy` →
-post-sweep.
+Per-object lifecycle (full DoD against live firmware): pre-sweep → `apply` (verify create + wire decode
++ field round-trip) → `plan` clean (idempotency) → mutate one field + `apply` (update path) → fresh
+`import` + `ImportStateVerify` → `t.Cleanup` `destroy` + `CheckDestroy` → post-sweep. The tiers below
+land **one per PR** (W0 → W1 → W2); every object additionally asserts the `tfacc-hil-` name prefix.
 
-**In scope** (safe to create-and-drop on the home console): `traffic_rule`, `traffic_route`,
-`port_forward` (all `enabled=false`); `static_route` (RFC-5737 blackhole); `firewall_group`,
-`port_profile`, `radius_profile` (+ its write-only `x_secret` round-trip), `radius_account` (+
-`x_password`), `user_group`, `wlan_group`, `ap_group` (unreferenced/additive).
+| Tier | Touches (on the live network) | Resources | Precondition asserted before `apply` |
+|------|-------------------------------|-----------|--------------------------------------|
+| **W0** | control-plane data only — no dataplane/RF/hardware effect even if a teardown leaks | `firewall_group`, `user_group`, `radius_profile` (+`x_secret`), `radius_account` (+`x_password`), `dns_record`, `protect_liveview`, `dhcp_reservation` | created **unreferenced**; DNS a fake name; reservation a MAC absent from active clients; liveview touches no camera |
+| **W1** | installed into the **gateway** config (provision/reload) but inert | `static_route`, `port_forward`, `traffic_rule`, `traffic_route`, `firewall_rule`, `port_profile` | `enabled=false`; route dests ∈ RFC-5737/RFC-3849 blackhole (`192.0.2.0/24`, …, `2001:db8::/32`); `port_profile` **not** referenced by any device `port_override` |
+| **W2** | **AP/switch provisioning** — a brief mgmt-plane blip (no client drop expected); run during low usage | `wlan_group`, `ap_group` | member list **empty** |
+| **W3** | mutates existing/shared state or has an outward effect — **rig only, never the home console** | `device` adopt/forget/PUT/`port_overrides`; real `network`; enabled `wlan`; `network_settings`; `protect_nvr_settings`/`camera`/`light`/`sensor`; `dynamic_dns` | — |
 
-**Out of scope for the home console — needs a disposable rig** (these mutate existing/shared state or
-have an outward effect): `device` adopt/forget + config PUT + `port_overrides`; `network_settings`
-writes + GET-merge-PUT empty-field clearing; `dynamic_dns` (registers with an external provider);
-Protect camera/nvr/light/sensor writes (mutate a real device — do with a read-original/restore
-pattern on a rig); an `enabled` `wlan` (broadcasts a real SSID) and a real `network` (live VLAN/DHCP
-scope). These stay in [`../TODO.md`](../TODO.md) *Verify against hardware* until a throwaway
-controller exists.
+W3 stays in [`../TODO.md`](../TODO.md) *Verify against hardware* until a throwaway controller exists.
 
 ## Honesty rule
 
