@@ -1,43 +1,86 @@
 # Releasing
 
-Releases are **zero-effort**: merging a substantive PR to `main` cuts the next
-patch version automatically. There is no manual tag step and nothing is ever
-committed back to `main` by the release process.
+Releases follow a **two-branch model** so small fixes ship themselves while
+multi-PR features release once, on purpose. **CI only tags and builds the
+release — it never merges or pushes a branch.** Every merge is GitHub's merge
+button; the bump is derived from which branch the PR came from.
 
-## What happens on merge to `main`
+| Branch | Purpose | Releases? |
+| ------ | ------- | --------- |
+| `main` | Only released code. | **Yes** — every substantive push releases; the bump comes from the merged PR (fix → patch, `next` → minor/major). |
+| `next` | Staging for features (possibly many PRs). | **No** — pushes here never release. |
 
-`.github/workflows/auto-release.yml` runs on every push to `main` and:
+## The two lanes
 
-1. Builds and unit-tests `main` (insurance — a broken `main` never releases).
-2. Computes the next version: the newest `vX.Y.Z` tag with **patch +1**
-   (`v0.1.0` → `v0.1.1` → …).
+### Patch lane — zero effort
+
+Open a fix PR against **`main`**. On merge, `.github/workflows/auto-release.yml`:
+
+1. Builds and unit-tests `main` (a broken `main` never releases).
+2. Computes the next version: newest `vX.Y.Z` tag with **patch +1** (`v0.1.2` → `v0.1.3`).
 3. Creates an annotated tag and pushes it.
-4. Runs GoReleaser, which builds binaries for every OS/arch
-   (darwin/freebsd/linux/windows × amd64/386/arm/arm64, minus darwin/386),
-   zips them, writes `..._SHA256SUMS`, GPG-signs the checksum (if a key is
-   configured — see below), bundles `terraform-registry-manifest.json`, and
-   creates the **GitHub Release** with the binaries attached.
+4. Runs GoReleaser → binaries for every OS/arch, `..._SHA256SUMS`, the
+   `terraform-registry-manifest.json`, an (optional) GPG signature, and the
+   **GitHub Release**.
 
 Tagging and GoReleaser run in the **same job** on purpose: a tag pushed with the
 default `GITHUB_TOKEN` does not trigger other workflows, so a separate
 tag-triggered release workflow would silently never fire.
 
-### Release notes
+### Feature lane — merge a `next → main` PR
 
-The GitHub Release body is auto-derived by GoReleaser from the commit log since
-the previous tag, with `deps:`/`ci:`/`chore:`/`docs:`/`test:`/merge commits
-filtered out. The curated human narrative lives in [`../CHANGELOG.md`](../CHANGELOG.md).
+Develop the feature as as many PRs as you like, all targeting **`next`**. None of
+them release. When the feature is ready, ship it by merging `next` into `main`
+**through a PR** — you click Merge, CI does the rest:
+
+1. Open the release PR: base **`main`**, compare **`next`**:
+   ```sh
+   gh pr create --base main --head next --title "release: <feature>"
+   ```
+   (or use GitHub's *Compare & pull request*). For a **breaking** release, add the
+   **`release:major`** label; otherwise it's a minor. (Both `release:major` and a
+   cosmetic `release:minor` label are pre-created in the repo — only `release:major`
+   changes the bump; minor is the default for any `next → main` merge.)
+2. `test.yml` runs on the PR and tests the **merged result** — so a feature that
+   breaks the build literally cannot land on `main`. Merge only when green, using
+   **"Create a merge commit"** (keeps the per-feature commits in the release notes).
+3. The merge pushes `main`, which triggers `auto-release.yml`. It looks up the PR
+   behind the merge: head branch `next` → **minor** (or **major** with the label),
+   with the lower parts reset to zero — `v0.1.x` → **`v0.2.0`**, major → **`v1.0.0`**.
+   It then tags and runs GoReleaser. **No `git merge`, no branch push** — only the
+   tag is pushed by CI.
+
+### Keeping `next` current
+
+Patches that land on `main` aren't on `next` until you bring them over. There's no
+automatic CI sync (CI never writes branches). Refresh `next` whenever you want the
+latest fixes — e.g. when starting the next feature:
+
+```sh
+git checkout next && git merge main && git push      # or open a main → next PR
+```
+
+A `next → main` release PR shows any real conflict up front; resolve it on `next`
+before merging.
 
 ## What triggers — and what doesn't
 
-Releases fire on substantive merges. **Non-functional merges are skipped** via
-`paths-ignore` — a push whose changed files are *entirely* within `**/*.md`,
-`docs/**`, `.github/**`, or `go.mod`/`go.sum` does not release (dependabot
-bumps, CI tweaks, and docs-only changes). A change that also touches Go source
-still releases.
+- The **patch lane** fires only on substantive merges to `main`. **Non-functional
+  merges are skipped** via `paths-ignore` — a push whose changed files are
+  *entirely* within `**/*.md`, `docs/**`, `.github/**`, or `go.mod`/`go.sum` does
+  not release (dependabot bumps, CI tweaks, docs-only changes). A change that also
+  touches Go source still releases.
+- Manual override: put **`[skip release]`** in the merge commit message to skip a
+  release you don't want.
+- The bump is decided purely by the merged PR's source branch (`next` → minor/major,
+  anything else → patch) — there is no automatic minor without a `next → main` merge.
 
-Manual override: put **`[skip release]`** in the merge commit message to skip a
-release you don't want.
+## Release notes
+
+The GitHub Release body is auto-derived by GoReleaser from the commit log since
+the previous tag, each line a clickable short-hash commit link, with
+`deps:`/`ci:`/`chore:`/`docs:`/`test:`/merge commits filtered out. The curated
+human narrative lives in [`../CHANGELOG.md`](../CHANGELOG.md).
 
 ## Keeping the changelog and docs current
 
@@ -54,6 +97,14 @@ release you don't want.
   > which needs the sibling `../unifi-specs` repo. CI runs **only** `make docs`.
 
 ## One-time setup
+
+### The `next` branch
+
+The feature lane needs a `next` branch to exist:
+
+```sh
+git push origin main:refs/heads/next     # create next at the current main tip
+```
 
 ### GPG signing (registry-grade artifacts)
 

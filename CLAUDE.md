@@ -87,11 +87,23 @@ example + generated docs · checklist updated.
 make build       # go install
 make test        # unit (no controller)
 make testacc     # TF_ACC=1 go test ./... -timeout 60m  (Docker controller; HIL for hardware verbs)
-go generate ./...; golangci-lint run; goreleaser release --clean
+make docs        # regenerate provider docs (tfplugindocs only; CI gate fails on a stale docs/)
+go generate ./...; golangci-lint run; goreleaser check   # releases are automated — never run `goreleaser release` by hand
 ```
 Acceptance env: `UNIFI_HOST/USERNAME/PASSWORD/SITE/INSECURE`. Never against production —
 tiered tests in [`docs/testing.md`](docs/testing.md) (UniFi OS Server can't run in hosted CI).
 
 ## Conventions
 - Go + `terraform-plugin-framework` (protocol v6); resources app-namespaced (`unifi_network_*`, `unifi_protect_*`, …).
-- Python via `uv run` (global pref); commit only when asked; branch off `main` first.
+- Python via `uv run` (global pref); commit only when asked; branch off `main` first (feature work targets `next` — see Releasing).
+
+## Releasing (two-branch; full detail in [`docs/releasing.md`](docs/releasing.md))
+Releases are **automatic**; CI **only tags + builds** — never hand-tag, never run `goreleaser release` locally. The
+bump is derived from the merged PR's **source branch**, so target PRs by intent:
+- **Fix / small change → PR into `main`.** On merge it auto-cuts the next **patch** (`v0.1.2`→`v0.1.3`).
+- **Feature (any size, multi-PR) → PRs into `next`** (which never releases). Ship the feature by merging a
+  **`next → main` PR** (use a **merge commit** — its CI tests the merged result first): head `next` ⇒ **minor**
+  (`v0.2.0`), or add the **`release:major`** label ⇒ **major** (`v1.0.0`). minor/major reset lower parts to 0.
+- After patches land on `main`, refresh `next` by hand (`git checkout next && git merge main`) — CI never writes branches.
+- `[skip release]` in a merge commit skips that release; docs/CI/dep-only merges auto-skip via `paths-ignore`.
+- `CHANGELOG.md` is **date-based** — add your entry in the PR (the release never edits it).
