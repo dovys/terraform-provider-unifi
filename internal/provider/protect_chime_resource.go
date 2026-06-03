@@ -104,6 +104,7 @@ func (r *protectChimeResource) Schema(_ context.Context, _ resource.SchemaReques
 
 func (r *protectChimeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
+		requireProtect(c, &resp.Diagnostics)
 		r.protect = c.Protect()
 	}
 }

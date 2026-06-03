@@ -44,6 +44,21 @@ func clientFromProviderData(providerData any, diags *diag.Diagnostics) (unifi.Cl
 	return c, true
 }
 
+// requireProtect adds a diagnostic when the UniFi Protect application is not
+// available on the configured console (per the Configure-time probe). Protect
+// resources/data sources call it from Configure so an absent Protect surfaces
+// as a clear plan-time message instead of a raw 4xx on the first call
+// (invariant 3).
+func requireProtect(c unifi.Client, diags *diag.Diagnostics) {
+	if caps := c.Capabilities(); caps == nil || !caps.ProtectInstalled {
+		diags.AddError(
+			"UniFi Protect is not available",
+			"This resource manages a UniFi Protect device, but the Protect application did not respond on the "+
+				"configured console. Install or enable Protect on the console, or remove the Protect resources from your configuration.",
+		)
+	}
+}
+
 // --- type conversions between framework attribute values and Go pointers ---
 //
 // Pointer round-trips give three-state semantics: a null/unknown attribute maps

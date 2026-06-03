@@ -29,6 +29,18 @@ type Capabilities struct {
 	Version *version.Version
 	// VersionRaw is the version string as the controller reported it.
 	VersionRaw string
+
+	// ProtectInstalled is true when the UniFi Protect application responded to
+	// the Configure-time probe (its NVR singleton is reachable on this console).
+	// Protect resources gate on it to surface a friendly diagnostic instead of a
+	// raw 4xx when Protect is absent (invariant 3).
+	ProtectInstalled bool
+	// ProtectVersion is the parsed Protect application version (nil when Protect
+	// is absent or the version is unparseable; ProtectVersionRaw keeps the raw
+	// string the controller reported).
+	ProtectVersion *version.Version
+	// ProtectVersionRaw is the Protect version string as reported (empty if absent).
+	ProtectVersionRaw string
 }
 
 // probe runs the Configure-time capability detection over the classic session:

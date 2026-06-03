@@ -77,6 +77,7 @@ func (d *protectCameraDataSource) Configure(_ context.Context, req datasource.Co
 		return
 	}
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
+		requireProtect(c, &resp.Diagnostics)
 		d.protect = c.Protect()
 	}
 }
