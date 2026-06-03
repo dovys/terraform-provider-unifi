@@ -80,6 +80,11 @@ func TestHILGenerateImports(t *testing.T) {
 	for i, r := range frs {
 		emit("unifi_network_firewall_rule", fmt.Sprintf("fw%d", i), d(r.UnderscoreId))
 	}
+	fgs, err := n.Firewall().Groups().List(ctx)
+	hilMust(t, err, "firewall_group")
+	for i, r := range fgs {
+		emit("unifi_network_firewall_group", fmt.Sprintf("fg%d", i), d(r.UnderscoreId))
+	}
 	ugs, err := n.UserGroups().List(ctx)
 	hilMust(t, err, "user_group")
 	for i, r := range ugs {
@@ -134,6 +139,40 @@ func TestHILGenerateImports(t *testing.T) {
 		} else {
 			emit("unifi_network_network", fmt.Sprintf("net%d", i), d(nw.UnderscoreId))
 		}
+	}
+	slas, err := n.WAN().SLAs().List(ctx)
+	hilMust(t, err, "wan_sla")
+	for i, s := range slas {
+		emit("unifi_network_wan_sla", fmt.Sprintf("sla%d", i), d(s.UnderscoreId))
+	}
+	// unifi_network_settings is intentionally NOT auto-imported: it's the site
+	// settings singleton (fixed id "settings", à-la-carte nested blocks). A bare
+	// import declares no blocks, so -generate-config-out emits an *unmanaged*
+	// (empty) resource and the plan is vacuously clean — no real round-trip. It
+	// imports meaningfully only with a hand-written config that declares the
+	// blocks to manage (like radius_profile's write-only secret).
+
+	// Protect app (read-only, same session): the camera(s), liveview(s), and the
+	// NVR singleton on a Protect console. Best-effort — skip cleanly if Protect
+	// isn't installed so a Protect-less console still runs the Network Rung B.
+	// light/sensor/chime/viewer have no live instance on the recon console
+	// (nothing to import); Rung A (hil_read_test.go) probes their decode.
+	if _, perr := c.Protect().NVR().Version(ctx); perr != nil {
+		t.Logf("Protect not installed/reachable — skipping Protect import blocks: %v", perr)
+	} else {
+		cams, cErr := c.Protect().Cameras().List(ctx)
+		hilMust(t, cErr, "protect_cameras")
+		for i, cam := range cams {
+			emit("unifi_protect_camera", fmt.Sprintf("cam%d", i), cam.Id)
+		}
+		lvs, lErr := c.Protect().Liveviews().List(ctx)
+		hilMust(t, lErr, "protect_liveviews")
+		for i, lv := range lvs {
+			emit("unifi_protect_liveview", fmt.Sprintf("lv%d", i), lv.Id)
+		}
+		nvr, nErr := c.Protect().NVR().Get(ctx)
+		hilMust(t, nErr, "protect_nvr")
+		emit("unifi_protect_nvr_settings", "nvr", nvr.Id)
 	}
 
 	if err := os.WriteFile(out, []byte(b.String()), 0o644); err != nil {

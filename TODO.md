@@ -8,7 +8,12 @@ Tracked improvements that aren't blocking a phase. Phase-scoped work lives in
 The live console allows **read-only** recon, so anything that needs a real write
 to hardware — or hardware in a state we don't currently have — is modeled from
 read-only GETs + documented behavior and must be confirmed once a hardware test
-rig (HIL) exists.
+rig (HIL) exists. Many of the items below (the empty-collection wire shapes, the
+write-only-secret round-trips) are reachable *sooner* via the **ephemeral
+additive write tier** scoped in [`docs/testing.md`](docs/testing.md) §"Write
+verification" — safe create-and-drop of inert, unreferenced objects on the live
+console; the genuinely destructive items (device adopt/forget + config PUT,
+settings writes, Protect device writes) still need a disposable rig.
 
 **Clean-room caveat:** for the HIL-unverified resources below, every field
 name/shape must be confirmed against the **actual controller API** (a live GET on
@@ -138,14 +143,16 @@ Open items:
   surfaces as the controller's raw 4xx instead of a plan-time diagnostic. Wire the
   cheap Configure-time probe (set a `caps.Protect` bit, friendly diagnostic when
   absent) and the per-camera `ModifyPlan` gate in P5b.
-- **Protect liveview (`/proxy/protect/api/liveviews`) — slots shape unverified.**
-  The shipped Protect OpenAPI types `liveview.slots` as an untyped array (`items:
-  {}`). `unifi_protect_liveview` (P5b) ships modeling each slot as a nested block
-  with `cameras` (list) + `cycle_mode` + `cycle_interval`, serialized to the
-  well-known UI shape (`{cameras, cycleMode, cycleInterval}`). **Confirm against a
-  live/HIL capture**: the exact slot key names, whether `cycleMode` is an enum,
-  and that an empty group round-trips (the read parser degrades unknown shapes to
-  partial slots rather than erroring, so a wrong key would silently drop data).
+- **Protect liveview (`/proxy/protect/api/liveviews`) — slots write/enum still
+  unverified.** The shipped Protect OpenAPI types `liveview.slots` as an untyped
+  array (`items: {}`). `unifi_protect_liveview` (P5b) models each slot as a nested
+  block with `cameras` (list) + `cycle_mode` + `cycle_interval`, serialized to the
+  well-known UI shape (`{cameras, cycleMode, cycleInterval}`). The **read side is
+  now HIL-verified** — the live liveview imports to a clean plan (Rung B), so the
+  slot key names round-trip. Still unconfirmed: whether `cycleMode` is an enum, and
+  the **write** path — and note the read parser degrades unknown shapes to partial
+  slots rather than erroring, so a wrong key on a *different* layout would silently
+  drop data without showing as drift. Confirm on a write-capable HIL rig.
 - **Protect P5b device writes (`PATCH /proxy/protect/api/{lights,sensors,chimes,viewers}/<id>`).**
   The light/sensor/chime/viewer *read* shapes are spec-typed but there is **no
   live instance** of any of these on the recon console, so neither reads nor

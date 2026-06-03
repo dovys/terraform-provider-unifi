@@ -34,10 +34,19 @@ committed).
 
 ## Coverage
 
-Imports the `_id`-passthrough resources that exist on the console: `dns_record`,
-`firewall_rule`, `user_group`, `wlan`, `wlan_group`, `ap_group`, `network`,
-`wan` (a `networkconf` with `purpose=wan`), and `dhcp_reservation` (the `users`
-carrying a fixed-IP reservation, `use_fixedip=true`).
+Imports the `_id`-passthrough resources that exist on the console:
+
+- **Network:** `dns_record`, `firewall_rule`, `user_group`, `wlan`, `wlan_group`,
+  `ap_group`, `network`, `wan` (a `networkconf` with `purpose=wan`), and
+  `dhcp_reservation` (the `users` carrying a fixed-IP reservation,
+  `use_fixedip=true`).
+- **Protect** (when installed — best-effort, skipped on a Protect-less console):
+  `camera`, `liveview`, and the `nvr_settings` singleton.
+
+`firewall_group` and `wan_sla` are emitted too but are empty on the recon console
+(nothing to import). The Rung A read smoke (`hil_read_test.go`) additionally
+forces a wire decode of every Network collection + all Protect surfaces
+(lights/sensors/chimes/viewers are empty here).
 
 **Excluded — write-only secrets** (`-generate-config-out` nulls sensitive values,
 so the round-trip can't be clean; they import fine with a hand-written config

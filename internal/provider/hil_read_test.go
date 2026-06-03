@@ -118,6 +118,32 @@ func TestHILRead(t *testing.T) {
 	probe("traffic.routes", func() (int, error) { v, e := n.Traffic().Routes().List(ctx); return len(v), e })
 	probe("traffic.qos", func() (int, error) { v, e := n.Traffic().QoS().List(ctx); return len(v), e })
 
+	// Protect app (read-only) — same authenticated session, no api_key. Skip
+	// cleanly when Protect isn't installed (the NVR version probe the console
+	// session itself uses on connect). When it IS installed, each List/Get forces
+	// a full decode through the Protect wire types — so a spec/wire field our
+	// clean-room model got wrong surfaces as DECODE-FAIL against real Protect
+	// firmware, exactly as for the Network collections above. lights/sensors/
+	// chimes/viewers are typically EMPTY (no such accessory on the recon console),
+	// which still confirms the endpoint + empty-decode.
+	if _, perr := c.Protect().NVR().Version(ctx); perr != nil {
+		t.Logf("Protect not installed/reachable — skipping Protect probes: %v", perr)
+	} else {
+		p := c.Protect()
+		probe("protect.nvr", func() (int, error) {
+			if _, e := p.NVR().Get(ctx); e != nil {
+				return 0, e
+			}
+			return 1, nil
+		})
+		probe("protect.cameras", func() (int, error) { v, e := p.Cameras().List(ctx); return len(v), e })
+		probe("protect.lights", func() (int, error) { v, e := p.Lights().List(ctx); return len(v), e })
+		probe("protect.sensors", func() (int, error) { v, e := p.Sensors().List(ctx); return len(v), e })
+		probe("protect.chimes", func() (int, error) { v, e := p.Chimes().List(ctx); return len(v), e })
+		probe("protect.viewers", func() (int, error) { v, e := p.Viewers().List(ctx); return len(v), e })
+		probe("protect.liveviews", func() (int, error) { v, e := p.Liveviews().List(ctx); return len(v), e })
+	}
+
 	sort.Slice(results, func(i, j int) bool { return results[i].name < results[j].name })
 
 	var decodeFails, otherFails int

@@ -80,6 +80,14 @@ below predate the date-based convention.
   `port_overrides` from the controller so generated config mirrors the switch.
   Every captured port becomes Terraform-managed — keep the ones you want in
   config (dropping a port reverts it, as does `destroy`).
+- **`unifi_protect_nvr_settings` now reads on real Protect firmware.** Decoding
+  the NVR singleton failed against a live Protect 7.1.69 console because the
+  vendor's own OpenAPI mistypes fields under `systemInfo` (it declares
+  `storage.devices[].healthy` a boolean and `ustorage.disks[].size` a string,
+  but firmware returns a string and a number respectively). `systemInfo` is
+  device telemetry no resource models, so it's now decoded as an opaque value —
+  fixing the read/import of the NVR settings resource and making it robust to
+  further firmware drift in that block. Caught by the new live read smoke test.
 
 ### Security
 
