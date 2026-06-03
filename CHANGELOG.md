@@ -12,8 +12,29 @@ below predate the date-based convention.
 
 ## 2026-06-03
 
+### Added
+
+- **`unifi_network_settings`** — manage site-wide UniFi Network settings as one
+  resource with an **optional nested block per `setting/<key>`**, declared à la
+  carte. A block you omit is left unmanaged (Terraform never reads or writes that
+  section), and writes shallow-merge the fields you set over the controller's
+  stored section so unmodeled fields are preserved. Ships the `ntp`, `country`,
+  and `locale` sections; more keys grow the same resource over time.
+- **`radius_profile_id` on `unifi_network_wlan`** — bind a WPA-Enterprise SSID to
+  a `unifi_network_radius_profile` directly.
+- **Friendlier resource imports.** `unifi_network_network`, `unifi_network_wan`,
+  and `unifi_network_wan_sla` now accept a `name=<name>` import key (e.g.
+  `terraform import unifi_network_wan.primary name=WAN1`) and resolve it to the
+  controller id — no more hunting for the 24-character `_id`. The raw `_id` still
+  works and remains the state `id`.
+
 ### Changed
 
+- **UniFi Protect resources now capability-gate at plan time.** The provider
+  probes the console for Protect on configure; a Protect resource used on a
+  console without Protect (and per-camera, a field the camera's hardware doesn't
+  support — HDR, microphone, status light, smart detections, LCD screen) now
+  surfaces a clear plan-time diagnostic instead of a raw API error on apply.
 - **Releases now follow a two-branch model.** `main` holds only released code;
   features are staged on a `next` branch that never releases. CI only tags and
   builds the release — it never merges or pushes a branch. The bump is derived
