@@ -2,12 +2,27 @@
 
 All notable changes are documented here as **dated** entries (newest first); add
 yours under today's date in the PR that makes the change. Versioning is decoupled
-from this file: every substantive merge to `main` is auto-released as the next
-patch (`vX.Y.Z`) with binaries attached, and that GitHub Release carries the
-per-version commit list (see [`docs/releasing.md`](docs/releasing.md)). The repo
-is private and the provider is **not** published to the Terraform Registry —
-releases ship as GoReleaser artifacts on the private repo only. Sections tagged
-`[vX.Y.Z]` below predate the date-based convention.
+from this file: fixes merged to `main` auto-release the next patch (`vX.Y.Z`),
+and features (staged on `next`) ship as a minor (`vX.Y.0`) via a manual workflow
+run — both attach binaries, and each GitHub Release carries the per-version
+commit list (see [`docs/releasing.md`](docs/releasing.md)). The repo is private
+and the provider is **not** published to the Terraform Registry — releases ship
+as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
+below predate the date-based convention.
+
+## 2026-06-03
+
+### Changed
+
+- **Releases now follow a two-branch model.** `main` holds only released code;
+  features are staged on a `next` branch that never releases. CI only tags and
+  builds the release — it never merges or pushes a branch. The bump is derived
+  from how a commit reached `main`: a fix PR merged straight in → **patch**; a
+  `next → main` PR merged in → **minor** (or **major** with the `release:major`
+  label), with the lower parts reset to zero so features land on `vX.Y.0`. A
+  feature ships by merging a `next → main` PR (its CI tests the merged result
+  first), stopping multi-PR features from emitting a release per PR. See
+  [`docs/releasing.md`](docs/releasing.md).
 
 ## 2026-06-02
 

@@ -1,13 +1,22 @@
 name: auto-release
 
-# Zero-effort releases: every substantive merge to main cuts the next patch
-# version, builds binaries for every arch, and publishes a GitHub Release whose
-# notes are auto-derived from the commit log. No human tag, no back-commit.
+# Two-branch release model — CI only TAGS and RELEASES; it never merges or pushes
+# a branch. All merging is done by GitHub's merge button.
+#
+#   main  — only released code. Every substantive push auto-cuts a release.
+#   next  — staging for features (possibly many PRs). Never releases.
+#
+# The bump is derived from how the commit reached main:
+#   • a fix PR merged straight into main          → PATCH  (v0.1.2 → v0.1.3)
+#   • a PR from `next` merged into main           → MINOR  (v0.1.x → v0.2.0)
+#   • …same, carrying the `release:major` label   → MAJOR  (v0.x.y → v1.0.0)
+#
+# So a feature ships by merging a `next → main` PR (its CI tests the merged result
+# first). minor/major reset the lower parts to 0, so features land on vX.Y.0.
 #
 # Tagging AND GoReleaser run in this ONE job on purpose: a tag pushed with the
 # default GITHUB_TOKEN does NOT trigger other workflows (GitHub suppresses it to
-# avoid recursion), so a separate tag-triggered release workflow would silently
-# never fire. Keeping both here removes that gap.
+# avoid recursion), so a separate tag-triggered release workflow would never fire.
 
 on:
   push:
@@ -29,7 +38,8 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write   # push the tag, create the GitHub Release
+  contents: write        # push the tag, create the GitHub Release
+  pull-requests: read    # look up the merged PR to pick the bump
 
 jobs:
   release:
@@ -48,7 +58,26 @@ jobs:
           go-version: 'stable'
           cache: true
 
-      # Insurance: never cut a release from a main that doesn't build / pass units.
+      # Pick the bump from the PR this push merged: from `next` → minor (major if
+      # labelled release:major); anything else (a fix PR, a direct push) → patch.
+      - name: Determine bump
+        id: bump
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          resp="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" 2>/dev/null || echo '[]')"
+          head="$(printf '%s' "$resp"  | jq -r 'if length>0 then .[0].head.ref else "" end')"
+          major="$(printf '%s' "$resp" | jq -r 'if length>0 then (([.[0].labels[].name] | index("release:major")) != null) else false end')"
+          if [ "$head" = "next" ]; then
+            [ "$major" = "true" ] && bump=major || bump=minor
+          else
+            bump=patch
+          fi
+          echo "bump=${bump}" >> "$GITHUB_OUTPUT"
+          echo "Bump: ${bump} (merged PR head: ${head:-<none, treated as a direct fix>})"
+
+      # Insurance: never cut a release from a tree that doesn't build / pass units.
       - name: Build & unit test
         run: |
           go build ./...
@@ -56,28 +85,38 @@ jobs:
 
       - name: Compute next version
         id: ver
+        env:
+          BUMP: ${{ steps.bump.outputs.bump }}
         run: |
           set -euo pipefail
           latest="$(git tag --list 'v*' --sort=-v:refname | head -n1)"
           if [ -z "$latest" ]; then
-            next="v0.0.1"
+            case "$BUMP" in
+              major) next="v1.0.0" ;;
+              minor) next="v0.1.0" ;;
+              *)     next="v0.0.1" ;;
+            esac
           else
             ver="${latest#v}"
             if ! printf '%s' "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
               echo "::error::Latest tag '$latest' is not vX.Y.Z; refusing to guess." >&2
               exit 1
             fi
-            IFS=. read -r major minor patch <<EOF
-          $ver
-          EOF
-            next="v${major}.${minor}.$((patch + 1))"
+            major="${ver%%.*}"; rest="${ver#*.}"; minor="${rest%%.*}"; patch="${rest##*.}"
+            case "$BUMP" in
+              # minor/major reset the lower parts to 0 → features land on vX.Y.0.
+              major) next="v$((major + 1)).0.0" ;;
+              minor) next="v${major}.$((minor + 1)).0" ;;
+              patch) next="v${major}.${minor}.$((patch + 1))" ;;
+              *) echo "::error::Unknown bump '$BUMP'." >&2; exit 1 ;;
+            esac
           fi
           if git rev-parse -q --verify "refs/tags/${next}" >/dev/null; then
             echo "::error::Computed tag ${next} already exists." >&2
             exit 1
           fi
           echo "next=${next}" >> "$GITHUB_OUTPUT"
-          echo "Releasing ${next} (was ${latest:-<none>})"
+          echo "Releasing ${next} (${BUMP}; previous ${latest:-<none>})"
 
       - name: Create and push tag
         env:
