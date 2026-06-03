@@ -80,29 +80,41 @@ func (c *Classic) loginLocked(ctx context.Context) error {
 		"password":   c.password,
 		"rememberMe": true,
 	}
-	req, err := newRequest(ctx, http.MethodPost, c.baseURL+"/api/auth/login", body)
-	if err != nil {
-		return err
-	}
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return fmt.Errorf("classic login request: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-	data, _ := io.ReadAll(resp.Body)
+	// The UniFi OS controller rate-limits logins (a handful per window); back-to-back
+	// `terraform import` runs each log in fresh and trip a 429. Honor Retry-After (or
+	// fall back to exponential backoff) and retry, just like the normal request path —
+	// the request is rebuilt each attempt because the body reader is consumed.
+	for attempt := 0; ; attempt++ {
+		req, err := newRequest(ctx, http.MethodPost, c.baseURL+"/api/auth/login", body)
+		if err != nil {
+			return err
+		}
+		resp, err := c.http.Do(req)
+		if err != nil {
+			return fmt.Errorf("classic login request: %w", err)
+		}
+		data, _ := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
 
-	if resp.StatusCode == 499 {
-		return &TwoFactorError{Body: string(data)}
-	}
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &AuthError{StatusCode: resp.StatusCode, Message: extractMessage(data)}
-	}
+		if resp.StatusCode == http.StatusTooManyRequests && attempt < c.maxRetries {
+			if err := sleep(ctx, retryAfter(resp.Header, attempt)); err != nil {
+				return err
+			}
+			continue
+		}
+		if resp.StatusCode == 499 {
+			return &TwoFactorError{Body: string(data)}
+		}
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			return &AuthError{StatusCode: resp.StatusCode, Message: extractMessage(data)}
+		}
 
-	// CSRF: prefer the response header, fall back to the TOKEN JWT claim.
-	c.csrf = firstHeader(resp.Header, "X-Updated-Csrf-Token", "X-Csrf-Token")
-	c.readTokenCookie(resp) // always sets exp; sets csrf only if the header was empty
-	c.loggedIn = true
-	return nil
+		// CSRF: prefer the response header, fall back to the TOKEN JWT claim.
+		c.csrf = firstHeader(resp.Header, "X-Updated-Csrf-Token", "X-Csrf-Token")
+		c.readTokenCookie(resp) // always sets exp; sets csrf only if the header was empty
+		c.loggedIn = true
+		return nil
+	}
 }
 
 // readTokenCookie extracts exp (always) and the CSRF token (only when not

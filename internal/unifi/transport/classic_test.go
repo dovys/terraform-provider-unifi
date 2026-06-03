@@ -127,6 +127,54 @@ func TestClassicLogin_AuthError(t *testing.T) {
 	}
 }
 
+func TestClassicLogin_429Retry(t *testing.T) {
+	var logins int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/auth/login" {
+			t.Errorf("unexpected path %q", r.URL.Path)
+			return
+		}
+		// First login is rate-limited; the second succeeds.
+		if atomic.AddInt32(&logins, 1) == 1 {
+			w.Header().Set("Retry-After", "0")
+			w.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{Name: "TOKEN", Value: makeToken(t, "c", time.Now().Add(time.Hour)), Path: "/"})
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	c := newClassicForTest(t, srv.URL, 3)
+	if err := c.Login(context.Background()); err != nil {
+		t.Fatalf("login: %v", err)
+	}
+	if got := atomic.LoadInt32(&logins); got != 2 {
+		t.Errorf("login attempts = %d, want 2 (429 then retry)", got)
+	}
+}
+
+func TestClassicLogin_429ExhaustsRetries(t *testing.T) {
+	var logins int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		atomic.AddInt32(&logins, 1)
+		w.Header().Set("Retry-After", "0")
+		w.WriteHeader(http.StatusTooManyRequests)
+	}))
+	defer srv.Close()
+
+	c := newClassicForTest(t, srv.URL, 2)
+	err := c.Login(context.Background())
+	var authErr *AuthError
+	if !errors.As(err, &authErr) || authErr.StatusCode != http.StatusTooManyRequests {
+		t.Fatalf("login error = %v, want *AuthError with 429", err)
+	}
+	// maxRetries=2 → attempts 0,1 retry, attempt 2 returns the 429: 3 total.
+	if got := atomic.LoadInt32(&logins); got != 3 {
+		t.Errorf("login attempts = %d, want 3 (maxRetries=2 + final)", got)
+	}
+}
+
 func TestClassic_ReauthOnUnauthorized(t *testing.T) {
 	var logins, dataCalls int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

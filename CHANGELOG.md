@@ -54,6 +54,15 @@ below predate the date-based convention.
   `386`, and 32-bit `arm`, taking the matrix from 13 archives to 6 (the repo isn't
   on the Terraform Registry, so there's no platform-coverage requirement).
 
+### Fixed
+
+- **Login now backs off on a rate-limit (HTTP 429).** The classic session's login
+  request previously had no retry, so back-to-back `terraform import` runs — each a
+  fresh provider process that logs in — tripped the controller's per-window login
+  limit and failed with `classic login failed: HTTP 429`. Login now honors
+  `Retry-After` (falling back to exponential backoff) and retries up to
+  `max_retries`, matching the normal request path.
+
 ### Security
 
 - **CI supply-chain hardening.** Every GitHub Action is pinned to a full commit
