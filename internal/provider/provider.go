@@ -233,6 +233,7 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		// live Access console; X-API-KEY is Network-only) — see TODO.md.
 		NewAccessDoorGroupResource,
 		NewAccessPolicyResource,
+		NewAccessHolidayGroupResource,
 	}
 }
 
@@ -251,6 +252,7 @@ func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataS
 		// Access app (c.Access()…).
 		NewAccessDoorGroupDataSource,
 		NewAccessPolicyDataSource,
+		NewAccessHolidayGroupDataSource,
 	}
 }
 

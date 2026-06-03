@@ -39,3 +39,13 @@ data "unifi_access_policy" "contractors" {
 output "contractor_door_count" {
   value = data.unifi_access_policy.contractors.door_count
 }
+
+# Manage a holiday group: a named set of holidays used to scope unlock schedules.
+# Membership references existing holiday unique_ids.
+resource "unifi_access_holiday_group" "us" {
+  name        = "US Federal Holidays"
+  description = "Days the office is closed"
+  holiday_ids = [
+    # "<holiday unique_id>", ...
+  ]
+}
