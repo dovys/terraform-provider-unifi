@@ -4116,22 +4116,22 @@ func (e DeviceStationMode) Valid() bool {
 
 // Defines values for DeviceStpPriority.
 const (
-	DeviceStpPriorityN0     DeviceStpPriority = 0
-	DeviceStpPriorityN12288 DeviceStpPriority = 12288
-	DeviceStpPriorityN16384 DeviceStpPriority = 16384
-	DeviceStpPriorityN20480 DeviceStpPriority = 20480
-	DeviceStpPriorityN24576 DeviceStpPriority = 24576
-	DeviceStpPriorityN28672 DeviceStpPriority = 28672
-	DeviceStpPriorityN32768 DeviceStpPriority = 32768
-	DeviceStpPriorityN36864 DeviceStpPriority = 36864
-	DeviceStpPriorityN4096  DeviceStpPriority = 4096
-	DeviceStpPriorityN40960 DeviceStpPriority = 40960
-	DeviceStpPriorityN45056 DeviceStpPriority = 45056
-	DeviceStpPriorityN49152 DeviceStpPriority = 49152
-	DeviceStpPriorityN53248 DeviceStpPriority = 53248
-	DeviceStpPriorityN57344 DeviceStpPriority = 57344
-	DeviceStpPriorityN61440 DeviceStpPriority = 61440
-	DeviceStpPriorityN8192  DeviceStpPriority = 8192
+	DeviceStpPriorityN0     DeviceStpPriority = "0"
+	DeviceStpPriorityN12288 DeviceStpPriority = "12288"
+	DeviceStpPriorityN16384 DeviceStpPriority = "16384"
+	DeviceStpPriorityN20480 DeviceStpPriority = "20480"
+	DeviceStpPriorityN24576 DeviceStpPriority = "24576"
+	DeviceStpPriorityN28672 DeviceStpPriority = "28672"
+	DeviceStpPriorityN32768 DeviceStpPriority = "32768"
+	DeviceStpPriorityN36864 DeviceStpPriority = "36864"
+	DeviceStpPriorityN4096  DeviceStpPriority = "4096"
+	DeviceStpPriorityN40960 DeviceStpPriority = "40960"
+	DeviceStpPriorityN45056 DeviceStpPriority = "45056"
+	DeviceStpPriorityN49152 DeviceStpPriority = "49152"
+	DeviceStpPriorityN53248 DeviceStpPriority = "53248"
+	DeviceStpPriorityN57344 DeviceStpPriority = "57344"
+	DeviceStpPriorityN61440 DeviceStpPriority = "61440"
+	DeviceStpPriorityN8192  DeviceStpPriority = "8192"
 )
 
 // Valid indicates whether the value is a known member of the DeviceStpPriority enum.
@@ -21435,7 +21435,7 @@ type Device struct {
 	RadioTable *[]struct {
 		AntennaGain           *int                   `json:"antenna_gain,omitempty"`
 		AntennaId             *int                   `json:"antenna_id,omitempty"`
-		Channel               *string                `json:"channel,omitempty"`
+		Channel               interface{}            `json:"channel,omitempty"`
 		Dfs                   *bool                  `json:"dfs,omitempty"`
 		HardNoiseFloorEnabled *bool                  `json:"hard_noise_floor_enabled,omitempty"`
 		Ht                    *DeviceRadioTableHt    `json:"ht,omitempty"`
@@ -21656,7 +21656,7 @@ type DeviceSmaPortConfigDisplay string
 type DeviceStationMode string
 
 // DeviceStpPriority defines model for Device.StpPriority.
-type DeviceStpPriority int
+type DeviceStpPriority string
 
 // DeviceStpVersion defines model for Device.StpVersion.
 type DeviceStpVersion string
@@ -27189,12 +27189,12 @@ type User struct {
 	AttrHiddenId                  *string   `json:"attr_hidden_id,omitempty"`
 	AttrNoDelete                  *bool     `json:"attr_no_delete,omitempty"`
 	AttrNoEdit                    *bool     `json:"attr_no_edit,omitempty"`
-	Blocked                       *string   `json:"blocked,omitempty"`
+	Blocked                       *bool     `json:"blocked,omitempty"`
 	FixedApEnabled                *bool     `json:"fixed_ap_enabled,omitempty"`
 	FixedApMac                    *string   `json:"fixed_ap_mac,omitempty"`
 	FixedIp                       *string   `json:"fixed_ip,omitempty"`
 	Hostname                      *string   `json:"hostname,omitempty"`
-	LastSeen                      *string   `json:"last_seen,omitempty"`
+	LastSeen                      *int      `json:"last_seen,omitempty"`
 	LocalDnsRecord                *string   `json:"local_dns_record,omitempty"`
 	LocalDnsRecordEnabled         *bool     `json:"local_dns_record_enabled,omitempty"`
 	Mac                           *string   `json:"mac,omitempty"`

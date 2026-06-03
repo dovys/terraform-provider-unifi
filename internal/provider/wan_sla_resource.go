@@ -244,6 +244,16 @@ func strPtrOrNil(v types.String) *string {
 	return &s
 }
 
+// stringOrNull maps an empty controller string to a null attribute (an absent /
+// disabled value). Read uses it so an imported resource doesn't carry "" that
+// would fail an enum validator or show spurious drift against an omitted config.
+func stringOrNull(s string) types.String {
+	if s == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(s)
+}
+
 func boolPtrOrNil(v types.Bool) *bool {
 	if v.IsNull() || v.IsUnknown() {
 		return nil
