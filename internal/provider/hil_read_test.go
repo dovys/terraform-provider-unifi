@@ -11,11 +11,11 @@ package provider
 // POST). There is no Create/Update/Delete codepath here. Never writes.
 //
 // Excluded from normal builds by the `hil` tag, so `make test` never compiles or
-// runs it. Run from the Mac (the mgmt VLAN is workstation-only):
+// runs it. Run from the workstation that can reach the console; set UNIFI_HOST,
+// UNIFI_USERNAME (a local admin), and UNIFI_PASSWORD — e.g. via test/hil/secrets.env
+// (see test/hil/secrets.env.example), which test/hil/run.sh sources for you:
 //
-//	PASS="$(security find-generic-password -s <KEYCHAIN-ITEM> -w 2>/dev/null)" \
-//	UNIFI_HOST=https://192.0.2.1 UNIFI_USERNAME=network-admin \
-//	UNIFI_PASSWORD="$PASS" UNIFI_ALLOW_INSECURE=true \
+//	UNIFI_ALLOW_INSECURE=true \
 //	  go test -tags hil ./internal/provider -run TestHILRead -count=1 -v
 
 import (

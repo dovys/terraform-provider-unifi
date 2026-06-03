@@ -8,7 +8,7 @@ import (
 )
 
 func TestStaticRoutesList(t *testing.T) {
-	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"r1","name":"to-lab","static-route_network":"10.9.0.0/24"}]}`)}
+	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"r1","name":"to-lab","static-route_network":"192.0.2.0/24"}]}`)}
 	routes, err := newTestClient(f).StaticRoutes().List(context.Background())
 	if err != nil {
 		t.Fatalf("List: %v", err)

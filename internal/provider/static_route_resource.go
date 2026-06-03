@@ -64,7 +64,7 @@ func (r *staticRouteResource) Schema(_ context.Context, _ resource.SchemaRequest
 			},
 			"network": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "Destination network in CIDR notation (e.g. `192.168.50.0/24`).",
+				MarkdownDescription: "Destination network in CIDR notation (e.g. `203.0.113.0/24`).",
 			},
 			"route_type": schema.StringAttribute{
 				Optional: true,

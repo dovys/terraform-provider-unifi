@@ -36,7 +36,10 @@ regression.
 ### Read-only rungs (run today, against the operator's live console)
 
 Two read-only rungs run from the workstation against the live console (cookie auth via a dedicated
-local-admin user; `test/hil/`):
+local-admin user; `test/hil/`). Console address and credentials come from a **gitignored**
+`test/hil/secrets.env` (copy `secrets.env.example`) — the maintainer's network topology and
+password-manager layout never land in this repo; the `secret-hygiene` CI job enforces it
+(`scripts/check-secrets.sh`):
 
 - **Rung A — read smoke** (`internal/provider/hil_read_test.go`, build tag `hil`): logs in and
   `List()`s every Network collection + the Protect surfaces (cameras/nvr/liveviews/…), forcing each

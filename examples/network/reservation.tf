@@ -11,7 +11,7 @@
 #   terraform import unifi_network_dhcp_reservation.nas aa:bb:cc:dd:ee:01
 resource "unifi_network_dhcp_reservation" "nas" {
   mac        = "aa:bb:cc:dd:ee:01"
-  ip_address = "192.168.1.10"
+  ip_address = "192.0.2.10"
   network_id = unifi_network_network.main.id
   name       = "NAS"
 

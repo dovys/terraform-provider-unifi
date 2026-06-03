@@ -60,7 +60,7 @@ func fakeQueue(bodies ...string) *fakeDoer {
 }
 
 func TestDNSRecordsList(t *testing.T) {
-	f := &fakeDoer{resp: okJSON(`[{"_id":"r1","key":"a.example.com","record_type":"A","value":"10.0.0.1"}]`)}
+	f := &fakeDoer{resp: okJSON(`[{"_id":"r1","key":"a.example.com","record_type":"A","value":"192.0.2.1"}]`)}
 	recs, err := newTestClient(f).DNS().Records().List(context.Background())
 	if err != nil {
 		t.Fatalf("List: %v", err)
@@ -77,10 +77,10 @@ func TestDNSRecordsList(t *testing.T) {
 }
 
 func TestDNSRecordsCreateWireBytes(t *testing.T) {
-	f := &fakeDoer{resp: okJSON(`{"_id":"new","key":"a.example.com","record_type":"A","value":"10.0.0.1"}`)}
+	f := &fakeDoer{resp: okJSON(`{"_id":"new","key":"a.example.com","record_type":"A","value":"192.0.2.1"}`)}
 	in := &wire.StaticDns{
 		Key:        "a.example.com",
-		Value:      "10.0.0.1",
+		Value:      "192.0.2.1",
 		RecordType: ptr(wire.StaticDnsRecordTypeA),
 		// Enabled left nil — must be omitted, not sent as false.
 	}
@@ -110,8 +110,8 @@ func TestDNSRecordsCreateWireBytes(t *testing.T) {
 }
 
 func TestDNSRecordsUpdateSendsIDInURLAndBody(t *testing.T) {
-	f := &fakeDoer{resp: okJSON(`{"_id":"r1","key":"a.example.com","record_type":"A","value":"10.0.0.2"}`)}
-	in := &wire.StaticDns{UnderscoreId: ptr("r1"), Key: "a.example.com", Value: "10.0.0.2", RecordType: ptr(wire.StaticDnsRecordTypeA)}
+	f := &fakeDoer{resp: okJSON(`{"_id":"r1","key":"a.example.com","record_type":"A","value":"192.0.2.2"}`)}
+	in := &wire.StaticDns{UnderscoreId: ptr("r1"), Key: "a.example.com", Value: "192.0.2.2", RecordType: ptr(wire.StaticDnsRecordTypeA)}
 	if _, err := newTestClient(f).DNS().Records().Update(context.Background(), in); err != nil {
 		t.Fatalf("Update: %v", err)
 	}

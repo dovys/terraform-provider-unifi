@@ -32,7 +32,7 @@ func TestHILGenerateImports(t *testing.T) {
 	}
 	user, pass := os.Getenv("UNIFI_USERNAME"), os.Getenv("UNIFI_PASSWORD")
 	if user == "" || pass == "" {
-		t.Fatal("set UNIFI_USERNAME and UNIFI_PASSWORD (the network-admin local admin)")
+		t.Fatal("set UNIFI_USERNAME and UNIFI_PASSWORD (a local UniFi OS admin) — see test/hil/secrets.env.example")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)

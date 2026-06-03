@@ -127,3 +127,14 @@ jobs:
           cache: true
       - run: go test ./... -timeout 120s -coverprofile=coverage.out
       - run: go tool cover -func=coverage.out | tail -1
+
+  secret-hygiene:
+    name: secret hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      # The live console's address/supernet and the maintainer's password-manager
+      # layout must never enter this (eventually public) repo — HIL operator config
+      # belongs in the gitignored test/hil/secrets.env. This guard fails the PR if
+      # any of those leak into a tracked file (scripts/check-secrets.sh).
+      - run: ./scripts/check-secrets.sh

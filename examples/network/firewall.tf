@@ -11,7 +11,7 @@ resource "unifi_network_firewall_group" "trusted_lans" {
   name = "Trusted LANs"
   type = "address-group"
   members = [
-    "192.168.1.0/24", # Main (see guest.tf)
+    "192.0.2.0/24", # Main (see guest.tf)
   ]
 }
 

@@ -7,21 +7,26 @@
 # `destroy` — there is no such codepath. Run from the Mac (the mgmt VLAN is
 # workstation-only).
 #
-# Usage:  ./run.sh        # fetches the password from 1Password
-#         UNIFI_PASSWORD=… ./run.sh   # or supply it yourself (skips `op`)
+# Usage:  ./run.sh
+# Config: put your console address + local-admin credentials in test/hil/secrets.env
+#         (gitignored — copy secrets.env.example). Or export UNIFI_* yourself.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(cd "$here/../.." && pwd)"
 
-export UNIFI_HOST="${UNIFI_HOST:-https://192.0.2.1}"
-export UNIFI_ALLOW_INSECURE="${UNIFI_ALLOW_INSECURE:-true}"
-export UNIFI_USERNAME="${UNIFI_USERNAME:-network-admin}"
-# Password from 1Password (vault Automation), never echoed. Pre-set UNIFI_PASSWORD to skip.
-if [ -z "${UNIFI_PASSWORD:-}" ]; then
-  UNIFI_PASSWORD="$(op item get unifi-network-admin --reveal --fields=password --vault <VAULT>)"
-  export UNIFI_PASSWORD
+# Operator-specific config (live console address, local-admin credentials) lives
+# in test/hil/secrets.env — gitignored, so the maintainer's network topology and
+# password-manager layout never land in this (eventually public) repo.
+if [ -f "$here/secrets.env" ]; then
+  # shellcheck source=/dev/null
+  . "$here/secrets.env"
 fi
+: "${UNIFI_HOST:?set UNIFI_HOST — see test/hil/secrets.env.example}"
+: "${UNIFI_USERNAME:?set UNIFI_USERNAME (a local UniFi OS admin) — see test/hil/secrets.env.example}"
+: "${UNIFI_PASSWORD:?set UNIFI_PASSWORD — see test/hil/secrets.env.example}"
+export UNIFI_HOST UNIFI_USERNAME UNIFI_PASSWORD
+export UNIFI_ALLOW_INSECURE="${UNIFI_ALLOW_INSECURE:-true}"
 
 # 1) Build + install the provider; point dev_overrides at it (no registry/init).
 ( cd "$repo" && go install ./... )

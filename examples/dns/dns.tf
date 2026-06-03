@@ -4,7 +4,7 @@
 resource "unifi_network_dns_record" "nas" {
   name  = "nas.lan"
   type  = "A"
-  value = "10.0.30.10"
+  value = "203.0.113.10"
 }
 
 # A CNAME alias pointing at it.

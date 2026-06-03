@@ -25,11 +25,11 @@ import {
 resource "unifi_network_network" "main" {
   name    = "Main"
   purpose = "corporate"
-  subnet  = "192.168.1.1/24"
+  subnet  = "192.0.2.1/24"
 
   dhcp_enabled = true
-  dhcp_start   = "192.168.1.100"
-  dhcp_stop    = "192.168.1.254"
+  dhcp_start   = "192.0.2.100"
+  dhcp_stop    = "192.0.2.254"
   dhcp_dns     = ["1.1.1.1", "1.0.0.1"]
 
   igmp_snooping = true
@@ -41,11 +41,11 @@ resource "unifi_network_network" "guest" {
   name    = "Guest"
   purpose = "guest"
   vlan_id = 40
-  subnet  = "192.168.40.1/24"
+  subnet  = "198.51.100.1/24"
 
   dhcp_enabled = true
-  dhcp_start   = "192.168.40.100"
-  dhcp_stop    = "192.168.40.254"
+  dhcp_start   = "198.51.100.100"
+  dhcp_stop    = "198.51.100.254"
   dhcp_dns     = ["1.1.1.1"]
 
   internet_access_enabled = true
@@ -57,11 +57,11 @@ resource "unifi_network_network" "iot" {
   name    = "IoT"
   purpose = "corporate"
   vlan_id = 50
-  subnet  = "192.168.50.1/24"
+  subnet  = "203.0.113.1/24"
 
   dhcp_enabled = true
-  dhcp_start   = "192.168.50.100"
-  dhcp_stop    = "192.168.50.254"
+  dhcp_start   = "203.0.113.100"
+  dhcp_stop    = "203.0.113.254"
   dhcp_dns     = ["1.1.1.1"]
 
   igmp_snooping = true # many IoT devices rely on multicast discovery

@@ -53,6 +53,7 @@ tidy:
 # (build/vet, gofmt, go mod tidy, govulncheck, terraform fmt, docs, lint, unit).
 check: build
 	go vet ./...
+	./scripts/check-secrets.sh
 	test -z "$$(gofmt -s -l .)" || { echo "gofmt: run 'make fmt'"; exit 1; }
 	go mod tidy && git diff --exit-code go.mod go.sum
 	$(MAKE) vulncheck

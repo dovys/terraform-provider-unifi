@@ -35,7 +35,7 @@ resource "unifi_network_radius_profile" "corp" {
 
   auth_servers = [
     {
-      ip       = "10.0.0.9"
+      ip       = "192.0.2.9"
       port     = 1812
       x_secret = var.radius_corp_secret
     },
@@ -43,7 +43,7 @@ resource "unifi_network_radius_profile" "corp" {
 
   acct_servers = [
     {
-      ip       = "10.0.0.9"
+      ip       = "192.0.2.9"
       port     = 1813
       x_secret = var.radius_corp_secret
     },

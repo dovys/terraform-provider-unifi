@@ -65,7 +65,7 @@ func TestNetworkConf_RoundTrip(t *testing.T) {
 		Name:              types.StringValue("iot"),
 		Purpose:           types.StringValue("corporate"),
 		VLANID:            types.Int64Value(30),
-		Subnet:            types.StringValue("10.0.30.1/24"),
+		Subnet:            types.StringValue("198.51.100.1/24"),
 		NetworkGroup:      types.StringNull(),
 		DHCPEnabled:       types.BoolValue(true),
 		DHCPStart:         types.StringNull(),
@@ -186,7 +186,7 @@ func TestDNSRecord_RoundTrip(t *testing.T) {
 		ID:       types.StringNull(),
 		Name:     types.StringValue("host.example.com"),
 		Type:     types.StringValue("A"),
-		Value:    types.StringValue("10.0.0.5"),
+		Value:    types.StringValue("192.0.2.5"),
 		Enabled:  types.BoolValue(true),
 		TTL:      types.Int64Null(),
 		Port:     types.Int64Null(),
@@ -194,7 +194,7 @@ func TestDNSRecord_RoundTrip(t *testing.T) {
 		Weight:   types.Int64Null(),
 	}
 	rec := m.toRecord()
-	if rec.Key != "host.example.com" || derefEnum(rec.RecordType) != "A" || rec.Value != "10.0.0.5" {
+	if rec.Key != "host.example.com" || derefEnum(rec.RecordType) != "A" || rec.Value != "192.0.2.5" {
 		t.Errorf("toRecord wrong: %+v", rec)
 	}
 	if rec.Enabled == nil || !*rec.Enabled {
@@ -348,14 +348,14 @@ func TestNetwork_DHCPOptionsRoundTrip(t *testing.T) {
 	m := &networkResourceModel{
 		Name: types.StringValue("lan"), Purpose: types.StringValue("corporate"),
 		DHCPLeaseTime:  types.Int64Value(86400),
-		DHCPNTPEnabled: types.BoolValue(true), DHCPNTPServer1: types.StringValue("10.0.0.1"),
+		DHCPNTPEnabled: types.BoolValue(true), DHCPNTPServer1: types.StringValue("192.0.2.1"),
 		DHCPGuardEnabled: types.BoolValue(true),
 	}
 	conf := m.toNetworkConf(ctx, &diags)
 	if conf.DhcpdLeasetime == nil || *conf.DhcpdLeasetime != 86400 {
 		t.Errorf("lease time wrong: %v", conf.DhcpdLeasetime)
 	}
-	if conf.DhcpdNtpEnabled == nil || !*conf.DhcpdNtpEnabled || derefStr(conf.DhcpdNtp1) != "10.0.0.1" {
+	if conf.DhcpdNtpEnabled == nil || !*conf.DhcpdNtpEnabled || derefStr(conf.DhcpdNtp1) != "192.0.2.1" {
 		t.Errorf("dhcp ntp wrong: %v / %q", conf.DhcpdNtpEnabled, derefStr(conf.DhcpdNtp1))
 	}
 	if conf.DhcpguardEnabled == nil || !*conf.DhcpguardEnabled {
@@ -364,7 +364,7 @@ func TestNetwork_DHCPOptionsRoundTrip(t *testing.T) {
 
 	var out networkResourceModel
 	out.fromNetworkConf(conf)
-	if out.DHCPLeaseTime.ValueInt64() != 86400 || out.DHCPNTPServer1.ValueString() != "10.0.0.1" {
+	if out.DHCPLeaseTime.ValueInt64() != 86400 || out.DHCPNTPServer1.ValueString() != "192.0.2.1" {
 		t.Errorf("round-trip wrong: %+v", out)
 	}
 }
@@ -520,7 +520,7 @@ func TestFirewallGroup_RoundTrip(t *testing.T) {
 		t.Errorf("null members must become an empty (non-nil) slice: %+v", g)
 	}
 
-	m.Members = sliceToStringSet([]string{"10.0.0.10", "10.0.0.0/24"})
+	m.Members = sliceToStringSet([]string{"192.0.2.10", "192.0.2.0/24"})
 	g = m.toFirewallGroup(ctx, &diags)
 	if g.GroupMembers == nil || len(*g.GroupMembers) != 2 {
 		t.Errorf("members mapping wrong: %v", g.GroupMembers)
@@ -655,7 +655,7 @@ func TestDHCPReservation_RoundTrip(t *testing.T) {
 	m := &dhcpReservationResourceModel{
 		ID:                    types.StringNull(),
 		MAC:                   types.StringValue("AA:BB:CC:DD:EE:01"), // mixed case
-		IPAddress:             types.StringValue("10.0.0.10"),
+		IPAddress:             types.StringValue("192.0.2.10"),
 		NetworkID:             types.StringValue("net1"),
 		Name:                  types.StringValue("nas"),
 		LocalDNSRecord:        types.StringNull(),
@@ -668,13 +668,13 @@ func TestDHCPReservation_RoundTrip(t *testing.T) {
 	if u.UseFixedip == nil || !*u.UseFixedip {
 		t.Errorf("toUser must always assert use_fixedip=true for a reservation")
 	}
-	if deref(u.FixedIp) != "10.0.0.10" || deref(u.NetworkId) != "net1" || deref(u.Name) != "nas" {
+	if deref(u.FixedIp) != "192.0.2.10" || deref(u.NetworkId) != "net1" || deref(u.Name) != "nas" {
 		t.Errorf("scalar mapping wrong: %+v", u)
 	}
 
 	// fromUser must NOT overwrite mac (immutable key, controller lowercases it),
 	// so a mixed-case config doesn't churn.
-	m.fromUser(&wire.User{UnderscoreId: sp("u9"), Mac: sp("aa:bb:cc:dd:ee:01"), FixedIp: sp("10.0.0.10"), Hostname: sp("nas"), NetworkId: sp("net1")})
+	m.fromUser(&wire.User{UnderscoreId: sp("u9"), Mac: sp("aa:bb:cc:dd:ee:01"), FixedIp: sp("192.0.2.10"), Hostname: sp("nas"), NetworkId: sp("net1")})
 	if m.ID.ValueString() != "u9" {
 		t.Errorf("id round-trip wrong: %q", m.ID.ValueString())
 	}
@@ -828,7 +828,7 @@ func TestRadiusProfile_RoundTrip(t *testing.T) {
 	var diags diag.Diagnostics
 
 	authServers, d := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: radiusServerAttrTypes}, []radiusServerObject{
-		{IP: types.StringValue("10.0.0.9"), Port: types.Int64Value(1812), XSecret: types.StringValue("s3cret")},
+		{IP: types.StringValue("192.0.2.9"), Port: types.Int64Value(1812), XSecret: types.StringValue("s3cret")},
 	})
 	diags.Append(d...)
 	if diags.HasError() {
@@ -851,7 +851,7 @@ func TestRadiusProfile_RoundTrip(t *testing.T) {
 		t.Errorf("scalar mapping wrong: %+v", p)
 	}
 	if p.AuthServers == nil || len(*p.AuthServers) != 1 ||
-		deref((*p.AuthServers)[0].Ip) != "10.0.0.9" || intOrZero((*p.AuthServers)[0].Port) != 1812 || deref((*p.AuthServers)[0].XSecret) != "s3cret" {
+		deref((*p.AuthServers)[0].Ip) != "192.0.2.9" || intOrZero((*p.AuthServers)[0].Port) != 1812 || deref((*p.AuthServers)[0].XSecret) != "s3cret" {
 		t.Errorf("auth_servers mapping wrong: %+v", p.AuthServers)
 	}
 	// A null server list maps to a non-nil empty slice (full-replace clears it).
@@ -867,7 +867,7 @@ func TestRadiusProfile_RoundTrip(t *testing.T) {
 	port := 1812
 	out.fromRadiusProfile(ctx, &wire.Radiusprofile{
 		UnderscoreId: sp("rp9"), Name: sp("Corp"),
-		AuthServers: &[]radiusServer{{Ip: sp("10.0.0.9"), Port: &port, XSecret: sp("s3cret")}},
+		AuthServers: &[]radiusServer{{Ip: sp("192.0.2.9"), Port: &port, XSecret: sp("s3cret")}},
 		AcctServers: &[]radiusServer{},
 	}, &diags)
 	if out.ID.ValueString() != "rp9" || out.Name.ValueString() != "Corp" {
@@ -875,7 +875,7 @@ func TestRadiusProfile_RoundTrip(t *testing.T) {
 	}
 	var servers []radiusServerObject
 	out.AuthServers.ElementsAs(ctx, &servers, false)
-	if len(servers) != 1 || servers[0].IP.ValueString() != "10.0.0.9" || servers[0].XSecret.ValueString() != "s3cret" {
+	if len(servers) != 1 || servers[0].IP.ValueString() != "192.0.2.9" || servers[0].XSecret.ValueString() != "s3cret" {
 		t.Errorf("auth_servers round-trip wrong: %+v", servers)
 	}
 	// An empty controller list reads back as a non-null empty list (Computed).
@@ -932,14 +932,14 @@ func TestStaticRoute_RoundTrip(t *testing.T) {
 		ID:        types.StringNull(),
 		Name:      types.StringValue("to-lab"),
 		Enabled:   types.BoolValue(true),
-		Network:   types.StringValue("192.168.50.0/24"),
+		Network:   types.StringValue("203.0.113.0/24"),
 		RouteType: types.StringValue("nexthop-route"),
-		NextHop:   types.StringValue("10.0.0.254"),
+		NextHop:   types.StringValue("192.0.2.254"),
 		Distance:  types.Int64Value(1),
 		Interface: types.StringNull(),
 	}
 	rt := m.toRouting()
-	if deref(rt.Name) != "to-lab" || deref(rt.StaticRouteNetwork) != "192.168.50.0/24" || deref(rt.StaticRouteNexthop) != "10.0.0.254" {
+	if deref(rt.Name) != "to-lab" || deref(rt.StaticRouteNetwork) != "203.0.113.0/24" || deref(rt.StaticRouteNexthop) != "192.0.2.254" {
 		t.Errorf("scalar mapping wrong: %+v", rt)
 	}
 	// The client always stamps the controller's discriminator.
@@ -954,7 +954,7 @@ func TestStaticRoute_RoundTrip(t *testing.T) {
 	bhType := wire.RoutingStaticRouteType("blackhole")
 	out.fromRouting(&wire.Routing{
 		UnderscoreId: sp("rt9"), Name: sp("to-lab"), Enabled: boolPtrLit(false),
-		StaticRouteNetwork: sp("192.168.50.0/24"), StaticRouteType: &bhType,
+		StaticRouteNetwork: sp("203.0.113.0/24"), StaticRouteType: &bhType,
 	})
 	if out.ID.ValueString() != "rt9" || out.RouteType.ValueString() != "blackhole" {
 		t.Errorf("fromRouting wrong: %+v", out)
@@ -977,7 +977,7 @@ func TestPortForward_RoundTrip(t *testing.T) {
 		Protocol:        types.StringValue("tcp"),
 		Source:          types.StringValue("any"),
 		DestinationPort: types.StringValue("443"),
-		ForwardIP:       types.StringValue("10.0.0.5"),
+		ForwardIP:       types.StringValue("192.0.2.5"),
 		ForwardPort:     types.StringValue("8443"),
 		Log:             types.BoolValue(false),
 	}
@@ -985,7 +985,7 @@ func TestPortForward_RoundTrip(t *testing.T) {
 	if deref(pf.Name) != "https" || deref(pf.PfwdInterface) != "wan" || string(derefEnum(pf.Proto)) != "tcp" {
 		t.Errorf("scalar mapping wrong: %+v", pf)
 	}
-	if deref(pf.DstPort) != "443" || deref(pf.Fwd) != "10.0.0.5" || deref(pf.FwdPort) != "8443" {
+	if deref(pf.DstPort) != "443" || deref(pf.Fwd) != "192.0.2.5" || deref(pf.FwdPort) != "8443" {
 		t.Errorf("forward fields mapping wrong: %+v", pf)
 	}
 	if pf.Enabled == nil || !*pf.Enabled || pf.Log == nil || *pf.Log {
@@ -996,7 +996,7 @@ func TestPortForward_RoundTrip(t *testing.T) {
 	proto := wire.PortforwardProto("tcp_udp")
 	out.fromPortForward(&wire.Portforward{
 		UnderscoreId: sp("pf9"), Name: sp("https"), Enabled: boolPtrLit(true), PfwdInterface: sp("both"),
-		Proto: &proto, DstPort: sp("443"), Fwd: sp("10.0.0.5"),
+		Proto: &proto, DstPort: sp("443"), Fwd: sp("192.0.2.5"),
 	})
 	if out.ID.ValueString() != "pf9" || out.Interface.ValueString() != "both" || out.Protocol.ValueString() != "tcp_udp" {
 		t.Errorf("fromPortForward wrong: %+v", out)

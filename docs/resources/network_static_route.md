@@ -18,7 +18,7 @@ A UniFi static route (`routing`, legacy `/rest`) — a user-defined route on the
 ### Required
 
 - `name` (String) Route name.
-- `network` (String) Destination network in CIDR notation (e.g. `192.168.50.0/24`).
+- `network` (String) Destination network in CIDR notation (e.g. `203.0.113.0/24`).
 
 ### Optional
 

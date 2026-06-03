@@ -106,7 +106,7 @@ func TestCameraFromWire(t *testing.T) {
 		VideoMode:    (*wire.CameraVideoMode)(pStr("default")),
 		IsAdopted:    pBool(true),
 		HasSpeaker:   pBool(true),
-		Host:         pStr("10.0.0.5"),
+		Host:         pStr("192.0.2.5"),
 		State:        (*wire.CameraState)(pStr("CONNECTED")),
 		Type:         pStr("UVC G4 Doorbell"),
 		LedSettings:  wire.LedSettings{IsEnabled: pBool(false)},

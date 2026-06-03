@@ -20,6 +20,11 @@ override.tf.json
 .env
 *.local
 
+# HIL operator config — your live console address + password-manager layout.
+# Source for run.sh / write.sh; copied from test/hil/secrets.env.example. The
+# .example template is committed; the filled-in secrets.env never is.
+test/hil/secrets.env
+
 # Live network snapshot — local acceptance fixture only (real MACs/IPs); never commit
 unifi-inventory.json
 
