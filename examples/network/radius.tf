@@ -53,6 +53,21 @@ resource "unifi_network_radius_profile" "corp" {
   interim_update_interval = 3600
 }
 
+# WPA-Enterprise (802.1X) SSID: authenticate each client against a RADIUS profile
+# instead of a shared passphrase. `radius_profile_id` is the binding that makes
+# the profile referenceable from the SSID; WPA3-Enterprise requires PMF. Bound to
+# the main LAN defined in guest.tf.
+resource "unifi_network_wlan" "corp" {
+  name       = "MyCorp Secure"
+  network_id = unifi_network_network.main.id
+
+  security          = "wpaeap"
+  radius_profile_id = unifi_network_radius_profile.corp.id
+  pmf_mode          = "required"
+
+  bands = ["2g", "5g"]
+}
+
 variable "radius_alice_password" {
   type      = string
   sensitive = true
