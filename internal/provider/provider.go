@@ -58,7 +58,7 @@ func (p *UnifiProvider) Metadata(_ context.Context, _ provider.MetadataRequest, 
 
 func (p *UnifiProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage a UniFi OS console (Network app today; Protect later) as code. " +
+		MarkdownDescription: "Manage a UniFi OS console (Network, Protect, and Access apps) as code. " +
 			"Connects to a single console over its local API using a local UniFi OS admin " +
 			"account (username + password).",
 		Attributes: map[string]schema.Attribute{

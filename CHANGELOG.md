@@ -40,11 +40,30 @@ below predate the date-based convention.
   closure-trim/hoist/widen transforms). Ships `data.unifi_access_door_group`
   (look up a door group by `id` or `name`) and the managed
   `unifi_access_door_group` resource (create/update/delete a named set of doors;
-  membership read back from the dedicated `/door_ids` endpoint). door_group is
-  the one Access object the RE'd spec provides a write DTO for; its CRUD paths +
+  membership read back from the dedicated `/door_ids` endpoint). Its CRUD paths +
   `{code,msg,data}` envelope contract are **HIL-unverified** (no live Access
-  console) — see `TODO.md`. Doors, policies, and holidays have no write DTO in the
-  spec and await an RE capture of their controller param types.
+  console) — see `TODO.md`. The remaining Access objects follow in P7c.
+- **UniFi Access — policies, holidays, doors & door guards (P7c).** An RE capture
+  added the missing write DTOs to the spec (`access_policy_bo_*`, `holiday_bo_*`,
+  `location_bo_UpdateDoorParams`, `door_guard_bo_UpdateDoorGuard`) and the `wire`
+  regen picked them up, completing the Access app:
+  - `unifi_access_policy` — a named grant of `resources` (typed door / door-group
+    references) gated on an optional `schedule_id`, with `enabled`; the controller
+    manages the subject/rule graph, surfaced as computed counts. The write and
+    read shapes diverge, so `Read` reconciles the read view and **preserves**
+    write-only fields (`schedule_id`, `resources`) from the prior model.
+  - `unifi_access_holiday_group` — a named set of holidays (`holiday_ids`, existing
+    holiday `unique_id`s) used to scope unlock schedules; reads back member and
+    default-group state.
+  - `unifi_access_door` — configures an existing **discovered** door (name, floor
+    association, type) — update/import-only, keyed by `door_id`; destroy is a
+    no-op state removal (never-forget), exposing live `is_open`/`dps_connected`.
+  - `unifi_access_door_guard` — the per-door guard `user_ids` set, update/import-only
+    keyed by `door_id` (set `user_ids = []` to clear; destroy is a no-op). Users are
+    opaque references — the provider models **infrastructure, not Access users**.
+  - Each ships a read-only data source. All four write surfaces are
+    **HIL-unverified** (no live Access console; X-API-KEY is Network-only) —
+    tracked in `TODO.md`.
 - **UniFi Protect app — first resources on a new substruct client
   (`c.Protect()…`).** The console `unifi.Client` gained a `Protect()` accessor
   exposing the Protect application over the **same cookie session** as Network

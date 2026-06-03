@@ -22,9 +22,12 @@ keeps pace with new UniFi releases. It's built with an unusual process:
   rather than maintained by hand.
 
 > **Status.** The Network app is built out and usable. Protect ships its client
-> and first resources (`unifi_protect_camera`, `unifi_protect_nvr_settings`);
-> Access ships its client and the read-only `data.unifi_access_door_group`. Both
-> are in active development. See [`docs/roadmap.md`](docs/roadmap.md) for what's
+> and device resources (`unifi_protect_camera`, `unifi_protect_nvr_settings`,
+> light/sensor/chime/viewer, liveviews). Access is feature-complete: door
+> groups, policies, holiday groups, doors, and door guards (each with a data
+> source). The Protect and Access write surfaces are reverse-engineered and
+> **HIL-unverified** (no live device on the recon console) — see
+> [`TODO.md`](TODO.md). See [`docs/roadmap.md`](docs/roadmap.md) for what's
 > shipped and what's next.
 
 ## Getting started
@@ -80,7 +83,7 @@ versions:
 |-----|-----------------|------------------|
 | [UniFi Network](docs/apps/network.md) | `10.4.57` | ✅ Supported |
 | [UniFi Protect](docs/apps/protect.md) | `7.1.69` | 🚧 In development |
-| [UniFi Access](docs/apps/access.md) | `4.2.27` | 🚧 In development |
+| [UniFi Access](docs/apps/access.md) | `4.2.27` | 🚧 Feature-complete (HIL-unverified) |
 
 > **We aim at recent UniFi releases and don't support older versions.** The
 > client is generated from a version-anchored spec and updated to track current
