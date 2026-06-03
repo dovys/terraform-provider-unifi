@@ -88,8 +88,13 @@ make build       # go install
 make test        # unit (no controller)
 make testacc     # TF_ACC=1 go test ./... -timeout 60m  (Docker controller; HIL for hardware verbs)
 make docs        # regenerate provider docs (tfplugindocs only; CI gate fails on a stale docs/)
+make check       # full PR gate locally: build/vet, gofmt, go mod tidy, govulncheck, terraform fmt, docs, lint, unit
 go generate ./...; golangci-lint run; goreleaser check   # releases are automated — never run `goreleaser release` by hand
 ```
+**PR gates** (`.github/workflows/test.yml`, must be green on every PR): build & vet · gofmt · `go mod tidy`
+clean · **govulncheck** (deps + stdlib) · **terraform fmt** (examples) · docs current · golangci-lint · unit.
+**Supply-chain:** every action is pinned to a full commit **SHA** (not `@vN`) + service-container images pinned
+by **digest**; Dependabot bumps both. The release build is `GOFLAGS=-mod=readonly` and runs **no** `go mod tidy`.
 Acceptance env: `UNIFI_HOST/USERNAME/PASSWORD/SITE/INSECURE`. Never against production —
 tiered tests in [`docs/testing.md`](docs/testing.md) (UniFi OS Server can't run in hosted CI).
 
@@ -105,5 +110,5 @@ bump is derived from the merged PR's **source branch**, so target PRs by intent:
   **`next → main` PR** (use a **merge commit** — its CI tests the merged result first): head `next` ⇒ **minor**
   (`v0.2.0`), or add the **`release:major`** label ⇒ **major** (`v1.0.0`). minor/major reset lower parts to 0.
 - After patches land on `main`, refresh `next` by hand (`git checkout next && git merge main`) — CI never writes branches.
-- `[skip release]` in a merge commit skips that release; docs/CI/dep-only merges auto-skip via `paths-ignore`.
+- The **`release:skip`** PR label skips that release; docs/CI/dep-only merges auto-skip via `paths-ignore`.
 - `CHANGELOG.md` is **date-based** — add your entry in the PR (the release never edits it).

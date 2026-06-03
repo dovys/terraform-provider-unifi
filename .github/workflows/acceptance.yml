@@ -24,12 +24,15 @@ jobs:
     if: github.event_name == 'schedule' || github.event.inputs.tier == 'tier2'
     runs-on: ubuntu-latest
     services:
+      # Service images pinned by immutable digest (a floating tag like :7 or
+      # :latest is a mutable supply-chain input). Refresh deliberately:
+      #   docker buildx imagetools inspect <image>:<tag> --format '{{.Manifest.Digest}}'
       mongo:
-        image: mongo:7
+        image: mongo:7@sha256:4b5bf3c2bb7516164f6dcb44acce4fdcb428abfe5771a1128304a0f34ab9ff7c # 7.0.34 (pinned 2026-06-03)
         ports:
           - 27017:27017
       controller:
-        image: lscr.io/linuxserver/unifi-network-application:latest
+        image: lscr.io/linuxserver/unifi-network-application@sha256:f87c4d57285f3118a0bad24f696f5aa088859d332b5bf865cdb8e515a1c819ab # :latest as of 2026-06-03
         env:
           PUID: '1000'
           PGID: '1000'
@@ -39,8 +42,8 @@ jobs:
         ports:
           - 8443:8443
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version: 'stable'
           cache: true

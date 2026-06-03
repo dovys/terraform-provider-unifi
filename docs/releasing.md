@@ -16,7 +16,9 @@ button; the bump is derived from which branch the PR came from.
 
 Open a fix PR against **`main`**. On merge, `.github/workflows/auto-release.yml`:
 
-1. Builds and unit-tests `main` (a broken `main` never releases).
+1. Builds and unit-tests `main` with `GOFLAGS=-mod=readonly` (a broken `main`
+   never releases; the release never runs `go mod tidy`, so module tidiness is
+   enforced earlier, by the PR gate).
 2. Computes the next version: newest `vX.Y.Z` tag with **patch +1** (`v0.1.2` → `v0.1.3`).
 3. Creates an annotated tag and pushes it.
 4. Runs GoReleaser → binaries for the supported platforms (linux/macOS/windows ×
@@ -97,6 +99,37 @@ human narrative lives in [`../CHANGELOG.md`](../CHANGELOG.md).
   ```
   > `make generate` (`go generate ./...`) additionally runs the `wire` codegen,
   > which needs the sibling `../unifi-specs` repo. CI runs **only** `make docs`.
+
+## PR checks (`test.yml`)
+
+Every PR must pass, so `main` is always releasable without per-release fixups.
+Reproduce the whole set locally with **`make check`**:
+
+| Check | Enforces |
+| ----- | -------- |
+| build & `go vet` | compiles and vets clean |
+| `gofmt -s` | Go formatting (`make fmt`) |
+| `go mod tidy` clean | `go.mod`/`go.sum` already tidy — the release won't tidy for you |
+| **govulncheck** | no known vuln reachable in our call graph — deps **and** the Go standard library (scanned under the patched toolchain, pinned via `GOTOOLCHAIN` in the job until setup-go's `stable` catches up) |
+| **terraform fmt** | `examples/*.tf` canonically formatted (`make fmt`) |
+| docs current | `docs/` matches the schema (`make docs`) |
+| golangci-lint | lint clean |
+| unit tests | `go test ./...` green |
+
+## Supply-chain hardening
+
+- **Actions pinned to a full commit SHA**, never a mutable tag (`@v6`) — a
+  re-pointed tag is the classic Actions compromise (it would run in the release
+  job with `contents: write` and, once configured, the GPG key in memory). The
+  trailing `# v6` comment is informational; **Dependabot** (`github-actions`)
+  bumps the SHA and the comment together. To roll an action by hand, resolve the
+  tag → SHA with `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`.
+- **Service-container images pinned by digest** (`acceptance.yml` Mongo +
+  controller) — refresh deliberately with
+  `docker buildx imagetools inspect <image>:<tag> --format '{{.Manifest.Digest}}'`.
+- **Release build is `-mod=readonly` with no `go mod tidy`** — a tampered or
+  stale module graph fails the build instead of being silently rewritten while a
+  release is being signed and published.
 
 ## One-time setup
 
