@@ -33,7 +33,7 @@ device/port internals in [../devices-and-ports.md](../devices-and-ports.md); ope
 ### Devices & ports (see [../devices-and-ports.md](../devices-and-ports.md))
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `unifi_network_device` | L (GET-merge-PUT) + I adopt | One resource per device, keyed by MAC: adopts if pending, manages config (`name`, `led_override`, `mgmt_network_id`, `port_overrides` — **Map keyed by port number**; owned-field allowlist), exposes computed telemetry. Destroy reverts config; `forget_on_destroy` opts into forget. |
+| `unifi_network_device` | L (GET-merge-PUT) + I adopt | One resource per device, keyed by MAC: adopts if pending, manages config (`name`, `led_override`, `mgmt_network_id`, `port_overrides` — **Map keyed by port number**; owned-field allowlist), exposes computed telemetry. Import captures the switch's live `port_overrides` (so `plan -generate-config-out` mirrors it). Destroy reverts config; `forget_on_destroy` opts into forget. |
 | `unifi_network_port_profile` | L | Reusable `portconf`, referenced by `port_overrides[*].port_profile_id`. |
 
 There's also a read-only `data.unifi_network_device` for referencing a device you don't manage. No

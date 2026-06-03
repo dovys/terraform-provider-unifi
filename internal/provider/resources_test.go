@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -1306,6 +1307,41 @@ func TestDevice_PortOverrideRoundTrip(t *testing.T) {
 	gone := buildPortOverridesMap(ctx, []network.PortOverride{{PortIdx: 9}}, []int{5}, nil, &diags)
 	if _, ok := gone.Elements()["5"]; ok {
 		t.Errorf("port 5 absent on the controller (no fallback) should drop from the map, got %v", gone)
+	}
+}
+
+func TestDevice_ImportCapturesAllPorts(t *testing.T) {
+	var diags diag.Diagnostics
+
+	// Import must capture every live port override (the #57 bug: it captured none).
+	dev := &wire.Device{}
+	if err := json.Unmarshal([]byte(`{"port_overrides":[{"port_idx":3},{"port_idx":1},{"port_idx":2}]}`), dev); err != nil {
+		t.Fatalf("unmarshal device: %v", err)
+	}
+	keys := allPortKeys(dev, &diags)
+	if diags.HasError() {
+		t.Fatalf("allPortKeys: %v", diags)
+	}
+	want := []int{1, 2, 3}
+	if len(keys) != len(want) {
+		t.Fatalf("allPortKeys = %v, want %v (every live override, sorted)", keys, want)
+	}
+	for i := range want {
+		if keys[i] != want[i] {
+			t.Errorf("keys[%d] = %d, want %d", i, keys[i], want[i])
+		}
+	}
+
+	// No overrides → capture nothing (empty, not an error).
+	if got := allPortKeys(&wire.Device{}, &diags); len(got) != 0 {
+		t.Errorf("device with no overrides should capture no ports, got %v", got)
+	}
+
+	// The captured keys build a full managed map (vs the old empty-on-import).
+	built := buildPortOverridesMap(context.Background(),
+		[]network.PortOverride{{PortIdx: 1}, {PortIdx: 2}, {PortIdx: 3}}, keys, nil, &diags)
+	if n := len(built.Elements()); n != 3 {
+		t.Errorf("imported map should hold all 3 ports, got %d: %v", n, built)
 	}
 }
 

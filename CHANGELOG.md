@@ -73,6 +73,13 @@ below predate the date-based convention.
   empty `x_wan_password`, which GET-merge-PUT overlaid onto the controller and
   could drop a live PPPoE uplink. The field is now omitted when unset (set it to
   `""` to deliberately clear it).
+- **`unifi_network_device` import now captures live port overrides.** Importing a
+  switch (or `terraform plan -generate-config-out`) previously produced
+  `port_overrides = {}`, dropping every per-port VLAN/profile/PoE assignment and
+  risking a wipe on the next apply. Import now reads the device's full
+  `port_overrides` from the controller so generated config mirrors the switch.
+  Every captured port becomes Terraform-managed — keep the ones you want in
+  config (dropping a port reverts it, as does `destroy`).
 
 ### Security
 

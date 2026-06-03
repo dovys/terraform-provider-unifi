@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -107,7 +106,9 @@ func (r *deviceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				Computed: true,
 				MarkdownDescription: "Per-port configuration, keyed by physical port number (e.g. `\"1\"`). Terraform manages " +
 					"only the ports listed here: each is merged onto the controller's existing override (unmodeled keys are " +
-					"preserved), undeclared ports are left untouched, and removing a port reverts it to defaults.",
+					"preserved), undeclared ports are left untouched, and removing a port reverts it to defaults. **On import, " +
+					"every port with a live override is captured** so `terraform plan -generate-config-out` reflects the switch — " +
+					"keep the ports you want to manage in config (dropping one reverts it, as does `terraform destroy`).",
 				NestedObject: schema.NestedAttributeObject{Attributes: portOverrideSchemaAttrs(false)},
 			},
 			"forget_on_destroy": schema.BoolAttribute{
@@ -236,17 +237,28 @@ func (r *deviceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 func (r *deviceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	id := strings.TrimSpace(req.ID)
 	// Accept either a controller _id or a MAC (containing ':').
+	var dev *wire.Device
+	var err error
 	if strings.Contains(id, ":") {
-		dev, err := r.net.Devices().GetByMAC(ctx, id)
-		if err != nil {
-			resp.Diagnostics.AddError("Import failed", fmt.Sprintf("no device with MAC %q: %s", id, err))
-			return
-		}
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), deref(dev.UnderscoreId))...)
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("mac"), deref(dev.Mac))...)
+		dev, err = r.net.Devices().GetByMAC(ctx, id)
+	} else {
+		dev, err = r.net.Devices().Get(ctx, id)
+	}
+	if err != nil {
+		resp.Diagnostics.AddError("Import failed", fmt.Sprintf("no device for %q: %s", id, err))
 		return
 	}
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
+	// Capture the whole device — including *every* live port override — so
+	// `plan -generate-config-out` reflects the switch's real per-port config
+	// instead of an empty map. Every captured port becomes Terraform-managed;
+	// keep the ones you want in config (dropping a port reverts it, as does
+	// destroy). MAC is null on the fresh model, so fromDevice fills it.
+	var state deviceResourceModel
+	state.fromDevice(ctx, dev, allPortKeys(dev, &resp.Diagnostics), nil, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 // applyConfig pushes the plan's owned config to the device and refreshes the
@@ -363,6 +375,22 @@ func buildPortOverridesMap(ctx context.Context, overrides []network.PortOverride
 		elems[strconv.Itoa(k)] = obj
 	}
 	return types.MapValueMust(objType, elems)
+}
+
+// allPortKeys returns every port index that has a live override on the device,
+// sorted. Import captures all of them so the imported state mirrors the switch.
+func allPortKeys(d *wire.Device, diags *diag.Diagnostics) []int {
+	overrides, err := network.PortOverridesOf(d)
+	if err != nil {
+		diags.AddError("Failed to decode device port overrides", err.Error())
+		return nil
+	}
+	keys := make([]int, 0, len(overrides))
+	for _, po := range overrides {
+		keys = append(keys, po.PortIdx)
+	}
+	sort.Ints(keys)
+	return keys
 }
 
 // portKeys returns the integer port numbers present in a port_overrides map.
