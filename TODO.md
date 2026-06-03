@@ -3,17 +3,6 @@
 Tracked improvements that aren't blocking a phase. Phase-scoped work lives in
 [`docs/roadmap.md`](docs/roadmap.md); cross-cutting polish lives here.
 
-## Spec: enrich `device.json` with read-only `/stat/device` fields
-
-The rebuilt client's generated `wire.Device` is typed from the **writable**
-`api/fields` set, so it omits read-only stat/identity fields the client needs —
-notably `mac` (the natural key), plus `state`, `model`, `version`, `adopted`,
-`ip`, etc. `network.Devices().GetByMAC` currently works around this by scanning
-the raw `/stat/device` documents and decoding the matched one. Fix at the source:
-add the observed stat fields to `objects/device.json` (as `server_fields`/
-read-only) in `../unifi-specs`, regenerate, then drop the raw-scan workaround.
-Other stat-heavy legacy objects (clients, etc.) may have the same gap.
-
 ## Verify against hardware
 
 The live console allows **read-only** recon, so anything that needs a real write
@@ -168,65 +157,37 @@ Open items:
   camera); (c) accepted enum values (`light.mode`/`enableAt`/`luxSensitivity`,
   `sensor.mountType`); (d) numeric ranges/units (light `ledLevel` scale,
   `pirDuration` units; sensor threshold units).
-- **Protect chime `ringSettings` not modeled.** `unifi_protect_chime` models
-  name/volume/repeat_times/camera_ids but **not** the per-doorbell `ringSettings`
-  list (`{cameraId, ringtoneId, volume, repeatTimes}`) — it references uploaded
-  ringtone objects that aren't modeled. Add a nested block once ringtones are
-  modeled (or confirmed referenceable by id) on a HIL rig.
+- **Clear owned `omitempty` fields on GET-merge-PUT (beyond DNS slots).**
+  `structToRawMap` drops zero-valued owned fields, so the overlay can set but not
+  clear a plain `string`/`*bool` back to its zero (e.g. clearing `domain_name`,
+  `dhcp_gateway`); likewise an explicit empty list `[]` reads back as `null` and
+  trips the post-apply consistency check. DNS-slot lists are already handled
+  (`*string` slots write a non-nil `&""`). Decide the general approach (per-field
+  empty-write allow-list, or always-emit owned keys) **once empty-string writes
+  are confirmed acceptable per field on a live controller** — HIL-gated (see
+  `docs/roadmap.md` open question #6).
 
-## Settings — model as typed resources (not a generic blob)
+## Settings — grow `unifi_network_settings` key coverage
 
-Site settings are ≈39 singleton `setting/<key>` documents (`ntp`, `mgmt`, `usg`,
-`guest_access`, `global_switch`, `mdns`, `ips`, `country`, `locale`, …; the
-`super_*` keys are console-internal and out of scope). A generic JSON-blob
-`unifi_network_setting` was **rejected** (2026-06-02) as a smell: it abandons the
-provider's typed-attributes + controller-mirroring-validators philosophy. Model
-the meaningful, user-facing settings as **typed, import/update-only** resources
-(they're singletons — no create/delete; destroy = state removal), each backed by
-`GET-merge-PUT` on `/rest/setting/<key>/<id>` so unmodeled fields survive. Pick
-the user-facing subset; confirm each field set against a live GET. This is a
-dedicated effort (its own phase/PR set), not part of the P3 stack.
+`unifi_network_settings` ships: one resource whose sections are managed à la
+carte, an **optional nested block per `setting/<key>`** (a null block is
+unmanaged — Read/apply touch only declared blocks, so managing one key never
+pulls another into state). It rides the dedicated settings verbs (`GET
+get/setting/<key>`, `POST set/setting/<key>`) — *not* `/rest` — and writes
+shallow-merge the configured fields over the stored section so unmodeled fields
+survive. The generic JSON-blob `unifi_network_setting` was **rejected** as a
+smell (it abandons typed attributes + controller-mirroring validators); the
+typed-block model keeps both.
 
-## Cross-resource wiring follow-ups
-
-- **`unifi_network_wlan` → RADIUS profile.** A `wpaeap` SSID needs a
-  `radiusprofile_id` to bind to a `unifi_network_radius_profile`; the WLAN
-  resource exposes `radius_mac_auth_enabled`/`radius_das_enabled` but **not** the
-  profile reference yet. Add `radiusprofile_id` to `unifi_network_wlan` (and the
-  wired 802.1X port profile binding) so the RADIUS profiles are actually
-  referenceable from config.
-
-## Import UX: friendlier keys than the controller `_id`
-
-Importing `unifi_network_network` / `unifi_network_wan` (and future
-`networkconf`-backed resources) currently requires the controller object id
-(`_id`, a 24-character hex string) in the `import {}` block or `terraform import`
-command. The UniFi UI does **not** expose this id anywhere — the settings URL
-stays at `/settings/internet` (or `/settings/networks`) with no id, and the side
-panel doesn't show it — so users must discover it via the `network_ids`
-data-source output or the legacy REST API. That is poor UX.
-
-Improve it:
-- Accept a human-friendly import key in `ImportState` and resolve it to the
-  `_id` — e.g. `terraform import unifi_network_wan.primary WAN1` (by name), or a
-  prefixed form like `name=WAN1`, while still accepting the raw `_id`.
-- Consider exposing the lookup more directly (e.g. import by `name`) so the
-  `import {}` block can reference a data source: `id = data.unifi_network_network.wan.id`.
-- Apply the same friendly-key pattern to other resources as they land, and
-  document it once in the import guidance.
-
-The raw `_id` must keep working — it remains the resource's state `id`.
-
-## Clear owned `omitempty` fields on GET-merge-PUT (beyond DNS slots)
-
-`structToRawMap` drops zero-valued owned fields, so the overlay can set but not
-clear a plain `string`/`*bool` back to its zero (e.g. clearing `domain_name`,
-`dhcp_gateway`). The DNS-slot lists are already handled (`*string` slots write a
-non-nil `&""`); a related edge remains: setting a list to an explicit empty `[]`
-reads back as `null`, which fails the post-apply consistency check. Decide the
-general approach (per-field empty-write allow-list, or always-emit owned keys)
-once empty-string writes are confirmed acceptable per field on a live controller.
-See `docs/roadmap.md` open question #6.
+Shipped keys: `ntp`, `country`, `locale`. Remaining (high-value first): `mgmt`,
+`guest_access`, `global_switch`, `global_ap`, `mdns`, `ips`, `radius`. Long-tail
+/ niche keys (`snmp`, `netflow`, `radio_ai`, `rsyslogd`, `dpi`, `teleport`,
+`baresip`, `lcm`, `usg`, `doh`, …) are added on demand; the `super_*` (console-
+internal) and `porta` (hardware-only) keys are out of scope. Each new key is one
+`settingKeyHandler` table entry + its schema block; secrets (`x_*`) get
+`Sensitive`. The live GET field set and the shallow-merge write semantics per key
+(including whether an empty write clears a field) are **HIL-pending** — see
+*Verify against hardware*.
 
 ## Access (P7): verify the RE'd `unifi_access_door_group` write surface on live/HIL
 

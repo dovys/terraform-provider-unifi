@@ -70,6 +70,6 @@ A UniFi Network LAN/VLAN or guest network (`networkconf`). Models the full confi
 ### Read-Only
 
 - `gateway_type` (String) Gateway type (read-only).
-- `id` (String) Controller object ID (`_id`). Import key.
+- `id` (String) Controller object ID (`_id`). Import key — `terraform import` also accepts a friendly `name=<network name>` key (e.g. `name=IoT`), since the UniFi UI does not expose the `_id`.
 - `network_group` (String) Controller network group (e.g. `LAN`).
 - `setting_preference` (String) Controller auto/manual settings toggle (read-only).

@@ -84,6 +84,7 @@ func (r *protectViewerResource) Schema(_ context.Context, _ resource.SchemaReque
 
 func (r *protectViewerResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
+		requireProtect(c, &resp.Diagnostics)
 		r.protect = c.Protect()
 	}
 }

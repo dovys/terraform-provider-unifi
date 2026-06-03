@@ -24,6 +24,7 @@ var (
 	_ resource.Resource                = (*protectCameraResource)(nil)
 	_ resource.ResourceWithConfigure   = (*protectCameraResource)(nil)
 	_ resource.ResourceWithImportState = (*protectCameraResource)(nil)
+	_ resource.ResourceWithModifyPlan  = (*protectCameraResource)(nil)
 )
 
 func NewProtectCameraResource() resource.Resource { return &protectCameraResource{} }
@@ -177,8 +178,88 @@ func (r *protectCameraResource) Schema(_ context.Context, _ resource.SchemaReque
 
 func (r *protectCameraResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
+		requireProtect(c, &resp.Diagnostics)
 		r.protect = c.Protect()
 	}
+}
+
+// ModifyPlan gates capability-dependent fields (HDR, mic, status LED, smart
+// detection, doorbell LCD) against the camera's live FeatureFlags — invariant 3:
+// writing an unsupported field becomes a plan-time diagnostic, not a raw 4xx.
+// Those flags are only known after a read, so this can't be ValidateConfig; it
+// reads the camera here (the documented ModifyPlan-with-read gate). It inspects
+// the *config* (not the plan) so Optional+Computed values carried from state
+// don't false-trigger. HIL-unverified — no camera lacking these flags on the
+// recon console — but safe: a too-permissive gate is a missing diagnostic, not a
+// crash.
+func (r *protectCameraResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// Destroy (null plan) or an unconfigured provider (validate walk): nothing to gate.
+	if req.Plan.Raw.IsNull() || r.protect == nil {
+		return
+	}
+	var cfg protectCameraResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &cfg)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	// Only read the camera when a capability-gated field is actually configured.
+	if !cameraConfiguresGatedField(&cfg) {
+		return
+	}
+	mac := strings.TrimSpace(cfg.MAC.ValueString())
+	if mac == "" {
+		return
+	}
+	cam, err := r.protect.Cameras().GetByMAC(ctx, mac)
+	if err != nil {
+		// Camera not readable yet (not adopted, Protect absent, transient): don't
+		// block the plan on a check we can't perform — Create surfaces a precise
+		// error and Configure already flags an absent Protect.
+		return
+	}
+	for _, v := range cameraCapabilityViolations(&cfg, cam.FeatureFlags) {
+		resp.Diagnostics.AddAttributeError(path.Root(v.Attr),
+			"Camera does not support "+v.Label,
+			fmt.Sprintf("Camera %q does not advertise %s, so %q cannot be set. Remove it or target a capable camera.",
+				macCanonical(cam.Mac), v.Label, v.Attr))
+	}
+}
+
+// capViolation pairs a configured-but-unsupported attribute with the capability
+// label named in its diagnostic.
+type capViolation struct{ Attr, Label string }
+
+// cameraConfiguresGatedField reports whether the config sets any
+// capability-gated field, so ModifyPlan can skip the camera read otherwise.
+func cameraConfiguresGatedField(cfg *protectCameraResourceModel) bool {
+	return !cfg.HDRType.IsNull() || !cfg.MicEnabled.IsNull() || !cfg.MicVolume.IsNull() ||
+		!cfg.StatusLightEnabled.IsNull() ||
+		!cfg.SmartDetectObjectTypes.IsNull() || !cfg.SmartDetectAudioTypes.IsNull() ||
+		!cfg.LCDMessageType.IsNull() || !cfg.LCDMessageText.IsNull()
+}
+
+// cameraCapabilityViolations returns the configured fields the camera's live
+// FeatureFlags say it doesn't support. cfg is read from the resource *config*,
+// so Optional+Computed values carried from state never false-trigger.
+func cameraCapabilityViolations(cfg *protectCameraResourceModel, ff wire.FeatureFlags) []capViolation {
+	supports := func(b *bool) bool { return b != nil && *b }
+	var v []capViolation
+	if !cfg.HDRType.IsNull() && !supports(ff.HasHdr) {
+		v = append(v, capViolation{"hdr_type", "HDR"})
+	}
+	if (!cfg.MicEnabled.IsNull() || !cfg.MicVolume.IsNull()) && !supports(ff.HasMic) {
+		v = append(v, capViolation{"mic_enabled", "a microphone"})
+	}
+	if !cfg.StatusLightEnabled.IsNull() && !supports(ff.HasLedStatus) {
+		v = append(v, capViolation{"status_light_enabled", "a status LED"})
+	}
+	if (!cfg.SmartDetectObjectTypes.IsNull() || !cfg.SmartDetectAudioTypes.IsNull()) && !supports(ff.HasSmartDetect) {
+		v = append(v, capViolation{"smart_detect_object_types", "smart detection"})
+	}
+	if (!cfg.LCDMessageType.IsNull() || !cfg.LCDMessageText.IsNull()) && !supports(ff.HasLcdScreen) {
+		v = append(v, capViolation{"lcd_message_type", "a doorbell LCD screen"})
+	}
+	return v
 }
 
 func (r *protectCameraResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

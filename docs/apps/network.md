@@ -61,12 +61,13 @@ refuses to mix.
 | Resource | Backend | Notes |
 |----------|:------:|-------|
 | `unifi_network_site` | L | Site CRUD (`/cmd/sitemgr`). *Deferred past P1 — the sitemgr write shapes need a multi-site controller to verify; the read-only `data.unifi_network_site` ships in P1.* |
-| `unifi_network_setting_*` (`mgmt`, `usg`, `guest_access`, `ntp`, `ips`, `country`/`locale`, …) | L | Typed singletons for common keys. |
-| `unifi_network_setting` (generic) | L | Experimental escape hatch: `key` + normalized-JSON `value` for untyped keys. |
+| `unifi_network_settings` | L (`get`/`set/setting/<key>`) | One resource, one **optional nested block per `setting/<key>`** — sections managed à la carte. Shipped keys: `ntp`, `country`, `locale`; grown over time (see TODO). A generic JSON-blob `unifi_network_setting` was rejected as a smell. |
 
-Settings are **one doc per key, always present** → singleton lifecycle: Create = read-then-overwrite;
-Delete = revert-to-default or no-op; Read never 404s. Single-ownership enforced (generic
-`unifi_network_setting` forbidden for a key a typed resource owns).
+Settings are **one doc per key, always present**, read via `get/setting/<key>` and written via
+`set/setting/<key>` (a shallow merge — send only changed fields; *not* `/rest`). The single resource keeps
+**typed, per-key blocks** rather than a JSON blob: a **null block is unmanaged** (Read/apply touch only
+declared blocks), removing a block stops managing that section without reverting it, and Delete is state
+removal only (the singleton always exists).
 
 ### Parity tail (later phases)
 `unifi_network_vpn_server`, `unifi_network_vpn_client`, `unifi_network_bgp` — round out the feature surface.
@@ -84,7 +85,7 @@ Delete = revert-to-default or no-op; Read never 404s. Single-ownership enforced 
 - **Client/end-user devices** (inventory, presence, blocking, per-client QoS) — ephemeral runtime
   state, not config. **Exception:** fixed-IP reservations → `unifi_network_dhcp_reservation`
   (per-client rate could become a reservation attribute later).
-- Schedule tasks → via `unifi_network_setting_mgmt`.
+- Schedule tasks → via the `mgmt` block of `unifi_network_settings` (when that key lands).
 - Cloud **Site Manager API** (read-only); other UniFi OS apps (Access, Talk, …) — later. **UniFi
   Protect is in scope** under `unifi_protect_*` — see [protect.md](protect.md).
 

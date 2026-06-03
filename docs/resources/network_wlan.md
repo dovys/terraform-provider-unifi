@@ -47,6 +47,7 @@ A UniFi Wi-Fi network/SSID (`wlanconf`). Models the configurable surface: securi
 - `pmf_mode` (String) Protected Management Frames: `disabled`, `optional`, or `required`.
 - `proxy_arp` (Boolean) Answer ARP on behalf of clients.
 - `radius_mac_auth_enabled` (Boolean) MAC-based RADIUS authentication.
+- `radius_profile_id` (String) ID of the RADIUS profile (`unifi_network_radius_profile`) this SSID binds to — required for `security = wpaeap` (802.1X enterprise) and used by MAC-based RADIUS auth.
 - `security` (String) Security suite: `open`, `wpapsk` (personal), or `wpaeap` (enterprise/RADIUS).
 - `uapsd_enabled` (Boolean) WMM power save (U-APSD).
 - `user_group_id` (String) ID of the user group (bandwidth profile) applied to clients.

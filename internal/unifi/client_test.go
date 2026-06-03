@@ -17,6 +17,8 @@ func consoleServer(t *testing.T) *httptest.Server {
 			w.WriteHeader(http.StatusOK)
 		case "/proxy/network/api/s/default/stat/sysinfo":
 			_, _ = w.Write([]byte(`{"meta":{"rc":"ok"},"data":[{"version":"10.4.57"}]}`))
+		case "/proxy/protect/api/nvr":
+			_, _ = w.Write([]byte(`{"version":"7.1.69"}`))
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -40,6 +42,37 @@ func TestNewClient_Success(t *testing.T) {
 	}
 	if got := c.Capabilities().VersionRaw; got != "10.4.57" {
 		t.Errorf("VersionRaw = %q, want 10.4.57", got)
+	}
+	if !c.Capabilities().ProtectInstalled {
+		t.Errorf("ProtectInstalled = false, want true (console serves Protect)")
+	}
+	if got := c.Capabilities().ProtectVersionRaw; got != "7.1.69" {
+		t.Errorf("ProtectVersionRaw = %q, want 7.1.69", got)
+	}
+}
+
+// TestNewClient_ProtectAbsent: a console without Protect probes non-fatally and
+// reports ProtectInstalled=false rather than failing NewClient.
+func TestNewClient_ProtectAbsent(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/auth/login":
+			http.SetCookie(w, &http.Cookie{Name: "TOKEN", Value: fakeToken, Path: "/"})
+			w.WriteHeader(http.StatusOK)
+		case "/proxy/network/api/s/default/stat/sysinfo":
+			_, _ = w.Write([]byte(`{"meta":{"rc":"ok"},"data":[{"version":"10.4.57"}]}`))
+		default:
+			w.WriteHeader(http.StatusNotFound) // no Protect application
+		}
+	}))
+	defer srv.Close()
+
+	c, err := NewClient(context.Background(), Config{Host: srv.URL, Username: "admin", Password: "pw"})
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
+	if c.Capabilities().ProtectInstalled {
+		t.Errorf("ProtectInstalled = true, want false (console has no Protect)")
 	}
 }
 

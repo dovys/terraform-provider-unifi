@@ -21,7 +21,7 @@ network to a clean plan (where instances exist) and pass CI.
   Import the live devices, WLANs, firewall rules, and reservations clean.
 - **3 — Parity & long tail:** `user_group`, `radius_profile`/`radius_account`, `wlan_group`;
   `static_route`, `port_forward`, `dynamic_dns`; zone firewall (`firewall_zone`/`firewall_policy`),
-  `traffic_rule`/`traffic_route` (tested on HIL); `setting_*` + generic `unifi_network_setting`.
+  `traffic_rule`/`traffic_route` (tested on HIL); `unifi_network_settings` (typed per-key blocks).
 - **4 — Long tail & release prep:** `vpn_server`/`vpn_client`/`bgp` are **deferred** — live recon found
   no configured VPN (no `networkconf` VPN `purpose`; the `openvpn`/`ipsec`/`teleport`/
   `magic_site_to_site_vpn` settings are near-empty global toggles) and **no** BGP REST/v2 surface or
@@ -55,10 +55,11 @@ A resource is checkable only when it meets the Definition of Done ([development.
 - [x] **P3** parity & long tail:
   - [x] user_group, radius_profile, radius_account, static_route, port_forward, dynamic_dns,
         wlan_group, traffic_rule, traffic_route
-  - **deferred — settings:** `setting_*` is its own sizable typed surface (≈39 singleton
-        `setting/<key>` docs). A generic JSON-blob `unifi_network_setting` was rejected as a smell
-        (abandons the provider's typed/validated philosophy); the meaningful settings should be
-        modeled as **typed** import/update-only resources in a dedicated effort (see `TODO.md`).
+  - [x] **settings:** `unifi_network_settings` — one resource, an **optional nested block per
+        `setting/<key>`** (a null block is unmanaged), over the `get`/`set/setting/<key>` verbs with a
+        shallow-merge write. A generic JSON-blob `unifi_network_setting` was rejected as a smell. Shipped
+        keys: `ntp`, `country`, `locale`; grown over time (remaining keys + per-key live confirmation in
+        `TODO.md`).
   - **deferred — zone firewall:** firewall_zone, firewall_policy — the live controller runs the
         **classic** firewall, so the zone-based v2 endpoints are empty and the classic-vs-zone
         capability gate can't be verified; build once a zone-firewall controller is available
@@ -114,7 +115,8 @@ A resource is checkable only when it meets the Definition of Done ([development.
 2. **CSRF source across firmwares** (header vs JWT claim); validate **`exp`-driven** re-auth (read the
    token's `exp`, don't hard-code 2h).
 3. **Self-hosted/HIL runner setup** + documenting what the Docker tier can't cover.
-4. **Which settings keys to type first** (likely `mgmt`, `usg`, `guest_access`, `ntp`, `country`, `ips`).
+4. **Which settings keys to add next** to `unifi_network_settings` (`ntp`/`country`/`locale` shipped;
+   high-value next: `mgmt`, `guest_access`, `global_switch`, `global_ap`, `mdns`, `ips`, `radius` — see `TODO.md`).
 5. **Protect (P5):** exact PATCH field set per device type + which need a legacy `/bootstrap` fallback;
    whether detection **zones** are in initial scope; confirm doorbell `feature_flags` names.
 6. **Clearing owned `omitempty` fields on GET-merge-PUT.** `structToRawMap` drops zero-valued owned

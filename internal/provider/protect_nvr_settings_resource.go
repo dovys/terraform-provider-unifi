@@ -91,6 +91,7 @@ func (r *protectNVRSettingsResource) Schema(_ context.Context, _ resource.Schema
 
 func (r *protectNVRSettingsResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
+		requireProtect(c, &resp.Diagnostics)
 		r.protect = c.Protect()
 	}
 }

@@ -81,9 +81,10 @@ type wlanResourceModel struct {
 	MinrateNADataRateKbps types.Int64 `tfsdk:"minrate_na_data_rate_kbps"` // 5 GHz minimum rate (kbps)
 
 	// Advanced.
-	GroupRekey           types.Int64 `tfsdk:"group_rekey"`             // GTK rekey interval (seconds)
-	RADIUSMACAuthEnabled types.Bool  `tfsdk:"radius_mac_auth_enabled"` // MAC-based RADIUS auth
-	Hotspot2Enabled      types.Bool  `tfsdk:"hotspot2_enabled"`        // Hotspot 2.0 / Passpoint
+	GroupRekey           types.Int64  `tfsdk:"group_rekey"`             // GTK rekey interval (seconds)
+	RADIUSMACAuthEnabled types.Bool   `tfsdk:"radius_mac_auth_enabled"` // MAC-based RADIUS auth
+	RADIUSProfileID      types.String `tfsdk:"radius_profile_id"`       // RADIUS profile (radiusprofile _id) for wpaeap / MAC auth
+	Hotspot2Enabled      types.Bool   `tfsdk:"hotspot2_enabled"`        // Hotspot 2.0 / Passpoint
 }
 
 func (r *wlanResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -183,6 +184,7 @@ func (r *wlanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Validators:          []validator.Int64{int64validator.AtLeast(0)},
 			},
 			"radius_mac_auth_enabled": optBool("MAC-based RADIUS authentication."),
+			"radius_profile_id":       optStr("ID of the RADIUS profile (`unifi_network_radius_profile`) this SSID binds to — required for `security = wpaeap` (802.1X enterprise) and used by MAC-based RADIUS auth."),
 			"hotspot2_enabled":        optBool("Hotspot 2.0 / Passpoint."),
 		},
 	}
@@ -291,6 +293,7 @@ func (m *wlanResourceModel) toWLANConf(ctx context.Context, diags *diag.Diagnost
 		MinrateNaDataRateKbps: intPtr(m.MinrateNADataRateKbps),
 		GroupRekey:            intPtr(m.GroupRekey),
 		RadiusMacAuthEnabled:  boolPtr(m.RADIUSMACAuthEnabled),
+		RadiusprofileId:       strPtrOrNil(m.RADIUSProfileID),
 		Hotspot2confEnabled:   boolPtr(m.Hotspot2Enabled),
 	}
 	// Leave these slices nil when the config is null so GET-merge-PUT preserves
@@ -357,6 +360,7 @@ func (m *wlanResourceModel) fromWLANConf(w *wire.Wlanconf) {
 	m.MinrateNADataRateKbps = intToState(w.MinrateNaDataRateKbps)
 	m.GroupRekey = intToState(w.GroupRekey)
 	m.RADIUSMACAuthEnabled = boolToState(w.RadiusMacAuthEnabled)
+	m.RADIUSProfileID = strToStateOptional(deref(w.RadiusprofileId))
 	m.Hotspot2Enabled = boolToState(w.Hotspot2confEnabled)
 }
 

@@ -135,6 +135,7 @@ func (r *protectLightResource) Schema(_ context.Context, _ resource.SchemaReques
 
 func (r *protectLightResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
+		requireProtect(c, &resp.Diagnostics)
 		r.protect = c.Protect()
 	}
 }
