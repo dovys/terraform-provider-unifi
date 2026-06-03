@@ -1,9 +1,9 @@
 # terraform-provider-unifi
 
 A Terraform provider for **UniFi OS** — manage your UniFi console as code. It
-covers the **Network** application today (with **Protect** and **Access** in
-development), is app-namespaced (`unifi_network_*`, `unifi_protect_*`,
-`unifi_access_*`, …), and tracks the latest UniFi APIs.
+covers the **Network**, **Protect**, and **Access** applications, is
+app-namespaced (`unifi_network_*`, `unifi_protect_*`, `unifi_access_*`, …), and
+tracks the latest UniFi APIs.
 
 The aim is an **up-to-date, feature-complete** provider that models the full
 configurable surface of each app — including surfaces like guest networks — and
@@ -21,14 +21,14 @@ keeps pace with new UniFi releases. It's built with an unusual process:
   spec and are regenerated when we move the provider to a newer UniFi release,
   rather than maintained by hand.
 
-> **Status.** The Network app is built out and usable. Protect ships its client
-> and device resources (`unifi_protect_camera`, `unifi_protect_nvr_settings`,
-> light/sensor/chime/viewer, liveviews). Access is feature-complete: door
-> groups, policies, holiday groups, doors, and door guards (each with a data
-> source). The Protect and Access write surfaces are reverse-engineered and
-> **HIL-unverified** (no live device on the recon console) — see
-> [`TODO.md`](TODO.md). See [`docs/roadmap.md`](docs/roadmap.md) for what's
-> shipped and what's next.
+> **Status.** The Network app is built out and usable. Protect is
+> feature-complete: cameras (`unifi_protect_camera` + data source), the NVR
+> singleton, lights, sensors, chimes, viewers, and liveviews. Access is
+> feature-complete: door groups, policies, holiday groups, doors, and door
+> guards (each with a data source). The Protect and Access write surfaces are
+> reverse-engineered and **HIL-unverified** (no live device on the recon
+> console) — see [`TODO.md`](TODO.md). See [`docs/roadmap.md`](docs/roadmap.md)
+> for what's shipped and what's next.
 
 ## Getting started
 
@@ -82,7 +82,7 @@ versions:
 | App | Modeled against | Provider support |
 |-----|-----------------|------------------|
 | [UniFi Network](docs/apps/network.md) | `10.4.57` | ✅ Supported |
-| [UniFi Protect](docs/apps/protect.md) | `7.1.69` | 🚧 In development |
+| [UniFi Protect](docs/apps/protect.md) | `7.1.69` | 🚧 Feature-complete (HIL-unverified) |
 | [UniFi Access](docs/apps/access.md) | `4.2.27` | 🚧 Feature-complete (HIL-unverified) |
 
 > **We aim at recent UniFi releases and don't support older versions.** The

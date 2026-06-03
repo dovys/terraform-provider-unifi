@@ -1,8 +1,9 @@
 # terraform-provider-unifi — Design Docs
 
-> **Status: in development.** Phase 0 (the base — provider scaffold + `internal/unifi` client:
-> classic cookie+CSRF transport, capabilities, `Configure` probe) has landed; resources are built
-> phase by phase ([roadmap.md](roadmap.md)). These docs describe the **current intended design** (not its history).
+> **Status.** The **Network** app (Phases 0–4) is shipped and usable; **Protect** (`unifi_protect_*`)
+> and **Access** (`unifi_access_*`) are feature-complete on the same console session — their
+> reverse-engineered write surfaces are **HIL-unverified** ([roadmap.md](roadmap.md), `TODO.md`).
+> These docs describe the **current intended design** (not its history).
 
 Manages a **UniFi OS** console as code — **Network**, **Protect**, and **Access** today (the other apps
 later) — against the latest UniFi APIs. Resources are **app-namespaced** (`unifi_network_*`,
