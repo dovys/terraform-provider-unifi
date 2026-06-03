@@ -29,8 +29,11 @@ clean-room, Registry `dovys/unifi`. Resources are **app-namespaced**: `unifi_net
    Immutables `RequiresReplace`.
 5. **Model infrastructure, not clients.** Only client touchpoint: `unifi_network_dhcp_reservation`
    (fixed-IP, find-or-create by MAC).
-6. **Read reconciles** (Computed vs configured; normalize; remove-on-404); `UseStateForUnknown` only
-   on post-create-immutable values.
+6. **Read reconciles** (Computed vs configured; normalize; remove-on-404). Use `UseStateForUnknown` on
+   `Optional+Computed` knobs to pin their prior value through an unrelated update — otherwise the
+   framework marks every un-pinned `Computed` field `known after apply` the moment a sibling changes, so a
+   partially-configured import never reaches a clean plan (invariant 7). It can't mask drift the
+   controller makes on its own — `Read` still reconciles each cycle.
 7. **Live network is the bar** — every resource imports the real objects to a clean (+ second empty) plan.
 8. **Comprehensive coverage**; validators mirror the controller (firewall `rule_index` full
    range); secrets `Sensitive`.
@@ -40,7 +43,7 @@ clean-room, Registry `dovys/unifi`. Resources are **app-namespaced**: `unifi_net
 ❌ `map[string]any` schemas (except generic `unifi_network_setting` + raw passthrough in GET-merge-PUT).
 ❌ client/end-user device modeling. ❌ reused provider/client source. ❌ whole-document PUT
 (GET-merge-PUT owned fields only). ❌ List for keyed collections (use Map/Set).
-❌ `UseStateForUnknown` on controller-mutable fields. ❌ over-tight validators.
+❌ over-tight validators.
 
 ## Docs hygiene
 Docs describe **current state only**. A decision reverted within the same changeset is **edited away,
@@ -65,9 +68,9 @@ out of scope.
    if a field is missing/mistyped — fix the spec, never hand-edit `types.gen.go`). Add the group
    accessor + collection in `internal/unifi/network` (a custom collection only when the surface needs
    id-in-body merge or List-filter Read). No hand-written per-type structs, no `models` package.
-3. Schema: nested attributes; Map/Set keyed by natural key (not List); `Optional+Computed`;
-   `UseStateForUnknown` only on post-create-immutable; `RequiresReplace` immutables; controller-accurate
-   validators; `Sensitive`.
+3. Schema: nested attributes; Map/Set keyed by natural key (not List); `Optional+Computed` with
+   `UseStateForUnknown` on the knobs (no post-import churn — invariant 6); `RequiresReplace` immutables;
+   controller-accurate validators; `Sensitive`.
 4. CRUD + ImportState: Read reconciles + removes-on-404; GET-merge-PUT for partly-owned docs; document
    import key + state `id`.
 5. Hand-written real-use-case examples in `examples/<use-case>/*.tf` (+ `examples/data/`), not

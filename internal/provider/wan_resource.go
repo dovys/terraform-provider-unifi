@@ -9,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -78,14 +81,23 @@ func (r *wanResource) Metadata(_ context.Context, req resource.MetadataRequest, 
 }
 
 func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	// These uplink knobs are Optional+Computed: unset in config, they take the
+	// controller's value. UseStateForUnknown holds that value through an unrelated
+	// update so an unconfigured field doesn't churn to "known after apply" on every
+	// plan (the framework otherwise marks all un-pinned Computed fields unknown the
+	// moment any sibling changes). The controller doesn't mutate these on its own,
+	// so pinning prior state can't mask server-side drift — Read still reconciles.
 	optBool := func(desc string) schema.BoolAttribute {
-		return schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: desc}
+		return schema.BoolAttribute{Optional: true, Computed: true, MarkdownDescription: desc,
+			PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}}
 	}
 	optStr := func(desc string) schema.StringAttribute {
-		return schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: desc}
+		return schema.StringAttribute{Optional: true, Computed: true, MarkdownDescription: desc,
+			PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}}
 	}
 	optInt := func(desc string) schema.Int64Attribute {
-		return schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: desc}
+		return schema.Int64Attribute{Optional: true, Computed: true, MarkdownDescription: desc,
+			PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}}
 	}
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A WAN uplink (`networkconf` with `purpose=wan`): DHCP/PPPoE/static, dual-WAN load balancing, " +
@@ -107,6 +119,7 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString("WAN"),
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "WAN interface group: `WAN` (primary) or `WAN2`.",
 				Validators:          []validator.String{stringvalidator.OneOf("WAN", "WAN2")},
 			},
@@ -118,6 +131,7 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
+				PlanModifiers:       []planmodifier.List{listplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Up to two IPv4 DNS servers. Setting any switches DNS to manual; empty uses automatic.",
 				Validators:          []validator.List{listvalidator.SizeAtMost(2)},
 			},
@@ -125,6 +139,7 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
+				PlanModifiers:       []planmodifier.List{listplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Up to two IPv6 DNS servers. Setting any switches IPv6 DNS to manual.",
 				Validators:          []validator.List{listvalidator.SizeAtMost(2)},
 			},
@@ -149,12 +164,14 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 			"load_balance_type": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Multi-WAN role: `weighted` (load balance) or `failover-only`.",
 				Validators:          []validator.String{stringvalidator.OneOf("weighted", "failover-only")},
 			},
 			"load_balance_weight": schema.Int64Attribute{
 				Optional:            true,
 				Computed:            true,
+				PlanModifiers:       []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
 				MarkdownDescription: "Load-balance weight (0–100) when `load_balance_type=weighted`.",
 				Validators:          []validator.Int64{int64validator.Between(0, 100)},
 			},
@@ -283,15 +300,22 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 		WanDhcpv6PdSize:       intPtr(m.IPv6PDSize),
 	}
 
-	// PPPoE credentials + their enable flags.
+	// PPPoE username + its enable flag (read back, so always safe to send).
 	wanUsername := strOrEmpty(m.PPPoEUsername)
-	xWanPassword := strOrEmpty(m.PPPoEPassword)
 	conf.WanUsername = &wanUsername
-	conf.XWanPassword = &xWanPassword
 	uEnabled := wanUsername != ""
-	pEnabled := xWanPassword != ""
 	conf.WanPppoeUsernameEnabled = &uEnabled
-	conf.WanPppoePasswordEnabled = &pEnabled
+
+	// pppoe_password is write-only (the controller never echoes it). Send it only
+	// when explicitly set in config: an unset password must be left untouched so
+	// GET-merge-PUT preserves the stored secret — sending "" would blank it and
+	// drop a live PPPoE uplink on any update. Set it to "" explicitly to clear it.
+	if !m.PPPoEPassword.IsNull() && !m.PPPoEPassword.IsUnknown() {
+		xWanPassword := m.PPPoEPassword.ValueString()
+		conf.XWanPassword = &xWanPassword
+		pEnabled := xWanPassword != ""
+		conf.WanPppoePasswordEnabled = &pEnabled
+	}
 
 	// MAC clone: a value enables the override, empty disables it.
 	mac := strOrEmpty(m.MACOverride)

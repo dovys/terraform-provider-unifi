@@ -23,8 +23,10 @@ locally reasonable, the sum betraying the design. This is the contract that keep
    keeps the device adopted; forgetting needs `forget_on_destroy = true`. `attr_no_delete` objects are
    import/update-only. Immutables `RequiresReplace`.
 5. **Read reconciles, it doesn't blind-overwrite.** Refresh Computed; reconcile configured only when
-   canonically different (normalize on read); remove-on-404. `UseStateForUnknown` only on
-   post-create-immutable values. Telemetry is **Computed-only** (so it never diffs).
+   canonically different (normalize on read); remove-on-404. `UseStateForUnknown` pins an
+   `Optional+Computed` knob's prior value so an unconfigured field doesn't churn to `known after apply`
+   on an unrelated update (it can't mask controller-side drift — `Read` still reconciles). Telemetry is
+   **Computed-only** (so it never diffs).
 6. **The live network is the bar.** Every resource round-trips the real objects from the live
    network to a clean plan (and a second empty plan).
 7. **Comprehensive coverage is a floor.** Model the full UniFi Network feature surface; design
@@ -53,8 +55,9 @@ locally reasonable, the sum betraying the design. This is the contract that keep
    no `map[string]any` except the generic `unifi_network_setting` and raw passthrough of unmodeled
    fields in GET-merge-PUT. v2 writes honor the [v2 write contract](architecture.md).
 3. Schema: nested **attributes** (not blocks); Map/Set keyed by a natural key, not List;
-   `Optional+Computed` for API-defaulted; `UseStateForUnknown` only on post-create-immutable values;
-   `RequiresReplace` immutables; controller-accurate validators; `Sensitive` secrets.
+   `Optional+Computed` for API-defaulted, with `UseStateForUnknown` on the knobs so a partially-configured
+   import still reaches a clean plan; `RequiresReplace` immutables; controller-accurate validators;
+   `Sensitive` secrets.
 4. CRUD + ImportState: Read reconciles + removes-on-404; Create/Update match the plan (GET-merge-PUT
    for partly-owned docs); document the import key + state `id`.
 5. Hand-written real-use-case examples in `examples/<use-case>/*.tf` (+ `examples/data/`), not

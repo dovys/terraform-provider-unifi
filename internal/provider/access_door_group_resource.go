@@ -64,9 +64,10 @@ func (r *accessDoorGroupResource) Schema(_ context.Context, _ resource.SchemaReq
 			"group_type": schema.StringAttribute{
 				Optional: true,
 				Computed: true,
-				// Controller-assigned/derivable, so no UseStateForUnknown (invariant 6):
-				// an unset group_type plans as "known after apply" and Read reconciles
-				// it each cycle, surfacing any server-side change honestly.
+				// group_type is controller-assigned, so we deliberately leave it
+				// unpinned: an unset group_type plans as "known after apply" and Read
+				// surfaces the controller's choice each cycle. (A user-set knob would
+				// take UseStateForUnknown to avoid post-import churn; this isn't one.)
 				MarkdownDescription: "Grouping kind (controller-assigned, e.g. `door`). Left unset, the controller chooses the " +
 					"default for a door group.",
 			},

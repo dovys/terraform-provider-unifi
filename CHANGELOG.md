@@ -62,6 +62,17 @@ below predate the date-based convention.
   limit and failed with `classic login failed: HTTP 429`. Login now honors
   `Retry-After` (falling back to exponential backoff) and retries up to
   `max_retries`, matching the normal request path.
+- **`unifi_network_wan` no longer churns after import.** The Optional+Computed
+  uplink knobs (load balancing, failover, smart-queue, IGMP proxy, IPv6, PPPoE
+  username, …) now use `UseStateForUnknown`, so a partially-configured imported
+  WAN reaches a clean second plan instead of ~10 fields flipping to `known after
+  apply` on every plan. These are user-set knobs the controller doesn't mutate on
+  its own, and `Read` still reconciles drift.
+- **`unifi_network_wan` update no longer blanks a stored PPPoE password.**
+  `pppoe_password` is write-only; an update that left it unset previously PUT an
+  empty `x_wan_password`, which GET-merge-PUT overlaid onto the controller and
+  could drop a live PPPoE uplink. The field is now omitted when unset (set it to
+  `""` to deliberately clear it).
 
 ### Security
 

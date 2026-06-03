@@ -125,7 +125,8 @@ need them — counts across both surfaces — not precomputed here. Resources su
 4. **Validators mirror the controller** — e.g. firewall `rule_index` allows the full range
    (migrated classic rules land in a high band like 20000+) with a plan-time duplicate-index guard.
 5. **Read reconciles, never blind-overwrites** — refresh Computed, reconcile configured only when
-   canonically different; remove-on-404. `UseStateForUnknown()` only on post-create-immutable values.
-   Telemetry is **Computed-only** (refreshed on read, never part of the plan). This makes "a live
-   instance imports to an empty plan" hold.
+   canonically different; remove-on-404. `UseStateForUnknown()` pins an `Optional+Computed` knob's prior
+   value so an unconfigured field doesn't churn to `known after apply` on an unrelated update — it can't
+   mask controller-side drift, since `Read` still reconciles each cycle. Telemetry is **Computed-only**
+   (refreshed on read, never part of the plan). This makes "a live instance imports to an empty plan" hold.
 6. **429 backoff** (honor `Retry-After`); **secrets `Sensitive`**; **site explicit in the plan**.

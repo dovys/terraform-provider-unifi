@@ -300,6 +300,46 @@ func TestWAN_PPPoEStaticAndSecrets(t *testing.T) {
 	}
 }
 
+func TestWAN_PPPoEPasswordOmittedWhenUnset(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	// Unset password (null): must be omitted from the wire conf so GET-merge-PUT
+	// preserves the controller's stored secret rather than blanking it. The
+	// username (read back) is still sent.
+	m := &wanResourceModel{
+		Name: types.StringValue("wan"), WANType: types.StringValue("pppoe"),
+		PPPoEUsername: types.StringValue("user@isp"), // PPPoEPassword left null
+	}
+	conf := m.toNetworkConf(ctx, &diags)
+	if conf.XWanPassword != nil {
+		t.Errorf("x_wan_password should be omitted when unset, got %q", derefStr(conf.XWanPassword))
+	}
+	if conf.WanPppoePasswordEnabled != nil {
+		t.Errorf("wan_pppoe_password_enabled should be omitted when password unset, got %v", *conf.WanPppoePasswordEnabled)
+	}
+	if derefStr(conf.WanUsername) != "user@isp" {
+		t.Errorf("username should still be sent: %q", derefStr(conf.WanUsername))
+	}
+
+	// Explicit empty string is a deliberate clear: sent as "" with enabled=false.
+	m.PPPoEPassword = types.StringValue("")
+	conf = m.toNetworkConf(ctx, &diags)
+	if conf.XWanPassword == nil || *conf.XWanPassword != "" {
+		t.Errorf(`explicit empty password should be sent as "", got %v`, conf.XWanPassword)
+	}
+	if conf.WanPppoePasswordEnabled == nil || *conf.WanPppoePasswordEnabled {
+		t.Errorf("explicit empty password should disable the flag")
+	}
+
+	// Set password: sent with the enable flag true.
+	m.PPPoEPassword = types.StringValue("s3cret")
+	conf = m.toNetworkConf(ctx, &diags)
+	if derefStr(conf.XWanPassword) != "s3cret" || conf.WanPppoePasswordEnabled == nil || !*conf.WanPppoePasswordEnabled {
+		t.Errorf("set password should be sent with the enable flag true")
+	}
+}
+
 func TestNetwork_DHCPOptionsRoundTrip(t *testing.T) {
 	ctx := context.Background()
 	var diags diag.Diagnostics
