@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-version"
+
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/access"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/protect"
@@ -107,6 +109,17 @@ func NewClient(ctx context.Context, cfg Config) (Client, error) {
 	caps, err := probe(ctx, c.classic, cfg.Site)
 	if err != nil {
 		return nil, err
+	}
+	// Probe the Protect application (non-fatal): its NVR singleton is reachable
+	// only when Protect is installed on this console. Any error just means "not
+	// installed" — Protect resources surface a friendly diagnostic rather than a
+	// raw 4xx (invariant 3). One cheap GET, shared with the Network probe.
+	if raw, perr := c.Protect().NVR().Version(ctx); perr == nil {
+		caps.ProtectInstalled = true
+		caps.ProtectVersionRaw = raw
+		if pv, verr := version.NewVersion(raw); verr == nil {
+			caps.ProtectVersion = pv
+		}
 	}
 	c.caps = caps
 	return c, nil

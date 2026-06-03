@@ -3,12 +3,12 @@
 page_title: "unifi_protect_chime Resource - unifi"
 subcategory: ""
 description: |-
-  A UniFi Protect Chime, identified by MAC. Configures the existing, adopted device over the private Protect API (/proxy/protect/api/chimes/<id>): name, speaker volume, ring repeat count, and the doorbell cameras it rings for. terraform destroy removes the chime from state and leaves it configured; set forget_on_destroy = true to unadopt it. Per-doorbell ringtone overrides (ringSettings) are not modeled yet — see the provider TODO. Config writes are HIL-unverified — see the provider TODO.
+  A UniFi Protect Chime, identified by MAC. Configures the existing, adopted device over the private Protect API (/proxy/protect/api/chimes/<id>): name, speaker volume, ring repeat count, and the doorbell cameras it rings for. terraform destroy removes the chime from state and leaves it configured; set forget_on_destroy = true to unadopt it. Per-doorbell ringtone overrides (ringSettings) are not modeled — they reference uploaded ringtone objects the provider does not model. Config writes are HIL-unverified — see the provider TODO.
 ---
 
 # unifi_protect_chime (Resource)
 
-A UniFi Protect Chime, identified by MAC. Configures the existing, adopted device over the private Protect API (`/proxy/protect/api/chimes/<id>`): name, speaker volume, ring repeat count, and the doorbell cameras it rings for. `terraform destroy` removes the chime from state and leaves it configured; set `forget_on_destroy = true` to unadopt it. Per-doorbell ringtone overrides (`ringSettings`) are not modeled yet — see the provider TODO. **Config writes are HIL-unverified — see the provider TODO.**
+A UniFi Protect Chime, identified by MAC. Configures the existing, adopted device over the private Protect API (`/proxy/protect/api/chimes/<id>`): name, speaker volume, ring repeat count, and the doorbell cameras it rings for. `terraform destroy` removes the chime from state and leaves it configured; set `forget_on_destroy = true` to unadopt it. Per-doorbell ringtone overrides (`ringSettings`) are not modeled — they reference uploaded ringtone objects the provider does not model. **Config writes are HIL-unverified — see the provider TODO.**
 
 
 

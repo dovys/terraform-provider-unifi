@@ -57,7 +57,7 @@ func (r *protectChimeResource) Schema(_ context.Context, _ resource.SchemaReques
 		MarkdownDescription: "A UniFi Protect Chime, identified by MAC. Configures the existing, adopted device over the private Protect " +
 			"API (`/proxy/protect/api/chimes/<id>`): name, speaker volume, ring repeat count, and the doorbell cameras it rings for. " +
 			"`terraform destroy` removes the chime from state and leaves it configured; set `forget_on_destroy = true` to unadopt it. " +
-			"Per-doorbell ringtone overrides (`ringSettings`) are not modeled yet — see the provider TODO. " +
+			"Per-doorbell ringtone overrides (`ringSettings`) are not modeled — they reference uploaded ringtone objects the provider does not model. " +
 			"**Config writes are HIL-unverified — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -104,6 +104,7 @@ func (r *protectChimeResource) Schema(_ context.Context, _ resource.SchemaReques
 
 func (r *protectChimeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
+		requireProtect(c, &resp.Diagnostics)
 		r.protect = c.Protect()
 	}
 }

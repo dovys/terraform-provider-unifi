@@ -43,7 +43,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account", "unifi_network_static_route", "unifi_network_port_forward", "unifi_network_dynamic_dns", "unifi_network_wlan_group", "unifi_network_traffic_rule", "unifi_network_traffic_route"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account", "unifi_network_static_route", "unifi_network_port_forward", "unifi_network_dynamic_dns", "unifi_network_wlan_group", "unifi_network_traffic_rule", "unifi_network_traffic_route", "unifi_network_settings"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -348,6 +348,7 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 		MACFilterPolicy:  types.StringValue("allow"),
 		MACFilterList:    sliceToStringSet([]string{"aa:bb:cc:00:11:22"}),
 		GroupRekey:       types.Int64Value(3600),
+		RADIUSProfileID:  types.StringValue("rprof1"),
 	}
 	conf := m.toWLANConf(ctx, &diags)
 	if diags.HasError() {
@@ -370,6 +371,9 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	if conf.GroupRekey == nil || *conf.GroupRekey != 3600 {
 		t.Errorf("group_rekey mapping wrong: %v", conf.GroupRekey)
 	}
+	if derefStr(conf.RadiusprofileId) != "rprof1" {
+		t.Errorf("radius_profile_id mapping wrong: %q", derefStr(conf.RadiusprofileId))
+	}
 
 	// Wire → state. The controller commonly echoes an empty x_passphrase on
 	// read; the passphrase must stay whatever the config set rather than wiping.
@@ -379,10 +383,13 @@ func TestWLANConf_RoundTrip(t *testing.T) {
 	bands := []wire.WlanconfWlanBands{"2g", "5g"}
 	out.fromWLANConf(&wire.Wlanconf{
 		UnderscoreId: sp("wlan9"), Name: sp("Home"), Security: &wpapsk, WpaMode: &wpa2,
-		XPassphrase: sp(""), NetworkconfId: sp("net1"), WlanBands: &bands,
+		XPassphrase: sp(""), NetworkconfId: sp("net1"), WlanBands: &bands, RadiusprofileId: sp("rprof1"),
 	})
 	if out.ID.ValueString() != "wlan9" {
 		t.Errorf("id round-trip wrong: %q", out.ID.ValueString())
+	}
+	if out.RADIUSProfileID.ValueString() != "rprof1" {
+		t.Errorf("radius_profile_id round-trip wrong: %q", out.RADIUSProfileID.ValueString())
 	}
 	if out.Passphrase.ValueString() != "hunter2hunter2" {
 		t.Errorf("passphrase must be preserved when the controller echoes empty, got %q", out.Passphrase.ValueString())

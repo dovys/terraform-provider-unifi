@@ -21,16 +21,26 @@ func TestDevicesListUsesStatSurface(t *testing.T) {
 	}
 }
 
-func TestDevicesGetByMACScansRawStat(t *testing.T) {
-	// wire.Device omits the read-only "mac" field, so GetByMAC matches on the
-	// raw stat document then decodes the typed device.
-	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"d1","mac":"AA:BB:CC:00:11:22","model":"US8"}]}`)}
+func TestDevicesGetByMAC(t *testing.T) {
+	// GetByMAC matches case-insensitively on the typed wire.Device.Mac field
+	// (a read-only stat field) while filtering the /stat/device list.
+	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"d0","mac":"00:00:00:00:00:00"},{"_id":"d1","mac":"AA:BB:CC:00:11:22","model":"US8"}]}`)}
 	d, err := newTestClient(f).Devices().GetByMAC(context.Background(), "aa:bb:cc:00:11:22")
 	if err != nil {
 		t.Fatalf("GetByMAC: %v", err)
 	}
 	if d.UnderscoreId == nil || *d.UnderscoreId != "d1" {
 		t.Fatalf("matched device = %+v, want _id d1", d)
+	}
+	if d.Mac == nil || *d.Mac != "AA:BB:CC:00:11:22" {
+		t.Fatalf("matched device mac = %v, want AA:BB:CC:00:11:22", d.Mac)
+	}
+}
+
+func TestDevicesGetByMACNotFound(t *testing.T) {
+	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"d1","mac":"AA:BB:CC:00:11:22"}]}`)}
+	if _, err := newTestClient(f).Devices().GetByMAC(context.Background(), "de:ad:be:ef:00:00"); err != ErrNotFound {
+		t.Fatalf("GetByMAC err = %v, want ErrNotFound", err)
 	}
 }
 

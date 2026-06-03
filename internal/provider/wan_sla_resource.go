@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -61,7 +60,7 @@ func (r *wanSLAResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Controller object ID (`_id`). Import key.",
+				MarkdownDescription: "Controller object ID (`_id`). Import key — `terraform import` also accepts a friendly `name=<SLA name>` key.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{
@@ -230,8 +229,16 @@ func (r *wanSLAResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 }
 
+// ImportState accepts the controller `_id` or a friendly `name=<SLA name>` key,
+// resolved to the `_id`.
 func (r *wanSLAResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	importByNameOrID(ctx, req, resp, "WAN SLA", func(ctx context.Context, name string) (string, error) {
+		sla, err := r.net.WAN().SLAs().GetByName(ctx, name)
+		if err != nil {
+			return "", err
+		}
+		return deref(sla.UnderscoreId), nil
+	})
 }
 
 // small helpers shared with the rebuilt resources.

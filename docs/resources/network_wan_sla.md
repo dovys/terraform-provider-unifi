@@ -27,7 +27,7 @@ A UniFi WAN failover SLA (health-monitor) profile (`wan-slas`, v2) — the probe
 
 ### Read-Only
 
-- `id` (String) Controller object ID (`_id`). Import key.
+- `id` (String) Controller object ID (`_id`). Import key — `terraform import` also accepts a friendly `name=<SLA name>` key.
 
 <a id="nestedatt--monitors"></a>
 ### Nested Schema for `monitors`

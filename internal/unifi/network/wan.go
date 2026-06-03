@@ -95,3 +95,19 @@ func (s SLACollection) Update(ctx context.Context, sla *wire.WanSlas) (*wire.Wan
 	}
 	return s.V2Collection.Update(ctx, *sla.UnderscoreId, sla)
 }
+
+// GetByName returns the WAN SLA with the given name (exact match), or
+// ErrNotFound. SLA names are unique, so this resolves a human-friendly import
+// key to the controller `_id`.
+func (s SLACollection) GetByName(ctx context.Context, name string) (*wire.WanSlas, error) {
+	slas, err := s.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for i := range slas {
+		if slas[i].Name != nil && *slas[i].Name == name {
+			return &slas[i], nil
+		}
+	}
+	return nil, ErrNotFound
+}

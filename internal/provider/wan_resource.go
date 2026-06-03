@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -95,7 +94,7 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Controller object ID (`_id`). Import key.",
+				MarkdownDescription: "Controller object ID (`_id`). Import key — `terraform import` also accepts `name=<WAN name>` (e.g. `name=WAN1`), since the UniFi UI does not expose the `_id`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"name": schema.StringAttribute{Required: true, MarkdownDescription: "WAN name."},
@@ -246,8 +245,16 @@ func (r *wanResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 	}
 }
 
+// ImportState accepts the controller `_id` or a friendly `name=<WAN name>` key
+// (e.g. `name=WAN1`), resolved to the `_id` via the underlying networkconf.
 func (r *wanResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	importByNameOrID(ctx, req, resp, "WAN", func(ctx context.Context, name string) (string, error) {
+		n, err := r.net.Networks().GetByName(ctx, name)
+		if err != nil {
+			return "", err
+		}
+		return deref(n.UnderscoreId), nil
+	})
 }
 
 func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *wire.Networkconf {
