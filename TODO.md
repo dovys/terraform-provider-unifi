@@ -3,17 +3,6 @@
 Tracked improvements that aren't blocking a phase. Phase-scoped work lives in
 [`docs/roadmap.md`](docs/roadmap.md); cross-cutting polish lives here.
 
-## Spec: enrich `device.json` with read-only `/stat/device` fields
-
-The rebuilt client's generated `wire.Device` is typed from the **writable**
-`api/fields` set, so it omits read-only stat/identity fields the client needs —
-notably `mac` (the natural key), plus `state`, `model`, `version`, `adopted`,
-`ip`, etc. `network.Devices().GetByMAC` currently works around this by scanning
-the raw `/stat/device` documents and decoding the matched one. Fix at the source:
-add the observed stat fields to `objects/device.json` (as `server_fields`/
-read-only) in `../unifi-specs`, regenerate, then drop the raw-scan workaround.
-Other stat-heavy legacy objects (clients, etc.) may have the same gap.
-
 ## Verify against hardware
 
 The live console allows **read-only** recon, so anything that needs a real write
@@ -168,11 +157,15 @@ Open items:
   camera); (c) accepted enum values (`light.mode`/`enableAt`/`luxSensitivity`,
   `sensor.mountType`); (d) numeric ranges/units (light `ledLevel` scale,
   `pirDuration` units; sensor threshold units).
-- **Protect chime `ringSettings` not modeled.** `unifi_protect_chime` models
-  name/volume/repeat_times/camera_ids but **not** the per-doorbell `ringSettings`
-  list (`{cameraId, ringtoneId, volume, repeatTimes}`) — it references uploaded
-  ringtone objects that aren't modeled. Add a nested block once ringtones are
-  modeled (or confirmed referenceable by id) on a HIL rig.
+- **Clear owned `omitempty` fields on GET-merge-PUT (beyond DNS slots).**
+  `structToRawMap` drops zero-valued owned fields, so the overlay can set but not
+  clear a plain `string`/`*bool` back to its zero (e.g. clearing `domain_name`,
+  `dhcp_gateway`); likewise an explicit empty list `[]` reads back as `null` and
+  trips the post-apply consistency check. DNS-slot lists are already handled
+  (`*string` slots write a non-nil `&""`). Decide the general approach (per-field
+  empty-write allow-list, or always-emit owned keys) **once empty-string writes
+  are confirmed acceptable per field on a live controller** — HIL-gated (see
+  `docs/roadmap.md` open question #6).
 
 ## Settings — model as typed resources (not a generic blob)
 
@@ -186,15 +179,6 @@ the meaningful, user-facing settings as **typed, import/update-only** resources
 `GET-merge-PUT` on `/rest/setting/<key>/<id>` so unmodeled fields survive. Pick
 the user-facing subset; confirm each field set against a live GET. This is a
 dedicated effort (its own phase/PR set), not part of the P3 stack.
-
-## Cross-resource wiring follow-ups
-
-- **`unifi_network_wlan` → RADIUS profile.** A `wpaeap` SSID needs a
-  `radiusprofile_id` to bind to a `unifi_network_radius_profile`; the WLAN
-  resource exposes `radius_mac_auth_enabled`/`radius_das_enabled` but **not** the
-  profile reference yet. Add `radiusprofile_id` to `unifi_network_wlan` (and the
-  wired 802.1X port profile binding) so the RADIUS profiles are actually
-  referenceable from config.
 
 ## Import UX: friendlier keys than the controller `_id`
 
@@ -216,17 +200,6 @@ Improve it:
   document it once in the import guidance.
 
 The raw `_id` must keep working — it remains the resource's state `id`.
-
-## Clear owned `omitempty` fields on GET-merge-PUT (beyond DNS slots)
-
-`structToRawMap` drops zero-valued owned fields, so the overlay can set but not
-clear a plain `string`/`*bool` back to its zero (e.g. clearing `domain_name`,
-`dhcp_gateway`). The DNS-slot lists are already handled (`*string` slots write a
-non-nil `&""`); a related edge remains: setting a list to an explicit empty `[]`
-reads back as `null`, which fails the post-apply consistency check. Decide the
-general approach (per-field empty-write allow-list, or always-emit owned keys)
-once empty-string writes are confirmed acceptable per field on a live controller.
-See `docs/roadmap.md` open question #6.
 
 ## Access (P7): verify the RE'd `unifi_access_door_group` write surface on live/HIL
 
