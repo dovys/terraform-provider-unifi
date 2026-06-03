@@ -52,7 +52,11 @@ generic collections (`LegacyCollection` — id-separate `Update`; `V2Collection`
 body) over **generated `wire` types**. A group adds a *custom* collection only where the surface
 needs a List-filter Read (a surface that lacks GET-by-id) or an array-field merge (device
 `port_overrides`). Writes are sparse PUTs of owned fields — the legacy `/rest` PUT shallow-merges
-server-side, so omitted fields keep their stored value and we never echo the full GET document back. The wire types are codegen — regenerated from the version-anchored
+server-side, so omitted fields keep their stored value and we never echo the full GET document back.
+**That merge is top-level-only:** the controller replaces a nested object or array *wholesale*
+(verified — PUTting one key of `wan_provider_capabilities` drops the sibling key). So a resource may
+send a nested object/array only if it owns *every* key/element; a partially-owned collection (device
+`port_overrides`) must GET-merge it instead. The wire types are codegen — regenerated from the version-anchored
 sibling spec ([`../unifi-specs`](../../unifi-specs)), never hand-edited; the hand-written facade is
 the groups and collections. Resources never touch a transport directly.
 

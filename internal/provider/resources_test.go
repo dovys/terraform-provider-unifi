@@ -347,8 +347,8 @@ func TestWAN_PPPoEPasswordOmittedWhenUnset(t *testing.T) {
 	ctx := context.Background()
 	var diags diag.Diagnostics
 
-	// Unset password (null): must be omitted from the wire conf so GET-merge-PUT
-	// preserves the controller's stored secret rather than blanking it. The
+	// Unset password (null): must be omitted from the wire conf so the sparse PUT
+	// leaves the controller's stored secret rather than blanking it. The
 	// username (read back) is still sent.
 	m := &wanResourceModel{
 		Name: types.StringValue("wan"), WANType: types.StringValue("pppoe"),
@@ -637,7 +637,7 @@ func TestFirewallRule_RoundTrip(t *testing.T) {
 	if r.Enabled == nil || !*r.Enabled || r.StateNew == nil || !*r.StateNew {
 		t.Errorf("bool mapping wrong: enabled=%v state_new=%v", r.Enabled, r.StateNew)
 	}
-	// Unset optionals stay nil/empty so GET-merge-PUT leaves the controller's value.
+	// Unset optionals stay nil/empty so the sparse PUT leaves the controller's value.
 	if r.SrcAddress != nil || r.ProtocolMatchExcepted != nil || r.DstFirewallgroupIds != nil {
 		t.Errorf("unset optionals must be nil: src_address=%v excepted=%v dst_groups=%v", r.SrcAddress, r.ProtocolMatchExcepted, r.DstFirewallgroupIds)
 	}
@@ -743,7 +743,7 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 		Autoneg:            types.BoolValue(false),
 		Speed:              types.Int64Value(1000),
 		STPPortMode:        types.BoolValue(false),
-		// leave the rest null so GET-merge-PUT preserves the controller's value
+		// leave the rest null so the sparse PUT leaves the controller's value
 		VoiceNetworkID:           types.StringNull(),
 		FullDuplex:               types.BoolNull(),
 		OpMode:                   types.StringNull(),
@@ -767,7 +767,7 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 	if deref(p.Name) != "Trunk" || string(derefEnum(p.Forward)) != "customize" || deref(p.NativeNetworkconfId) != "net-mgmt" {
 		t.Errorf("scalar mapping wrong: %+v", p)
 	}
-	// Explicit false on autoneg must be a non-nil *bool so the merge writes it.
+	// Explicit false on autoneg must be a non-nil *bool so the per-port merge writes it.
 	if p.Autoneg == nil || *p.Autoneg != false || p.StpPortMode == nil || *p.StpPortMode != false {
 		t.Errorf("explicit false bool must be non-nil: autoneg=%v stp_port_mode=%v", p.Autoneg, p.StpPortMode)
 	}
@@ -777,7 +777,7 @@ func TestPortProfile_RoundTrip(t *testing.T) {
 	if p.ExcludedNetworkconfIds == nil || len(*p.ExcludedNetworkconfIds) != 1 || (*p.ExcludedNetworkconfIds)[0] != "net-iot" {
 		t.Errorf("excluded_network_ids mapping wrong: %v", p.ExcludedNetworkconfIds)
 	}
-	// Unset scalar optionals stay nil/empty so the merge-PUT leaves the controller's value.
+	// Unset scalar optionals stay nil/empty so the per-port merge leaves the controller's value.
 	if p.FullDuplex != nil || p.Dot1xCtrl != nil {
 		t.Errorf("unset scalar optionals must be nil: full_duplex=%v dot1x=%v", p.FullDuplex, p.Dot1xCtrl)
 	}
@@ -837,7 +837,7 @@ func TestUserGroup_RoundTrip(t *testing.T) {
 		t.Errorf("explicit 0 must map to &0 (not nil), got %v", g.QosRateMaxDown)
 	}
 
-	// An unconfigured cap stays nil so GET-merge-PUT leaves the controller's value.
+	// An unconfigured cap stays nil so the sparse PUT leaves the controller's value.
 	m.QOSRateMaxUp = types.Int64Null()
 	if g := m.toUserGroup(); g.QosRateMaxUp != nil {
 		t.Errorf("null qos_rate_max_up must map to nil, got %v", g.QosRateMaxUp)

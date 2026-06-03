@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -153,6 +154,13 @@ func sleep(ctx context.Context, d time.Duration) error {
 // host discards without TF_LOG, but tflog rides the hclog sink the host parses.
 // Capture it with `TF_LOG_PROVIDER=debug tofu apply 2>&1 | grep 'wire HTTP'`.
 func debugHTTP(ctx context.Context, method, url string, reqBody any, status int, respBody []byte) {
+	// Skip the marshal+redact work entirely when no provider logging is
+	// configured — tflog.Debug would no-op anyway, but the fields (incl. the
+	// JSON round-trip in redactJSON) are built eagerly before that gate. TF_LOG /
+	// TF_LOG_PROVIDER is the same control tflog itself honors.
+	if os.Getenv("TF_LOG") == "" && os.Getenv("TF_LOG_PROVIDER") == "" {
+		return
+	}
 	fields := map[string]any{"method": method, "url": url}
 	if reqBody != nil {
 		if b, err := json.Marshal(reqBody); err == nil {
@@ -169,11 +177,16 @@ func debugHTTP(ctx context.Context, method, url string, reqBody any, status int,
 }
 
 // secretKeyHints are JSON field-name substrings (case-insensitive) whose values
-// debugHTTP masks. Credentials — login body, write-only passphrases the
-// controller echoes — must never reach the debug stream.
+// debugHTTP masks. Credentials — the login body, and the passphrases / key
+// material the controller echoes on GET (WLAN PSKs, IPsec/WireGuard preshared
+// keys, CA and server private keys) — must never reach the debug stream. The
+// "_key" hint covers the controller's *_key fields (x_ca_key, x_server_key,
+// wireguard_client_preshared_key, …) without masking the bare "key" field
+// (a static-DNS record's hostname).
 var secretKeyHints = []string{
 	"password", "passwd", "passphrase", "psk", "secret",
 	"token", "cookie", "authorization", "privkey", "private_key", "wpa_psk",
+	"_key", "pre_shared_key", "preshared_key",
 }
 
 // redactJSON pretty-prints JSON with secret-bearing values masked. On a parse

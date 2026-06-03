@@ -16,8 +16,9 @@ func (c *Client) Networks() NetworkCollection {
 
 // NetworkCollection is the networkconf CRUD collection. networkconf is a
 // partly-owned legacy document (the controller manages and returns fields the
-// provider does not model), so updates go through GET-merge-PUT (Update,
-// overridden here) rather than a whole-document PUT.
+// provider does not model), so Update (overridden here) sends a sparse PUT of
+// only the owned fields — the legacy /rest PUT shallow-merges server-side, so
+// omitted fields keep their stored value — never the controller's full document.
 type NetworkCollection struct {
 	LegacyCollection[wire.Networkconf]
 }

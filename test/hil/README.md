@@ -83,8 +83,9 @@ failure.
 ## Write verification (write.sh)
 
 Reaches the **write paths** the read-only rungs can't: resources whose live
-collection is empty (nothing to import) and write semantics (GET-merge-PUT,
-update-merge). It **writes to the live console**, so every object is **additive**
+collection is empty (nothing to import) and write semantics (sparse PUT,
+server-side partial-merge, the `port_overrides` array merge). It **writes to the
+live console**, so every object is **additive**
 (never mutates an existing object), **inert** (disabled rules / RFC-5737 blackhole
 routes / unreferenced groups — zero effect on live traffic while it exists), and
 **named `tfacc-hil-`** so the sweep can always reclaim it. A deliberate one-shot,

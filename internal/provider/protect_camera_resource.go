@@ -358,7 +358,8 @@ func (r *protectCameraResource) ImportState(ctx context.Context, req resource.Im
 // applyConfig PATCHes the plan's owned fields onto the camera and refreshes the
 // model in place. Each owned sub-object is built by merging the plan over the
 // current camera's values, so a PATCH never clears a sibling field the provider
-// also models (the Protect analogue of GET-merge-PUT).
+// also models — read-modify-write, since the controller replaces a nested
+// object wholesale rather than merging within it.
 func (r *protectCameraResource) applyConfig(ctx context.Context, plan *protectCameraResourceModel, current *wire.Camera, diags *diag.Diagnostics) {
 	cfg := cameraConfig{
 		Name:         mergeStr(plan.Name, current.Name),

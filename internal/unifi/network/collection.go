@@ -10,8 +10,10 @@ import (
 
 // The generic CRUD primitives every group builds on. A group embeds the
 // collection for its surface and adds object-specific behavior (Get-by-filter
-// where the API lacks GET-by-id, merge-update for partly-owned legacy docs,
-// the v2 _id-in-url-and-body contract). T is the generated wire type.
+// where the API lacks GET-by-id, the device port_overrides array merge, the v2
+// _id-in-url-and-body contract). Update is a sparse PUT — the legacy /rest PUT
+// shallow-merges server-side, so a body carrying only the owned fields is
+// enough. T is the generated wire type.
 
 // LegacyCollection is a CRUD collection over a legacy /rest/<type> object,
 // keyed by the controller's collection-name token (e.g. "networkconf").

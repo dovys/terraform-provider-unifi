@@ -58,8 +58,9 @@ nvr_settings is a singleton. All over `/proxy/protect/api/...`; field schemas pe
 **Data sources.** Only `data.unifi_protect_camera` ships initially (the object most likely referenced
 without being managed). Add `liveview`/`nvr` data sources later if asked.
 
-**Write path.** GET-merge-PUT/PATCH of the **owned fields only** (the exact verb per RE), never a
-whole-document write — the Protect analogue of the Network GET-merge discipline. Read reconciles
+**Write path.** PATCH of the **owned fields only** (the exact verb per RE), never a
+whole-document write — the Protect analogue of the Network sparse PUT (the controller partial-merges
+at the top level; nested sub-objects it replaces wholesale are merged client-side). Read reconciles
 Computed-vs-configured and removes-on-404 for the device resources; the singleton `nvr_settings` never
 404s. The known `structToRawMap` set-but-not-clear limitation ([roadmap.md open question 6](../roadmap.md))
 applies here too; same mitigations (Optional+Computed for the common path; an explicit-empty allow-list
@@ -111,7 +112,7 @@ Runtime media and ephemeral actions are not configuration:
 and there's no Protect simulator, so there is no Tier-2 acceptance for Protect (see
 [../testing.md](../testing.md)). Coverage:
 
-- **Unit** (no hardware): client CRUD over `httptest` incl. the GET-merge mask, model (de)serialization,
+- **Unit** (no hardware): client CRUD over `httptest` incl. the owned-field overlay mask, model (de)serialization,
   schema validation, the capability/version gating, and conversion round-trips — against **redacted RE
   fixtures**.
 - **Live read** (this console, read-only): `camera`, `liveview`, and `nvr_settings` **import clean** once

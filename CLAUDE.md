@@ -69,7 +69,7 @@ out of scope.
 2. Map the TF model to the generated `wire.<Type>` (regenerate from [`../unifi-specs`](../unifi-specs)
    if a field is missing/mistyped — fix the spec, never hand-edit `types.gen.go`). Add the group
    accessor + collection in `internal/unifi/network` (a custom collection only when the surface needs
-   id-in-body merge or List-filter Read). No hand-written per-type structs, no `models` package.
+   a List-filter Read or an array-field merge). No hand-written per-type structs, no `models` package.
 3. Schema: nested attributes; Map/Set keyed by natural key (not List); `Optional+Computed` with
    `UseStateForUnknown` on the knobs (no post-import churn — invariant 6); `RequiresReplace` immutables;
    controller-accurate validators; `Sensitive`.
