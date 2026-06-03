@@ -95,7 +95,7 @@ func (c *Classic) loginLocked(ctx context.Context) error {
 		}
 		data, _ := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
-		debugHTTP(http.MethodPost, c.baseURL+"/api/auth/login", body, resp.StatusCode, data)
+		debugHTTP(ctx, http.MethodPost, c.baseURL+"/api/auth/login", body, resp.StatusCode, data)
 
 		if resp.StatusCode == http.StatusTooManyRequests && attempt < c.maxRetries {
 			if err := sleep(ctx, retryAfter(resp.Header, attempt)); err != nil {
@@ -210,7 +210,7 @@ func (c *Classic) do(ctx context.Context, method, path string, body any) (*Respo
 		}
 		resp, err := c.http.Do(req)
 		if err != nil {
-			debugHTTP(method, c.baseURL+path, body, 0, nil)
+			debugHTTP(ctx, method, c.baseURL+path, body, 0, nil)
 			return nil, fmt.Errorf("classic %s %s: %w", method, path, err)
 		}
 		data, err := io.ReadAll(resp.Body)
@@ -218,7 +218,7 @@ func (c *Classic) do(ctx context.Context, method, path string, body any) (*Respo
 		if err != nil {
 			return nil, fmt.Errorf("read response body: %w", err)
 		}
-		debugHTTP(method, c.baseURL+path, body, resp.StatusCode, data)
+		debugHTTP(ctx, method, c.baseURL+path, body, resp.StatusCode, data)
 		// A rotated CSRF token may ride along on any response.
 		if v := firstHeader(resp.Header, "X-Updated-Csrf-Token"); v != "" {
 			c.mu.Lock()

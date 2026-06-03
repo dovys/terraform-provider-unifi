@@ -147,8 +147,8 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	}
 
 	// Narrowing the list to one server must explicitly clear the freed slot
-	// (non-nil &"") so GET-merge-PUT overwrites the stale wan_dns2 rather than
-	// leaving it — otherwise the controller echoes a perpetual extra server.
+	// (non-nil &"") so the sparse PUT overwrites the stale wan_dns2 — omitting it
+	// would leave the controller's server-side merge holding the extra server.
 	m.DNSServers = sliceToStringList([]string{"1.1.1.1"})
 	conf = m.toNetworkConf(ctx, &diags)
 	if derefStr(conf.WanDns1) != "1.1.1.1" || conf.WanDns2 == nil || *conf.WanDns2 != "" {
@@ -178,6 +178,48 @@ func TestWANConf_RoundTrip(t *testing.T) {
 	}
 	if out.UploadKilobits.ValueInt64() != 1000 {
 		t.Errorf("upload_kilobits should round-trip to 1000, got %v", out.UploadKilobits)
+	}
+}
+
+// TestWANConf_OmitsEmptyStaticFields proves the overlay omits wan_ip / netmask /
+// gateway / igmp_proxy_for when unset rather than sending "". The controller
+// validates these and rejects an empty string (api.err.InvalidValue) on a
+// non-static WAN, so a sparse PUT must leave them out entirely.
+func TestWANConf_OmitsEmptyStaticFields(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	// DHCP WAN, static-IP fields unset: must be omitted from the wire.
+	dhcp := (&wanResourceModel{
+		Name:         types.StringValue("uplink"),
+		WANType:      types.StringValue("dhcp"),
+		NetworkGroup: types.StringValue("WAN"),
+		Enabled:      types.BoolValue(true),
+		IP:           types.StringNull(),
+		Netmask:      types.StringNull(),
+		Gateway:      types.StringNull(),
+		IGMPProxyFor: types.StringNull(),
+	}).toNetworkConf(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toNetworkConf diags: %v", diags)
+	}
+	if dhcp.WanIp != nil || dhcp.WanNetmask != nil || dhcp.WanGateway != nil || dhcp.IgmpProxyFor != nil {
+		t.Errorf("static-IP / igmp fields must be omitted on a DHCP WAN, got ip=%v mask=%v gw=%v igmp=%v",
+			dhcp.WanIp, dhcp.WanNetmask, dhcp.WanGateway, dhcp.IgmpProxyFor)
+	}
+
+	// Static WAN with real values: the fields must be sent.
+	static := (&wanResourceModel{
+		Name:         types.StringValue("uplink"),
+		WANType:      types.StringValue("static"),
+		NetworkGroup: types.StringValue("WAN"),
+		Enabled:      types.BoolValue(true),
+		IP:           types.StringValue("203.0.113.2"),
+		Netmask:      types.StringValue("255.255.255.0"),
+		Gateway:      types.StringValue("203.0.113.1"),
+	}).toNetworkConf(ctx, &diags)
+	if derefStr(static.WanIp) != "203.0.113.2" || derefStr(static.WanNetmask) != "255.255.255.0" || derefStr(static.WanGateway) != "203.0.113.1" {
+		t.Errorf("static WAN must send ip/netmask/gateway, got ip=%v mask=%v gw=%v", static.WanIp, static.WanNetmask, static.WanGateway)
 	}
 }
 

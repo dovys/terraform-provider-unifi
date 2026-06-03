@@ -50,13 +50,16 @@ you're bringing existing hardware under management, not provisioning it. `mac` i
 `type`, `state`, `adopted`, `ip`, `version`, `num_ports`). Use it to reference a device you do **not**
 want Terraform to adopt or configure; otherwise just use the resource.
 
-## Why GET-merge-PUT, and ports as a Map
+## Why merge `port_overrides`, and ports as a Map
 
-The controller writes the **whole device document** (`PUT /rest/device/<id>`), which carries fields
-we don't model (`radio_table`, `config_network`, counters). So we GET, overwrite only owned keys, and
-PUT — keeping unmodeled fields as raw passthrough (a `json.RawMessage` carry, not a `map[string]any`
-schema). The doc also changes out-of-band, so the read happens inside the per-device lock; a separate
-apply or UI edit still means **last-write-wins**.
+The device write is a **sparse PUT** (`PUT /rest/device/<id>`) — the legacy `/rest` PUT shallow-merges
+server-side, so we send only the owned top-level keys (`name`, `led_override`, `mgmt_network_id`) and
+the controller keeps everything we don't model (`radio_table`, `config_network`, counters) untouched.
+The exception is **`port_overrides`**: it's a JSON *array*, which the controller replaces wholesale
+rather than merging element-by-element. So that one field we GET, overlay the owned ports onto the
+existing array (raw `json.RawMessage` passthrough for unmodeled per-port keys, not a `map[string]any`
+schema), and send back merged. That array read happens inside the per-device lock; a separate apply or
+UI edit still means **last-write-wins**.
 
 `port_overrides` is a **`MapNestedAttribute` keyed by port number**, not a list or block — a list
 tracks by index, so controller array reordering yields phantom diffs. Per-entry: `name`,

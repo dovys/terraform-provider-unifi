@@ -144,11 +144,16 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 				Validators:          []validator.List{listvalidator.SizeAtMost(2)},
 			},
 
-			"pppoe_username": optStr("PPPoE username (`wan_type=pppoe`)."),
+			"pppoe_username": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "PPPoE username (`wan_type=pppoe`). Read back from the controller when not set in config.",
+			},
 			"pppoe_password": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "PPPoE password (`wan_type=pppoe`). Write-only — the controller does not return it, so it is not refreshed on read or recoverable on import.",
+				MarkdownDescription: "PPPoE password (`wan_type=pppoe`). The provider never reads it back, so the secret stays out of state; set it in config to change it, and it is not recoverable on import.",
 			},
 
 			"ip":      optStr("Static WAN IP address (`wan_type=static`)."),
@@ -283,9 +288,9 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 		WanType:               (*wire.NetworkconfWanType)(strPtrOrNil(m.WANType)),
 		WanNetworkgroup:       strPtrOrNil(m.NetworkGroup),
 		Enabled:               boolPtr(m.Enabled),
-		WanIp:                 strPtrOrNil(m.IP),
-		WanNetmask:            strPtrOrNil(m.Netmask),
-		WanGateway:            strPtrOrNil(m.Gateway),
+		WanIp:                 strPtrIfSet(m.IP),
+		WanNetmask:            strPtrIfSet(m.Netmask),
+		WanGateway:            strPtrIfSet(m.Gateway),
 		WanLoadBalanceType:    (*wire.NetworkconfWanLoadBalanceType)(strPtrOrNil(m.LoadBalanceType)),
 		WanLoadBalanceWeight:  intPtr(m.LoadBalanceWeight),
 		WanFailoverPriority:   intPtr(m.FailoverPriority),
@@ -293,7 +298,7 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 		WanSmartqUpRate:       intPtr(m.SmartQUpRate),
 		WanSmartqDownRate:     intPtr(m.SmartQDownRate),
 		IgmpProxyUpstream:     boolPtr(m.IGMPProxyUpstream),
-		IgmpProxyFor:          (*wire.NetworkconfIgmpProxyFor)(strPtrOrNil(m.IGMPProxyFor)),
+		IgmpProxyFor:          (*wire.NetworkconfIgmpProxyFor)(strPtrIfSet(m.IGMPProxyFor)),
 		ReportWanEvent:        boolPtr(m.ReportWANEvent),
 		WanTypeV6:             (*wire.NetworkconfWanTypeV6)(strPtrOrNil(m.IPv6Type)),
 		Ipv6WanDelegationType: (*wire.NetworkconfIpv6WanDelegationType)(strPtrOrNil(m.IPv6DelegationType)),
@@ -383,9 +388,9 @@ func (m *wanResourceModel) fromNetworkConf(conf *wire.Networkconf) {
 	m.SettingPreference = types.StringValue(string(derefEnum(conf.SettingPreference)))
 	m.SingleNetworkLAN = types.StringValue(deref(conf.SingleNetworkLan))
 
-	m.IP = types.StringValue(deref(conf.WanIp))
-	m.Netmask = types.StringValue(deref(conf.WanNetmask))
-	m.Gateway = types.StringValue(deref(conf.WanGateway))
+	m.IP = strToStateOptional(deref(conf.WanIp))
+	m.Netmask = strToStateOptional(deref(conf.WanNetmask))
+	m.Gateway = strToStateOptional(deref(conf.WanGateway))
 
 	m.LoadBalanceType = types.StringValue(string(derefEnum(conf.WanLoadBalanceType)))
 	m.LoadBalanceWeight = intToState(conf.WanLoadBalanceWeight)
@@ -394,7 +399,7 @@ func (m *wanResourceModel) fromNetworkConf(conf *wire.Networkconf) {
 	m.SmartQUpRate = intToState(conf.WanSmartqUpRate)
 	m.SmartQDownRate = intToState(conf.WanSmartqDownRate)
 	m.IGMPProxyUpstream = boolToState(conf.IgmpProxyUpstream)
-	m.IGMPProxyFor = types.StringValue(string(derefEnum(conf.IgmpProxyFor)))
+	m.IGMPProxyFor = strToStateOptional(string(derefEnum(conf.IgmpProxyFor)))
 	m.MACOverride = types.StringValue(deref(conf.MacOverride))
 	m.ReportWANEvent = boolToState(conf.ReportWanEvent)
 	m.IPv6Type = types.StringValue(string(derefEnum(conf.WanTypeV6)))
@@ -402,11 +407,9 @@ func (m *wanResourceModel) fromNetworkConf(conf *wire.Networkconf) {
 	m.IPv6PDSize = intToState(conf.WanDhcpv6PdSize)
 
 	m.PPPoEUsername = types.StringValue(deref(conf.WanUsername))
-	// Write-only secret: the controller doesn't echo it, so keep the existing
-	// (plan/state) value rather than nulling it on read.
-	if deref(conf.XWanPassword) != "" {
-		m.PPPoEPassword = types.StringValue(deref(conf.XWanPassword))
-	}
+	// pppoe_password is deliberately never read back: the controller does echo
+	// x_wan_password, but adopting it would pull the secret into state and make
+	// the value diverge from config (the field mirrors config/plan only).
 
 	if conf.WanVlanEnabled != nil && *conf.WanVlanEnabled && conf.WanVlan != nil {
 		m.VLANID = types.Int64Value(int64(*conf.WanVlan))

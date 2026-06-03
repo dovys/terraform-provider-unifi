@@ -39,8 +39,8 @@ A WAN uplink (`networkconf` with `purpose=wan`): DHCP/PPPoE/static, dual-WAN loa
 - `mac_override` (String) Clone this MAC address on the WAN interface (empty disables MAC override).
 - `netmask` (String) Static WAN netmask (`wan_type=static`).
 - `network_group` (String) WAN interface group: `WAN` (primary) or `WAN2`.
-- `pppoe_password` (String, Sensitive) PPPoE password (`wan_type=pppoe`). Write-only — the controller does not return it, so it is not refreshed on read or recoverable on import.
-- `pppoe_username` (String) PPPoE username (`wan_type=pppoe`).
+- `pppoe_password` (String, Sensitive) PPPoE password (`wan_type=pppoe`). The provider never reads it back, so the secret stays out of state; set it in config to change it, and it is not recoverable on import.
+- `pppoe_username` (String) PPPoE username (`wan_type=pppoe`). Read back from the controller when not set in config.
 - `report_wan_event` (Boolean) Whether WAN up/down events are reported.
 - `smartq_down_rate` (Number) Smart-queue download limit (kbit/s).
 - `smartq_enabled` (Boolean) Whether smart-queue QoS is enabled on this uplink.

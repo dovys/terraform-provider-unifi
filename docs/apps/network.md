@@ -33,7 +33,7 @@ device/port internals in [../devices-and-ports.md](../devices-and-ports.md); ope
 ### Devices & ports (see [../devices-and-ports.md](../devices-and-ports.md))
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `unifi_network_device` | L (GET-merge-PUT) + I adopt | One resource per device, keyed by MAC: adopts if pending, manages config (`name`, `led_override`, `mgmt_network_id`, `port_overrides` — **Map keyed by port number**; owned-field allowlist), exposes computed telemetry. Import captures the switch's live `port_overrides` (so `plan -generate-config-out` mirrors it). Destroy reverts config; `forget_on_destroy` opts into forget. |
+| `unifi_network_device` | L (sparse PUT; `port_overrides` array merged) + I adopt | One resource per device, keyed by MAC: adopts if pending, manages config (`name`, `led_override`, `mgmt_network_id`, `port_overrides` — **Map keyed by port number**; owned-field allowlist), exposes computed telemetry. Import captures the switch's live `port_overrides` (so `plan -generate-config-out` mirrors it). Destroy reverts config; `forget_on_destroy` opts into forget. |
 | `unifi_network_port_profile` | L | Reusable `portconf`, referenced by `port_overrides[*].port_profile_id`. |
 
 There's also a read-only `data.unifi_network_device` for referencing a device you don't manage. No
@@ -42,8 +42,8 @@ standalone per-port resource (the device-doc write would race); ports are manage
 ### Firewall & traffic
 | Resource | Backend | Notes |
 |----------|:------:|-------|
-| `unifi_network_firewall_rule` | L (GET-merge-PUT) | Classic rule. `rule_index` validated `>= 0` (permissive) + apply-time uniqueness guard within a ruleset. Source/dest by address, port, network, or firewall group; connection-state match. Don't normalize controller-authored names. |
-| `unifi_network_firewall_group` | L (GET-merge-PUT) | Address/port groups (`address-group`/`port-group`/`ipv6-address-group`); immutable `type`; sends explicit empty `group_members`. |
+| `unifi_network_firewall_rule` | L | Classic rule. `rule_index` validated `>= 0` (permissive) + apply-time uniqueness guard within a ruleset. Source/dest by address, port, network, or firewall group; connection-state match. Don't normalize controller-authored names. |
+| `unifi_network_firewall_group` | L | Address/port groups (`address-group`/`port-group`/`ipv6-address-group`); immutable `type`; sends explicit empty `group_members`. |
 | `unifi_network_firewall_zone` / `unifi_network_firewall_policy` | V2 | Zone-based model (with ordering). |
 | `unifi_network_traffic_rule` / `unifi_network_traffic_route` | V2 | App/category rules; policy routing. |
 

@@ -63,8 +63,8 @@ clean in a plan-only flow). See [`test/hil/README.md`](../test/hil/README.md).
 The read-only rungs can't reach two things: the **write paths** of resources whose live collection is
 *empty* (nothing to import — `port_profile`, `radius_account`/`radius_profile`, `static_route`,
 `port_forward`, `traffic_rule`/`traffic_route` are modeled from docs, never seen populated — the
-biggest provisional risk in [`../TODO.md`](../TODO.md)), and **write semantics** (GET-merge-PUT,
-partial-merge, replace-vs-merge). Verifying these needs a write — done *safely* against the operator's
+biggest provisional risk in [`../TODO.md`](../TODO.md)), and **write semantics** (sparse PUT,
+server-side partial-merge, replace-vs-merge). Verifying these needs a write — done *safely* against the operator's
 **own active home console** (no separate test site) by making every test object **additive, inert, and
 guaranteed-torn-down**. It is a **deliberate one-shot** from the workstation (`run.sh`, gated), **not** a
 CI gate — the `tier3-hil` job stays a stub; an occasional leaked-and-swept object or momentary blip is

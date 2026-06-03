@@ -19,7 +19,7 @@ them this clean.
      }
    }
    ```
-4. `apply` → adopts, waits for provisioned, then GET-merge-PUTs name + ports.
+4. `apply` → adopts, waits for provisioned, then sparse-PUTs name + the merged `port_overrides`.
 
 Variations: `wait_for_adoption = "10m"` lets you apply before powering on; default `0` errors if
 undiscovered (so success means real hardware). Destroying the resource reverts the config and leaves
