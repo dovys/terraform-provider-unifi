@@ -114,30 +114,18 @@ func (s DevicesService) Get(ctx context.Context, id string) (*wire.Device, error
 }
 
 // GetByMAC returns the device with the given MAC (case-insensitive), or
-// ErrNotFound — the lookup adopt-if-needed does before configuring.
-//
-// wire.Device is typed from the writable api/fields set and so omits read-only
-// stat fields like "mac"; the MAC match scans the raw /stat/device documents,
-// then decodes the matched one into the typed Device. (Enriching device.json
-// with the stat/identity fields is tracked in TODO.md.)
+// ErrNotFound — the lookup adopt-if-needed does before configuring. The match
+// is against the typed wire.Device.Mac (a read-only stat field carried by the
+// generated type), filtering the authoritative /stat/device list like Get.
 func (s DevicesService) GetByMAC(ctx context.Context, mac string) (*wire.Device, error) {
 	want := strings.ToLower(strings.TrimSpace(mac))
-	raws, err := legacyData[map[string]json.RawMessage](ctx, s.core, http.MethodGet, s.core.legacyPath("stat/device"), nil)
+	devices, err := s.List(ctx)
 	if err != nil {
 		return nil, err
 	}
-	for _, raw := range raws {
-		var m string
-		if rawMac, ok := raw["mac"]; ok && json.Unmarshal(rawMac, &m) == nil && strings.ToLower(m) == want {
-			var d wire.Device
-			b, err := json.Marshal(raw)
-			if err != nil {
-				return nil, err
-			}
-			if err := json.Unmarshal(b, &d); err != nil {
-				return nil, err
-			}
-			return &d, nil
+	for i := range devices {
+		if devices[i].Mac != nil && strings.ToLower(*devices[i].Mac) == want {
+			return &devices[i], nil
 		}
 	}
 	return nil, ErrNotFound
