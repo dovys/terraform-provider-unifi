@@ -50,6 +50,6 @@ A WAN uplink (`networkconf` with `purpose=wan`): DHCP/PPPoE/static, dual-WAN loa
 
 ### Read-Only
 
-- `id` (String) Controller object ID (`_id`). Import key.
+- `id` (String) Controller object ID (`_id`). Import key — `terraform import` also accepts `name=<WAN name>` (e.g. `name=WAN1`), since the UniFi UI does not expose the `_id`.
 - `setting_preference` (String) Controller auto/manual settings toggle (read-only).
 - `single_network_lan` (String) LAN this uplink is bound to (read-only).

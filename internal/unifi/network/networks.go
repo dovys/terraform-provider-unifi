@@ -22,6 +22,22 @@ type NetworkCollection struct {
 	LegacyCollection[wire.Networkconf]
 }
 
+// GetByName returns the networkconf with the given name (exact match), or
+// ErrNotFound. Network names are unique per site, so this resolves a
+// human-friendly import key (e.g. "WAN1", "Default") to the controller `_id`.
+func (s NetworkCollection) GetByName(ctx context.Context, name string) (*wire.Networkconf, error) {
+	confs, err := s.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for i := range confs {
+		if confs[i].Name != nil && *confs[i].Name == name {
+			return &confs[i], nil
+		}
+	}
+	return nil, ErrNotFound
+}
+
 // Update applies the owned fields of n onto the live networkconf document via
 // GET-merge-PUT, leaving controller-managed and unmodeled fields intact. n must
 // carry its _id.

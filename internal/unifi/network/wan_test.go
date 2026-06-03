@@ -72,6 +72,21 @@ func TestWANSLAUpdateSendsID(t *testing.T) {
 	}
 }
 
+func TestWANSLAGetByName(t *testing.T) {
+	f := &fakeDoer{resp: okJSON(`[{"_id":"s1","name":"primary"},{"_id":"s2","name":"backup"}]`)}
+	sla, err := newTestClient(f).WAN().SLAs().GetByName(context.Background(), "backup")
+	if err != nil {
+		t.Fatalf("GetByName: %v", err)
+	}
+	if sla.UnderscoreId == nil || *sla.UnderscoreId != "s2" {
+		t.Fatalf("got %+v, want s2", sla)
+	}
+	if _, err := newTestClient(&fakeDoer{resp: okJSON(`[{"_id":"s1","name":"primary"}]`)}).
+		WAN().SLAs().GetByName(context.Background(), "nope"); err != ErrNotFound {
+		t.Fatalf("want ErrNotFound, got %v", err)
+	}
+}
+
 func TestNetworksList(t *testing.T) {
 	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN","purpose":"corporate"}]}`)}
 	nets, err := newTestClient(f).Networks().List(context.Background())
@@ -83,6 +98,21 @@ func TestNetworksList(t *testing.T) {
 	}
 	if len(nets) != 1 || nets[0].Name == nil || *nets[0].Name != "LAN" {
 		t.Fatalf("nets = %+v, want one LAN", nets)
+	}
+}
+
+func TestNetworksGetByName(t *testing.T) {
+	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"Default"},{"_id":"n2","name":"WAN1"}]}`)}
+	n, err := newTestClient(f).Networks().GetByName(context.Background(), "WAN1")
+	if err != nil {
+		t.Fatalf("GetByName: %v", err)
+	}
+	if n.UnderscoreId == nil || *n.UnderscoreId != "n2" {
+		t.Fatalf("got %+v, want n2", n)
+	}
+	if _, err := newTestClient(&fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"Default"}]}`)}).
+		Networks().GetByName(context.Background(), "Nope"); err != ErrNotFound {
+		t.Fatalf("want ErrNotFound, got %v", err)
 	}
 }
 
