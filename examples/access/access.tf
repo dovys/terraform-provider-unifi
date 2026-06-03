@@ -62,3 +62,14 @@ resource "unifi_access_door" "front" {
   name       = "Front Entrance"
   floor_name = "Ground Floor"
 }
+
+# Set the guard user set of a door (the users authorized to act as guards for
+# it). Update/import-only, keyed by door_id; set user_ids = [] to clear, and
+# destroy stops managing the set without changing it. user_ids reference
+# existing Access users (the provider does not model users).
+resource "unifi_access_door_guard" "front" {
+  door_id = data.unifi_access_door.front.id
+  user_ids = [
+    # "<access user unique_id>", ...
+  ]
+}
