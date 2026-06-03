@@ -1,0 +1,9 @@
+# Force reporters through the structured forms above.
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/dovys/terraform-provider-unifi/tree/main/docs
+    about: Architecture, per-app resource reference, and testing — check here before filing.
+  - name: Roadmap
+    url: https://github.com/dovys/terraform-provider-unifi/blob/main/docs/roadmap.md
+    about: What's shipped and what's planned — your ask may already be tracked.
