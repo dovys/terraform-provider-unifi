@@ -27,6 +27,11 @@ below predate the date-based convention.
   `terraform import unifi_network_wan.primary name=WAN1`) and resolve it to the
   controller id — no more hunting for the 24-character `_id`. The raw `_id` still
   works and remains the state `id`.
+- **`UNIFI_DEBUG_HTTP` wire-level debug dump.** Set it to any non-empty value to
+  dump every request/response — method, URL, exact JSON body — to stderr, with
+  secret-bearing fields masked. The tool for reverse-engineering which fields a
+  surface accepts on PUT/POST vs only returns on GET. Off by default. See
+  [`docs/development.md`](docs/development.md).
 
 ### Changed
 
@@ -73,6 +78,13 @@ below predate the date-based convention.
   empty `x_wan_password`, which GET-merge-PUT overlaid onto the controller and
   could drop a live PPPoE uplink. The field is now omitted when unset (set it to
   `""` to deliberately clear it).
+- **GET-merge-PUT no longer fails with `api.err.InvalidPayload` on protected
+  networks.** Updating a network the controller marks as a built-in — the WAN
+  configs and the protected `Default` network — returned the server-managed meta
+  fields `attr_no_delete` / `attr_hidden_id` on GET, and the merge PUT them
+  straight back, which the controller rejects. These fields are never
+  provider-owned, so `UpdateMerge` now strips them from the merged document
+  before the write.
 - **`unifi_network_device` import now captures live port overrides.** Importing a
   switch (or `terraform plan -generate-config-out`) previously produced
   `port_overrides = {}`, dropping every per-port VLAN/profile/PoE assignment and

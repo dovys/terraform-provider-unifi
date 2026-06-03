@@ -81,12 +81,19 @@ func (s LegacyCollection[T]) Delete(ctx context.Context, id string) error {
 	return err
 }
 
+// serverManagedKeys are fields the legacy controller emits on GET but rejects on
+// PUT with api.err.InvalidPayload. They are never provider-owned, so UpdateMerge
+// strips them from the merged document before the write. attr_no_delete /
+// attr_hidden_id mark protected built-ins (the Default network, the WAN configs).
+var serverManagedKeys = []string{"attr_no_delete", "attr_hidden_id"}
+
 // UpdateMerge performs GET-merge-PUT for a partly-owned legacy document: fetch
 // the existing doc as a raw field map, overlay the owned (omitempty) fields of
-// owned, and PUT the result. Controller-managed and unmodeled fields survive
-// untouched — the invariant for legacy docs whose full surface the provider
-// does not own (never a whole-document PUT). owned is typically a *T or a subset
-// struct whose omitempty fields are exactly the ones the caller intends to set.
+// owned, and PUT the result. Unmodeled fields survive untouched — the invariant
+// for legacy docs whose full surface the provider does not own (never a
+// whole-document PUT) — except serverManagedKeys, which the controller emits on
+// GET but rejects on PUT and so must be dropped. owned is typically a *T or a
+// subset struct whose omitempty fields are exactly the ones the caller sets.
 func (s LegacyCollection[T]) UpdateMerge(ctx context.Context, id string, owned any) (*T, error) {
 	existing, err := legacyData[map[string]json.RawMessage](ctx, s.core, http.MethodGet, s.restPath(id), nil)
 	if err != nil {
@@ -102,6 +109,13 @@ func (s LegacyCollection[T]) UpdateMerge(ctx context.Context, id string, owned a
 	}
 	for k, v := range fields {
 		doc[k] = v
+	}
+	// Drop controller-managed meta fields the legacy API returns on GET but
+	// rejects on PUT with api.err.InvalidPayload (e.g. attr_no_delete /
+	// attr_hidden_id on the protected Default network and the WAN configs). They
+	// are never provider-owned, so they must not ride back in the merged document.
+	for _, k := range serverManagedKeys {
+		delete(doc, k)
 	}
 	items, err := legacyData[T](ctx, s.core, http.MethodPut, s.restPath(id), doc)
 	if err != nil {

@@ -67,6 +67,21 @@ locally reasonable, the sum betraying the design. This is the contract that keep
 6. Tests to the Definition of Done.
 7. Update [apps/network.md](apps/network.md) + the [roadmap.md](roadmap.md) checklist.
 
+## Wire-level debugging (`UNIFI_DEBUG_HTTP`)
+
+Set `UNIFI_DEBUG_HTTP=1` to dump every request/response — method, URL, and the
+exact JSON body — to stderr, with secret-bearing fields (`password`,
+`passphrase`, `psk`, `token`, …) masked. This is the tool for **reverse-engineering
+a surface**: which fields the controller actually accepts on PUT/POST vs only
+returns on GET. The recipe step-1 confirmation ("confirm the surface + wire
+shape") is exactly this — capture the live GET, then watch what a write
+round-trips or rejects (`api.err.InvalidPayload` names a field the surface won't
+take). Off by default; never on in normal runs.
+
+```
+UNIFI_DEBUG_HTTP=1 tofu apply 2>capture.log   # stderr carries the dump
+```
+
 ## Definition of Done
 
 - [ ] Routes via `Client`; targets the correct surface (legacy `/rest` or v2).

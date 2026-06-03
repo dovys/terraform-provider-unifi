@@ -117,12 +117,13 @@ func TestNetworksGetByName(t *testing.T) {
 }
 
 // TestNetworksUpdateMerge proves GET-merge-PUT: the live doc is fetched, the
-// owned fields overlaid, and the merged document PUT back — controller-managed
-// fields the provider doesn't model (here attr_no_delete) survive.
+// owned fields overlaid, and the merged document PUT back. Genuinely unmodeled
+// fields (here vlan) survive untouched, but server-managed meta fields the
+// controller rejects on PUT (attr_no_delete) are stripped from the merged doc.
 func TestNetworksUpdateMerge(t *testing.T) {
 	f := fakeQueue(
-		`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN","attr_no_delete":true,"vlan":10}]}`,
-		`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN-renamed","attr_no_delete":true,"vlan":10}]}`,
+		`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN","attr_no_delete":true,"attr_hidden_id":"WAN","vlan":10}]}`,
+		`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN-renamed","vlan":10}]}`,
 	)
 	_, err := newTestClient(f).Networks().Update(context.Background(),
 		&wire.Networkconf{UnderscoreId: ptr("n1"), Name: ptr("LAN-renamed")})
@@ -145,7 +146,13 @@ func TestNetworksUpdateMerge(t *testing.T) {
 	if string(doc["name"]) != `"LAN-renamed"` {
 		t.Errorf("owned field not overlaid: name = %s", doc["name"])
 	}
-	if string(doc["attr_no_delete"]) != "true" {
-		t.Errorf("unmodeled controller field not preserved: attr_no_delete = %s", doc["attr_no_delete"])
+	if string(doc["vlan"]) != "10" {
+		t.Errorf("genuinely unmodeled field not preserved: vlan = %s", doc["vlan"])
+	}
+	if _, present := doc["attr_no_delete"]; present {
+		t.Errorf("server-managed attr_no_delete must be stripped from PUT body, got %s", doc["attr_no_delete"])
+	}
+	if _, present := doc["attr_hidden_id"]; present {
+		t.Errorf("server-managed attr_hidden_id must be stripped from PUT body, got %s", doc["attr_hidden_id"])
 	}
 }

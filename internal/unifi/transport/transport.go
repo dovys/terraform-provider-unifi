@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -135,4 +136,94 @@ func sleep(ctx context.Context, d time.Duration) error {
 	case <-t.C:
 		return nil
 	}
+}
+
+// --- wire-level HTTP debug (UNIFI_DEBUG_HTTP) ---
+
+// debugHTTPEnabled reports whether wire-level request/response dumping is on,
+// gated by a non-empty UNIFI_DEBUG_HTTP so it never fires in normal runs.
+func debugHTTPEnabled() bool { return os.Getenv("UNIFI_DEBUG_HTTP") != "" }
+
+// debugHTTP dumps one request/response pair to stderr, with secret-bearing JSON
+// fields masked, when UNIFI_DEBUG_HTTP is set. Every classic request and the
+// login pass through it, so it captures the exact body the controller accepts or
+// rejects — the tool for reverse-engineering which fields a surface will
+// PUT/POST vs only GET. status 0 / nil respBody denotes a transport-level
+// failure (no response). Output goes to stderr, never stdout: stdout carries the
+// go-plugin gRPC handshake, while Terraform forwards plugin stderr to the
+// operator.
+func debugHTTP(method, url string, reqBody any, status int, respBody []byte) {
+	if !debugHTTPEnabled() {
+		return
+	}
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "\n=== UNIFI HTTP %s %s ===\n", method, url)
+	if reqBody != nil {
+		if b, err := json.Marshal(reqBody); err == nil {
+			fmt.Fprintf(&sb, "--> request:\n%s\n", redactJSON(b))
+		}
+	}
+	if status != 0 {
+		fmt.Fprintf(&sb, "<-- status: %d\n", status)
+	}
+	if len(respBody) > 0 {
+		fmt.Fprintf(&sb, "<-- response:\n%s\n", redactJSON(respBody))
+	}
+	fmt.Fprint(os.Stderr, sb.String())
+}
+
+// secretKeyHints are JSON field-name substrings (case-insensitive) whose values
+// debugHTTP masks. Credentials — login body, write-only passphrases the
+// controller echoes — must never reach the debug stream.
+var secretKeyHints = []string{
+	"password", "passwd", "passphrase", "psk", "secret",
+	"token", "cookie", "authorization", "privkey", "private_key", "wpa_psk",
+}
+
+// redactJSON pretty-prints JSON with secret-bearing values masked. On a parse
+// failure it returns the raw text, truncated, so a non-JSON body still shows.
+func redactJSON(b []byte) string {
+	var v any
+	if err := json.Unmarshal(b, &v); err != nil {
+		s := strings.TrimSpace(string(b))
+		if len(s) > 2000 {
+			s = s[:2000] + "…(truncated)"
+		}
+		return s
+	}
+	redactValue(v)
+	out, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return string(b)
+	}
+	return string(out)
+}
+
+// redactValue walks a decoded JSON value in place, masking every value under a
+// secret-bearing key at any depth.
+func redactValue(v any) {
+	switch t := v.(type) {
+	case map[string]any:
+		for k, val := range t {
+			if isSecretKey(k) {
+				t[k] = "***REDACTED***"
+				continue
+			}
+			redactValue(val)
+		}
+	case []any:
+		for _, val := range t {
+			redactValue(val)
+		}
+	}
+}
+
+func isSecretKey(k string) bool {
+	lk := strings.ToLower(k)
+	for _, h := range secretKeyHints {
+		if strings.Contains(lk, h) {
+			return true
+		}
+	}
+	return false
 }
