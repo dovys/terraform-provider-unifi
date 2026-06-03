@@ -60,10 +60,13 @@ release:
 # Release notes are auto-derived from the commit log between tags. The curated
 # human narrative lives in CHANGELOG.md (date-based, maintained in PRs); this is
 # the per-version mechanical list. Filter out non-functional commit prefixes and
-# merge commits.
+# merge commits. Each line is "[short-sha](commit-url) subject" — GitHub renders
+# the markdown as a clickable abbreviated-hash link (full SHA in the URL so it
+# always resolves).
 changelog:
   use: git
   sort: asc
+  format: "[{{ slice .SHA 0 7 }}](https://github.com/dovys/terraform-provider-unifi/commit/{{ .SHA }}) {{ .Message }}"
   filters:
     exclude:
       - '^deps:'
