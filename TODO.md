@@ -261,17 +261,42 @@ console and tighten the code where noted:
 - **DoD.** Acceptance create→update→import→destroy + `CheckDestroy` + `tfacc-`
   sweeper + a clean second-empty plan, per the standard (needs a live/HIL console).
 
-### Access P7c — doors, policies, holidays are blocked on spec write DTOs
+### Access P7c — doors, policies, holidays: verify the RE'd write surface on live/HIL
 
-The RE'd Access spec contains **no** resource-config write DTO for doors,
-policies, or holidays — only read types (`access_co_Door`,
-`access_policy_bo_AccessPolicy`, `holiday_bo_Holiday`, …) and operation params
-(adopt, backup, NFC). `door_group_controller_DoorGroupParams` is the **only**
-controller config-params type in the whole spec. Modeling the others would mean
-guessing a write shape from no-omitempty read types — exactly the plan-unstable,
-unverifiable modeling this repo avoids. Before building them: extend the RE
-capture in `../unifi-specs/access` with the missing controller param types (e.g.
-`holiday_controller_*`, `door_controller_*`, `access_policy_controller_*`), add
-them as projection roots, regenerate `wire`, then model + verify on a live/HIL
-console. (Holidays also lack date-range fields in the current read type; doors
-are largely read-only physical objects; policies are deeply nested.)
+P7c is **unblocked** — the regenerated spec (`../unifi-specs/access/v4.2.27`)
+carries the controller-bound **write DTOs** the earlier capture had dropped
+(`access_policy_bo_AccessPolicyBo`, `holiday_bo_HolidayGroupParams`,
+`location_bo_UpdateDoorParams`, `door_guard_bo_UpdateDoorGuard`). The
+`c.Access()` client now has `AccessPolicies`/`HolidayGroups`/`Doors`/`DoorGuards`
+groups and the resources ship. As with `door_group`, **none of this is verified
+against a live console** (no Access console; X-API-KEY is Network-only) — schemas
+flag it HIL-unverified. Confirm on a live/HIL Access console:
+
+- **CRUD paths.** `GET /api/v2/access_policies` (list) + `POST|GET|PUT|DELETE
+  /api/v2/access_policy[/{id}]`; `GET /api/v2/holiday_groups` + `POST|GET|PUT|DELETE
+  /api/v2/holiday_group[/{id}]`; `GET /api/v2/locations/doors` + `PUT
+  /api/v2/locations/door/{id}`; `GET|PUT /api/v2/locations/door/{id}/door_guard`
+  (`internal/unifi/access/{access_policies,holiday_groups,doors,door_guards}.go`).
+- **access_policy read/write divergence.** The POST/PUT body is
+  `access_policy_bo_AccessPolicyBo` (configs/objects/rules/resources) but GET
+  returns `access_policy_bo_AccessPolicy` (embedded `Policy` + access_resources/
+  access_subject) — a different shape. The resource therefore reconciles only
+  `name` + computed status from the read view and **preserves config** for the
+  nested write-only fields (no drift detection on those). Confirm how write fields
+  map to the read view and tighten reconciliation; confirm the create response
+  carries `unique_id`.
+- **door read.** There is no per-door GET, so `Doors().Get` lists
+  `/locations/doors` and filters by `Location.unique_id`. Confirm the list item
+  shape (`location_bo_Door` w/ `Location` embed) and that `floor_name`/`extra_type`
+  round-trip (the door resource preserves `floor_name`, which isn't directly
+  readable on the door object).
+- **door_guard.** No create/delete — replaced in place via PUT; an empty
+  `user_ids` is the clear. `user_ids` are opaque user references (the provider
+  does not model Access users). Confirm GET returns `user_ids` (not only
+  `user_infos`) and that an empty set round-trips as `[]` not `null`.
+- **holiday_group membership.** Modeled via `holiday_ids` (mirrors door_group's
+  `door_ids`); inline holiday creation (`holidays[]` in the write DTO) is exposed
+  read-only for now. Confirm `holiday_ids` associates existing holidays and the
+  detail read returns them.
+- **DoD.** Acceptance create→update→import→destroy + `CheckDestroy` + `tfacc-`
+  sweeper + clean second-empty plan, per the standard (needs a live/HIL console).
