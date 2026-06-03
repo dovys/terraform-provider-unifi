@@ -86,10 +86,11 @@ A resource is checkable only when it meets the Definition of Done ([development.
         surface; `forget_on_destroy` unadopts). **All HIL-unverified** (no live device on the recon
         console — see `TODO.md`); chime per-doorbell `ringSettings` deferred (references unmodeled
         ringtone objects).
-- [~] **P7** Access app (`unifi_access_*`): design ([apps/access.md](apps/access.md)). Access ships only an
+- [x] **P7** Access app (`unifi_access_*`): design ([apps/access.md](apps/access.md)). Access ships only an
       Integration-API openapi (wrong surface); the private web-UI API is reverse-engineered from the Access
       Go binary (`../unifi-specs/access/v4.2.27`), so fidelity is lower than Protect's vendor OpenAPI and the
-      surface **cannot be live-verified** (no Access console; X-API-KEY is Network-only).
+      surface **cannot be live-verified** (no Access console; X-API-KEY is Network-only) — every Access write
+      surface is therefore **HIL-unverified**, tracked in `TODO.md`.
   - [x] **P7a — foundation + read-only data source:** `Access()` substruct client over the cookie session
         (`internal/unifi/access`, private web-UI API `/proxy/access/api`, `{code,msg,data}` envelope, no
         `api_key`, console-global); generated `wire` types projected from the RE'd spec via the shared
@@ -99,11 +100,13 @@ A resource is checkable only when it meets the Definition of Done ([development.
         object the RE'd spec provides a write DTO for (`door_group_controller_DoorGroupParams`); its CRUD
         paths, the envelope success-code set, and the `/door_ids` response shape remain **HIL-unverified**
         (see `TODO.md`).
-  - [ ] **P7c — doors, policies, holidays (blocked on spec):** the RE'd Access spec contains **no** write
-        DTO for these (only read types + operation params), so they can't be modeled clean-room without
-        guessing an unverifiable write shape. Blocked until an RE capture adds the controller param types
-        (e.g. `holiday_controller_*`, `access_policy_controller_*`) to `../unifi-specs/access`, then model +
-        verify on a live/HIL console.
+  - [x] **P7c — policies, holidays, doors, door guards:** an RE capture added the missing write DTOs to
+        `../unifi-specs/access` (`access_policy_bo_*`, `holiday_bo_*`, `location_bo_UpdateDoorParams`,
+        `door_guard_bo_UpdateDoorGuard`); the `wire` regen picked them up. Ships `unifi_access_policy`,
+        `unifi_access_holiday_group`, `unifi_access_door` (update/import-only on discovered hardware), and
+        `unifi_access_door_guard` (update/import-only), each with a read-only data source. Doors and door
+        guards configure discovered hardware, so destroy is a no-op state removal (never-forget). The write
+        surface stays **HIL-unverified** (no live Access console — see `TODO.md`).
 
 ## Open questions (don't block design)
 

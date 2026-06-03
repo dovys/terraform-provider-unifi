@@ -4,16 +4,16 @@
 > classic cookie+CSRF transport, capabilities, `Configure` probe) has landed; resources are built
 > phase by phase ([roadmap.md](roadmap.md)). These docs describe the **current intended design** (not its history).
 
-Manages a **UniFi OS** console as code — **Network** and **Protect** today (Access and the other apps
+Manages a **UniFi OS** console as code — **Network**, **Protect**, and **Access** today (the other apps
 later) — against the latest UniFi APIs. Resources are **app-namespaced** (`unifi_network_*`,
-`unifi_protect_*`, …). Built clean-room (no reused third-party code).
+`unifi_protect_*`, `unifi_access_*`, …). Built clean-room (no reused third-party code).
 
 | Doc | Covers |
 |-----|--------|
 | [architecture.md](architecture.md) | API surfaces, client, auth, the per-resource surface map, capability gating, safety. |
 | [apps/network.md](apps/network.md) | **Network** app resource & data-source catalog: the resource design and what we don't model. |
 | [apps/protect.md](apps/protect.md) | **Protect** app: cameras, doorbells, lights, sensors, chimes, viewers, liveviews, NVR settings — shares the client & session. |
-| [apps/access.md](apps/access.md) | **Access** app: door groups (doors, policies, holidays to follow) — shares the client & session; private web-UI API behind a `{code,msg,data}` envelope. |
+| [apps/access.md](apps/access.md) | **Access** app: door groups, policies, holiday groups, doors, door guards — shares the client & session; private web-UI API behind a `{code,msg,data}` envelope. |
 | [devices-and-ports.md](devices-and-ports.md) | The device model (one adopt-and-configure resource + data source) and per-port config. |
 | [flows.md](flows.md) | Operator runbooks: add a device, VLAN, DHCP reservation, firewall rule, WLAN, import. |
 | [testing.md](testing.md) | Tiered tests: unit + Docker controller + gated hardware-in-the-loop. |

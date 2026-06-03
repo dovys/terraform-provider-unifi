@@ -33,23 +33,41 @@ closure-trim/hoist/widen transforms). Because there is **no live/HIL Access cons
 (X-API-KEY is Network-only), the write surface — CRUD paths, the envelope success-code set, the
 `/door_ids` shape — is **unconfirmed**; see [`../../TODO.md`](../../TODO.md).
 
-> **Status: P7a + P7b shipped.** The `c.Access()` substruct client is built on the cookie session
-> (`internal/unifi/access`, private web-UI API `/proxy/access/api`, `{code,msg,data}` envelope,
-> console-global, no `api_key`); generated `wire` types are projected from the RE'd spec. Ships
-> `data.unifi_access_door_group` (look up by `id`/`name`) and the managed `unifi_access_door_group`
-> resource — the one Access object the RE'd spec provides a write DTO for. Its CRUD paths + envelope
-> contract are **HIL-unverified** (no live Access console — see [`../../TODO.md`](../../TODO.md)). Doors,
-> policies, and holidays have **no write DTO** in the spec, so they're blocked until an RE capture adds
-> their controller param types (P7c).
+> **Status: P7 complete (P7a–P7c shipped).** The `c.Access()` substruct client is built on the cookie
+> session (`internal/unifi/access`, private web-UI API `/proxy/access/api`, `{code,msg,data}` envelope,
+> console-global, no `api_key`); generated `wire` types are projected from the RE'd spec. Ships the
+> managed resources `unifi_access_door_group`, `unifi_access_policy`, `unifi_access_holiday_group`,
+> `unifi_access_door`, and `unifi_access_door_guard`, each with a read-only data source. Every Access
+> write surface — CRUD paths, the envelope success-code set, the `/door_ids` shape — is
+> **HIL-unverified** (no live Access console; X-API-KEY is Network-only — see
+> [`../../TODO.md`](../../TODO.md)).
 
 ## Resources
 
-A door group is a logical object (not adopted hardware), so it's a plain CRUD resource keyed by the
-controller `unique_id`. Members live behind a dedicated `/door_ids` endpoint, so `Read` reconstructs state
-from the group object (name, group_type) **plus** that endpoint. Floor groups (member floors) are out of
-scope until a read path for floor membership is found — the resource models **door-only** groups.
+Two shapes appear. **Logical objects** (door groups, policies, holiday groups) are plain CRUD resources
+keyed by the controller `unique_id` — Terraform owns their lifecycle. **Discovered hardware** (doors, and
+the per-door guard set) has no create/delete API, so those resources are **update/import-only**: they adopt
+an existing door by `door_id`, configure it, and on destroy do a **no-op state removal** — the door keeps
+its last-applied config (the safe-by-default, never-forget posture; `RequiresReplace` on `door_id`).
+
+Where a resource's write shape and its read shape diverge (the policy and door write DTOs carry fields the
+read view omits, e.g. `schedule_id`/`resources` on a policy, `floor_name` on a door), `Read` reconciles the
+fields the read view returns and **preserves** the write-only fields from the prior model — no phantom diff.
 
 | Resource | Backs | Notes |
 |----------|------|-------|
-| `unifi_access_door_group` | `POST/GET/PUT/DELETE /api/v2/access/door_group[/{id}]`, members via `/door_ids` | Keyed by `unique_id`. Manages `name`, `group_type` (controller-assigned), and door membership (`door_ids`). HIL-unverified write surface. |
+| `unifi_access_door_group` | `POST/GET/PUT/DELETE /api/v2/access/door_group[/{id}]`, members via `/door_ids` | Logical object keyed by `unique_id`. Manages `name`, `group_type` (controller-assigned), door membership (`door_ids`). |
+| `unifi_access_policy` | `POST/GET/PUT/DELETE /api/v2/access_policy[/{id}]`, list `/access_policies` | Logical object. Manages `name`, `enabled`, `schedule_id`, and `resources` (typed door/door-group references); reads back computed subject/resource counts. |
+| `unifi_access_holiday_group` | `POST/GET/PUT/DELETE /api/v2/holiday_group[/{id}]` | Logical object. Manages `name`, `description`, `is_private`, `template_name`, and member `holiday_ids` (existing holiday `unique_id`s). |
+| `unifi_access_door` | `GET/PUT /api/v2/locations/door[/{id}]`, list `/locations/doors` | Discovered hardware — **update/import-only**. Manages `name`, `floor_name` (write-time association), `extra_type`; exposes live `is_open`/`dps_connected`. Destroy = no-op. |
+| `unifi_access_door_guard` | `GET/PUT /api/v2/locations/door/{id}/door_guard` | Discovered hardware — **update/import-only**. Manages the guard `user_ids` of a door (opaque user references; users not modeled). Set `user_ids = []` to clear; destroy = no-op. |
 | `data.unifi_access_door_group` | `GET /api/v2/access/door_groups` (+ `/door_ids`) | Read-only lookup by `id`/`name`: name, group_type, type, member/floor/policy counts, member `door_ids`. |
+| `data.unifi_access_policy` | `GET /api/v2/access_policies` | Read-only lookup by `id`/`name`: name, enabled, creator, subject/resource counts, validity window. |
+| `data.unifi_access_holiday_group` | `GET /api/v2/holiday_groups` | Read-only lookup by `id`/`name`: name, description, member `holiday_ids`, counts. |
+| `data.unifi_access_door` | `GET /api/v2/locations/doors` | Read-only lookup by `id`/`name`: full name, floor, location type, live `is_open`/`dps_connected`. |
+| `data.unifi_access_door_guard` | `GET /api/v2/locations/door/{id}/door_guard` | Read-only lookup by `door_id`: the guard `user_ids`. |
+
+Floor groups (member floors) remain out of scope until a read path for floor membership is found — door
+groups model **door-only** membership. The provider models **infrastructure**, so Access users, credentials,
+and NFC cards are out of scope; `user_ids` on a policy/door guard are opaque references the operator supplies.
+Every write surface above is **HIL-unverified** — see [`../../TODO.md`](../../TODO.md).
