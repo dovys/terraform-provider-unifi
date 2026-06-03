@@ -68,8 +68,8 @@ func TestHILGenerateImports(t *testing.T) {
 		return *p
 	}
 
-	// _id-passthrough resources that exist live. (device + dhcp_reservation are
-	// MAC-keyed with heavy computed/stat fields — deferred to a later cut.)
+	// _id-passthrough resources that exist live. (unifi_network_device is excluded
+	// below — its telemetry is runtime-volatile, so plan-only can't be clean.)
 	recs, err := n.DNS().Records().List(ctx)
 	hilMust(t, err, "dns")
 	for i, r := range recs {
@@ -103,6 +103,21 @@ func TestHILGenerateImports(t *testing.T) {
 	hilMust(t, err, "ap_group")
 	for i, r := range ags {
 		emit("unifi_network_ap_group", fmt.Sprintf("ap%d", i), d(r.UnderscoreId))
+	}
+	// unifi_network_device is intentionally NOT in this plan-only set: its computed
+	// read-only telemetry (ip, state) is runtime-volatile, so a generate-config-out
+	// plan always reports it "known after apply" — never clean without an apply +
+	// second plan. Rung A (hil_read_test.go) already verifies device read/decode.
+	//
+	// dhcp_reservation: the users carrying a fixed-IP reservation (use_fixedip).
+	users, err := n.Clients().Users().List(ctx)
+	hilMust(t, err, "clients_users")
+	ri := 0
+	for _, u := range users {
+		if u.UseFixedip != nil && *u.UseFixedip {
+			emit("unifi_network_dhcp_reservation", fmt.Sprintf("res%d", ri), d(u.UnderscoreId))
+			ri++
+		}
 	}
 	// networkconf splits on purpose: purpose=wan -> unifi_network_wan, else unifi_network_network.
 	nets, err := n.Networks().List(ctx)

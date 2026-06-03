@@ -35,17 +35,22 @@ committed).
 ## Coverage
 
 Imports the `_id`-passthrough resources that exist on the console: `dns_record`,
-`firewall_rule`, `user_group`, `wlan`, `wlan_group`, `ap_group`, `network`, and
-`wan` (a `networkconf` with `purpose=wan`).
+`firewall_rule`, `user_group`, `wlan`, `wlan_group`, `ap_group`, `network`,
+`wan` (a `networkconf` with `purpose=wan`), and `dhcp_reservation` (the `users`
+carrying a fixed-IP reservation, `use_fixedip=true`).
 
-**Excluded** (write-only secrets — `-generate-config-out` nulls sensitive values,
+**Excluded — write-only secrets** (`-generate-config-out` nulls sensitive values,
 so the round-trip can't be clean; they import fine with a hand-written config
 supplying the secret):
 - `radius_profile` — `auth_servers[].x_secret`.
 - PPPoE WANs — `x_wan_password` (DHCP/static WANs are covered).
 
-**Not yet covered:** `device` and `dhcp_reservation` — MAC-keyed with heavy
-computed/stat fields; a later cut.
+**Excluded — runtime-volatile telemetry** (a plan-only flow can't be clean
+without an `apply` + second plan, which this read-only harness deliberately
+omits):
+- `device` — computed read-only telemetry (`ip`, `state`) drifts every read, so
+  `-generate-config-out` always reports it "known after apply". Rung A
+  (`internal/provider/hil_read_test.go`) already verifies device read/decode.
 
 A non-empty plan for any covered resource is a **HIL finding** — a field the
 provider's Read/normalize doesn't round-trip against live firmware — not a harness
