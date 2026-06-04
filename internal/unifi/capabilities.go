@@ -41,6 +41,12 @@ type Capabilities struct {
 	ProtectVersion *version.Version
 	// ProtectVersionRaw is the Protect version string as reported (empty if absent).
 	ProtectVersionRaw string
+
+	// ConsoleCertSupported is true when the unifi-core certificate surface
+	// (/api/userCertificates) responded to the Configure-time probe. The
+	// unifi_console_certificate resource gates on it to surface a friendly
+	// diagnostic instead of a raw 4xx on firmware that lacks it (invariant 3).
+	ConsoleCertSupported bool
 }
 
 // probe runs the Configure-time capability detection over the classic session:

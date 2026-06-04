@@ -108,6 +108,15 @@ A resource is checkable only when it meets the Definition of Done ([development.
         `unifi_access_door_guard` (update/import-only), each with a read-only data source. Doors and door
         guards configure discovered hardware, so destroy is a no-op state removal (never-forget). The write
         surface stays **HIL-unverified** (no live Access console — see `TODO.md`).
+- [x] **P8** Console OS surface (`unifi_console_*`): design ([apps/console.md](apps/console.md)). The first
+      resource off the **unifi-core OS** layer (baseURL-rooted `/api/...`, not a `/proxy/<app>/` app) over the
+      one cookie session — a new `c.Console()` substruct client (`internal/unifi/console`). Ships
+      `unifi_console_certificate`: install the console's TLS cert via native ACME (automated DNS-01, the full
+      generic provider union + manual) or BYO upload. **The console owns renewal** — Terraform issues once;
+      DNS creds are write-only (no state, no diff, no re-issue on re-apply; rotate via `-replace`). Wire types
+      hand-written (documented invariant-2 exception — no OpenAPI for the OS surface; RE'd from the UI bundle,
+      recorded in `../unifi-specs/unifi-os`). Read + capability probe confirmed on a live UCG Max
+      (UniFi OS v5.1.12); `start`→`complete` issuance verified by a live install (Cloudflare DNS-01).
 
 ## Open questions (don't block design)
 

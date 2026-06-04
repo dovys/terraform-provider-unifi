@@ -11,6 +11,7 @@ import (
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/access"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/console"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/protect"
 )
@@ -23,7 +24,24 @@ func isNotFoundErr(err error) bool {
 	return errors.Is(err, unifi.ErrNotFound) ||
 		errors.Is(err, network.ErrNotFound) ||
 		errors.Is(err, protect.ErrNotFound) ||
-		errors.Is(err, access.ErrNotFound)
+		errors.Is(err, access.ErrNotFound) ||
+		errors.Is(err, console.ErrNotFound)
+}
+
+// requireConsoleCert adds a diagnostic when the unifi-core certificate surface
+// did not respond to the Configure-time probe (older firmware without
+// /api/userCertificates). The console_certificate resource calls it so an
+// unsupported console surfaces as a clear plan-time message instead of a raw 4xx
+// (invariant 3).
+func requireConsoleCert(c unifi.Client, diags *diag.Diagnostics) {
+	if caps := c.Capabilities(); caps == nil || !caps.ConsoleCertSupported {
+		diags.AddError(
+			"Console certificate management is not available",
+			"This resource manages the UniFi OS console TLS certificate, but the console's certificate API "+
+				"(/api/userCertificates) did not respond on the configured console. This usually means the UniFi OS "+
+				"firmware is too old. Upgrade UniFi OS, or remove unifi_console_certificate from your configuration.",
+		)
+	}
 }
 
 // clientFromProviderData extracts the configured unifi.Client from the value the

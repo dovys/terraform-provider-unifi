@@ -182,11 +182,17 @@ func debugHTTP(ctx context.Context, method, url string, reqBody any, status int,
 // keys, CA and server private keys) — must never reach the debug stream. The
 // "_key" hint covers the controller's *_key fields (x_ca_key, x_server_key,
 // wireguard_client_preshared_key, …) without masking the bare "key" field
-// (a static-DNS record's hostname).
+// (a static-DNS record's hostname). The api*/application*/consumer*/access*
+// entries cover the camelCase DNS-provider credentials the console-certificate
+// surface sends (apiKey, applicationKey, consumerKey, accessKeyId; apiToken /
+// apiSecret / secretKey already match via "token" / "secret"). A bare-"key"
+// value that is itself secret (a PEM private key — e.g. the BYO upload body,
+// which sends the key under the field "key") is caught by value in isSecretValue.
 var secretKeyHints = []string{
 	"password", "passwd", "passphrase", "psk", "secret",
 	"token", "cookie", "authorization", "privkey", "private_key", "wpa_psk",
 	"_key", "pre_shared_key", "preshared_key",
+	"apikey", "applicationkey", "consumerkey", "accesskey",
 }
 
 // redactJSON pretty-prints JSON with secret-bearing values masked. On a parse
@@ -209,22 +215,39 @@ func redactJSON(b []byte) string {
 }
 
 // redactValue walks a decoded JSON value in place, masking every value under a
-// secret-bearing key at any depth.
+// secret-bearing key (by name) and every value that is itself secret material
+// (a PEM private key, by content), at any depth.
 func redactValue(v any) {
 	switch t := v.(type) {
 	case map[string]any:
 		for k, val := range t {
-			if isSecretKey(k) {
+			if isSecretKey(k) || isSecretValue(val) {
 				t[k] = "***REDACTED***"
 				continue
 			}
 			redactValue(val)
 		}
 	case []any:
-		for _, val := range t {
+		for i, val := range t {
+			if isSecretValue(val) {
+				t[i] = "***REDACTED***"
+				continue
+			}
 			redactValue(val)
 		}
 	}
+}
+
+// isSecretValue reports whether a decoded JSON value is itself secret material
+// that must never be logged regardless of its field name — a PEM private key.
+// The console BYO-upload body sends the key under the bare field "key" (which
+// stays unmasked by name, since a bare "key" is usually a non-secret hostname),
+// and the issue/upload response echoes it; matching on the PEM marker catches
+// those by content. Public certificates ("BEGIN CERTIFICATE") are intentionally
+// left visible.
+func isSecretValue(v any) bool {
+	s, ok := v.(string)
+	return ok && strings.Contains(s, "PRIVATE KEY")
 }
 
 func isSecretKey(k string) bool {

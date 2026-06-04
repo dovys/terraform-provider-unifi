@@ -237,6 +237,9 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewAccessHolidayGroupResource,
 		NewAccessDoorResource,
 		NewAccessDoorGuardResource,
+		// Console OS surface (c.Console()…) — unifi-core /api/userCertificates over
+		// the one cookie session. Installs a TLS cert on the console itself.
+		NewConsoleCertificateResource,
 	}
 }
 

@@ -91,14 +91,12 @@ jobs:
       # third-party deps AND the Go standard library. Tool version pinned; the
       # advisory DB is fetched from vuln.go.dev at run time.
       - name: govulncheck
-        # Scan under the security-patched toolchain. setup-go's `stable` manifest
-        # still serves 1.26.3, which carries two stdlib advisories (GO-2026-5037
-        # crypto/x509, GO-2026-5039 net/textproto, both fixed in 1.26.4); pinning
-        # GOTOOLCHAIN here makes Go fetch 1.26.4 directly (its own toolchain
-        # mechanism, independent of setup-go's manifest) so the scan reflects the
-        # fixed stdlib. Drop this override once `stable` reaches >= 1.26.4.
-        env:
-          GOTOOLCHAIN: go1.26.4
+        # The toolchain floor lives in go.mod (`toolchain go1.26.4`), so every
+        # build — local, CI, and the goreleaser release binary — runs on the
+        # security-patched stdlib, and this scan inherits it via GOTOOLCHAIN=auto.
+        # (1.26.3 carried GO-2026-5037 crypto/x509 + GO-2026-5039 net/textproto,
+        # both fixed in 1.26.4.) Raise the floor in go.mod when a future advisory
+        # lands — see the CVE policy in CLAUDE.md.
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
           govulncheck ./...

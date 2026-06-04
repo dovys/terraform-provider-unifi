@@ -23,7 +23,14 @@ scope: the cloud **Site Manager API** (`api.ui.com`, read-only).
 
 **UniFi Protect** (cameras, doorbells, …) is **in scope** under the `unifi_protect_*` namespace — it
 reuses this client and console session under `/proxy/protect/...` (see [apps/protect.md](apps/protect.md)).
-The other UniFi OS apps (Access/Talk/Connect/InnerSpace) are out of scope for now.
+**UniFi Access** is in scope under `unifi_access_*` (`/proxy/access/...`, see [apps/access.md](apps/access.md)).
+The other app surfaces (Talk/Connect/InnerSpace) are out of scope for now.
+
+**UniFi OS itself** is also reachable on this session. Beyond the per-app `/proxy/<app>/...` surfaces,
+the unifi-core OS exposes baseURL-rooted `/api/...` routes (peers of `/api/system`, `/api/users`). The
+provider models one such surface today — the **console TLS certificate** (`/api/userCertificates`,
+native ACME + BYO upload) under `unifi_console_certificate` (the `c.Console()` substruct client,
+`internal/unifi/console`; see [apps/console.md](apps/console.md)).
 
 ## 2. Client
 
