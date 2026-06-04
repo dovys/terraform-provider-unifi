@@ -102,6 +102,13 @@ go generate ./...; golangci-lint run; goreleaser check   # releases are automate
 clean · **govulncheck** (deps + stdlib) · **terraform fmt** (examples) · docs current · golangci-lint · unit.
 **Supply-chain:** every action is pinned to a full commit **SHA** (not `@vN`) + service-container images pinned
 by **digest**; Dependabot bumps both. The release build is `GOFLAGS=-mod=readonly` and runs **no** `go mod tidy`.
+**CVE policy — we fix every advisory we find, even ones we didn't introduce.** No one else maintains this
+tree; a `govulncheck` finding (third-party **or** Go stdlib) is ours to clear in the same PR, never to
+ignore or suppress. Stdlib advisories are fixed by **raising the `go.mod` toolchain floor** (e.g.
+`toolchain go1.26.4`, which patches local + CI + the goreleaser release binary in one line); dependency
+advisories by bumping the module. Always *attempt* the fix; only if it's genuinely unfixable (no patched
+release exists yet) do you document the advisory ID + why in the PR and track the follow-up — you never
+silently pass a red `govulncheck`.
 Acceptance env: `UNIFI_HOST/USERNAME/PASSWORD/SITE/INSECURE`. Never against production —
 tiered tests in [`docs/testing.md`](docs/testing.md) (UniFi OS Server can't run in hosted CI).
 

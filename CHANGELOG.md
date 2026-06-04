@@ -10,6 +10,46 @@ and the provider is **not** published to the Terraform Registry — releases shi
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
 
+## 2026-06-04
+
+### Added
+
+- **`unifi_console_certificate`** — install a TLS certificate on the **UniFi OS
+  console itself** (the unifi-core management UI), replacing the self-signed
+  default. Sources: `letsEncrypt` (native ACME with automated DNS-01) and
+  `upload` (bring-your-own). The DNS provider is the console's full **generic**
+  union — `cloudflare`, `route53`, `godaddy`, `digitalocean`, `porkbun`,
+  `duckdns`, `dynu`, `ovh`, plus `manual` — each with its own credential fields.
+  This is a new **UniFi OS surface**: unifi-core `/api/userCertificates` (a peer
+  of `/api/system`), reached over the existing one cookie+CSRF session via a new
+  `c.Console()` substruct client — no `api_key`.
+  - **The console owns renewal; Terraform installs the machinery once.** Create
+    runs the ACME challenge a single time; a plain `apply` never re-issues, and
+    expiry drift never produces a plan diff (the device renews under the same
+    `id`).
+  - **DNS credentials and the BYO private key are write-only** (Terraform ≥ 1.11
+    / OpenTofu ≥ 1.9): never stored in state, never diffed. Set the token once;
+    a re-apply stays empty. Rotate by recreating the resource
+    (`terraform apply -replace=...`) — there is no imperative re-issue knob.
+  - **Activation is handled.** A freshly issued or uploaded certificate is
+    installed inactive; the resource activates it (`active`, default `true`) so
+    the console actually serves it. Set `active = false` to stage one without
+    serving. Destroy removes the certificate (the console reverts to its
+    self-signed default) without a permanent CA revocation.
+
+### Security
+
+- **Go toolchain floored at 1.26.4** (`go.mod` `toolchain` directive) so local
+  builds, every CI job, and the goreleaser release binary ship the security-
+  patched standard library — clearing `GO-2026-5037` (crypto/x509) and
+  `GO-2026-5039` (net/textproto). `govulncheck` is clean. (Policy: we fix every
+  advisory we find, stdlib included — see `CLAUDE.md`.)
+- **Broadened wire-debug redaction** so the console-certificate secrets never
+  reach the `TF_LOG` debug stream: the camelCase DNS-provider credentials
+  (`apiKey`, `applicationKey`, `consumerKey`, `accessKeyId`) are masked by field
+  name, and a PEM **private key** (the BYO-upload `key`) is now masked by value
+  regardless of its field name. Public certificates stay visible.
+
 ## 2026-06-03
 
 ### Added

@@ -144,6 +144,12 @@ func TestHILRead(t *testing.T) {
 		probe("protect.liveviews", func() (int, error) { v, e := p.Liveviews().List(ctx); return len(v), e })
 	}
 
+	// Console OS surface (read-only) — unifi-core /api/userCertificates over the
+	// same session. len() forces a full decode through console.Certificate, so a
+	// hand-written wire field that disagrees with real firmware surfaces here.
+	// Typically EMPTY while the console is on its self-signed default.
+	probe("console.user_certificates", func() (int, error) { v, e := c.Console().Certificates().List(ctx); return len(v), e })
+
 	sort.Slice(results, func(i, j int) bool { return results[i].name < results[j].name })
 
 	var decodeFails, otherFails int

@@ -39,6 +39,50 @@ func TestRedactJSON(t *testing.T) {
 	}
 }
 
+// TestRedactJSONConsoleCertificate proves the console-certificate surface's
+// secrets are masked: the camelCase DNS-provider credentials (by field name) and
+// the BYO-upload private key (by value — it rides under the bare field "key",
+// which is not a secret name). The public certificate and non-secret discriminators
+// stay readable.
+func TestRedactJSONConsoleCertificate(t *testing.T) {
+	in := []byte(`{
+		"name": "console",
+		"domain": "console.example.com",
+		"dnsProvider": {
+			"provider": "ovh",
+			"apiToken": "cf-token",
+			"apiKey": "dynu-key",
+			"apiSecret": "godaddy-secret",
+			"secretKey": "porkbun-secret",
+			"accessKeyId": "AKIAEXAMPLE",
+			"secretAccessKey": "aws-secret",
+			"applicationKey": "ovh-app-key",
+			"applicationSecret": "ovh-app-secret",
+			"consumerKey": "ovh-consumer",
+			"region": "eu-west-1",
+			"endpoint": "ovh-eu"
+		},
+		"cert": "-----BEGIN CERTIFICATE-----\nMIIPUBLIC\n-----END CERTIFICATE-----",
+		"key": "-----BEGIN PRIVATE KEY-----\nMIISECRET\n-----END PRIVATE KEY-----"
+	}`)
+	out := redactJSON(in)
+
+	for _, leaked := range []string{
+		"cf-token", "dynu-key", "godaddy-secret", "porkbun-secret", "AKIAEXAMPLE",
+		"aws-secret", "ovh-app-key", "ovh-app-secret", "ovh-consumer", "MIISECRET",
+	} {
+		if strings.Contains(out, leaked) {
+			t.Errorf("console-cert secret %q leaked into debug output:\n%s", leaked, out)
+		}
+	}
+	// Non-secret discriminators and the public certificate must survive.
+	for _, kept := range []string{"console", "console.example.com", "ovh", "eu-west-1", "ovh-eu", "MIIPUBLIC"} {
+		if !strings.Contains(out, kept) {
+			t.Errorf("non-secret %q missing from debug output:\n%s", kept, out)
+		}
+	}
+}
+
 func TestRedactJSONNonJSON(t *testing.T) {
 	if got := redactJSON([]byte("not json")); got != "not json" {
 		t.Errorf("non-JSON body should pass through, got %q", got)

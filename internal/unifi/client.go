@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/go-version"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/access"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/console"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/protect"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/transport"
@@ -60,6 +61,12 @@ type Client interface {
 	// over the private web-UI API at /proxy/access/api — the same one cookie
 	// session, no api_key. Access is console-global (not site-scoped).
 	Access() *access.Client
+
+	// Console returns the UniFi OS console client (c.Console().Certificates()…).
+	// It shares this client's authenticated session over the unifi-core OS API at
+	// baseURL-rooted /api/... — the same one cookie session, no api_key. The
+	// console OS surface is global (not site-scoped).
+	Console() *console.Client
 
 	// Sites (console-level: /api/self/sites read, /cmd/sitemgr writes).
 	ListSites(ctx context.Context) ([]Site, error)
@@ -121,6 +128,14 @@ func NewClient(ctx context.Context, cfg Config) (Client, error) {
 			caps.ProtectVersion = pv
 		}
 	}
+	// Probe the unifi-core certificate surface (non-fatal): a cheap list GET. It
+	// succeeds (often with an empty list) when the OS exposes userCertificates,
+	// and errors on firmware that lacks it — the console_certificate resource
+	// gates on this to emit a plan-time diagnostic instead of a raw 4xx
+	// (invariant 3).
+	if _, cerr := c.Console().Certificates().List(ctx); cerr == nil {
+		caps.ConsoleCertSupported = true
+	}
 	c.caps = caps
 	return c, nil
 }
@@ -139,6 +154,10 @@ func (c *client) Protect() *protect.Client { return protect.New(c.classic) }
 // Access builds the substruct Access client over this client's authenticated
 // classic session — the private web-UI API at /proxy/access/api, no api_key.
 func (c *client) Access() *access.Client { return access.New(c.classic) }
+
+// Console builds the UniFi OS console client over this client's authenticated
+// classic session — the unifi-core OS API at baseURL-rooted /api/..., no api_key.
+func (c *client) Console() *console.Client { return console.New(c.classic) }
 
 func newHTTPClient(cfg Config) *http.Client {
 	timeout := cfg.Timeout
