@@ -12,6 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-testing v1.16.0
 	github.com/oapi-codegen/runtime v1.4.1
+	golang.org/x/time v0.14.0
 )
 
 require (

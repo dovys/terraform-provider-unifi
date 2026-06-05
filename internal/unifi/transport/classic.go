@@ -75,6 +75,12 @@ func (c *Classic) Login(ctx context.Context) error {
 }
 
 func (c *Classic) loginLocked(ctx context.Context) error {
+	// Space this login from any other to the same controller — the server
+	// rate-limits /api/auth/login, so a burst of fresh sessions (back-to-back
+	// imports, the per-test acceptance provider) must not hammer it.
+	if err := globalLoginThrottle.wait(ctx, c.baseURL); err != nil {
+		return err
+	}
 	body := map[string]any{
 		"username":   c.username,
 		"password":   c.password,

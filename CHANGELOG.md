@@ -10,6 +10,25 @@ and the provider is **not** published to the Terraform Registry — releases shi
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
 
+## 2026-06-05
+
+### Changed
+
+- **Auth no longer hammers the controller's login limiter.** UniFi OS rate-limits
+  `/api/auth/login` (a handful per window → HTTP 429); building a fresh session
+  per operation tripped it (back-to-back `terraform import`s, and the acceptance
+  suite spinning up a provider per test). Two provider-level guards now prevent
+  the burst:
+  - **Client reuse** — `NewClient` caches the authenticated `Client` by config, so
+    identical configs share one login + one capability probe. A normal `apply`
+    configures once (a no-op), but repeated configures in one process — imports,
+    the test harness, the sweepers — reuse the session instead of re-logging in.
+    Disable with `UNIFI_DISABLE_CLIENT_CACHE=1`.
+  - **Login throttle** — a per-controller minimum spacing between login POSTs
+    (default 1s; the first login to a host never waits), so the logins that *do*
+    happen can't burst. Tune with `UNIFI_LOGIN_MIN_INTERVAL` (Go duration; `0`
+    disables). Whatever still hits a 429 rides the existing `Retry-After` backoff.
+
 ## 2026-06-04
 
 ### Added

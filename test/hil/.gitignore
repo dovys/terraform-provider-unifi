@@ -3,7 +3,10 @@
 imports.tf
 generated.tf
 plan.out
+write.out
 dev.tfrc
+*.out
+*.log
 *.tfstate
 *.tfstate.*
 .terraform/

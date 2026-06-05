@@ -2,10 +2,15 @@ package unifi
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/hex"
 	"net/http"
 	"net/http/cookiejar"
+	"os"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-version"
@@ -81,10 +86,47 @@ type client struct {
 	caps    *Capabilities
 }
 
+// Process-global cache of ready Clients keyed by configuration. The provider's
+// Configure runs per acceptance test (and the sweepers build their own client),
+// so without reuse one run logs in a dozen times and trips the controller's
+// login rate-limit. A real `terraform apply` configures once, so the cache is a
+// no-op there — but back-to-back `terraform import`s in one process benefit too.
+// Reuse hands back the same authenticated session (its token auto-re-auths near
+// expiry), so identical configs share one login + one capability probe. Disable
+// with UNIFI_DISABLE_CLIENT_CACHE=1.
+var (
+	clientCacheMu sync.Mutex
+	clientCache   = map[string]Client{}
+)
+
+func clientCacheDisabled() bool {
+	v := strings.TrimSpace(os.Getenv("UNIFI_DISABLE_CLIENT_CACHE"))
+	return v == "1" || strings.EqualFold(v, "true")
+}
+
+// clientCacheKey fingerprints the auth-relevant config. The password is hashed
+// in (sha256) rather than held as a raw map key.
+func clientCacheKey(cfg Config) string {
+	sum := sha256.Sum256([]byte(strings.Join([]string{
+		normalizeHost(cfg.Host), cfg.Username, cfg.Password, cfg.Site,
+		strconv.FormatBool(cfg.AllowInsecure), cfg.Timeout.String(),
+		strconv.Itoa(cfg.MaxRetries),
+	}, "\x00")))
+	return hex.EncodeToString(sum[:])
+}
+
+// resetClientCache clears the cache (tests, to stay hermetic).
+func resetClientCache() {
+	clientCacheMu.Lock()
+	clientCache = map[string]Client{}
+	clientCacheMu.Unlock()
+}
+
 // NewClient validates config, builds the cookie+CSRF (classic) session, eagerly
-// authenticates it, probes capabilities, and returns a ready Client. Errors are
-// typed (ConfigError, transport.TwoFactorError, transport.AuthError, …) so the
-// provider can render a helpful diagnostic.
+// authenticates it, probes capabilities, and returns a ready Client. Identical
+// configs reuse a cached, already-authenticated Client (see clientCache). Errors
+// are typed (ConfigError, transport.TwoFactorError, transport.AuthError, …) so
+// the provider can render a helpful diagnostic.
 func NewClient(ctx context.Context, cfg Config) (Client, error) {
 	if strings.TrimSpace(cfg.Host) == "" {
 		return nil, &ConfigError{Msg: "host is required (set `host` or UNIFI_HOST)"}
@@ -98,6 +140,18 @@ func NewClient(ctx context.Context, cfg Config) (Client, error) {
 	if cfg.MaxRetries < 0 {
 		cfg.MaxRetries = 0
 	}
+
+	var cacheKey string
+	if !clientCacheDisabled() {
+		cacheKey = clientCacheKey(cfg)
+		clientCacheMu.Lock()
+		cached := clientCache[cacheKey]
+		clientCacheMu.Unlock()
+		if cached != nil {
+			return cached, nil
+		}
+	}
+
 	host := normalizeHost(cfg.Host)
 
 	c := &client{cfg: cfg}
@@ -137,6 +191,18 @@ func NewClient(ctx context.Context, cfg Config) (Client, error) {
 		caps.ConsoleCertSupported = true
 	}
 	c.caps = caps
+
+	if cacheKey != "" {
+		clientCacheMu.Lock()
+		// Another goroutine may have built the same client concurrently; prefer
+		// the already-cached one so callers share a single session.
+		if existing := clientCache[cacheKey]; existing != nil {
+			clientCacheMu.Unlock()
+			return existing, nil
+		}
+		clientCache[cacheKey] = c
+		clientCacheMu.Unlock()
+	}
 	return c, nil
 }
 
