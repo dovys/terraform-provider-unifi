@@ -1,8 +1,10 @@
 # terraform-provider-unifi — Design Docs
 
-> **Status.** The **Network** app (Phases 0–4) is shipped and usable; **Protect** (`unifi_protect_*`)
-> and **Access** (`unifi_access_*`) are feature-complete on the same console session — their
-> reverse-engineered write surfaces are **HIL-unverified** ([roadmap.md](roadmap.md), `TODO.md`).
+> **Status.** The **Network** app (Phases 0–4) is shipped, usable, and hardware-verified on a live
+> console; **Protect** (`unifi_protect_*`) and **Access** (`unifi_access_*`) are feature-complete on
+> the same console session. Protect's reads are hardware-verified (live camera + NVR) and its
+> `liveview` write round-trips; its other device-config writes — and all of Access (no live console on
+> hand) — are reverse-engineered and **HIL-unverified** ([roadmap.md](roadmap.md), `TODO.md`).
 > These docs describe the **current intended design** (not its history).
 
 Manages a **UniFi OS** console as code — **Network**, **Protect**, and **Access** today (the other apps

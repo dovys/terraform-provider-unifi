@@ -27,10 +27,11 @@ keeps pace with new UniFi releases. It's built with an unusual process:
 > feature-complete: cameras (`unifi_protect_camera` + data source), the NVR
 > singleton, lights, sensors, chimes, viewers, and liveviews. Access is
 > feature-complete: door groups, policies, holiday groups, doors, and door
-> guards (each with a data source). The Protect and Access write surfaces are
-> reverse-engineered and **HIL-unverified** (no live device on the recon
-> console) — see [`TODO.md`](TODO.md). See [`docs/roadmap.md`](docs/roadmap.md)
-> for what's shipped and what's next.
+> guards (each with a data source). The Protect and Access surfaces are
+> reverse-engineered; the support table below notes what's hardware-verified for
+> each (Protect's reads are, its device writes aren't yet; Access has no live
+> console on hand). See [`docs/roadmap.md`](docs/roadmap.md) for what's shipped and
+> what's next.
 
 ## Getting started
 
@@ -91,8 +92,18 @@ versions:
 | App | Modeled against | Provider support |
 |-----|-----------------|------------------|
 | [UniFi Network](docs/apps/network.md) | `10.4.57` | ✅ Supported |
-| [UniFi Protect](docs/apps/protect.md) | `7.1.69` | 🚧 Feature-complete (HIL-unverified) |
-| [UniFi Access](docs/apps/access.md) | `4.2.27` | 🚧 Feature-complete (HIL-unverified) |
+| [UniFi Protect](docs/apps/protect.md) | `7.1.69` | ✅ Supported <sup>1</sup> |
+| [UniFi Access](docs/apps/access.md) | `4.2.27` | ✅ Supported <sup>2</sup> |
+
+<sup>1</sup> **Protect** — reads are hardware-verified on a live console (Protect
+7.1.69 with a camera + NVR import to a clean plan; the `liveview` write round-trips
+create → update → import → destroy). The reverse-engineered **device config
+writes** — camera/NVR settings and the light/sensor/chime/viewer surfaces (no live
+instance) — aren't hardware-verified yet; they need a disposable rig.
+
+<sup>2</sup> **Access** — not yet hardware-verified: there's no live Access console
+on hand, so the reverse-engineered read + write surface is HIL-unverified
+end-to-end. The resources ship and are registered.
 
 > **We aim at recent UniFi releases and don't support older versions.** The
 > client is generated from a version-anchored spec and updated to track current
