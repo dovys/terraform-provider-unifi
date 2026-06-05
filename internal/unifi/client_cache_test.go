@@ -8,6 +8,14 @@ import (
 	"testing"
 )
 
+// resetClientCache clears the process-global client cache so cache tests stay
+// hermetic. It lives here (not in client.go) because it only exists for tests.
+func resetClientCache() {
+	clientCacheMu.Lock()
+	clientCache = map[string]Client{}
+	clientCacheMu.Unlock()
+}
+
 // loginCountingServer is a console mock that tallies /api/auth/login hits so a
 // test can assert how many times a session was established.
 func loginCountingServer(t *testing.T, logins *int32) *httptest.Server {

@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"net/http/cookiejar"
 	"os"
@@ -104,22 +105,20 @@ func clientCacheDisabled() bool {
 	return v == "1" || strings.EqualFold(v, "true")
 }
 
-// clientCacheKey fingerprints the auth-relevant config. The password is hashed
-// in (sha256) rather than held as a raw map key.
+// clientCacheKey fingerprints the auth-relevant config (the password is hashed
+// in, never held as a raw map key). Each field is length-prefixed so distinct
+// field boundaries can't collide — e.g. (user "a", pass "b\x00c") must not key
+// the same as (user "a\x00b", pass "c").
 func clientCacheKey(cfg Config) string {
-	sum := sha256.Sum256([]byte(strings.Join([]string{
+	h := sha256.New()
+	for _, field := range []string{
 		normalizeHost(cfg.Host), cfg.Username, cfg.Password, cfg.Site,
 		strconv.FormatBool(cfg.AllowInsecure), cfg.Timeout.String(),
 		strconv.Itoa(cfg.MaxRetries),
-	}, "\x00")))
-	return hex.EncodeToString(sum[:])
-}
-
-// resetClientCache clears the cache (tests, to stay hermetic).
-func resetClientCache() {
-	clientCacheMu.Lock()
-	clientCache = map[string]Client{}
-	clientCacheMu.Unlock()
+	} {
+		_, _ = fmt.Fprintf(h, "%d:%s", len(field), field)
+	}
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 // NewClient validates config, builds the cookie+CSRF (classic) session, eagerly
@@ -141,8 +140,9 @@ func NewClient(ctx context.Context, cfg Config) (Client, error) {
 		cfg.MaxRetries = 0
 	}
 
+	useCache := !clientCacheDisabled()
 	var cacheKey string
-	if !clientCacheDisabled() {
+	if useCache {
 		cacheKey = clientCacheKey(cfg)
 		clientCacheMu.Lock()
 		cached := clientCache[cacheKey]
@@ -192,7 +192,7 @@ func NewClient(ctx context.Context, cfg Config) (Client, error) {
 	}
 	c.caps = caps
 
-	if cacheKey != "" {
+	if useCache {
 		clientCacheMu.Lock()
 		// Another goroutine may have built the same client concurrently; prefer
 		// the already-cached one so callers share a single session.
