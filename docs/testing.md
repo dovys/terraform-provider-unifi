@@ -7,7 +7,7 @@ controller covers the legacy + v2 surfaces where ~all writes live.
 | Tier | Runs | Controller | Auth | Covers |
 |------|------|:----------:|------|--------|
 | **Unit** | every PR | none | — | capability logic, model (de)serialization (`httptest`), validators, plan modifiers, the **v2 write contract**. Most bugs live here. |
-| **Acceptance (legacy/v2)** | merge / nightly | `linuxserver/unifi-network-application` (Docker) | classic | networks, WAN, firewall (classic), routing, port profiles, devices + port overrides, reservations, user groups, RADIUS, DNS. The bulk. |
+| **Acceptance (legacy/v2)** | on demand (manual dispatch / `make testacc`) | `linuxserver/unifi-network-application` (Docker) | classic | networks, WAN, firewall (classic), routing, port profiles, devices + port overrides, reservations, user groups, RADIUS, DNS. The bulk. |
 | **HIL** | gated `workflow_dispatch` / self-hosted | UniFi OS Server (VM) or real gear | classic | Real radios (WLAN broadcasting), device adoption/forget, zone-firewall enforcement, firmware quirks the Docker controller can't reproduce. |
 
 ## Tier 2 (workhorse)

@@ -114,7 +114,9 @@ tiered tests in [`docs/testing.md`](docs/testing.md) (UniFi OS Server can't run 
 
 ## Conventions
 - Go + `terraform-plugin-framework` (protocol v6); resources app-namespaced (`unifi_network_*`, `unifi_protect_*`, …).
-- Python via `uv run` (global pref); commit only when asked; branch off `main` first (feature work targets `next` — see Releasing).
+- Python via `uv run` (global pref); **always work through PRs** — branch off `main` first (feature work
+  targets `next` — see Releasing), open the PR, then merge it yourself when you're confident (and tell the
+  user) or ask first when you're unsure. Never push straight to `main`.
 
 ## Releasing (two-branch; full detail in [`docs/releasing.md`](docs/releasing.md))
 Releases are **automatic**; CI **only tags + builds** — never hand-tag, never run `goreleaser release` locally. The
