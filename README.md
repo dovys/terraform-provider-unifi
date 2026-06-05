@@ -21,18 +21,6 @@ keeps pace with new UniFi releases. It's built with an unusual process:
   spec and are regenerated when we move the provider to a newer UniFi release,
   rather than maintained by hand.
 
-> **Status.** The Network app is built out, usable, and **verified against a live
-> console** (every resource imports to a clean plan, and the additive write paths
-> pass an end-to-end create→update→import→destroy on real firmware). Protect is
-> feature-complete: cameras (`unifi_protect_camera` + data source), the NVR
-> singleton, lights, sensors, chimes, viewers, and liveviews. Access is
-> feature-complete: door groups, policies, holiday groups, doors, and door
-> guards (each with a data source). The Protect and Access surfaces are
-> reverse-engineered; the support table below notes what's hardware-verified for
-> each (Protect's reads are, its device writes aren't yet; Access has no live
-> console on hand). See [`docs/roadmap.md`](docs/roadmap.md) for what's shipped and
-> what's next.
-
 ## Getting started
 
 ### Requirements
