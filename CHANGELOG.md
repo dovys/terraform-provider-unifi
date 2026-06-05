@@ -12,6 +12,18 @@ below predate the date-based convention.
 
 ## 2026-06-05
 
+### Fixed
+
+- **`unifi_network_traffic_rule` no longer errors on apply when match criteria are
+  omitted.** The controller echoes empty arrays (`[]`) for unset optional criteria
+  — `domains`, `ip_addresses`, `ip_ranges`, `regions`, `app_ids`,
+  `app_category_ids`, `network_ids` — and returns a disabled default
+  `bandwidth_limit` on rules that don't speed-limit. The reader mapped those back
+  to empty sets / a phantom object, so any rule leaving them unset failed with
+  *"Provider produced inconsistent result after apply"* (planned null vs. an empty
+  value). Empty/disabled now round-trips to `null`, matching the plan. (Surfaced by
+  HIL write-verification W1.)
+
 ### Changed
 
 - **Auth no longer hammers the controller's login limiter.** UniFi OS rate-limits

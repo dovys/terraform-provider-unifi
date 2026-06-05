@@ -9,7 +9,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -19,6 +18,7 @@ import (
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
+	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 func init() {
@@ -154,6 +154,68 @@ func checkPortProfileUnassigned(addr string) resource.TestCheckFunc {
 	}
 }
 
+// hilEgressNetworkID discovers a network _id usable as a traffic-route egress,
+// live, so the W1 route test is portable across consoles — the controller
+// rejects an empty networkId with NotEmpty. It prefers a WAN-purpose network
+// (the natural policy-route egress) and falls back to any network. The route
+// that uses it is disabled, so the choice never affects live routing.
+func hilEgressNetworkID(t *testing.T) string {
+	t.Helper()
+	c, err := sweepClient()
+	if err != nil {
+		t.Fatalf("egress network: client: %v", err)
+	}
+	nets, err := c.Network().Networks().List(context.Background())
+	if err != nil {
+		t.Fatalf("egress network: list networks: %v", err)
+	}
+	var fallback string
+	for i := range nets {
+		id := deref(nets[i].UnderscoreId)
+		if id == "" {
+			continue
+		}
+		if nets[i].Purpose != nil && *nets[i].Purpose == wire.NetworkconfPurposeWan {
+			return id
+		}
+		if fallback == "" {
+			fallback = id
+		}
+	}
+	if fallback == "" {
+		t.Skip("no network on the console to use as a traffic-route egress")
+	}
+	return fallback
+}
+
+// hilFreeFirewallIndex discovers an unused rule_index in the user band for a
+// ruleset, live: the controller rejects out-of-band indices with
+// FirewallRuleIndexOutOfRange, and the band differs by firmware. It returns the
+// highest existing user index in the ruleset + 1 (floored at the observed user
+// base), so the created rule can't collide with an operator rule.
+func hilFreeFirewallIndex(t *testing.T, ruleset string) int {
+	t.Helper()
+	const userBase = 20000 // user-defined rule band for the *_LOCAL / *_IN rulesets
+	c, err := sweepClient()
+	if err != nil {
+		t.Fatalf("firewall index: client: %v", err)
+	}
+	rules, err := c.Network().Firewall().Rules().List(context.Background())
+	if err != nil {
+		t.Fatalf("firewall index: list rules: %v", err)
+	}
+	next := userBase
+	for i := range rules {
+		if rules[i].Ruleset == nil || string(*rules[i].Ruleset) != ruleset {
+			continue
+		}
+		if rules[i].RuleIndex != nil && *rules[i].RuleIndex >= next {
+			next = *rules[i].RuleIndex + 1
+		}
+	}
+	return next
+}
+
 func TestHILWrite_W1_StaticRoute(t *testing.T) {
 	const addr = "unifi_network_static_route.test"
 	name := tfaccHILPrefix + "route"
@@ -274,18 +336,21 @@ resource "unifi_network_traffic_rule" "test" {
 
 func TestHILWrite_W1_TrafficRoute(t *testing.T) {
 	const addr = "unifi_network_traffic_route.test"
+	hilWriteGate(t, "W1") // skip/opt-in + host-pin before any live discovery below
 	desc := tfaccHILPrefix + "troute"
+	egress := hilEgressNetworkID(t) // a real network _id; the route is disabled, so inert
 	cfg := func(suffix string) string {
 		return fmt.Sprintf(`
 resource "unifi_network_traffic_route" "test" {
   description = %q
   enabled = false
   matching_target = "INTERNET"
+  network_id = %q
   target_devices = [
     { type = "ALL_CLIENTS" }
   ]
 }
-`, desc+suffix)
+`, desc+suffix, egress)
 	}
 	runHILWrite(t, hilWriteTest{
 		tier:         "W1",
@@ -317,13 +382,9 @@ resource "unifi_network_traffic_route" "test" {
 
 func TestHILWrite_W1_FirewallRule(t *testing.T) {
 	const addr = "unifi_network_firewall_rule.test"
+	hilWriteGate(t, "W1") // skip/opt-in + host-pin before any live discovery below
 	name := tfaccHILPrefix + "rule"
-	idx := 4000 // a high, normally-unused index; override if it collides on your console
-	if v := os.Getenv("UNIFI_HIL_FW_RULE_INDEX"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			idx = n
-		}
-	}
+	idx := hilFreeFirewallIndex(t, "LAN_LOCAL") // an unused index in the live user band
 	cfg := func(logging bool) string {
 		return fmt.Sprintf(`
 resource "unifi_network_firewall_rule" "test" {
