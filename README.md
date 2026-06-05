@@ -21,7 +21,9 @@ keeps pace with new UniFi releases. It's built with an unusual process:
   spec and are regenerated when we move the provider to a newer UniFi release,
   rather than maintained by hand.
 
-> **Status.** The Network app is built out and usable. Protect is
+> **Status.** The Network app is built out, usable, and **verified against a live
+> console** (every resource imports to a clean plan, and the additive write paths
+> pass an end-to-end create→update→import→destroy on real firmware). Protect is
 > feature-complete: cameras (`unifi_protect_camera` + data source), the NVR
 > singleton, lights, sensors, chimes, viewers, and liveviews. Access is
 > feature-complete: door groups, policies, holiday groups, doors, and door
@@ -70,6 +72,13 @@ credentials out of your configuration:
 | `allow_insecure` | `UNIFI_ALLOW_INSECURE` | Skip TLS verification (self-signed LAN certs). |
 | `timeout` | `UNIFI_TIMEOUT` | Per-request timeout (Go duration, default `60s`). |
 | `max_retries` | `UNIFI_MAX_RETRIES` | HTTP 429 retries (default `3`). |
+
+The provider also reuses one authenticated session across identical configs and
+throttles repeat logins, so back-to-back runs don't trip the console's login rate
+limit (HTTP 429). Two env-only knobs tune this — `UNIFI_LOGIN_MIN_INTERVAL`
+(minimum spacing between logins to one console, Go duration, default `1s`) and
+`UNIFI_DISABLE_CLIENT_CACHE=1` (disable session reuse) — but the defaults suit
+almost everyone. See [`docs/architecture.md`](docs/architecture.md#3-authentication).
 
 See the [`examples/`](examples/) directory for complete, real-world
 configurations organized by use case.

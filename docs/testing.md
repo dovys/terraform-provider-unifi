@@ -58,17 +58,18 @@ PPPoE-WAN passwords) or a singleton-with-à-la-carte-blocks import (`network_set
 hand-written config, and `device` is excluded (runtime-volatile `ip`/`state` telemetry can't be
 clean in a plan-only flow). See [`test/hil/README.md`](../test/hil/README.md).
 
-### Write verification — ephemeral, additive, opt-in (planned, staged)
+### Write verification — ephemeral, additive, opt-in (W0–W2 run; W3 deferred)
 
 The read-only rungs can't reach two things: the **write paths** of resources whose live collection is
 *empty* (nothing to import — `port_profile`, `radius_account`/`radius_profile`, `static_route`,
-`port_forward`, `traffic_rule`/`traffic_route` are modeled from docs, never seen populated — the
-biggest provisional risk in [`../TODO.md`](../TODO.md)), and **write semantics** (sparse PUT,
-server-side partial-merge, replace-vs-merge). Verifying these needs a write — done *safely* against the operator's
-**own active home console** (no separate test site) by making every test object **additive, inert, and
-guaranteed-torn-down**. It is a **deliberate one-shot** from the workstation (`run.sh`, gated), **not** a
-CI gate — the `tier3-hil` job stays a stub; an occasional leaked-and-swept object or momentary blip is
-acceptable.
+`port_forward`, `traffic_rule`/`traffic_route` were modeled from docs, never seen populated), and
+**write semantics** (sparse PUT, server-side partial-merge, replace-vs-merge). Verifying these needs a
+write — done *safely* against the operator's **own active home console** (no separate test site) by
+making every test object **additive, inert, and guaranteed-torn-down**. **W0–W2 have been run green**,
+so those empty-collection wire shapes are now HIL-confirmed end-to-end (the run also caught and fixed one
+provider bug — `traffic_rule` echoed empty match criteria back as empty sets instead of null). It is a
+**deliberate one-shot** from the workstation (`write.sh`, gated), **not** a CI gate — the `tier3-hil` job
+stays a stub; an occasional leaked-and-swept object or momentary blip is acceptable.
 
 **Five rails.**
 
@@ -91,7 +92,7 @@ acceptable.
 Per-object lifecycle (full DoD against live firmware): pre-sweep → `apply` (verify create + wire decode
 + field round-trip) → `plan` clean (idempotency) → mutate one field + `apply` (update path) → fresh
 `import` + `ImportStateVerify` → `t.Cleanup` `destroy` + `CheckDestroy` → post-sweep. The tiers below
-land **one per PR** (W0 → W1 → W2); every object additionally asserts the `tfacc-hil-` name prefix.
+**have been run** (W0 → W1 → W2); every object additionally asserts the `tfacc-hil-` name prefix.
 
 | Tier | Touches (on the live network) | Resources | Precondition asserted before `apply` |
 |------|-------------------------------|-----------|--------------------------------------|
