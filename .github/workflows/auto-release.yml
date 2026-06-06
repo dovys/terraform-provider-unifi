@@ -174,7 +174,11 @@ jobs:
         uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7
         with:
           version: '~> v2'
-          args: release --clean ${{ env.HAS_GPG_KEY == 'true' && '' || '--skip=sign' }}
+          # Both branches are non-empty: a GitHub Actions `A && '' || B` ternary
+          # always yields B because the empty string is falsy, so the old form
+          # skipped signing on *every* release even with a key present. Put the
+          # full command in each branch so the truthy side actually wins.
+          args: ${{ env.HAS_GPG_KEY == 'true' && 'release --clean' || 'release --clean --skip=sign' }}
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
