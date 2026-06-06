@@ -1,9 +1,10 @@
 name: acceptance
 
-# Acceptance tests are expensive and need a controller, so they are manual
-# (and optionally nightly). Tier 2 runs against the Docker controller (legacy +
-# v2 surfaces); Tier 3 runs against real gear / UniFi OS Server on a self-hosted
-# runner (Integration writes, radios). See docs/testing.md.
+# Acceptance tests are expensive and need a controller, so they run on demand
+# only — dispatch a one-off here, or run them locally with `make testacc`. Tier 2
+# runs against the Docker controller (legacy + v2 surfaces); Tier 3 runs against
+# real gear / UniFi OS Server on a self-hosted runner (Integration writes,
+# radios). See docs/testing.md.
 on:
   workflow_dispatch:
     inputs:
@@ -12,8 +13,6 @@ on:
         type: choice
         default: tier2
         options: [tier2, tier3]
-  schedule:
-    - cron: '0 6 * * *' # nightly Tier 2
 
 permissions:
   contents: read
@@ -21,7 +20,7 @@ permissions:
 jobs:
   tier2-docker:
     name: Tier 2 — Docker controller (legacy/v2)
-    if: github.event_name == 'schedule' || github.event.inputs.tier == 'tier2'
+    if: github.event.inputs.tier == 'tier2'
     runs-on: ubuntu-latest
     services:
       # Service images pinned by immutable digest (a floating tag like :7 or
@@ -48,14 +47,17 @@ jobs:
           go-version: 'stable'
           cache: true
       - name: Wait for controller
+        # The linuxserver image does a heavy s6 first-run (permission fixup,
+        # then JVM + Mongo schema init) before /status answers — cold on a
+        # hosted runner that's regularly >5 min, so poll for up to 10.
         run: |
-          for i in $(seq 1 60); do
+          for i in $(seq 1 120); do
             if curl -ksf https://localhost:8443/status >/dev/null; then
-              echo "controller is up"; exit 0
+              echo "controller is up after ~$((i*5))s"; exit 0
             fi
             sleep 5
           done
-          echo "controller did not become ready"; exit 1
+          echo "controller did not become ready within 10m"; exit 1
       # NOTE: bootstrapping a headless local admin + enabling simulation mode,
       # and the acceptance tests themselves, land with Phase 1 resources. Until
       # then this job validates that the controller harness boots.

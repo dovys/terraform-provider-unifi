@@ -114,13 +114,18 @@ tiered tests in [`docs/testing.md`](docs/testing.md) (UniFi OS Server can't run 
 
 ## Conventions
 - Go + `terraform-plugin-framework` (protocol v6); resources app-namespaced (`unifi_network_*`, `unifi_protect_*`, …).
-- Python via `uv run` (global pref); commit only when asked; branch off `main` first (feature work targets `next` — see Releasing).
+- Python via `uv run` (global pref); **always work through PRs — never push straight to `main`.**
+- **Branch off the branch you target — hard rule (see Releasing):** a **feature** (any new resource,
+  data source, or behavior) **branches off `next` and PRs into `next`**; a **bugfix or a docs/CI/dep-only
+  change** **branches off `main` and PRs into `main`**. Never branch a feature off `main`. Open the PR, then
+  merge it yourself when you're confident (and tell the user) or ask first when you're unsure.
 
 ## Releasing (two-branch; full detail in [`docs/releasing.md`](docs/releasing.md))
 Releases are **automatic**; CI **only tags + builds** — never hand-tag, never run `goreleaser release` locally. The
-bump is derived from the merged PR's **source branch**, so target PRs by intent:
-- **Fix / small change → PR into `main`.** On merge it auto-cuts the next **patch** (`v0.1.2`→`v0.1.3`).
-- **Feature (any size, multi-PR) → PRs into `next`** (which never releases). Ship the feature by merging a
+bump is derived from the merged PR's **source branch**, so target PRs by intent (and **branch off the
+branch you target** — see Conventions):
+- **Fix / small change → branch off `main`, PR into `main`.** On merge it auto-cuts the next **patch** (`v0.1.2`→`v0.1.3`).
+- **Feature (any size, multi-PR) → branch off `next`, PRs into `next`** (which never releases). Ship the feature by merging a
   **`next → main` PR** (use a **merge commit** — its CI tests the merged result first): head `next` ⇒ **minor**
   (`v0.2.0`), or add the **`release:major`** label ⇒ **major** (`v1.0.0`). minor/major reset lower parts to 0.
 - After patches land on `main`, refresh `next` by hand (`git checkout next && git merge main`) — CI never writes branches.

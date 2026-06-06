@@ -1264,6 +1264,47 @@ func TestTrafficRule_RoundTrip(t *testing.T) {
 	}
 }
 
+// TestTrafficRule_EmptyCriteriaReadBackNull pins the HIL W1 finding: the
+// controller echoes empty arrays (not omitted fields) for unset match criteria,
+// and a disabled default bandwidth_limit on non-speed-limit rules. Each must read
+// back null so an omitted field round-trips — otherwise create reports "Provider
+// produced inconsistent result after apply" (planned null vs an empty set/object).
+func TestTrafficRule_EmptyCriteriaReadBackNull(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	var out trafficRuleResourceModel
+	out.fromTrafficRule(ctx, &wire.Trafficrules{
+		UnderscoreId: sp("tr-empty"), Action: "BLOCK", MatchingTarget: "INTERNET", Enabled: boolPtrLit(true),
+		TargetDevices:  []wire.TrafficroutesTargetDevice{{Type: "ALL_CLIENTS"}},
+		Domains:        &[]wire.TrafficroutesDomain{},
+		IpAddresses:    &[]wire.TrafficroutesIpAddress{},
+		IpRanges:       &[]wire.TrafficroutesIpRange{},
+		Regions:        &[]string{},
+		AppIds:         &[]int{},
+		AppCategoryIds: &[]int{},
+		NetworkIds:     &[]string{},
+		BandwidthLimit: &wire.TrafficruleBandwidthLimit{Enabled: boolPtrLit(false)},
+	}, &diags)
+	if diags.HasError() {
+		t.Fatalf("fromTrafficRule diags: %v", diags)
+	}
+	for field, isNull := range map[string]bool{
+		"domains":          out.Domains.IsNull(),
+		"ip_addresses":     out.IPAddresses.IsNull(),
+		"ip_ranges":        out.IPRanges.IsNull(),
+		"regions":          out.Regions.IsNull(),
+		"app_ids":          out.AppIDs.IsNull(),
+		"app_category_ids": out.AppCategoryIDs.IsNull(),
+		"network_ids":      out.NetworkIDs.IsNull(),
+		"bandwidth_limit":  out.BandwidthLimit.IsNull(),
+	} {
+		if !isNull {
+			t.Errorf("%s: an empty/disabled wire value must read back null", field)
+		}
+	}
+}
+
 func TestTrafficRoute_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 	var diags diag.Diagnostics

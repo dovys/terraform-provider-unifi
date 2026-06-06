@@ -98,6 +98,13 @@ single cookie+CSRF session that serves both the legacy and v2 surfaces.
 - **Re-auth + retry once** on 401/403 (or near `exp`) so a long apply can't die when the token lapses.
 - **Reject cloud/2FA accounts clearly:** cloud accounts force MFA; 2FA returns HTTP `499`
   (`api.err.Ubic2faTokenRequired`) → emit "use a local admin account", not a raw error.
+- **Don't hammer login.** The controller rate-limits `/api/auth/login` (a handful per window → `429`).
+  Two guards keep us under it: (1) a process-global **client cache** (`NewClient` keyed by config) so
+  identical configs reuse one authenticated session + capability probe — a normal apply logs in once;
+  back-to-back `terraform import`s and the per-test acceptance provider stop re-logging in. (2) a
+  per-controller **login throttle** spacing the POSTs that do happen (default 1s; the first login to a
+  host never waits). Whatever still hits a `429` rides the `Retry-After` backoff (§6). Tune with
+  `UNIFI_LOGIN_MIN_INTERVAL` (Go duration; `0` disables) and `UNIFI_DISABLE_CLIENT_CACHE=1`.
 
 **Provider schema:** `host`, `username`, `password` (sensitive), `site` (default `"default"`),
 `allow_insecure`, `timeout`, `max_retries`. Env fallbacks for each (`UNIFI_HOST`, `UNIFI_USERNAME`,

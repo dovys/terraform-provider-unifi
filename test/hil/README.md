@@ -99,8 +99,10 @@ routes / unreferenced groups — zero effect on live traffic while it exists), a
 
 Config is the same `test/hil/secrets.env` as `run.sh`; the W0 `dhcp_reservation`
 test additionally needs `UNIFI_HIL_RESERVATION_IP` (an unused IP in your DHCP
-scope) and the W1 `firewall_rule` test honors `UNIFI_HIL_FW_RULE_INDEX` (default
-`4000`) — both can live in `secrets.env`.
+scope), which can live in `secrets.env`. The W1 `firewall_rule` index and
+`traffic_route` egress network are **discovered live** (a free index in the
+controller's user band; a WAN-purpose network) — no extra config, portable across
+consoles.
 
 The harness (`internal/provider/hil_write_*_test.go`, build tag `hil`) drives the
 standard **create → update-one-field → import(`ImportStateVerify`) → second empty

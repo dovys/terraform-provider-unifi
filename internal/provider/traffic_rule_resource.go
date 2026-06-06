@@ -345,7 +345,11 @@ func objectToBandwidthLimit(ctx context.Context, o types.Object, diags *diag.Dia
 
 func bandwidthLimitToObject(ctx context.Context, b *wire.TrafficruleBandwidthLimit, diags *diag.Diagnostics) types.Object {
 	objType := types.ObjectType{AttrTypes: bandwidthLimitAttrTypes}
-	if b == nil {
+	// The controller returns a disabled default bandwidth_limit even on rules that
+	// don't speed-limit (action != SPEED_LIMIT). Treat "disabled" as unset so an
+	// omitted limit round-trips as null rather than a phantom object — matching the
+	// planned null instead of reporting "inconsistent result after apply".
+	if b == nil || b.Enabled == nil || !*b.Enabled {
 		return types.ObjectNull(bandwidthLimitAttrTypes)
 	}
 	obj := bandwidthLimitObject{

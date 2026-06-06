@@ -166,8 +166,13 @@ func stringSetToSlicePtr(ctx context.Context, s types.Set, diags *diag.Diagnosti
 	return &v
 }
 
+// slicePtrToStringSet maps a wire string slice back to a framework Set. An
+// omitted match field round-trips as null: the controller echoes an empty array
+// ([]) rather than omitting it, so an empty slice must read back as null (not an
+// empty set) to match the planned null — otherwise create reports "inconsistent
+// result after apply". The same empty==null rule applies to every reader below.
 func slicePtrToStringSet(p *[]string) types.Set {
-	if p == nil {
+	if p == nil || len(*p) == 0 {
 		return types.SetNull(types.StringType)
 	}
 	return sliceToStringSet(*p)
@@ -184,7 +189,7 @@ func setToPorts(ctx context.Context, s types.Set, diags *diag.Diagnostics) *[]in
 }
 
 func portsToSet(p *[]int) types.Set {
-	if p == nil {
+	if p == nil || len(*p) == 0 {
 		return types.SetNull(types.Int64Type)
 	}
 	return sliceToIntSet(*p)
@@ -207,7 +212,7 @@ func listToPortRanges(ctx context.Context, l types.List, diags *diag.Diagnostics
 }
 
 func portRangesToList(ctx context.Context, pr *[]wire.TrafficroutesDomainPortRange, diags *diag.Diagnostics) types.List {
-	if pr == nil {
+	if pr == nil || len(*pr) == 0 {
 		return types.ListNull(types.ObjectType{AttrTypes: trafficPortRangeAttrTypes})
 	}
 	objs := make([]trafficPortRangeModel, 0, len(*pr))
@@ -242,7 +247,7 @@ func setToDomains(ctx context.Context, s types.Set, diags *diag.Diagnostics) *[]
 }
 
 func domainsToSet(ctx context.Context, d *[]wire.TrafficroutesDomain, diags *diag.Diagnostics) types.Set {
-	if d == nil {
+	if d == nil || len(*d) == 0 {
 		return types.SetNull(domainSetType.ElemType)
 	}
 	objs := make([]trafficDomainModel, 0, len(*d))
@@ -277,7 +282,7 @@ func setToIPAddresses(ctx context.Context, s types.Set, diags *diag.Diagnostics)
 }
 
 func ipAddressesToSet(ctx context.Context, a *[]wire.TrafficroutesIpAddress, diags *diag.Diagnostics) types.Set {
-	if a == nil {
+	if a == nil || len(*a) == 0 {
 		return types.SetNull(ipAddressSetType.ElemType)
 	}
 	objs := make([]trafficIPAddressModel, 0, len(*a))
@@ -312,7 +317,7 @@ func setToIPRanges(ctx context.Context, s types.Set, diags *diag.Diagnostics) *[
 }
 
 func ipRangesToSet(ctx context.Context, r *[]wire.TrafficroutesIpRange, diags *diag.Diagnostics) types.Set {
-	if r == nil {
+	if r == nil || len(*r) == 0 {
 		return types.SetNull(ipRangeSetType.ElemType)
 	}
 	objs := make([]trafficIPRangeModel, 0, len(*r))
