@@ -12,9 +12,18 @@ button; the bump is derived from which branch the PR came from.
 
 ## The two lanes
 
+**Branch off the branch you target — this is a hard rule.** A **feature** (any new
+resource, data source, or behavior change — anything worth a minor/major bump)
+**branches off `next`** and PRs into `next`. A **bugfix**, or a **docs / CI / dep-only**
+change, **branches off `main`** and PRs into `main`. Never branch a feature off `main`:
+its base would be `main`'s tip, which muddies the eventual `next → main` release diff
+and risks shipping a half-staged feature as a patch. If `next` is behind `main` when you
+start a feature, refresh it first ([Keeping `next` current](#keeping-next-current)) —
+don't reach for `main` because it's newer.
+
 ### Patch lane — zero effort
 
-Open a fix PR against **`main`**. On merge, `.github/workflows/auto-release.yml`:
+Branch off **`main`** and open a fix PR against **`main`**. On merge, `.github/workflows/auto-release.yml`:
 
 1. Builds and unit-tests `main` with `GOFLAGS=-mod=readonly` (a broken `main`
    never releases; the release never runs `go mod tidy`, so module tidiness is
@@ -31,8 +40,8 @@ tag-triggered release workflow would silently never fire.
 
 ### Feature lane — merge a `next → main` PR
 
-Develop the feature as as many PRs as you like, all targeting **`next`**. None of
-them release. When the feature is ready, ship it by merging `next` into `main`
+Develop the feature as as many PRs as you like, each **branched off `next`** and
+targeting **`next`**. None of them release. When the feature is ready, ship it by merging `next` into `main`
 **through a PR** — you click Merge, CI does the rest:
 
 1. Open the release PR: base **`main`**, compare **`next`**:
