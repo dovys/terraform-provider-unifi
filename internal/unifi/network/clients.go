@@ -8,9 +8,10 @@ import (
 )
 
 // ClientsService is the clients group: known client records (legacy /rest/user).
-// This is the provider's one client-device touchpoint — it backs DHCP fixed-IP
-// reservations (find-or-create by MAC, use_fixedip). The provider does not model
-// clients as managed devices beyond this.
+// This is the provider's one client-record touchpoint — it backs the two
+// client-record resources, both find-or-create by MAC: DHCP fixed-IP reservations
+// (use_fixedip) and AP locks (fixed_ap_enabled/fixed_ap_mac). The provider does
+// not model clients as managed devices beyond this.
 type ClientsService struct{ core *core }
 
 // Clients returns the clients group.
@@ -22,7 +23,7 @@ func (s ClientsService) Users() LegacyCollection[wire.User] {
 }
 
 // GetByMAC returns the client record with the given MAC (case-insensitive), or
-// ErrNotFound — the lookup a DHCP reservation does before find-or-create.
+// ErrNotFound — the lookup a reservation or AP lock does before find-or-create.
 func (s ClientsService) GetByMAC(ctx context.Context, mac string) (*wire.User, error) {
 	want := strings.ToLower(strings.TrimSpace(mac))
 	users, err := s.Users().List(ctx)

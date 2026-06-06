@@ -117,6 +117,12 @@ A resource is checkable only when it meets the Definition of Done ([development.
       hand-written (documented invariant-2 exception — no OpenAPI for the OS surface; RE'd from the UI bundle,
       recorded in `../unifi-specs/unifi-os`). Read + capability probe confirmed on a live UCG Max
       (UniFi OS v5.1.12); `start`→`complete` issuance verified by a live install (Cloudflare DNS-01).
+- [x] **client AP lock** (issue #82): `unifi_network_client_ap_lock` — pin a Wi-Fi client to a fixed AP so
+      the controller never roams/band-steers it (legacy `/rest/user`, `fixed_ap_enabled`/`fixed_ap_mac`). The
+      second client-record touchpoint after `dhcp_reservation` (invariant 5): find-or-create by MAC + sparse
+      PUT, so a lock and a reservation coexist on one client record; destroy clears the lock, never deletes
+      the client. The `fixed_ap_*` read is recon-confirmed on the live console; the **write is HIL-unverified**
+      (needs a live AP MAC + console — see `TODO.md`).
 
 ## Open questions (don't block design)
 

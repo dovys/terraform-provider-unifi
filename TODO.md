@@ -43,6 +43,15 @@ Open items:
   recon session is read-only, so verify that a partial PUT merges top-level fields
   server-side (we never send the whole document) and that `port_overrides` is
   replace-semantics (the resource rebuilds the full array via per-port merge).
+- **Client AP lock write (`PUT /rest/user/<id>`, `fixed_ap_enabled`/`fixed_ap_mac`).**
+  `unifi_network_client_ap_lock` (issue #82). A *locked* client's read shape is
+  recon-confirmed (`fixed_ap_enabled=true`, `fixed_ap_mac=<AP mac>`), but the
+  *write* is not (read-only recon): on a HIL rig with a real AP MAC confirm (a)
+  the sparse PUT of just the two `fixed_ap_*` fields actually pins the client and
+  leaves a coexisting `dhcp_reservation`'s `fixed_ip` untouched (server-side
+  shallow-merge), (b) re-pinning to a different `ap_mac` in place takes effect,
+  and (c) destroy (`fixed_ap_enabled=false`) clears the lock without forgetting
+  the client. Plus the standard create→update→import→destroy + second-empty plan.
 - **Device `state` enum.** Only `state=1` (connected) is observable live; the
   other states (provisioning, upgrading, disconnected, heartbeat-missed, …) and
   their integer values need confirming before any state-dependent logic.

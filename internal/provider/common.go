@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
@@ -43,6 +45,33 @@ func requireConsoleCert(c unifi.Client, diags *diag.Diagnostics) {
 		)
 	}
 }
+
+// lowercaseModifier normalizes a configured string to lower-case during planning.
+// The controller stores MAC addresses case-folded, so without this a config that
+// uses upper-case would churn the plan on every refresh (config != stored value)
+// and — for a mutable attribute the provider echoes back from the controller —
+// trip the post-apply consistency check (planned upper-case vs applied
+// lower-case). Applied to MAC attributes; a case-only edit becomes a no-op rather
+// than a spurious diff or RequiresReplace.
+type lowercaseModifier struct{}
+
+func (lowercaseModifier) Description(context.Context) string {
+	return "Normalizes the value to lower-case."
+}
+
+func (lowercaseModifier) MarkdownDescription(context.Context) string {
+	return "Normalizes the value to lower-case."
+}
+
+func (lowercaseModifier) PlanModifyString(_ context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+	resp.PlanValue = types.StringValue(strings.ToLower(req.ConfigValue.ValueString()))
+}
+
+// lowercase returns the lower-casing plan modifier (see lowercaseModifier).
+func lowercase() planmodifier.String { return lowercaseModifier{} }
 
 // clientFromProviderData extracts the configured unifi.Client from the value the
 // provider's Configure stored. providerData is nil during early validation

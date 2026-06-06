@@ -206,6 +206,7 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewFirewallGroupResource,
 		NewFirewallRuleResource,
 		NewDHCPReservationResource,
+		NewClientAPLockResource,
 		NewPortProfileResource,
 		NewDeviceResource,
 		NewUserGroupResource,

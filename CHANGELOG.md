@@ -10,6 +10,21 @@ and the provider is **not** published to the Terraform Registry — releases shi
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
 
+## 2026-06-06
+
+### Added
+
+- **`unifi_network_client_ap_lock`** — pin a Wi-Fi client (by MAC) to a specific
+  access point so the controller never roams or band-steers it away (the
+  per-client *fixed AP* / "Lock to AP" setting). Like
+  `unifi_network_dhcp_reservation`, it's a client-record attribute, not a
+  standalone object: **find-or-create by MAC**, import by MAC, and a **sparse PUT**
+  of just the `fixed_ap_enabled`/`fixed_ap_mac` fields (the legacy `/rest/user`
+  PUT shallow-merges server-side), so a lock and a reservation can both manage the
+  same client. `terraform destroy` clears the lock (`fixed_ap_enabled = false`)
+  rather than deleting the client; `ap_mac` is mutable (re-pin in place). Both MAC
+  fields are case-insensitive — normalized to lower-case at plan time.
+
 ## 2026-06-04
 
 ### Added
