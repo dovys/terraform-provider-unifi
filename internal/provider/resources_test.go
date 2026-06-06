@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 
@@ -44,7 +45,7 @@ func TestProviderSchemasValidate(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account", "unifi_network_static_route", "unifi_network_port_forward", "unifi_network_dynamic_dns", "unifi_network_wlan_group", "unifi_network_traffic_rule", "unifi_network_traffic_route", "unifi_network_settings"} {
+	for _, name := range []string{"unifi_network_network", "unifi_network_wan", "unifi_network_dns_record", "unifi_network_wlan", "unifi_network_ap_group", "unifi_network_firewall_group", "unifi_network_firewall_rule", "unifi_network_dhcp_reservation", "unifi_network_client_ap_lock", "unifi_network_port_profile", "unifi_network_device", "unifi_network_user_group", "unifi_network_radius_profile", "unifi_network_radius_account", "unifi_network_static_route", "unifi_network_port_forward", "unifi_network_dynamic_dns", "unifi_network_wlan_group", "unifi_network_traffic_rule", "unifi_network_traffic_route", "unifi_network_settings"} {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
 			t.Errorf("resource %q not registered", name)
 		}
@@ -725,6 +726,67 @@ func TestDHCPReservation_RoundTrip(t *testing.T) {
 	}
 	if m.Hostname.ValueString() != "nas" {
 		t.Errorf("hostname should round-trip, got %q", m.Hostname.ValueString())
+	}
+}
+
+func TestClientAPLock_RoundTrip(t *testing.T) {
+	m := &clientAPLockResourceModel{
+		ID:    types.StringNull(),
+		MAC:   types.StringValue("AA:BB:CC:DD:EE:01"), // mixed case
+		APMAC: types.StringValue("11:22:33:44:55:66"),
+	}
+	u := m.toUser()
+	if deref(u.Mac) != "aa:bb:cc:dd:ee:01" {
+		t.Errorf("mac should be lower-cased on the wire, got %q", deref(u.Mac))
+	}
+	if u.FixedApEnabled == nil || !*u.FixedApEnabled {
+		t.Errorf("toUser must always assert fixed_ap_enabled=true for an AP lock")
+	}
+	if deref(u.FixedApMac) != "11:22:33:44:55:66" {
+		t.Errorf("ap_mac should be lower-cased on the wire, got %q", deref(u.FixedApMac))
+	}
+
+	// fromUser must NOT overwrite mac (immutable key, controller lowercases it),
+	// so a mixed-case config doesn't churn.
+	m.fromUser(&wire.User{UnderscoreId: sp("u9"), Mac: sp("aa:bb:cc:dd:ee:01"), FixedApEnabled: boolPtrLit(true), FixedApMac: sp("11:22:33:44:55:66")})
+	if m.ID.ValueString() != "u9" {
+		t.Errorf("id round-trip wrong: %q", m.ID.ValueString())
+	}
+	if m.MAC.ValueString() != "AA:BB:CC:DD:EE:01" {
+		t.Errorf("fromUser must preserve the configured mac, got %q", m.MAC.ValueString())
+	}
+	if m.APMAC.ValueString() != "11:22:33:44:55:66" {
+		t.Errorf("ap_mac should round-trip, got %q", m.APMAC.ValueString())
+	}
+}
+
+// TestLowercaseModifier covers the plan-time MAC normalization. Without it an
+// upper-case ap_mac (mutable, echoed back lower-case by the controller) would
+// trip the post-apply consistency check (planned upper vs applied lower); a
+// case-only edit would also churn the plan or force a needless replace on mac.
+func TestLowercaseModifier(t *testing.T) {
+	ctx := context.Background()
+	cases := []struct {
+		name string
+		in   types.String
+		want types.String
+	}{
+		{"uppercase", types.StringValue("00:00:5e:00:53:aa"), types.StringValue("00:00:5e:00:53:aa")},
+		{"mixed", types.StringValue("Aa:Bb:Cc:Dd:Ee:Ff"), types.StringValue("aa:bb:cc:dd:ee:ff")},
+		{"already-lower", types.StringValue("aa:bb:cc:dd:ee:ff"), types.StringValue("aa:bb:cc:dd:ee:ff")},
+		{"null-untouched", types.StringNull(), types.StringNull()},
+		{"unknown-untouched", types.StringUnknown(), types.StringUnknown()},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			// resp.PlanValue starts as the planned value, as the framework sets it.
+			req := planmodifier.StringRequest{ConfigValue: tc.in, PlanValue: tc.in}
+			resp := &planmodifier.StringResponse{PlanValue: tc.in}
+			lowercase().PlanModifyString(ctx, req, resp)
+			if !resp.PlanValue.Equal(tc.want) {
+				t.Errorf("lowercase()(%v) = %v, want %v", tc.in, resp.PlanValue, tc.want)
+			}
+		})
 	}
 }
 

@@ -124,6 +124,15 @@ func TestHILGenerateImports(t *testing.T) {
 			ri++
 		}
 	}
+	// client_ap_lock: the users carrying an AP lock (fixed_ap_enabled). Reuses the
+	// users list above; a lock can coexist with a reservation on the same record.
+	li := 0
+	for _, u := range users {
+		if u.FixedApEnabled != nil && *u.FixedApEnabled {
+			emit("unifi_network_client_ap_lock", fmt.Sprintf("aplock%d", li), d(u.UnderscoreId))
+			li++
+		}
+	}
 	// networkconf splits on purpose: purpose=wan -> unifi_network_wan, else unifi_network_network.
 	nets, err := n.Networks().List(ctx)
 	hilMust(t, err, "networks")

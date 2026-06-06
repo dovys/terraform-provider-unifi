@@ -19,6 +19,11 @@ tracked field-by-field here** — the resource schemas carry an `HIL-unverified`
 note and the deferred phases live in [`docs/roadmap.md`](docs/roadmap.md). Each
 gap unlocks only with the matching hardware:
 
+- **a real AP MAC + a write-tier run** — `unifi_network_client_ap_lock` (new,
+  issue #82) is the one Network write not yet HIL-confirmed: verify the sparse
+  `fixed_ap_*` PUT pins the client and leaves a coexisting reservation's
+  `fixed_ip` intact, that re-pinning `ap_mac` takes effect, and that destroy
+  (`fixed_ap_enabled=false`) clears the lock without forgetting the client;
 - **a disposable gateway/switch rig** — device adopt/forget + config PUT, the
   `device.state` enum, `port_overrides` `poe_mode`/`portconf_id` on a bound port,
   `unifi_network_settings` write semantics, and dynamic DNS;

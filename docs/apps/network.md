@@ -56,6 +56,7 @@ refuses to mix.
 | `unifi_network_user_group` | L | Bandwidth/QoS group. |
 | `unifi_network_radius_profile` / `unifi_network_radius_account` | L | RADIUS profile; account (`/rest/account`). |
 | `unifi_network_dhcp_reservation` | L | Fixed-IP reservation, keyed by MAC (`/rest/user`, `use_fixedip`). **Find-or-create by MAC** (controller auto-creates a user per seen MAC); destroy clears the reservation, doesn't delete the user. Only client-object touchpoint. |
+| `unifi_network_client_ap_lock` | L | Pins a client to one AP, keyed by MAC (`/rest/user`, `fixed_ap_enabled` + `fixed_ap_mac`). **Find-or-create by MAC**; destroy clears the lock, doesn't delete the user. Coexists with a reservation on the same record (sparse PUT merge). |
 
 ### Site & settings
 | Resource | Backend | Notes |
