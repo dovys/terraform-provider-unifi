@@ -10,6 +10,23 @@ and the provider is **not** published to the Terraform Registry — releases shi
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
 
+## 2026-06-08
+
+### Added
+
+- **`unifi_network_network.dhcp_guard_servers`** — the trusted-DHCP-server list
+  (up to three, mapped to `dhcpd_ip_1`..`dhcpd_ip_3`) that rogue-DHCP guarding
+  needs. Verified live against UniFi Network 10.4.57: enabling
+  `dhcp_guard_enabled` with no trusted server is rejected by the controller as
+  `api.err.MissingIPAddress` — the missing address is the **trusted DHCP server**,
+  not `ip_subnet`. Without this field, `dhcp_guard_enabled = true` was unusable.
+  A plan-time `ValidateConfig` now requires at least one server when guard is on,
+  turning the opaque apply-time 400 into a clear diagnostic on the attribute. The
+  earlier hypothesis (issue #89 / PR #92) that the failure was a sparse-PUT
+  dropping `ip_subnet` did not hold: a plain non-subnet update applies fine, and a
+  full-document PUT carrying `ip_subnet` still fails when guard is on with no
+  trusted server.
+
 ## 2026-06-06
 
 ### Added

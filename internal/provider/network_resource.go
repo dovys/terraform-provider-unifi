@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -19,9 +20,10 @@ import (
 )
 
 var (
-	_ resource.Resource                = (*networkResource)(nil)
-	_ resource.ResourceWithConfigure   = (*networkResource)(nil)
-	_ resource.ResourceWithImportState = (*networkResource)(nil)
+	_ resource.Resource                   = (*networkResource)(nil)
+	_ resource.ResourceWithConfigure      = (*networkResource)(nil)
+	_ resource.ResourceWithImportState    = (*networkResource)(nil)
+	_ resource.ResourceWithValidateConfig = (*networkResource)(nil)
 )
 
 func NewNetworkResource() resource.Resource { return &networkResource{} }
@@ -50,6 +52,7 @@ type networkResourceModel struct {
 	IGMPSnooping          types.Bool   `tfsdk:"igmp_snooping"`           // IGMP snooping (multicast pruning)
 	UPNPEnabled           types.Bool   `tfsdk:"upnp_enabled"`            // UPnP IGD on this LAN
 	DHCPGuardEnabled      types.Bool   `tfsdk:"dhcp_guard_enabled"`      // block rogue DHCP servers
+	DHCPGuardServers      types.List   `tfsdk:"dhcp_guard_servers"`      // trusted DHCP servers (dhcpd_ip_1..3); required when guard is on
 	AutoScaleEnabled      types.Bool   `tfsdk:"auto_scale_enabled"`      // auto-grow the subnet
 	LTEFailoverEnabled    types.Bool   `tfsdk:"lte_failover_enabled"`    // designate as the LTE-failover LAN
 
@@ -139,9 +142,22 @@ func (r *networkResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			"internet_access_enabled": optBool("Whether clients on this network may reach the internet."),
 			"igmp_snooping":           optBool("Whether IGMP snooping is enabled."),
 			"upnp_enabled":            optBool("Whether UPnP is enabled on this LAN."),
-			"dhcp_guard_enabled":      optBool("Whether rogue-DHCP guarding is enabled."),
-			"auto_scale_enabled":      optBool("Whether the subnet auto-scales."),
-			"lte_failover_enabled":    optBool("Whether this is the LTE failover LAN."),
+			"dhcp_guard_enabled": optBool("Whether rogue-DHCP guarding is enabled. When `true`, " +
+				"`dhcp_guard_servers` must list at least one trusted DHCP server."),
+			"dhcp_guard_servers": schema.ListAttribute{
+				Optional:    true,
+				Computed:    true,
+				ElementType: types.StringType,
+				MarkdownDescription: "Trusted DHCP servers (up to three) for rogue-DHCP guarding (`dhcpd_ip_1`..`dhcpd_ip_3`). " +
+					"Required — at least one entry — when `dhcp_guard_enabled` is `true`; the controller rejects an " +
+					"enabled guard with no trusted server (`api.err.MissingIPAddress`).",
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(3),
+					listvalidator.ValueStringsAre(stringvalidator.LengthAtLeast(1)),
+				},
+			},
+			"auto_scale_enabled":   optBool("Whether the subnet auto-scales."),
+			"lte_failover_enabled": optBool("Whether this is the LTE failover LAN."),
 
 			"dhcp_enabled":    optBool("Whether the built-in DHCP server is enabled."),
 			"dhcp_start":      optStr("First address of the DHCP pool. Computed from the controller when unset."),
@@ -196,6 +212,44 @@ func (r *networkResource) Configure(_ context.Context, req resource.ConfigureReq
 	if c, ok := clientFromProviderData(req.ProviderData, &resp.Diagnostics); ok {
 		r.net = c.Network()
 	}
+}
+
+// ValidateConfig surfaces the controller's DHCP-guard contract at plan time
+// (invariant 3: capability/contract mismatches are plan-time diagnostics, not raw
+// 4xx). The controller requires at least one trusted DHCP server (dhcpd_ip_1..3)
+// whenever rogue-DHCP guarding is on, rejecting an enabled guard with no server
+// as api.err.MissingIPAddress. We can only check this when both values are known.
+func (r *networkResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var cfg networkResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &cfg)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(validateDHCPGuardConfig(cfg)...)
+}
+
+// validateDHCPGuardConfig enforces the DHCP-guard contract: an enabled guard
+// needs at least one trusted server. Split out from ValidateConfig so it can be
+// unit-tested at the model level (the framework's ValidateConfigRequest wraps a
+// tfsdk.Config that's awkward to fabricate). Unknown values defer to apply.
+func validateDHCPGuardConfig(cfg networkResourceModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+	if cfg.DHCPGuardEnabled.IsNull() || cfg.DHCPGuardEnabled.IsUnknown() || !cfg.DHCPGuardEnabled.ValueBool() {
+		return diags
+	}
+	if cfg.DHCPGuardServers.IsUnknown() {
+		return diags
+	}
+	if cfg.DHCPGuardServers.IsNull() || len(cfg.DHCPGuardServers.Elements()) == 0 {
+		diags.AddAttributeError(
+			path.Root("dhcp_guard_servers"),
+			"dhcp_guard_servers required when dhcp_guard_enabled is true",
+			"Enabling DHCP guard requires at least one trusted DHCP server. The controller rejects "+
+				"an enabled guard with no server (api.err.MissingIPAddress). Set dhcp_guard_servers to the "+
+				"address(es) of the legitimate DHCP server(s) for this network (e.g. the gateway).",
+		)
+	}
+	return diags
 }
 
 func (r *networkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -351,6 +405,16 @@ func (m *networkResourceModel) toNetworkConf(ctx context.Context, diags *diag.Di
 		conf.DhcpdDns3 = dnsSlotPtr(dns, 2)
 		conf.DhcpdDns4 = dnsSlotPtr(dns, 3)
 	}
+
+	// Trusted DHCP servers for rogue-DHCP guard map to dhcpd_ip_1..3. Same freed-
+	// slot discipline as DHCP DNS: write every owned slot (cleared ones as "") so
+	// shrinking the list blanks the trailing slot rather than leaving it stale.
+	if !m.DHCPGuardServers.IsNull() && !m.DHCPGuardServers.IsUnknown() {
+		servers := stringListToSlice(ctx, m.DHCPGuardServers, diags)
+		conf.DhcpdIp1 = dnsSlotPtr(servers, 0)
+		conf.DhcpdIp2 = dnsSlotPtr(servers, 1)
+		conf.DhcpdIp3 = dnsSlotPtr(servers, 2)
+	}
 	return conf
 }
 
@@ -370,6 +434,7 @@ func (m *networkResourceModel) fromNetworkConf(conf *wire.Networkconf) {
 	m.IGMPSnooping = boolToState(conf.IgmpSnooping)
 	m.UPNPEnabled = boolToState(conf.UpnpLanEnabled)
 	m.DHCPGuardEnabled = boolToState(conf.DhcpguardEnabled)
+	m.DHCPGuardServers = sliceToStringList(dnsSlots(conf.DhcpdIp1, conf.DhcpdIp2, conf.DhcpdIp3))
 	m.AutoScaleEnabled = boolToState(conf.AutoScaleEnabled)
 	m.LTEFailoverEnabled = boolToState(conf.LteLanEnabled)
 

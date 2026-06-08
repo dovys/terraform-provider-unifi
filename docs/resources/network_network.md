@@ -30,7 +30,8 @@ A UniFi Network LAN/VLAN or guest network (`networkconf`). Models the full confi
 - `dhcp_enabled` (Boolean) Whether the built-in DHCP server is enabled.
 - `dhcp_gateway` (String) Custom DHCP gateway address (requires `dhcp_gateway_enabled`).
 - `dhcp_gateway_enabled` (Boolean) Whether DHCP hands out a custom gateway (`dhcp_gateway`).
-- `dhcp_guard_enabled` (Boolean) Whether rogue-DHCP guarding is enabled.
+- `dhcp_guard_enabled` (Boolean) Whether rogue-DHCP guarding is enabled. When `true`, `dhcp_guard_servers` must list at least one trusted DHCP server.
+- `dhcp_guard_servers` (List of String) Trusted DHCP servers (up to three) for rogue-DHCP guarding (`dhcpd_ip_1`..`dhcpd_ip_3`). Required — at least one entry — when `dhcp_guard_enabled` is `true`; the controller rejects an enabled guard with no trusted server (`api.err.MissingIPAddress`).
 - `dhcp_lease_time` (Number) DHCP lease time in seconds.
 - `dhcp_ntp_enabled` (Boolean) Whether DHCP hands out NTP servers.
 - `dhcp_ntp_server_1` (String) First DHCP NTP server.

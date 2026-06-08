@@ -114,3 +114,22 @@ Unit tests (schema/validators/serialization); a Tier-2 test doing **create → u
 (`ImportStateVerify`) → destroy** with a clean intermediate plan **and a second consecutive empty
 plan**; `CheckDestroy`; a sweeper; a Tier-3 HIL test if it needs radios/hardware (else noted as
 sim-covered). Full Definition of Done in [development.md](development.md).
+
+## Test what the user sees, not how the code works
+
+Every test targets the **resource interface** — create / update / delete a resource (or, for the
+serialization unit layer, the config→wire→state round-trip and the validators) and asserts the
+**user-visible outcome**: the apply succeeds, the field survives, the plan is empty, the controller
+error surfaces as a clear diagnostic. **Never assert internal mechanics** — call counts, "issues a GET
+then a PUT", GET-merge-PUT vs sparse-PUT, which private method ran. Those pin a test to one
+implementation: a legitimate refactor breaks them even though behaviour is unchanged, and they verify
+*how* rather than *whether it works*.
+
+Two consequences for bug fixes (also in [`CONTRIBUTING.md`](../CONTRIBUTING.md)):
+
+- **A fix may only ADD a test, never REWRITE one.** If a fix forces you to change an existing test's
+  assertions, that test was coupled to the buggy implementation — replace it via a *new* added test and
+  keep the suite green, rather than editing the old one to match the new code.
+- **Each fix adds a specific regression test** that fails on the old behaviour and passes on the new,
+  written against the interface (e.g. *enabling DHCP guard with no trusted server is rejected with a
+  clear error; with a server it applies*), not against the wire call sequence.

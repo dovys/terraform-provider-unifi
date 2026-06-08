@@ -41,4 +41,18 @@ the provider moves to a newer UniFi spec, a one-off fix can be silently undone �
 so each fix needs a regression test that **fails** before and **passes** after,
 keeping the bug from resurfacing.
 
+Three rules make these tests durable:
+
+- **Test behaviour through the resource interface — create / update / delete a
+  resource and assert the user-visible outcome.** Do not assert internal
+  mechanics (how many HTTP calls a write makes, "issues a GET then a PUT",
+  GET-merge-PUT vs sparse-PUT). Those couple a test to one implementation and
+  break on a legitimate refactor; they tell you *how*, not *whether it works*.
+- **A bug fix may only ADD a test, never REWRITE an existing one.** If fixing a
+  bug forces you to change an existing test's assertions, that test was bad — it
+  was pinned to the buggy implementation. Add a new regression test instead; the
+  existing suite must keep passing untouched.
+- **Each bug fix adds a specific test reproducing that bug** — failing on the old
+  behaviour, passing on the new.
+
 See [`docs/testing.md`](docs/testing.md) for the testing tiers and conventions.
