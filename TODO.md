@@ -41,11 +41,6 @@ gap unlocks only with the matching hardware:
   NB the live `ips` doc also carries server-managed fields the spec omits
   (`utm_token`, `ad_blocking_enabled`, `dns_filtering`, `endpoint_scanning`) — left
   unmodeled per the spec's writable set; reconfirm none are practitioner-writable;
-=======
-  `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
-  DNS. (The `port_overrides` write→read-back contract — which fields the controller
-  stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
->>>>>>> origin/main
 - **a zone-firewall controller** — `firewall_zone` / `firewall_policy` (the recon
   console runs the mutually-exclusive classic firewall);
 - **a VPN-configured gateway** — `vpn_server` / `vpn_client` and BGP;
