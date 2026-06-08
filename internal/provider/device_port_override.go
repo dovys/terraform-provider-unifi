@@ -60,7 +60,7 @@ func portOverrideSchemaAttrs(computed bool) map[string]schema.Attribute {
 		return schema.SetAttribute{Optional: !computed, Computed: true, ElementType: types.StringType, MarkdownDescription: desc}
 	}
 	return map[string]schema.Attribute{
-		"port_profile_id":             str("Bind the port to a `unifi_network_port_profile` (its `id`). HIL-unverified key."),
+		"port_profile_id":             str("Bind the port to a `unifi_network_port_profile` (its `id`). The profile then governs the port's VLAN behavior, so leave the inline VLAN fields (`forward`, `native_network_id`, `tagged_vlan_mgmt`) unset — the controller nulls them once a profile is bound."),
 		"name":                        str("Port label."),
 		"poe_mode":                    str("Power over Ethernet: `auto`, `pasv24`, `passthrough`, or `off` (varies by switch). HIL-unverified."),
 		"forward":                     str("VLAN behavior: `all`, `native`, `customize`, or `disabled`."),

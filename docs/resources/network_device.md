@@ -59,7 +59,7 @@ Optional:
 - `native_network_id` (String) Untagged/native network (`unifi_network_network` id).
 - `poe_mode` (String) Power over Ethernet: `auto`, `pasv24`, `passthrough`, or `off` (varies by switch). HIL-unverified.
 - `port_keepalive_enabled` (Boolean) Enable port keep-alive.
-- `port_profile_id` (String) Bind the port to a `unifi_network_port_profile` (its `id`). HIL-unverified key.
+- `port_profile_id` (String) Bind the port to a `unifi_network_port_profile` (its `id`). The profile then governs the port's VLAN behavior, so leave the inline VLAN fields (`forward`, `native_network_id`, `tagged_vlan_mgmt`) unset — the controller nulls them once a profile is bound.
 - `port_security_enabled` (Boolean) Restrict the port to specific MAC addresses.
 - `port_security_mac_addresses` (Set of String) Allowed MAC addresses when `port_security_enabled = true`.
 - `speed` (Number) Forced link speed in Mbps (when `autoneg = false`).

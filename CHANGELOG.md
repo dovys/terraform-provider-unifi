@@ -46,6 +46,17 @@ below predate the date-based convention.
 
 ### Fixed
 
+- **`unifi_network_device` no longer errors on apply when a port binds to a port
+  profile.** Setting a `port_overrides` entry's `port_profile_id` could fail with
+  *"Provider produced inconsistent result after apply: .port_overrides[N].port_profile_id:
+  was "…", but now null"*. The controller accepts the binding into `/rest/device`,
+  but the `/stat/device` list the reader maps from can lag a refresh before it
+  reflects `portconf_id` — so the configured, known `port_profile_id` read back as
+  null and contradicted the plan. Apply-time state now restores a configured
+  binding the read document omits, so it round-trips; once the controller catches
+  up, the next plan is clean. (The inline VLAN fields the profile governs —
+  `forward`, `native_network_id`, `tagged_vlan_mgmt` — correctly read back null.)
+
 - **`unifi_network_traffic_rule` no longer errors on apply when match criteria are
   omitted.** The controller echoes empty arrays (`[]`) for unset optional criteria
   — `domains`, `ip_addresses`, `ip_ranges`, `regions`, `app_ids`,
