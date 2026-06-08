@@ -25,8 +25,9 @@ gap unlocks only with the matching hardware:
   `fixed_ip` intact, that re-pinning `ap_mac` takes effect, and that destroy
   (`fixed_ap_enabled=false`) clears the lock without forgetting the client;
 - **a disposable gateway/switch rig** — device adopt/forget + config PUT, the
-  `device.state` enum, `port_overrides` `poe_mode`/`portconf_id` on a bound port,
-  `unifi_network_settings` write semantics, and dynamic DNS;
+  `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
+  DNS. (The `port_overrides` write→read-back contract — which fields the controller
+  stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
 - **a zone-firewall controller** — `firewall_zone` / `firewall_policy` (the recon
   console runs the mutually-exclusive classic firewall);
 - **a VPN-configured gateway** — `vpn_server` / `vpn_client` and BGP;

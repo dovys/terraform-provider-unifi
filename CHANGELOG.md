@@ -12,6 +12,24 @@ below predate the date-based convention.
 
 ## 2026-06-08
 
+### Fixed
+
+- **`unifi_network_device` no longer errors on apply when renaming a port.**
+  Setting a `port_overrides` entry's `name` could fail with *"Provider produced
+  inconsistent result after apply: .port_overrides["N"].name: was "…", but now
+  "…"*, leaving every later plan re-proposing the rename. The controller accepts
+  the write into `/rest/device`, but the `/stat/device` list the read maps from can
+  lag a refresh and echo the *pre-rename* name — so the known, configured value
+  read back as the old one and contradicted the plan. Apply-time state now restores
+  the configured `name` and `port_profile_id` from the plan when the read lags, so a
+  known value round-trips; once the controller catches up the next plan is clean.
+  Restoration is restricted to these two fields, which the controller stores
+  verbatim (verified live and against the controller's config code). The VLAN fields
+  (`forward`, `tagged_vlan_mgmt`, the native/excluded networks) are server-derived —
+  the controller normalizes them on write — so they are left to the read, where a
+  normalized value can't become a permanent re-proposed diff or mask a contradictory
+  config. (#101)
+
 ### Changed
 
 - **CI now caches the goinstall-built tool binaries and the release cross-compile.**
