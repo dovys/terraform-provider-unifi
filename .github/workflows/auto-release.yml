@@ -72,12 +72,27 @@ jobs:
         with:
           fetch-depth: 0          # full history + tags for version calc
 
-      # Pin to the go.mod toolchain (see test.yml).
+      # Pin to the go.mod toolchain (see test.yml). cache:false — setup-go's auto
+      # cache shares the PR job's key (native-arch, "not saved" on hit), so the
+      # cross-compile never persists; the release-scoped cache below does instead.
       - if: steps.decide.outputs.release == 'true'
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: go.mod
-          cache: true
+          cache: false
+
+      # Persist the cross-compile + module cache across releases (keyed go.mod+go.sum;
+      # restore-keys warm the base on a change). #1 saves all six arches; #2+ restore
+      # them, so GoReleaser recompiles only changed packages, not stdlib ×6.
+      - if: steps.decide.outputs.release == 'true'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: release-go-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: |
+            release-go-${{ runner.os }}-
 
       # Don't tag a tree that doesn't build/pass units (the only check for a direct
       # push to main); GoReleaser reuses this warm cache for the cross-compile.

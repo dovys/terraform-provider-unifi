@@ -76,18 +76,36 @@ jobs:
             exit 1
           fi
 
-      # goinstall builds golangci-lint with the setup-go toolchain (>= the module's
-      # go directive, which it requires); reuses the warm GOCACHE from `build`.
+      # Cache the goinstall-built golangci-lint binary — building it from source is
+      # the ~80s bulk here and setup-go's shared cache never persists it. Keyed by
+      # lint version × go.mod toolchain; goinstall (not prebuilt) so its build Go
+      # satisfies the module's go directive. The action runs the cached binary
+      # (install-mode: none, found via $GOPATH/bin on PATH) for caching + annotations.
+      - name: Cache golangci-lint binary
+        id: golangci-bin
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/go/bin/golangci-lint
+          key: golangci-bin-${{ runner.os }}-v2.12.2-${{ hashFiles('go.mod') }}
+      - if: steps.golangci-bin.outputs.cache-hit != 'true'
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
+      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
       - uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
           version: v2.12.2
-          install-mode: goinstall
+          install-mode: none
 
-      # Fail on any known vuln reachable in our call graph — deps and stdlib (the
-      # latter via the pinned go.mod toolchain floor).
+      # Same for govulncheck. Fails on any known vuln in our call graph — deps +
+      # stdlib (the latter via the pinned go.mod toolchain).
+      - name: Cache govulncheck binary
+        id: govulncheck-bin
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/go/bin/govulncheck
+          key: govulncheck-bin-${{ runner.os }}-v1.3.0-${{ hashFiles('go.mod') }}
       - name: govulncheck
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
+          [ -x "$(go env GOPATH)/bin/govulncheck" ] || go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
           govulncheck ./...
 
       # Example HCL is shipped docs (tfplugindocs renders it) — keep it formatted.

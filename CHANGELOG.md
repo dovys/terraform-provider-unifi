@@ -14,6 +14,15 @@ below predate the date-based convention.
 
 ### Changed
 
+- **CI now caches the goinstall-built tool binaries and the release cross-compile.**
+  Building `golangci-lint` from source was ~80s of every `checks` run, and
+  GoReleaser rebuilt all six `GOOS/GOARCH` targets from scratch each release
+  (~290s) — both because `setup-go`'s shared cache key is set native-arch-only and
+  "not saved" on a key hit, so those artifacts never persisted. `checks` now caches
+  the `golangci-lint`/`govulncheck` binaries (keyed tool-version × `go.mod`
+  toolchain; run via `install-mode: none`), and `release` keeps a release-scoped
+  cache of the build + module caches that survives release→release. Saves ~1 billed
+  min on warm `checks` runs and most of the second-and-later release's compile.
 - **CI restructured to cut GitHub Actions minutes (~half per run).** The `test`
   workflow's six parallel jobs — each re-installing Go and recompiling the module
   from scratch, and each billed a full minute — collapse into one `checks` job
