@@ -12,6 +12,19 @@ below predate the date-based convention.
 
 ## 2026-06-08
 
+### Documentation
+
+- **`unifi_network_device.mgmt_network_id`** — rewrote the schema description (and
+  the `data.unifi_network_device` mirror) plus the `devices-and-ports.md` prose to
+  state what the field actually does: it's the device's **management VLAN**. An
+  infrastructure device 802.1Q-tags its own control-plane traffic (inform,
+  adoption) onto that network's VLAN, so it reaches the controller and gets its IP
+  on that subnet **regardless of the upstream switch port's native/untagged VLAN**
+  — which is why an AP on a port whose `native_network_id` is `iot` still lands on
+  the management subnet. Also clarified that it is distinct from the device's
+  `config_network` (dhcp/static IP-addressing mode), which the provider does not
+  model. Verified read-only against a live UCG Max. Docs-only; no behavior change.
+
 ### Added
 
 - **`unifi_network_network.dhcp_guard_servers`** — the trusted-DHCP-server list

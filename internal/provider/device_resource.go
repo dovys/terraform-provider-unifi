@@ -97,9 +97,13 @@ func (r *deviceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				MarkdownDescription: "LED brightness (0–100), when the model supports it.",
 			},
 			"mgmt_network_id": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				MarkdownDescription: "Management network (`unifi_network_network` id) the device uses.",
+				Optional: true,
+				Computed: true,
+				MarkdownDescription: "The device's **management VLAN** (`unifi_network_network` id). The device 802.1Q-tags its own " +
+					"control-plane traffic (inform, adoption) with this network's VLAN, so it reaches the controller and gets " +
+					"its IP on that subnet **regardless of the upstream switch port's untagged/native VLAN** — an AP on a port " +
+					"whose `native_network_id` is `iot` still lands on the management subnet. Distinct from `config_network` " +
+					"(the device's IP-addressing mode: dhcp/static), which this provider does not model.",
 			},
 			"port_overrides": schema.MapNestedAttribute{
 				Optional: true,
