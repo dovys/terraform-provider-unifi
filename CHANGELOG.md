@@ -76,6 +76,14 @@ below predate the date-based convention.
 
 ### Added
 
+- **`unifi_network_mdns`** — the site's mDNS (Bonjour) reflector scope (issue #91),
+  a singleton on the v2 global network-config document. `mode` is `all` (reflect
+  across every network), `none` (off), or `some` (only the VLANs in `network_ids`).
+  The v2 surface is replace-style with required IGMP/multicast fields, so the
+  resource GET-merges — it overlays only `mdns_enabled_for[_network_ids]` and PUTs
+  the whole document back, leaving the controller's other multicast knobs intact.
+  Destroy is state-removal only (the document always exists); a console without the
+  surface (older firmware) is rejected with a plan-time diagnostic.
 - **`unifi_network_threat_management`** — manages UniFi Threat Management (IDS/IPS),
   the `ips` settings singleton (issue #90): `mode` (`disabled`/`ids` detection /
   `ips`/`ipsInline` prevention), `enabled_categories` (the controller's 59-member

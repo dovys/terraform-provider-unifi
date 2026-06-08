@@ -28,6 +28,12 @@ gap unlocks only with the matching hardware:
   `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
   DNS. (The `port_overrides` write→read-back contract — which fields the controller
   stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
+- **a live controller write-tier run** — `unifi_network_mdns` (new, issue #91):
+  confirm the v2 `global/config/network` PUT is **replace-style** as the spec
+  notes (the resource GET-merges and PUTs the whole doc, so the required IGMP
+  fields must survive a mDNS-only change), that `some` + `network_ids` actually
+  scopes the reflector, and that the GET shape matches `wire.Global`
+  (decompiled DTO — field types unverified against a live response);
 - **a CyberSecure-licensed gateway** for `unifi_network_threat_management` — the
   enabled (non-`disabled`) write path is unverified. Confirmed live (UCG Max, no
   active subscription): the controller lists the `IPS` feature and accepts a
@@ -64,8 +70,10 @@ typed-block model keeps both.
 Shipped keys: `ntp`, `country`, `locale`. The `ips` key ships separately as the
 dedicated `unifi_network_threat_management` resource (IDS/IPS is a large enough
 surface — mode, category set, the engine flags — to warrant its own typed
-resource rather than a `network_settings` block). Remaining (high-value first):
-`mgmt`, `guest_access`, `global_switch`, `global_ap`, `mdns`, `radius`. Long-tail
+resource rather than a `network_settings` block); likewise the mDNS reflector
+scope is its own `unifi_network_mdns` resource (v2 `global/config/network`, not a
+`setting/<key>` block). Remaining (high-value first): `mgmt`, `guest_access`,
+`global_switch`, `global_ap`, `radius`. Long-tail
 / niche keys (`snmp`, `netflow`, `radio_ai`, `rsyslogd`, `dpi`, `teleport`,
 `baresip`, `lcm`, `usg`, `doh`, …) are added on demand; the `super_*` (console-
 internal) and `porta` (hardware-only) keys are out of scope. Each new key is one

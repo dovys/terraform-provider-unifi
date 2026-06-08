@@ -135,7 +135,9 @@ A resource is checkable only when it meets the Definition of Done ([development.
    token's `exp`, don't hard-code 2h).
 3. **Self-hosted/HIL runner setup** + documenting what the Docker tier can't cover.
 4. **Which settings keys to add next** to `unifi_network_settings` (`ntp`/`country`/`locale` shipped;
-   high-value next: `mgmt`, `guest_access`, `global_switch`, `global_ap`, `mdns`, `ips`, `radius` — see `TODO.md`).
+   high-value next: `mgmt`, `guest_access`, `global_switch`, `global_ap`, `ips`, `radius` — see `TODO.md`).
+   The mDNS reflector scope shipped as its own `unifi_network_mdns` resource (v2 `global/config/network`),
+   not a `setting/<key>` block.
 5. **Protect (P5):** exact PATCH field set per device type + which need a legacy `/bootstrap` fallback;
    whether detection **zones** are in initial scope; confirm doorbell `feature_flags` names.
 6. **Clearing owned `omitempty` fields under sparse PUT.** A sparse PUT (and the `port_overrides`
