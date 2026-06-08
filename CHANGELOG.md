@@ -21,17 +21,28 @@ below predate the date-based convention.
   the write into `/rest/device`, but the `/stat/device` list the read maps from can
   lag a refresh and echo the *pre-rename* name — so the known, configured value
   read back as the old one and contradicted the plan. Apply-time state now restores
-  the configured `name` and `port_profile_id` from the plan when the read lags, so a
-  known value round-trips; once the controller catches up the next plan is clean.
-  Restoration is restricted to these two fields, which the controller stores
-  verbatim (verified live and against the controller's config code). The VLAN fields
-  (`forward`, `tagged_vlan_mgmt`, the native/excluded networks) are server-derived —
-  the controller normalizes them on write — so they are left to the read, where a
-  normalized value can't become a permanent re-proposed diff or mask a contradictory
-  config. (#101)
+  the configured verbatim-stored fields (the port `name`, the `port_profile_id`
+  binding, and the VLAN *intent* — `native_network_id`, `voice_network_id`,
+  `tagged_vlan_mgmt`) from the plan when the read lags, so a known value round-trips;
+  once the controller catches up the next plan is clean. These are the fields the
+  controller stores verbatim, verified live and against the controller's config
+  code. The one field NOT restored is `forward`, which the controller *derives* from
+  the intent — see the `port_overrides` change below. (#101)
 
 ### Changed
 
+- **`unifi_network_device` — `port_overrides[*].forward` is now read-only
+  (Computed).** The controller does not store `forward` as written: it *derives* it
+  from the port's VLAN intent (the native network + `tagged_vlan_mgmt` + excluded
+  set) and rewrites it on every write — verified live (HIL on a switch port), where
+  every value we wrote was recomputed on read-back. A configured `forward` could
+  therefore never round-trip cleanly. Practitioners
+  now express VLAN intent via `native_network_id`, `tagged_vlan_mgmt`, and
+  `excluded_network_ids` and read `forward` back as the controller's computed result.
+  **Breaking** for configs that set `forward` inline on a device port — remove it
+  (the intent fields already determine it). This applies to `unifi_network_device`
+  port overrides only; `unifi_network_port_profile` still stores `forward` verbatim
+  (a profile is a template, derivation runs when it's bound to a port). (#101)
 - **CI now caches the goinstall-built tool binaries and the release cross-compile.**
   Building `golangci-lint` from source was ~80s of every `checks` run, and
   GoReleaser rebuilt all six `GOOS/GOARCH` targets from scratch each release

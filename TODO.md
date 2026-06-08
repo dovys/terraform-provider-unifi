@@ -28,6 +28,9 @@ gap unlocks only with the matching hardware:
   `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
   DNS. (The `port_overrides` write→read-back contract — which fields the controller
   stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
+  **Administratively disabling a port is not yet modeled** (issue #108): `forward =
+  "disabled"` is derived away by the controller, so there's no working off switch —
+  capture the UI's disable PUT and add a dedicated field.
 - **a live controller write-tier run** — `unifi_network_mdns` (new, issue #91):
   confirm the v2 `global/config/network` PUT is **replace-style** as the spec
   notes (the resource GET-merges and PUTs the whole doc, so the required IGMP

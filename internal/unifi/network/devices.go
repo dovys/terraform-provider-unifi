@@ -36,7 +36,7 @@ type PortOverride struct {
 	Name       string `json:"name,omitempty"`
 	PoEMode    string `json:"poe_mode,omitempty"` // auto | pasv24 | passthrough | off
 
-	Forward                string   `json:"forward,omitempty"`                  // all | native | customize | disabled
+	Forward                string   `json:"forward,omitempty"`                  // all | native | customize | disabled — controller-DERIVED on a device port (read-only); see RestoreConfiguredScalars
 	NativeNetworkConfID    string   `json:"native_networkconf_id,omitempty"`    // untagged/native network (networkconf _id)
 	TaggedVLANMgmt         string   `json:"tagged_vlan_mgmt,omitempty"`         // auto | block_all | custom
 	ExcludedNetworkConfIDs []string `json:"excluded_networkconf_ids,omitempty"` // VLANs to block on the trunk when TaggedVLANMgmt=custom
@@ -66,21 +66,20 @@ type PortOverride struct {
 // RestoreConfiguredScalars repairs a read that lagged a write. The /rest/device PUT
 // lands, but the /stat/device list the Read maps from can briefly echo the old
 // value. That stale value contradicts the known plan value and trips "inconsistent
-// result after apply". For a field the controller stores exactly as written, this
-// overlays the configured value back so it round-trips; the next Read then picks up
-// the controller's settled value.
+// result after apply". This overlays the configured value back so a known field
+// round-trips; the next Read picks up the controller's settled value.
 //
-// Only two fields qualify: name and the port-profile binding (portconf_id). Both
-// were verified to round-trip verbatim against a live controller.
+// Restored fields are the ones the controller stores VERBATIM (verified live): the
+// name, the port-profile binding, and the VLAN intent — the native/voice networks
+// and the tagged-VLAN mode.
 //
-// The VLAN fields (forward, tagged_vlan_mgmt, native_networkconf_id,
-// excluded_networkconf_ids) are deliberately NOT restored. The controller derives
-// them on write — forward:"disabled" can read back "all", native is injected when
-// blank or cleared otherwise — so its read is authoritative. Restoring a configured
-// VLAN value would re-propose a diff on every plan, and would hide a contradictory
-// config (e.g. a native network set while forward resolves to "all") that should
-// surface as an error instead. A field the user left unset (empty want) also defers
-// to the controller.
+// `forward` is NOT restored: the controller DERIVES it from those intent fields
+// (native + tagged_vlan_mgmt + excluded), so it is modeled Computed-only. A Computed
+// field is never a known plan value, so a lagging read of it can't trip the
+// consistency check, and the read stays authoritative. A field the user left unset
+// (empty want) also defers to the controller. (excluded_networkconf_ids — a
+// custom-mode-only Set — is left to the array merge; restoring it is a possible
+// follow-up.)
 func (po *PortOverride) RestoreConfiguredScalars(want PortOverride) {
 	restore := func(dst *string, src string) {
 		if src != "" && *dst != src {
@@ -89,6 +88,9 @@ func (po *PortOverride) RestoreConfiguredScalars(want PortOverride) {
 	}
 	restore(&po.Name, want.Name)
 	restore(&po.PortconfID, want.PortconfID)
+	restore(&po.NativeNetworkConfID, want.NativeNetworkConfID)
+	restore(&po.VoiceNetworkConfID, want.VoiceNetworkConfID)
+	restore(&po.TaggedVLANMgmt, want.TaggedVLANMgmt)
 }
 
 // DeviceConfig is the owned, writable subset of a device document. Scalars ride

@@ -50,21 +50,24 @@ Optional:
 - `egress_rate_limit_enabled` (Boolean) Enable an egress rate limit.
 - `egress_rate_limit_kbps` (Number) Egress rate limit in kbps (when enabled).
 - `excluded_network_ids` (Set of String) Tagged networks to exclude when `tagged_vlan_mgmt = custom`.
-- `forward` (String) VLAN behavior: `all`, `native`, `customize`, or `disabled`.
 - `full_duplex` (Boolean) Forced full duplex (when `autoneg = false`).
 - `isolation` (Boolean) Isolate this port from other isolated ports.
 - `lldpmed_enabled` (Boolean) Enable LLDP-MED.
 - `multicast_router_mode` (String) Multicast router mode.
 - `name` (String) Port label.
-- `native_network_id` (String) Untagged/native network (`unifi_network_network` id).
+- `native_network_id` (String) Untagged/native network (`unifi_network_network` id) — the port's VLAN intent.
 - `poe_mode` (String) Power over Ethernet: `auto`, `pasv24`, `passthrough`, or `off` (varies by switch). HIL-unverified.
 - `port_keepalive_enabled` (Boolean) Enable port keep-alive.
-- `port_profile_id` (String) Bind the port to a `unifi_network_port_profile` (its `id`). The profile then governs the port's VLAN behavior, so leave the inline VLAN fields (`forward`, `native_network_id`, `tagged_vlan_mgmt`) unset — the controller nulls them once a profile is bound.
+- `port_profile_id` (String) Bind the port to a `unifi_network_port_profile` (its `id`). The profile then governs the port's VLAN behavior, so leave the inline VLAN intent (`native_network_id`, `tagged_vlan_mgmt`) unset — the controller nulls them (and the derived `forward`) once a profile is bound.
 - `port_security_enabled` (Boolean) Restrict the port to specific MAC addresses.
 - `port_security_mac_addresses` (Set of String) Allowed MAC addresses when `port_security_enabled = true`.
 - `speed` (Number) Forced link speed in Mbps (when `autoneg = false`).
 - `stp_bpdu_guard` (Boolean) Enable BPDU guard.
 - `stp_edge_state` (String) STP edge-port state.
 - `stp_port_mode` (Boolean) Participate in spanning tree.
-- `tagged_vlan_mgmt` (String) Tagged-VLAN handling: `auto`, `block_all`, or `custom`.
+- `tagged_vlan_mgmt` (String) Tagged-VLAN handling: `auto` (allow all), `block_all` (native only), or `custom` (allow all but `excluded_network_ids`). The controller derives `forward` from this.
 - `voice_network_id` (String) Voice VLAN network (`unifi_network_network` id).
+
+Read-Only:
+
+- `forward` (String) VLAN forwarding mode, **derived by the controller** (read-only) from `native_network_id` + `tagged_vlan_mgmt` + `excluded_network_ids`: `all` (trunk), `native`, or `customize`. Set the intent fields instead — the controller computes this. (Binding a port profile governs it.)

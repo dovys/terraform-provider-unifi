@@ -50,6 +50,11 @@ func portOverrideSchemaAttrs(computed bool) map[string]schema.Attribute {
 	str := func(desc string) schema.Attribute {
 		return schema.StringAttribute{Optional: !computed, Computed: true, MarkdownDescription: desc}
 	}
+	// computedStr is always Computed-only, even on the resource — for a field the
+	// controller derives and owns (the user can't set it).
+	computedStr := func(desc string) schema.Attribute {
+		return schema.StringAttribute{Computed: true, MarkdownDescription: desc}
+	}
 	b := func(desc string) schema.Attribute {
 		return schema.BoolAttribute{Optional: !computed, Computed: true, MarkdownDescription: desc}
 	}
@@ -60,12 +65,12 @@ func portOverrideSchemaAttrs(computed bool) map[string]schema.Attribute {
 		return schema.SetAttribute{Optional: !computed, Computed: true, ElementType: types.StringType, MarkdownDescription: desc}
 	}
 	return map[string]schema.Attribute{
-		"port_profile_id":             str("Bind the port to a `unifi_network_port_profile` (its `id`). The profile then governs the port's VLAN behavior, so leave the inline VLAN fields (`forward`, `native_network_id`, `tagged_vlan_mgmt`) unset — the controller nulls them once a profile is bound."),
+		"port_profile_id":             str("Bind the port to a `unifi_network_port_profile` (its `id`). The profile then governs the port's VLAN behavior, so leave the inline VLAN intent (`native_network_id`, `tagged_vlan_mgmt`) unset — the controller nulls them (and the derived `forward`) once a profile is bound."),
 		"name":                        str("Port label."),
 		"poe_mode":                    str("Power over Ethernet: `auto`, `pasv24`, `passthrough`, or `off` (varies by switch). HIL-unverified."),
-		"forward":                     str("VLAN behavior: `all`, `native`, `customize`, or `disabled`."),
-		"native_network_id":           str("Untagged/native network (`unifi_network_network` id)."),
-		"tagged_vlan_mgmt":            str("Tagged-VLAN handling: `auto`, `block_all`, or `custom`."),
+		"forward":                     computedStr("VLAN forwarding mode, **derived by the controller** (read-only) from `native_network_id` + `tagged_vlan_mgmt` + `excluded_network_ids`: `all` (trunk), `native`, or `customize`. Set the intent fields instead — the controller computes this. (Binding a port profile governs it.)"),
+		"native_network_id":           str("Untagged/native network (`unifi_network_network` id) — the port's VLAN intent."),
+		"tagged_vlan_mgmt":            str("Tagged-VLAN handling: `auto` (allow all), `block_all` (native only), or `custom` (allow all but `excluded_network_ids`). The controller derives `forward` from this."),
 		"excluded_network_ids":        set("Tagged networks to exclude when `tagged_vlan_mgmt = custom`."),
 		"voice_network_id":            str("Voice VLAN network (`unifi_network_network` id)."),
 		"autoneg":                     b("Auto-negotiate link speed/duplex."),
@@ -91,11 +96,12 @@ func portOverrideSchemaAttrs(computed bool) map[string]schema.Attribute {
 // number) into the client struct. diags collects set-conversion errors.
 func portOverrideToNet(ctx context.Context, portIdx int, o portOverrideObject, diags *diag.Diagnostics) network.PortOverride {
 	po := network.PortOverride{
-		PortIdx:                portIdx,
-		PortconfID:             strOrEmpty(o.PortProfileID),
-		Name:                   strOrEmpty(o.Name),
-		PoEMode:                strOrEmpty(o.POEMode),
-		Forward:                strOrEmpty(o.Forward),
+		PortIdx:    portIdx,
+		PortconfID: strOrEmpty(o.PortProfileID),
+		Name:       strOrEmpty(o.Name),
+		PoEMode:    strOrEmpty(o.POEMode),
+		// Forward is read-only (controller-derived); it's never written — the
+		// controller computes it from the intent below. So it's omitted here.
 		NativeNetworkConfID:    strOrEmpty(o.NativeNetworkID),
 		TaggedVLANMgmt:         strOrEmpty(o.TaggedVLANMgmt),
 		VoiceNetworkConfID:     strOrEmpty(o.VoiceNetworkID),
