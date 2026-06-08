@@ -412,6 +412,86 @@ func TestNetwork_DHCPOptionsRoundTrip(t *testing.T) {
 	}
 }
 
+// TestNetwork_DHCPGuardServersRoundTrip is the regression test for issue #89's
+// real cause (verified live against UniFi Network 10.4.57): enabling DHCP guard
+// requires at least one trusted DHCP server, carried in dhcpd_ip_1..3. Enabling
+// guard with no server is rejected by the controller as api.err.MissingIPAddress
+// — NOT because ip_subnet is missing. The provider must model the trusted servers
+// (dhcp_guard_servers) and map them to dhcpd_ip_1..3.
+//
+// Added, not a rewrite: before the fix, dhcp_guard_servers did not exist and
+// toNetworkConf never set DhcpdIp1..3, so a guard-on network had no way to carry
+// a trusted server and the apply hit MissingIPAddress. This asserts the mapping
+// that closes that gap.
+func TestNetwork_DHCPGuardServersRoundTrip(t *testing.T) {
+	ctx := context.Background()
+	var diags diag.Diagnostics
+
+	// Config → wire: guard on with two trusted servers maps to dhcpd_ip_1/_2; the
+	// freed third slot is cleared (non-nil "") so shrinking the list blanks it.
+	m := &networkResourceModel{
+		Name: types.StringValue("iot"), Purpose: types.StringValue("corporate"),
+		Subnet:           types.StringValue("192.0.2.1/24"),
+		DHCPGuardEnabled: types.BoolValue(true),
+		DHCPGuardServers: sliceToStringList([]string{"192.0.2.1", "192.0.2.2"}),
+	}
+	conf := m.toNetworkConf(ctx, &diags)
+	if diags.HasError() {
+		t.Fatalf("toNetworkConf diags: %v", diags)
+	}
+	if derefStr(conf.DhcpdIp1) != "192.0.2.1" || derefStr(conf.DhcpdIp2) != "192.0.2.2" {
+		t.Errorf("trusted-server mapping wrong: ip1=%q ip2=%q", derefStr(conf.DhcpdIp1), derefStr(conf.DhcpdIp2))
+	}
+	if conf.DhcpdIp3 == nil || *conf.DhcpdIp3 != "" {
+		t.Errorf("freed third slot must be cleared (non-nil \"\"), got %v", conf.DhcpdIp3)
+	}
+	if conf.DhcpguardEnabled == nil || !*conf.DhcpguardEnabled {
+		t.Errorf("guard flag not set")
+	}
+
+	// Wire → state: dhcpd_ip_1..3 read back into the list (nil/empty slots drop).
+	var out networkResourceModel
+	out.fromNetworkConf(&wire.Networkconf{
+		DhcpguardEnabled: boolPtrLit(true), DhcpdIp1: sp("192.0.2.1"), DhcpdIp2: sp("192.0.2.2"),
+	})
+	var servers []string
+	out.DHCPGuardServers.ElementsAs(ctx, &servers, false)
+	if len(servers) != 2 || servers[0] != "192.0.2.1" || servers[1] != "192.0.2.2" {
+		t.Errorf("dhcp_guard_servers round-trip wrong: %v", servers)
+	}
+}
+
+// TestNetwork_DHCPGuardRequiresServer is the user-facing regression for issue
+// #89: enabling dhcp_guard_enabled without a trusted server must surface as a
+// clear plan-time diagnostic on dhcp_guard_servers (mirroring the controller's
+// api.err.MissingIPAddress), not a raw apply-time 400.
+//
+// Added, not a rewrite: this validation is new with the fix; before it, the only
+// signal a user got was the controller's opaque 400 at apply.
+func TestNetwork_DHCPGuardRequiresServer(t *testing.T) {
+	guardNoServer := networkResourceModel{
+		Name: types.StringValue("iot"), Purpose: types.StringValue("corporate"),
+		Subnet:           types.StringValue("192.0.2.1/24"),
+		DHCPGuardEnabled: types.BoolValue(true),
+		DHCPGuardServers: types.ListNull(types.StringType),
+	}
+	if diags := validateDHCPGuardConfig(guardNoServer); !diags.HasError() {
+		t.Errorf("guard on + no server must be a config error (the #89 bug repro), got none")
+	}
+
+	guardWithServer := guardNoServer
+	guardWithServer.DHCPGuardServers = sliceToStringList([]string{"192.0.2.1"})
+	if diags := validateDHCPGuardConfig(guardWithServer); diags.HasError() {
+		t.Errorf("guard on + a trusted server must validate, got: %v", diags)
+	}
+
+	guardOff := guardNoServer
+	guardOff.DHCPGuardEnabled = types.BoolValue(false)
+	if diags := validateDHCPGuardConfig(guardOff); diags.HasError() {
+		t.Errorf("guard off needs no server, got: %v", diags)
+	}
+}
+
 func TestWLANConf_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 	var diags diag.Diagnostics

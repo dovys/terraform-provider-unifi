@@ -65,4 +65,10 @@ resource "unifi_network_network" "iot" {
   dhcp_dns     = ["1.1.1.1"]
 
   igmp_snooping = true # many IoT devices rely on multicast discovery
+
+  # Rogue-DHCP guarding: drop DHCP offers from anything but the trusted server.
+  # Worthwhile on an IoT VLAN where an untrusted device could run a stray DHCP
+  # server. Enabling guard requires listing the trusted server(s) — the gateway.
+  dhcp_guard_enabled = true
+  dhcp_guard_servers = ["203.0.113.1"]
 }
