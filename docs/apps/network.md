@@ -63,6 +63,7 @@ refuses to mix.
 |----------|:------:|-------|
 | `unifi_network_site` | L | Site CRUD (`/cmd/sitemgr`). *Deferred past P1 — the sitemgr write shapes need a multi-site controller to verify; the read-only `data.unifi_network_site` ships in P1.* |
 | `unifi_network_settings` | L (`get`/`set/setting/<key>`) | One resource, one **optional nested block per `setting/<key>`** — sections managed à la carte. Shipped keys: `ntp`, `country`, `locale`; grown over time (see TODO). A generic JSON-blob `unifi_network_setting` was rejected as a smell. |
+| `unifi_network_threat_management` | L (`get`/`set/setting/ips`) | **Threat Management (IDS/IPS)** — the `ips` settings singleton as a dedicated resource: `mode` (`disabled`/`ids`/`ips`/`ipsInline`), `enabled_categories` (signature category Set), and the engine flags (`restrict_torrents`, `honeypot_enabled`, `memory_optimized`, …). Sparse-merge write; destroy is state removal only. Per-network `honeypot` entries are left to the controller. |
 
 Settings are **one doc per key, always present**, read via `get/setting/<key>` and written via
 `set/setting/<key>` (a shallow merge — send only changed fields; *not* `/rest`). The single resource keeps

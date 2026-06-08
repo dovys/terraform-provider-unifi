@@ -58,6 +58,24 @@ below predate the date-based convention.
 
 ### Added
 
+- **`unifi_network_threat_management`** — manages UniFi Threat Management (IDS/IPS),
+  the `ips` settings singleton (issue #90): `mode` (`disabled`/`ids` detection /
+  `ips`/`ipsInline` prevention), `enabled_categories` (the controller's 59-member
+  signature-category Set, validated), `enabled_networks`, and the engine flags
+  (`restrict_torrents`, `honeypot_enabled`, `memory_optimized`,
+  `content_filtering_blocking_page_enabled`). Rides the dedicated settings verbs
+  (`get`/`set/setting/ips`) with a shallow-merge write of the owned fields, so
+  unmodeled fields (per-network `honeypot` entries) survive. Like
+  `unifi_network_settings` it is a singleton: destroy is state removal only, and
+  import seeds the fixed `ips` id. **Enabling IDS/IPS requires a gateway with an
+  active CyberSecure subscription** — the resource gates on the console's `IPS`
+  capability at plan time and, because the controller silently keeps the engine
+  off without an active subscription (it accepts the write but stores `disabled`),
+  verifies at apply time that the requested mode actually took and fails with a
+  clear diagnostic rather than looping on drift. The `disabled`/inert path works
+  everywhere. **The enabled write path is modeled from the reverse-engineered
+  controller spec and is NOT verified against live IDS/IPS hardware** — no
+  CyberSecure-licensed console was available (see TODO).
 - **`unifi_network_network.dhcp_guard_servers`** — the trusted-DHCP-server list
   (up to three, mapped to `dhcpd_ip_1`..`dhcpd_ip_3`) that rogue-DHCP guarding
   needs. Verified live against UniFi Network 10.4.57: enabling

@@ -60,6 +60,10 @@ A resource is checkable only when it meets the Definition of Done ([development.
         shallow-merge write. A generic JSON-blob `unifi_network_setting` was rejected as a smell. Shipped
         keys: `ntp`, `country`, `locale`; grown over time (remaining keys + per-key live confirmation in
         `TODO.md`).
+  - [x] **threat management:** `unifi_network_threat_management` — IDS/IPS (the `ips` settings key) as a
+        dedicated resource: `mode` (detection/prevention/off), `enabled_categories` (signature Set), and
+        the engine flags, over `get`/`set/setting/ips` with a shallow-merge write (write semantics
+        HIL-unverified — see `TODO.md`).
   - **deferred — zone firewall:** firewall_zone, firewall_policy — the live controller runs the
         **classic** firewall, so the zone-based v2 endpoints are empty and the classic-vs-zone
         capability gate can't be verified; build once a zone-firewall controller is available
