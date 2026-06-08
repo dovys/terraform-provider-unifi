@@ -5,7 +5,7 @@ Two runners against the operator's **live** UniFi console
 
 - **`run.sh` — read-only** (Rung B): imports the live objects and asserts a
   **clean plan**, the truest regression. Pairs with the read smoke test
-  (`internal/provider/hil_read_test.go`, Rung A). **Never writes.**
+  (`test/hil/read_hil_test.go`, Rung A). **Never writes.**
 - **`write.sh` — write verification** (bucket 2): **creates then destroys**
   additive, inert objects to exercise write paths the read rungs can't reach.
   Opt-in and gated. See [Write verification](#write-verification-writesh) below.
@@ -59,7 +59,7 @@ Imports the `_id`-passthrough resources that exist on the console:
   `camera`, `liveview`, and the `nvr_settings` singleton.
 
 `firewall_group` and `wan_sla` are emitted too but are empty on the recon console
-(nothing to import). The Rung A read smoke (`hil_read_test.go`) additionally
+(nothing to import). The Rung A read smoke (`read_hil_test.go`) additionally
 forces a wire decode of every Network collection + all Protect surfaces
 (lights/sensors/chimes/viewers are empty here).
 
@@ -74,7 +74,7 @@ without an `apply` + second plan, which this read-only harness deliberately
 omits):
 - `device` — computed read-only telemetry (`ip`, `state`) drifts every read, so
   `-generate-config-out` always reports it "known after apply". Rung A
-  (`internal/provider/hil_read_test.go`) already verifies device read/decode.
+  (`test/hil/read_hil_test.go`) already verifies device read/decode.
 
 A non-empty plan for any covered resource is a **HIL finding** — a field the
 provider's Read/normalize doesn't round-trip against live firmware — not a harness
@@ -104,7 +104,7 @@ scope), which can live in `secrets.env`. The W1 `firewall_rule` index and
 controller's user band; a WAN-purpose network) — no extra config, portable across
 consoles.
 
-The harness (`internal/provider/hil_write_*_test.go`, build tag `hil`) drives the
+The harness (`test/hil/write_*_hil_test.go`, build tag `hil`) drives the
 standard **create → update-one-field → import(`ImportStateVerify`) → second empty
 plan → destroy + `CheckDestroy`** lifecycle per object against real firmware.
 `write.sh` runs a **pre-run sweep**, the tests, then a **post-run sweep** (the

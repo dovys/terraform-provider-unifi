@@ -1,4 +1,6 @@
-package provider
+//go:build acc
+
+package acc
 
 import (
 	"context"
@@ -9,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 )
 
 func init() {
@@ -17,7 +21,7 @@ func init() {
 	resource.AddTestSweepers("unifi_network_network", &resource.Sweeper{
 		Name: "unifi_network_network",
 		F: func(_ string) error {
-			c, err := sweepClient()
+			c, err := acctest.Client()
 			if err != nil {
 				return err
 			}
@@ -27,11 +31,11 @@ func init() {
 				return err
 			}
 			for i := range nets {
-				name := deref(nets[i].Name)
-				if !strings.HasPrefix(name, accNamePrefix) {
+				name := acctest.Deref(nets[i].Name)
+				if !strings.HasPrefix(name, acctest.NamePrefix) {
 					continue
 				}
-				id := deref(nets[i].UnderscoreId)
+				id := acctest.Deref(nets[i].UnderscoreId)
 				if err := c.Network().Networks().Delete(ctx, id); err != nil {
 					return fmt.Errorf("sweep network %s (%s): %w", name, id, err)
 				}
@@ -42,10 +46,10 @@ func init() {
 }
 
 func TestAccNetworkResource(t *testing.T) {
-	name := accNamePrefix + "net"
+	name := acctest.NamePrefix + "net"
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckNetworkDestroy,
 		Steps: []resource.TestStep{
 			{ // create
@@ -98,7 +102,7 @@ resource "unifi_network_network" "test" {
 
 // testAccCheckNetworkDestroy asserts every test-managed network is gone.
 func testAccCheckNetworkDestroy(s *terraform.State) error {
-	c, err := sweepClient()
+	c, err := acctest.Client()
 	if err != nil {
 		return err
 	}
@@ -111,7 +115,7 @@ func testAccCheckNetworkDestroy(s *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("network %s still exists after destroy", rs.Primary.ID)
 		}
-		if !isNotFoundErr(err) {
+		if !acctest.IsNotFound(err) {
 			return fmt.Errorf("checking destroy of %s: %w", rs.Primary.ID, err)
 		}
 	}

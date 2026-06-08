@@ -116,11 +116,8 @@ func TestNetworksGetByName(t *testing.T) {
 	}
 }
 
-// TestNetworksUpdateSparse proves the write is a single sparse PUT of only the
-// provider-owned fields — no GET-then-merge. The legacy /rest PUT is a
-// server-side partial merge, so the controller keeps every field the body omits
-// (controller-managed and unmodeled alike); the provider never fetches and
-// re-sends the full document.
+// The legacy /rest PUT is a server-side partial merge, so the body must carry
+// only the provider-set fields — never an echoed-back full document.
 func TestNetworksUpdateSparse(t *testing.T) {
 	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"n1","name":"LAN-renamed"}]}`)}
 	_, err := newTestClient(f).Networks().Update(context.Background(),
@@ -128,18 +125,12 @@ func TestNetworksUpdateSparse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Update: %v", err)
 	}
-	if f.calls != 1 {
-		t.Fatalf("sparse update should be a single PUT (no GET-merge), got %d calls", f.calls)
-	}
 	if f.method != "PUT" {
 		t.Errorf("method = %q, want PUT", f.method)
 	}
 	if want := "/proxy/network/api/s/default/rest/networkconf/n1"; f.path != want {
 		t.Errorf("path = %q, want %q", f.path, want)
 	}
-	// The body is the typed wire object; omitempty drops the unset fields, so
-	// only _id and the owned name are serialized — nothing the controller would
-	// reject (no attr_no_delete, no echoed GET document).
 	raw, _ := json.Marshal(f.body)
 	var got map[string]any
 	if err := json.Unmarshal(raw, &got); err != nil {

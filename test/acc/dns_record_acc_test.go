@@ -1,4 +1,6 @@
-package provider
+//go:build acc
+
+package acc
 
 import (
 	"context"
@@ -9,13 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 )
 
 func init() {
 	resource.AddTestSweepers("unifi_network_dns_record", &resource.Sweeper{
 		Name: "unifi_network_dns_record",
 		F: func(_ string) error {
-			c, err := sweepClient()
+			c, err := acctest.Client()
 			if err != nil {
 				return err
 			}
@@ -25,10 +29,10 @@ func init() {
 				return err
 			}
 			for i := range recs {
-				if !strings.HasPrefix(recs[i].Key, accNamePrefix) {
+				if !strings.HasPrefix(recs[i].Key, acctest.NamePrefix) {
 					continue
 				}
-				id := deref(recs[i].UnderscoreId)
+				id := acctest.Deref(recs[i].UnderscoreId)
 				if err := c.Network().DNS().Records().Delete(ctx, id); err != nil {
 					return fmt.Errorf("sweep dns %s (%s): %w", recs[i].Key, id, err)
 				}
@@ -39,10 +43,10 @@ func init() {
 }
 
 func TestAccDNSRecordResource(t *testing.T) {
-	name := accNamePrefix + "host.lan"
+	name := acctest.NamePrefix + "host.lan"
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             testAccCheckDNSRecordDestroy,
 		Steps: []resource.TestStep{
 			{ // create
@@ -85,7 +89,7 @@ resource "unifi_network_dns_record" "test" {
 }
 
 func testAccCheckDNSRecordDestroy(s *terraform.State) error {
-	c, err := sweepClient()
+	c, err := acctest.Client()
 	if err != nil {
 		return err
 	}
@@ -98,7 +102,7 @@ func testAccCheckDNSRecordDestroy(s *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("dns record %s still exists after destroy", rs.Primary.ID)
 		}
-		if !isNotFoundErr(err) {
+		if !acctest.IsNotFound(err) {
 			return fmt.Errorf("checking destroy of %s: %w", rs.Primary.ID, err)
 		}
 	}

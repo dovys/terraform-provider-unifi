@@ -12,7 +12,7 @@
 // test` and Tier-2 CI, and hilWriteGate refuses to run without an explicit
 // opt-in plus a pinned target host. Drive them through test/hil/write.sh, which
 // adds an interactive confirmation and the pre/post sweep.
-package provider
+package hil
 
 import (
 	"context"
@@ -25,24 +25,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 )
 
 // tfaccHILPrefix names every object the write tier creates on the live console.
-// It extends the Tier-2 accNamePrefix ("tfacc-"), so the existing "tfacc-"
+// It extends the Tier-2 acctest.NamePrefix ("tfacc-"), so the existing "tfacc-"
 // sweepers already match anything this tier leaks — tfaccHILPrefix just marks
 // it as live-console write-test debris specifically.
-const tfaccHILPrefix = accNamePrefix + "hil-" // "tfacc-hil-"
-
-// Documentation prefixes (RFC 5737 / RFC 3849). Nothing on a real network
-// routes to these, so a static/traffic route or port-forward target pointed at
-// one carries no live traffic — the inertness lever for W1 routing resources.
-const (
-	blackholeV4   = "192.0.2.0/24"    // TEST-NET-1
-	blackholeV4b  = "198.51.100.0/24" // TEST-NET-2
-	blackholeV4IP = "192.0.2.1"       // a host in TEST-NET-1 (route next-hop / forward target)
-	blackholeV6   = "2001:db8::/32"   // RFC 3849 documentation range
-)
+const tfaccHILPrefix = acctest.NamePrefix + "hil-" // "tfacc-hil-"
 
 // hilTestMAC returns a stable, locally-administered unicast MAC for a write
 // test (the 0x02 bit means "locally administered", so it can't collide with a
@@ -62,7 +53,7 @@ func hilWriteGate(t *testing.T, tier string) {
 	if os.Getenv("UNIFI_HIL_ALLOW_WRITES") != "1" {
 		t.Skip("write-verification HIL tier is opt-in: set UNIFI_HIL_ALLOW_WRITES=1 and run via test/hil/write.sh")
 	}
-	testAccPreCheck(t) // UNIFI_HOST + local-admin UNIFI_USERNAME/UNIFI_PASSWORD
+	acctest.PreCheck(t) // UNIFI_HOST + local-admin UNIFI_USERNAME/UNIFI_PASSWORD
 	host := os.Getenv("UNIFI_HOST")
 	if pinned := os.Getenv("UNIFI_HIL_WRITE_HOST"); pinned == "" || pinned != host {
 		t.Fatalf("host allowlist: set UNIFI_HIL_WRITE_HOST to exactly the console you intend to write to "+
@@ -123,7 +114,7 @@ func registerHILSweeper(resourceType string, sweep func(ctx context.Context, c u
 	resource.AddTestSweepers(resourceType, &resource.Sweeper{
 		Name: resourceType,
 		F: func(string) error {
-			c, err := sweepClient()
+			c, err := acctest.Client()
 			if err != nil {
 				return err
 			}
@@ -137,7 +128,7 @@ func registerHILSweeper(resourceType string, sweep func(ctx context.Context, c u
 // Get). The framework destroys after the steps; this verifies it took.
 func checkDestroyByGet(resourceType string, get func(ctx context.Context, c unifi.Client, id string) error) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		c, err := sweepClient()
+		c, err := acctest.Client()
 		if err != nil {
 			return err
 		}
@@ -150,7 +141,7 @@ func checkDestroyByGet(resourceType string, get func(ctx context.Context, c unif
 			if err == nil {
 				return fmt.Errorf("%s %s still exists after destroy", resourceType, rs.Primary.ID)
 			}
-			if !isNotFoundErr(err) {
+			if !acctest.IsNotFound(err) {
 				return fmt.Errorf("checking destroy of %s %s: %w", resourceType, rs.Primary.ID, err)
 			}
 		}
@@ -162,7 +153,7 @@ func checkDestroyByGet(resourceType string, get func(ctx context.Context, c unif
 // v2 collections that have no Get — listIDs returns the live collection's _ids.
 func checkDestroyByList(resourceType string, listIDs func(ctx context.Context, c unifi.Client) ([]string, error)) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		c, err := sweepClient()
+		c, err := acctest.Client()
 		if err != nil {
 			return err
 		}
@@ -193,7 +184,7 @@ func runHILWrite(t *testing.T, tc hilWriteTest) {
 		assertInert(t, cfg, tc.inertTokens...)
 	}
 	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		CheckDestroy:             tc.checkDestroy,
 		Steps: []resource.TestStep{
 			{ // create: verify the write path + field round-trip against live firmware

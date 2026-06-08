@@ -1,6 +1,6 @@
 //go:build hil
 
-package provider
+package hil
 
 // Tier-3 HIL read-only smoke test (docs/testing.md). Logs in to a LIVE UniFi OS
 // console with a local admin and Lists every Network collection, forcing each
@@ -16,7 +16,7 @@ package provider
 // (see test/hil/secrets.env.example), which test/hil/run.sh sources for you:
 //
 //	UNIFI_ALLOW_INSECURE=true \
-//	  go test -tags hil ./internal/provider -run TestHILRead -count=1 -v
+//	  go test -tags hil ./test/hil -run TestHILRead -count=1 -v
 
 import (
 	"context"
@@ -29,6 +29,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/transport"
 )
@@ -46,7 +47,7 @@ func TestHILRead(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
-	site := envOr("UNIFI_SITE", "default")
+	site := acctest.EnvOr("UNIFI_SITE", "default")
 	c, err := unifi.NewClient(ctx, unifi.Config{
 		Host:          host,
 		Username:      user,
@@ -155,15 +156,15 @@ func TestHILRead(t *testing.T) {
 	var decodeFails, otherFails int
 	t.Log("─── HIL read smoke test ──────────────────────────────")
 	for _, r := range results {
-		switch {
-		case r.status == "OK":
+		switch r.status {
+		case "OK":
 			t.Logf("  ✓ %-20s %d", r.name, r.count)
-		case r.status == "EMPTY":
+		case "EMPTY":
 			t.Logf("  · %-20s 0 (empty)", r.name)
-		case r.status == "DECODE-FAIL":
+		case "DECODE-FAIL":
 			decodeFails++
 			t.Logf("  ✗ %-20s DECODE-FAIL: %v", r.name, r.err)
-		case r.status == "FAIL":
+		case "FAIL":
 			otherFails++
 			t.Logf("  ✗ %-20s FAIL: %v", r.name, r.err)
 		default: // HTTP nnn — endpoint absent/unsupported on this firmware

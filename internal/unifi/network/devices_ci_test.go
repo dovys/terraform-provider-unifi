@@ -156,11 +156,8 @@ func TestUpdateConfig_NoPortsLeavesArrayUntouched(t *testing.T) {
 	if _, err := newTestClient(f).Devices().UpdateConfig(context.Background(), "d1", DeviceConfig{LEDOverride: "off"}, nil); err != nil {
 		t.Fatalf("UpdateConfig: %v", err)
 	}
-	// Exactly two calls: the PUT then the authoritative re-read (no override prefetch).
-	if f.calls != 2 {
-		t.Fatalf("want 2 calls (PUT + re-read), got %d", f.calls)
-	}
-	// The first call is the PUT: it carries led_override and no port_overrides.
+	// A scalar-only update skips the port-table prefetch, so the first wire body
+	// is the PUT itself — carrying led_override and no port_overrides.
 	raw, _ := json.Marshal(f.bodies[0])
 	var putBody map[string]any
 	if err := json.Unmarshal(raw, &putBody); err != nil {

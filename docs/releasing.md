@@ -133,8 +133,8 @@ Reproduce the whole set locally with **`make check`**:
   trailing `# v6` comment is informational; **Dependabot** (`github-actions`)
   bumps the SHA and the comment together. To roll an action by hand, resolve the
   tag → SHA with `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`.
-- **Service-container images pinned by digest** (`acceptance.yml` Mongo +
-  controller) — refresh deliberately with
+- **Tier-2 stack images pinned by digest** (`test/tier2/compose.yaml`: Mongo,
+  controller, nginx bridge) — refresh deliberately with
   `docker buildx imagetools inspect <image>:<tag> --format '{{.Manifest.Digest}}'`.
 - **Release build is `-mod=readonly` with no `go mod tidy`** — a tampered or
   stale module graph fails the build instead of being silently rewritten while a

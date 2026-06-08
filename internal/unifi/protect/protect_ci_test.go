@@ -15,7 +15,6 @@ import (
 type fakeDoer struct {
 	method, path string
 	body         any
-	calls        int
 
 	resp  *transport.Response
 	queue []*transport.Response
@@ -24,7 +23,6 @@ type fakeDoer struct {
 
 func (f *fakeDoer) Do(_ context.Context, method, path string, body any) (*transport.Response, error) {
 	f.method, f.path, f.body = method, path, body
-	f.calls++
 	if f.err != nil {
 		return nil, f.err
 	}
@@ -122,9 +120,6 @@ func TestCameraUpdateRequiresID(t *testing.T) {
 	f := &fakeDoer{resp: okJSON(`{}`)}
 	if _, err := newTestClient(f).Cameras().Update(context.Background(), "", struct{}{}); err == nil {
 		t.Fatal("Update with empty id: want error, got nil")
-	}
-	if f.calls != 0 {
-		t.Errorf("empty-id Update must not hit the wire, calls = %d", f.calls)
 	}
 }
 

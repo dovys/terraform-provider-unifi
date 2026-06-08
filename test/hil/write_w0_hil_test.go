@@ -3,7 +3,7 @@
 // W0 — pure control-plane data. None of these touch the dataplane, RF, or any
 // device: a leaked teardown leaves an inert, unreferenced object. See
 // docs/testing.md §"Write verification".
-package provider
+package hil
 
 import (
 	"context"
@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 )
 
@@ -26,11 +27,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep firewall_group %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep firewall_group %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -42,11 +43,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep user_group %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep user_group %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -58,11 +59,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep radius_profile %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep radius_profile %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -74,11 +75,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep radius_account %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep radius_account %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -90,11 +91,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
 			if err := coll.Delete(ctx, items[i].Id); err != nil { // Liveview.Id is a non-pointer string
-				return fmt.Errorf("sweep liveview %s: %w", deref(items[i].Name), err)
+				return fmt.Errorf("sweep liveview %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -108,11 +109,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep dhcp_reservation %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep dhcp_reservation %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -124,13 +125,13 @@ func init() {
 // nothing real (rail 1: additive, never mutate an existing object).
 func requireMACNotActive(t *testing.T, mac string) {
 	t.Helper()
-	c, err := sweepClient()
+	c, err := acctest.Client()
 	if err != nil {
 		t.Fatalf("precondition client: %v", err)
 	}
 	if _, err := c.Network().Clients().GetByMAC(context.Background(), mac); err == nil {
 		t.Fatalf("refusing to write a reservation: MAC %s is already a known client", mac)
-	} else if !isNotFoundErr(err) {
+	} else if !acctest.IsNotFound(err) {
 		t.Fatalf("checking MAC %s: %v", mac, err)
 	}
 }
@@ -301,17 +302,17 @@ func TestHILWrite_W0_DNSRecord(t *testing.T) {
 	runHILWrite(t, hilWriteTest{
 		tier:         "W0",
 		resourceAddr: addr,
-		createConfig: testAccDNSRecordConfig(name, "A", "192.0.2.10"),
+		createConfig: dnsRecordConfig(name, "A", "192.0.2.10"),
 		createChecks: []resource.TestCheckFunc{
 			resource.TestCheckResourceAttr(addr, "name", name),
 			resource.TestCheckResourceAttr(addr, "value", "192.0.2.10"),
 			resource.TestCheckResourceAttrSet(addr, "id"),
 		},
-		updateConfig: testAccDNSRecordConfig(name, "A", "192.0.2.11"),
+		updateConfig: dnsRecordConfig(name, "A", "192.0.2.11"),
 		updateChecks: []resource.TestCheckFunc{
 			resource.TestCheckResourceAttr(addr, "value", "192.0.2.11"),
 		},
-		checkDestroy: testAccCheckDNSRecordDestroy, // reused from the Tier-2 test
+		checkDestroy: checkDNSRecordDestroy, // reused from the Tier-2 test
 	})
 }
 
@@ -354,7 +355,7 @@ resource "unifi_network_dhcp_reservation" "test" {
 		// destroy reverts the fixed-IP rather than deleting the client record
 		// (invariant 4: never forget) — so verify use_fixedip cleared, not absence.
 		checkDestroy: func(s *terraform.State) error {
-			c, err := sweepClient()
+			c, err := acctest.Client()
 			if err != nil {
 				return err
 			}
@@ -364,7 +365,7 @@ resource "unifi_network_dhcp_reservation" "test" {
 					continue
 				}
 				u, err := c.Network().Clients().GetByMAC(ctx, mac)
-				if isNotFoundErr(err) {
+				if acctest.IsNotFound(err) {
 					continue // record fully gone is also acceptable
 				}
 				if err != nil {

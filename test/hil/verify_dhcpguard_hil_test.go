@@ -19,8 +19,8 @@
 // t.Cleanup. It never mutates an operator object. Gated like the W* write tiers.
 //
 //	UNIFI_HIL_ALLOW_WRITES=1 UNIFI_HIL_WRITE_HOST=$UNIFI_HOST \
-//	  go test ./internal/provider -tags hil -run TestHILVerifyDHCPGuard -v
-package provider
+//	  go test -tags hil ./test/hil -run TestHILVerifyDHCPGuard -v
+package hil
 
 import (
 	"context"
@@ -28,6 +28,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
@@ -47,7 +48,7 @@ func isMissingIPAddress(err error) bool {
 func TestHILVerifyDHCPGuard(t *testing.T) {
 	hilWriteGate(t, "verify")
 
-	c, err := sweepClient()
+	c, err := acctest.Client()
 	if err != nil {
 		t.Fatalf("client: %v", err)
 	}
@@ -69,7 +70,7 @@ func TestHILVerifyDHCPGuard(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create baseline network: %v", err)
 	}
-	id := deref(created.UnderscoreId)
+	id := acctest.Deref(created.UnderscoreId)
 	t.Cleanup(func() {
 		if err := nets.Delete(context.Background(), id); err != nil && !errors.Is(err, network.ErrNotFound) {
 			t.Logf("cleanup delete %s: %v (sweeper backstops)", id, err)
@@ -97,7 +98,7 @@ func TestHILVerifyDHCPGuard(t *testing.T) {
 		t.Fatalf("read full doc: %v", err)
 	}
 	full.DhcpguardEnabled = ptr(true)
-	if deref(full.IpSubnet) == "" {
+	if acctest.Deref(full.IpSubnet) == "" {
 		t.Fatalf("precondition: live doc must carry ip_subnet, got empty")
 	}
 	if _, err := nets.LegacyCollection.Update(ctx, id, full); !isMissingIPAddress(err) {
@@ -119,7 +120,7 @@ func TestHILVerifyDHCPGuard(t *testing.T) {
 	if got.DhcpguardEnabled == nil || !*got.DhcpguardEnabled {
 		t.Errorf("guard flag not persisted: %v", got.DhcpguardEnabled)
 	}
-	if deref(got.DhcpdIp1) != "192.0.2.1" {
-		t.Errorf("trusted server not persisted: dhcpd_ip_1=%q", deref(got.DhcpdIp1))
+	if acctest.Deref(got.DhcpdIp1) != "192.0.2.1" {
+		t.Errorf("trusted server not persisted: dhcpd_ip_1=%q", acctest.Deref(got.DhcpdIp1))
 	}
 }

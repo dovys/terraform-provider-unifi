@@ -1,6 +1,6 @@
 //go:build hil
 
-package provider
+package hil
 
 // Rung-B helper: discovers the live Network objects and writes Terraform
 // `import {}` blocks to $HIL_IMPORTS_OUT, which test/hil/run.sh feeds to
@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 )
 
@@ -42,7 +43,7 @@ func TestHILGenerateImports(t *testing.T) {
 		Host:          host,
 		Username:      user,
 		Password:      pass,
-		Site:          envOr("UNIFI_SITE", "default"),
+		Site:          acctest.EnvOr("UNIFI_SITE", "default"),
 		AllowInsecure: strings.EqualFold(os.Getenv("UNIFI_ALLOW_INSECURE"), "true") || os.Getenv("UNIFI_ALLOW_INSECURE") == "1",
 	})
 	if err != nil {
@@ -112,7 +113,7 @@ func TestHILGenerateImports(t *testing.T) {
 	// unifi_network_device is intentionally NOT in this plan-only set: its computed
 	// read-only telemetry (ip, state) is runtime-volatile, so a generate-config-out
 	// plan always reports it "known after apply" — never clean without an apply +
-	// second plan. Rung A (hil_read_test.go) already verifies device read/decode.
+	// second plan. Rung A (read_hil_test.go) already verifies device read/decode.
 	//
 	// dhcp_reservation: the users carrying a fixed-IP reservation (use_fixedip).
 	users, err := n.Clients().Users().List(ctx)
@@ -165,7 +166,7 @@ func TestHILGenerateImports(t *testing.T) {
 	// NVR singleton on a Protect console. Best-effort — skip cleanly if Protect
 	// isn't installed so a Protect-less console still runs the Network Rung B.
 	// light/sensor/chime/viewer have no live instance on the recon console
-	// (nothing to import); Rung A (hil_read_test.go) probes their decode.
+	// (nothing to import); Rung A (read_hil_test.go) probes their decode.
 	if _, perr := c.Protect().NVR().Version(ctx); perr != nil {
 		t.Logf("Protect not installed/reachable — skipping Protect import blocks: %v", perr)
 	} else {

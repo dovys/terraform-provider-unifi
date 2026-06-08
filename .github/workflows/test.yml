@@ -94,6 +94,11 @@ jobs:
         with:
           version: v2.12.2
           install-mode: none
+          # Build tags so the tag-gated tiers (test/acc, test/hil) are linted too —
+          # without them golangci-lint skips those dirs (no buildable files) and a
+          # regression there would land silently. One pass covers all tiers.
+          args: --build-tags=acc,hil
+
 
       # Same for govulncheck. Fails on any known vuln in our call graph — deps +
       # stdlib (the latter via the pinned go.mod toolchain).
@@ -115,10 +120,12 @@ jobs:
       - name: terraform fmt
         run: terraform fmt -check -recursive examples/
 
-      # Only on release-bound PRs (base main); run `make test` locally on `next`
-      # PRs — they re-run here at the `next → main` merge.
+      # Tier 1 only — the same `./test-ci.sh` contributors run locally. Tier 2
+      # (acceptance) runs on the workstation before each PR, not in CI. Only on
+      # release-bound PRs (base main); `next` PRs re-run here at the `next → main`
+      # merge.
       - name: unit tests
         if: github.base_ref == 'main'
         run: |
-          go test ./... -timeout 120s -coverprofile=coverage.out
+          ./test-ci.sh -coverprofile=coverage.out
           go tool cover -func=coverage.out | tail -1

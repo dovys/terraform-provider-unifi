@@ -6,14 +6,19 @@ default: build
 build:
 	go install ./...
 
-# Unit tests — no controller required (the bulk of coverage lives here).
+# Tier 1 — unit tests, no controller (this is what CI runs).
 test:
-	go test ./... -timeout 120s
+	./test-ci.sh
 
-# Acceptance tests — needs a controller (Docker for legacy/v2; HIL for Integration).
-# Never run against production. See docs/testing.md.
+# Tier 2 — acceptance lifecycles against a Docker controller. Run before every PR
+# and paste the printed summary into the PR description. Needs Docker; never run
+# against production. See docs/testing.md.
 testacc:
-	TF_ACC=1 go test ./... -timeout 60m
+	./test-extended.sh
+
+# Tier 3 — hardware-in-the-loop, against the operator's live console. Sparingly.
+testhil:
+	./test-hil.sh
 
 # Static analysis. golangci-lint must be installed (CI installs it).
 lint:
@@ -62,4 +67,4 @@ check: build
 	golangci-lint run ./...
 	$(MAKE) test
 
-.PHONY: default build test testacc lint fmt tffmt vulncheck generate docs tidy check
+.PHONY: default build test testacc testhil lint fmt tffmt vulncheck generate docs tidy check

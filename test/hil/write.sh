@@ -63,7 +63,7 @@ fi
 
 sweep() { # delete any tfacc- leftovers on the live console (pre/post safety net)
   echo "── $1 sweep (tfacc-) ─────────────────────────────────────────"
-  ( cd "$repo" && go test -tags hil ./internal/provider \
+  ( cd "$repo" && go test -tags hil ./test/hil \
       -sweep=default -timeout 10m 2>&1 ) || echo "  (sweep reported errors — non-fatal; continuing)"
 }
 
@@ -71,7 +71,7 @@ sweep "pre-run"
 
 echo "── write tests [$run_re] ─────────────────────────────────────"
 set +e
-( cd "$repo" && go test -tags hil ./internal/provider \
+( cd "$repo" && go test -tags hil ./test/hil \
     -run "$run_re" -count=1 -v -timeout 45m 2>&1 | tee "$here/write.out" )
 rc=${PIPESTATUS[0]}
 set -e

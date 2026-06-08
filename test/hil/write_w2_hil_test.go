@@ -3,7 +3,7 @@
 // W2 — AP/switch provisioning. Creating/destroying these (empty, unreferenced)
 // reprovisions the APs; a brief management-plane blip is possible (no client
 // drop expected). Run during low usage. See docs/testing.md §"Write verification".
-package provider
+package hil
 
 import (
 	"context"
@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 )
 
@@ -24,11 +25,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep wlan_group %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep wlan_group %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -43,7 +44,7 @@ func init() {
 			if !strings.HasPrefix(items[i].Name, tfaccHILPrefix) { // Apgroups.Name is a non-pointer string
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
 				return fmt.Errorf("sweep ap_group %s: %w", items[i].Name, err)
 			}
 		}
@@ -112,7 +113,7 @@ resource "unifi_network_ap_group" "test" {
 			}
 			ids := make([]string, 0, len(items))
 			for i := range items {
-				ids = append(ids, deref(items[i].UnderscoreId))
+				ids = append(ids, acctest.Deref(items[i].UnderscoreId))
 			}
 			return ids, nil
 		}),

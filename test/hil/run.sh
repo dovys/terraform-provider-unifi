@@ -41,7 +41,7 @@ export TF_CLI_CONFIG_FILE="$here/dev.tfrc"
 
 # 2) Discover live object IDs -> import blocks (gitignored).
 ( cd "$repo" && HIL_IMPORTS_OUT="$here/imports.tf" \
-    go test -tags hil ./internal/provider -run TestHILGenerateImports -count=1 -v )
+    go test -tags hil ./test/hil -run TestHILGenerateImports -count=1 -v )
 
 # 3) Plan with import blocks + config generation. Read-only; never applied.
 cd "$here"

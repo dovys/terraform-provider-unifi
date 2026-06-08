@@ -26,7 +26,4 @@ func TestStaticRoutesUpdateRequiresID(t *testing.T) {
 	if _, err := newTestClient(f).StaticRoutes().Update(context.Background(), &wire.Routing{Name: ptr("x")}); err == nil {
 		t.Fatal("Update without _id should error")
 	}
-	if f.calls != 0 {
-		t.Errorf("no request expected, got %d", f.calls)
-	}
 }

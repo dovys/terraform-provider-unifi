@@ -90,10 +90,14 @@ acceptance create→update→import(`ImportStateVerify`)→destroy with clean + 
 example + generated docs · checklist updated.
 
 ## Commands (created in Phase 0)
+Three test tiers, each a root script (docs/testing.md): `./test-ci.sh` (Tier 1, unit, what CI runs) ·
+`./test-extended.sh` (Tier 2, acceptance lifecycles vs a Docker controller — **run before every PR and
+paste its summary into the PR description**) · `./test-hil.sh` (Tier 3, hardware-in-the-loop, sparingly).
 ```bash
 make build       # go install
-make test        # unit (no controller)
-make testacc     # TF_ACC=1 go test ./... -timeout 60m  (Docker controller; HIL for hardware verbs)
+make test        # ./test-ci.sh — Tier 1 unit (no controller)
+make testacc     # ./test-extended.sh — Tier 2 acceptance (Docker; run before each PR, summary → PR body)
+make testhil     # ./test-hil.sh — Tier 3 HIL (live console; sparingly)
 make docs        # regenerate provider docs (tfplugindocs only; CI gate fails on a stale docs/)
 make check       # full PR gate locally: build/vet, gofmt, go mod tidy, govulncheck, terraform fmt, docs, lint, unit
 go generate ./...; golangci-lint run; goreleaser check   # releases are automated — never run `goreleaser release` by hand

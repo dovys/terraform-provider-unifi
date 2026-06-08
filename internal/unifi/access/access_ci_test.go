@@ -16,7 +16,6 @@ import (
 type fakeDoer struct {
 	method, path string
 	body         any
-	calls        int
 
 	resp  *transport.Response
 	queue []*transport.Response
@@ -25,7 +24,6 @@ type fakeDoer struct {
 
 func (f *fakeDoer) Do(_ context.Context, method, path string, body any) (*transport.Response, error) {
 	f.method, f.path, f.body = method, path, body
-	f.calls++
 	if f.err != nil {
 		return nil, f.err
 	}

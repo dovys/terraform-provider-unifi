@@ -1,30 +1,96 @@
 # Testing & sandbox strategy
 
-Never test against production. Three tiers — because **UniFi OS Server can't run in GitHub-hosted
-runners** (needs systemd, `SYS_ADMIN`, host cgroups; runners are unprivileged), but the plain Docker
-controller covers the legacy + v2 surfaces where ~all writes live.
+Never test against production. Three tiers, each a script at the repo root — because **UniFi OS Server
+can't run in GitHub-hosted runners** (needs systemd, `SYS_ADMIN`, host cgroups; runners are
+unprivileged), but a plain Docker controller covers the legacy + v2 surfaces where ~all writes live.
 
-| Tier | Runs | Controller | Auth | Covers |
-|------|------|:----------:|------|--------|
-| **Unit** | every PR | none | — | capability logic, model (de)serialization (`httptest`), validators, plan modifiers, the **v2 write contract**. Most bugs live here. |
-| **Acceptance (legacy/v2)** | on demand (manual dispatch / `make testacc`) | `linuxserver/unifi-network-application` (Docker) | classic | networks, WAN, firewall (classic), routing, port profiles, devices + port overrides, reservations, user groups, RADIUS, DNS. The bulk. |
-| **HIL** | gated `workflow_dispatch` / self-hosted | UniFi OS Server (VM) or real gear | classic | Real radios (WLAN broadcasting), device adoption/forget, zone-firewall enforcement, firmware quirks the Docker controller can't reproduce. |
+| Tier | Script | Runs | Controller | Covers |
+|------|--------|------|:----------:|--------|
+| **1 — unit** | `./test-ci.sh` | every PR (CI) | none | capability logic, model (de)serialization (`httptest`), validators, plan modifiers, the **v2 write contract**. Fast, no behaviour reproduction. |
+| **2 — acceptance** | `./test-extended.sh` | **locally, before every PR** | Docker (`linuxserver/unifi-network-application` + Mongo + nginx bridge) | concrete create → update → import → destroy lifecycles for the legacy/v2 resources. The behaviour bar. |
+| **3 — HIL** | `./test-hil.sh` | sparingly, by hand | the operator's live console / real gear | real radios, device adoption/forget, zone-firewall enforcement, write paths of empty live collections, firmware quirks Docker can't reproduce. |
 
-## Tier 2 (workhorse)
+CI runs **Tier 1 only** (`./test-ci.sh`); Tier 2 is expensive and stateful, so it runs on the
+workstation. **Run `./test-extended.sh` before opening any PR and paste its printed summary into the PR
+description** — that summary is the evidence the behaviour suite passed.
 
-Boot the Docker controller (+ MongoDB) as a CI service, pin the version, poll for readiness
-(generous timeout + retry). Bootstrap a local admin headlessly →
-`UNIFI_HOST/USERNAME/PASSWORD/SITE/INSECURE`. Enable **simulation mode** to fabricate hardware
-without devices:
+## Layout — packages and tags, not name prefixes
+
+The tier a test belongs to is encoded by its **package + build tag + file suffix**, never by a
+`-run` name-prefix filter (a prefix is a fragile selector — one mistyped `TestAcc…` and a suite silently
+drops out):
+
+| Tier | Package | Build tag | Files |
+|------|---------|-----------|-------|
+| 1 — unit | the package under test (`internal/provider`, `internal/unifi/…`) | none | `<feature>_ci_test.go` |
+| 2 — acceptance | `test/acc` (`package acc`) | `//go:build acc` | `<feature>_acc_test.go` |
+| 3 — HIL | `test/hil` (`package hil`) | `//go:build hil` | `<feature>_hil_test.go` |
+
+Unit tests are **white-box** — they reach into unexported internals (serialization, validators), so Go
+binds them to their package directory; they stay beside the code. Acceptance and HIL tests are
+**black-box** — they drive the provider through its public Terraform protocol, so they live in their own
+packages and share one harness, **`internal/acctest`** (the in-process provider factory, env precheck,
+env-built client, and the sweep/`CheckDestroy` plumbing). `go test ./...` (no tag) compiles only the
+unit tests; `-tags acc`/`-tags hil` select a tier with no `-run` filtering.
+
+## Tier 2 (the behaviour bar) — `./test-extended.sh`
+
+The stack is a Docker Compose file (`test/tier2/compose.yaml`): Mongo + the standalone
+`unifi-network-application` controller + a small **nginx bridge**. The provider only speaks the
+**UniFi-OS console** dialect (`/api/auth/login`, `/proxy/network/...`, CSRF), but the only
+CI-runnable controller is the **standalone** Network Application (`/api/login`, bare `/api/...` +
+`/v2/...`, no CSRF). The bridge (`unifi-os-bridge.conf`) translates between them — rewrites the login
+path, strips the `/proxy/network` prefix, and drops the `Secure` cookie flag so the session rides plain
+HTTP. The provider connects to the bridge on `:8443`; nothing else changes. Mongo is seeded
+(`init-mongo.js`) with the `unifi`/`unifi_stat` users the controller's connection string requires.
+
+**Lifecycle lives in Go, not bash.** `TestMain` (`test/acc/`, gated on `UNIFI_T2_MANAGE=1`)
+boots the stack if it's down, polls for readiness (controller `/status` up **and** the default site in
+Mongo, 12-min deadline), seeds a local admin **directly into Mongo** (the standalone image has no
+headless add-admin verb — insert the admin + privilege docs with a pre-hashed `x_shadow`), verifies a
+login, and exports `UNIFI_HOST/USERNAME/PASSWORD/SITE/INSECURE`. The bash script is a thin trigger
+(`go test -tags acc ./test/acc/`):
+
 ```
-is_simulation=true
-demo.num_ugw=1   demo.num_usw=2   demo.num_uap=0
+./test-extended.sh                  boot (if needed) + run every acceptance test, print a summary
+./test-extended.sh -run TestAccFoo  forward extra `go test` flags (one suite)
+./test-extended.sh up               boot + seed the stack, run no tests
+./test-extended.sh down             tear the stack down (-v)
+./test-extended.sh --fresh [...]    tear down, then boot fresh + run
 ```
-Run `TF_ACC=1 go test ./... -timeout 60m`. Dispose per run; **sweepers** clean leaked objects via a
-mandatory `tfacc-` name prefix; `CheckDestroy` per resource. Version matrix over a current build +
-the firmware floor.
 
-## Tier 3 (gated)
+Suites run serial (`-p 1`) against the single controller. **Sweepers** clean leaked objects via a
+mandatory `tfacc-` name prefix; each resource has a `CheckDestroy`. Don't recreate the controller
+container after seeding — its `/config` re-inits and wipes the admin; `--fresh` does a clean
+`down -v` + reboot instead.
+
+### Tier-2 coverage
+
+Each resource below runs the full lifecycle — **create → update → import (`ImportStateVerify`) →
+destroy**, with a clean intermediate plan and a **second consecutive empty plan**, plus `CheckDestroy`
+and a sweeper:
+
+`network`, `dns_record`, `firewall_group`, `firewall_rule`, `static_route`, `port_forward`,
+`port_profile`, `user_group`, `radius_profile`, `radius_account`, `traffic_rule`, `ap_group`, `wlan`,
+`dhcp_reservation`, `dynamic_dns`, `network_settings`, `wan`.
+
+Three carry a documented deviation:
+
+- **`wan`** — create → import → destroy only (no update step): a WAN-update PUT currently returns
+  `api.err.InvalidPayload` for any field. That's a separate known provider bug with its own fix in
+  flight; the test stops short of it rather than asserting broken behaviour.
+- **`traffic_route`** — `t.Skip`ped: it needs a VPN/WAN egress network the Docker controller can't
+  provide (the controller rejects every reachable target as an invalid type/target combination). HIL
+  covers it.
+- **`wan_sla`** — `t.Skip`ped: a real provider bug. The monitor `type` is sent lowercase (`icmp`) but
+  the v2 wan-slas API only accepts the uppercase enum (`ICMP`/`DNS`/`SPEED_LIMIT`) — the clean-room
+  spec guessed the casing. The skip carries the finding; un-skip once it's fixed.
+
+## Tier 3 (gated) — `./test-hil.sh`
+
+`./test-hil.sh read` runs the read-only rungs (import → clean-plan); `./test-hil.sh write` runs the
+additive write verification (triple-gated). Both wrap the rungs in `test/hil/` and take config +
+credentials from a gitignored `test/hil/secrets.env`.
 
 A self-hosted runner with UniFi OS Server on a systemd VM, or real hardware (disposable gateway +
 AP). The **only** place that exercises real radios, device adoption/forget, zone-firewall
@@ -41,12 +107,12 @@ local-admin user; `test/hil/`). Console address and credentials come from a **gi
 password-manager layout never land in this repo; the `secret-hygiene` CI job enforces it
 (`scripts/check-secrets.sh`):
 
-- **Rung A — read smoke** (`internal/provider/hil_read_test.go`, build tag `hil`): logs in and
+- **Rung A — read smoke** (`test/hil/read_hil_test.go`, build tag `hil`): logs in and
   `List()`s every Network collection + the Protect surfaces (cameras/nvr/liveviews/…), forcing each
   element through its generated `wire` type. A field the clean-room spec got wrong shows up as a
   decode failure against real firmware. (This is how the user `last_seen`/`blocked`, device
   `stp_priority`/`radio_table.channel`, and Protect NVR `systemInfo` telemetry mistypes were found.)
-- **Rung B — import → clean-plan** (`internal/provider/hil_import_test.go` + `test/hil/run.sh`):
+- **Rung B — import → clean-plan** (`test/hil/import_hil_test.go` + `test/hil/run.sh`):
   discovers live `_id`s, emits `import {}` blocks, and runs `tofu plan -generate-config-out`,
   asserting *N to import, 0 to add/change/destroy*. A non-empty plan is a HIL finding (a field Read
   doesn't round-trip), not a harness failure.
@@ -112,8 +178,9 @@ firmware quirks** — those are Tier 3 only. No claimed-but-absent coverage.
 
 Unit tests (schema/validators/serialization); a Tier-2 test doing **create → update → import
 (`ImportStateVerify`) → destroy** with a clean intermediate plan **and a second consecutive empty
-plan**; `CheckDestroy`; a sweeper; a Tier-3 HIL test if it needs radios/hardware (else noted as
-sim-covered). Full Definition of Done in [development.md](development.md).
+plan**; `CheckDestroy`; a sweeper; a Tier-3 HIL test if it needs radios/hardware (else the Docker
+lifecycle is the bar, with any hardware gap noted). Full Definition of Done in
+[development.md](development.md).
 
 ## Test what the user sees, not how the code works
 

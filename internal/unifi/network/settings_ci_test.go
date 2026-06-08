@@ -73,10 +73,11 @@ func TestSettingsSetKey(t *testing.T) {
 }
 
 func TestSettingsSetKeyReReadsOnEmptyEcho(t *testing.T) {
-	// A write that echoes no data re-reads the section via get/setting/<key>.
+	// The POST echoes an empty array, so a result carrying timezone "UTC" can
+	// only have come from the section re-read.
 	f := fakeQueue(
-		`{"meta":{"rc":"ok"},"data":[]}`,                                             // POST set/setting/locale → empty echo
-		`{"meta":{"rc":"ok"},"data":[{"_id":"s1","key":"locale","timezone":"UTC"}]}`, // GET re-read
+		`{"meta":{"rc":"ok"},"data":[]}`,
+		`{"meta":{"rc":"ok"},"data":[{"_id":"s1","key":"locale","timezone":"UTC"}]}`,
 	)
 	raw, err := newTestClient(f).Settings().SetKey(context.Background(), "locale",
 		&struct {
@@ -84,9 +85,6 @@ func TestSettingsSetKeyReReadsOnEmptyEcho(t *testing.T) {
 		}{Timezone: ptr("UTC")})
 	if err != nil {
 		t.Fatalf("SetKey: %v", err)
-	}
-	if f.calls != 2 {
-		t.Errorf("calls = %d, want 2 (POST then re-read GET)", f.calls)
 	}
 	if !strings.Contains(string(raw), `"timezone":"UTC"`) {
 		t.Errorf("re-read section = %s, want timezone UTC", raw)

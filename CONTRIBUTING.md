@@ -55,4 +55,13 @@ Three rules make these tests durable:
 - **Each bug fix adds a specific test reproducing that bug** — failing on the old
   behaviour, passing on the new.
 
+## 4. Run the extended suite before opening a PR
+
+CI runs only the fast unit tier (`./test-ci.sh`). The behaviour bar — the
+create → update → import → destroy lifecycles against a real controller — lives
+in Tier 2 and runs on your workstation. **Before you open a PR, run
+`./test-extended.sh` (it boots a Docker controller, needs Docker) and paste its
+printed summary into the PR description.** That summary is the evidence the
+behaviour suite passed; a PR without it hasn't cleared the bar.
+
 See [`docs/testing.md`](docs/testing.md) for the testing tiers and conventions.

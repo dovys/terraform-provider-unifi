@@ -97,7 +97,7 @@ never surfaces — `tflog` rides the hclog sink the host parses.
 - [ ] Acceptance test: create → update → import (`ImportStateVerify`) → destroy, clean intermediate
       plan + **second empty plan**; `CheckDestroy` (removal, or overlay-revert for config resources);
       `tfacc-`-prefixed sweeper.
-- [ ] HIL test if hardware-dependent (else noted as sim-covered).
+- [ ] HIL test if hardware-dependent (else the Docker lifecycle is the bar; note any hardware gap).
 - [ ] Live instance imports to an empty plan.
 - [ ] Example + generated docs; checklist updated.
 

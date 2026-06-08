@@ -1,0 +1,61 @@
+# Local Tier-2 acceptance harness — the Docker controller the acceptance tests
+# run against on a workstation. `./test-extended.sh` owns the lifecycle: it boots
+# this stack, seeds a local admin, runs the Tier-2 lifecycles, and tears down.
+# See docs/testing.md. Never point this at production.
+#
+# The provider speaks the UniFi-OS console dialect, but the only CI-runnable
+# controller is the *standalone* Network Application (different login path + URL
+# prefix), so a small nginx "bridge" translates between them — see
+# unifi-os-bridge.conf. The provider connects to the bridge on :8443.
+#
+# Images are pinned by immutable digest (a floating tag like :latest is a mutable
+# supply-chain input — the same policy as the CI service containers). Refresh
+# deliberately:
+#   docker buildx imagetools inspect <image>:<tag> --format '{{.Manifest.Digest}}'
+services:
+  mongo:
+    image: mongo:7@sha256:4b5bf3c2bb7516164f6dcb44acce4fdcb428abfe5771a1128304a0f34ab9ff7c # 7.0.34 (pinned 2026-06-03)
+    networks: [unifi]
+    volumes:
+      # Seeds the unifi/unifi_stat users the controller's connection string
+      # requires (runs once, on a fresh data dir).
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    # mongod only listens on the network port after the initdb seed completes, so
+    # service_healthy gates the controller on a *seeded* DB, not just a started
+    # container — no first-boot race on the seeded users.
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 10s
+
+  controller:
+    image: lscr.io/linuxserver/unifi-network-application@sha256:f87c4d57285f3118a0bad24f696f5aa088859d332b5bf865cdb8e515a1c819ab # :latest as of 2026-06-03
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks: [unifi]
+    environment:
+      PUID: '1000'
+      PGID: '1000'
+      MONGO_HOST: mongo
+      MONGO_PORT: '27017'
+      MONGO_DBNAME: unifi
+      MONGO_USER: unifi
+      MONGO_PASS: unifi
+      MONGO_AUTHSOURCE: unifi
+
+  bridge:
+    image: nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10 # 1.27 (pinned 2026-06-03)
+    depends_on: [controller]
+    networks: [unifi]
+    volumes:
+      - ./unifi-os-bridge.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      # Bind to loopback only — this is a throwaway test controller with a fixed
+      # admin; it has no business being reachable on the workstation's LAN.
+      - '127.0.0.1:8443:8443'
+
+networks:
+  unifi:

@@ -4,7 +4,7 @@
 // construction: disabled rules, blackhole routes, and a port profile created
 // unassigned. Each create/destroy reloads the gateway ruleset (no WAN/LAN drop
 // expected). See docs/testing.md §"Write verification".
-package provider
+package hil
 
 import (
 	"context"
@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/dovys/terraform-provider-unifi/internal/acctest"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
@@ -29,11 +30,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep static_route %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep static_route %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -45,11 +46,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep port_forward %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep port_forward %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -61,11 +62,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Description), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Description), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep traffic_rule %s: %w", deref(items[i].Description), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep traffic_rule %s: %w", acctest.Deref(items[i].Description), err)
 			}
 		}
 		return nil
@@ -77,11 +78,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Description), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Description), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep traffic_route %s: %w", deref(items[i].Description), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep traffic_route %s: %w", acctest.Deref(items[i].Description), err)
 			}
 		}
 		return nil
@@ -93,11 +94,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep firewall_rule %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep firewall_rule %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -109,11 +110,11 @@ func init() {
 			return err
 		}
 		for i := range items {
-			if !strings.HasPrefix(deref(items[i].Name), tfaccHILPrefix) {
+			if !strings.HasPrefix(acctest.Deref(items[i].Name), tfaccHILPrefix) {
 				continue
 			}
-			if err := coll.Delete(ctx, deref(items[i].UnderscoreId)); err != nil {
-				return fmt.Errorf("sweep port_profile %s: %w", deref(items[i].Name), err)
+			if err := coll.Delete(ctx, acctest.Deref(items[i].UnderscoreId)); err != nil {
+				return fmt.Errorf("sweep port_profile %s: %w", acctest.Deref(items[i].Name), err)
 			}
 		}
 		return nil
@@ -130,7 +131,7 @@ func checkPortProfileUnassigned(addr string) resource.TestCheckFunc {
 			return fmt.Errorf("%s not found in state", addr)
 		}
 		id := rs.Primary.ID
-		c, err := sweepClient()
+		c, err := acctest.Client()
 		if err != nil {
 			return err
 		}
@@ -161,7 +162,7 @@ func checkPortProfileUnassigned(addr string) resource.TestCheckFunc {
 // that uses it is disabled, so the choice never affects live routing.
 func hilEgressNetworkID(t *testing.T) string {
 	t.Helper()
-	c, err := sweepClient()
+	c, err := acctest.Client()
 	if err != nil {
 		t.Fatalf("egress network: client: %v", err)
 	}
@@ -171,7 +172,7 @@ func hilEgressNetworkID(t *testing.T) string {
 	}
 	var fallback string
 	for i := range nets {
-		id := deref(nets[i].UnderscoreId)
+		id := acctest.Deref(nets[i].UnderscoreId)
 		if id == "" {
 			continue
 		}
@@ -196,7 +197,7 @@ func hilEgressNetworkID(t *testing.T) string {
 func hilFreeFirewallIndex(t *testing.T, ruleset string) int {
 	t.Helper()
 	const userBase = 20000 // user-defined rule band for the *_LOCAL / *_IN rulesets
-	c, err := sweepClient()
+	c, err := acctest.Client()
 	if err != nil {
 		t.Fatalf("firewall index: client: %v", err)
 	}
@@ -327,7 +328,7 @@ resource "unifi_network_traffic_rule" "test" {
 			}
 			ids := make([]string, 0, len(items))
 			for i := range items {
-				ids = append(ids, deref(items[i].UnderscoreId))
+				ids = append(ids, acctest.Deref(items[i].UnderscoreId))
 			}
 			return ids, nil
 		}),
@@ -373,7 +374,7 @@ resource "unifi_network_traffic_route" "test" {
 			}
 			ids := make([]string, 0, len(items))
 			for i := range items {
-				ids = append(ids, deref(items[i].UnderscoreId))
+				ids = append(ids, acctest.Deref(items[i].UnderscoreId))
 			}
 			return ids, nil
 		}),
