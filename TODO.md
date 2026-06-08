@@ -25,8 +25,9 @@ gap unlocks only with the matching hardware:
   `fixed_ip` intact, that re-pinning `ap_mac` takes effect, and that destroy
   (`fixed_ap_enabled=false`) clears the lock without forgetting the client;
 - **a disposable gateway/switch rig** — device adopt/forget + config PUT, the
-  `device.state` enum, `port_overrides` `poe_mode`/`portconf_id` on a bound port,
-  `unifi_network_settings` write semantics, and dynamic DNS;
+  `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
+  DNS. (The `port_overrides` write→read-back contract — which fields the controller
+  stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
 - **a CyberSecure-licensed gateway** for `unifi_network_threat_management` — the
   enabled (non-`disabled`) write path is unverified. Confirmed live (UCG Max, no
   active subscription): the controller lists the `IPS` feature and accepts a
@@ -40,6 +41,11 @@ gap unlocks only with the matching hardware:
   NB the live `ips` doc also carries server-managed fields the spec omits
   (`utm_token`, `ad_blocking_enabled`, `dns_filtering`, `endpoint_scanning`) — left
   unmodeled per the spec's writable set; reconfirm none are practitioner-writable;
+=======
+  `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
+  DNS. (The `port_overrides` write→read-back contract — which fields the controller
+  stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
+>>>>>>> origin/main
 - **a zone-firewall controller** — `firewall_zone` / `firewall_policy` (the recon
   console runs the mutually-exclusive classic firewall);
 - **a VPN-configured gateway** — `vpn_server` / `vpn_client` and BGP;

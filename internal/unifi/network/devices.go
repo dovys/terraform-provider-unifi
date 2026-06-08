@@ -63,6 +63,34 @@ type PortOverride struct {
 	MulticastRouterMode string `json:"multicast_router_mode,omitempty"`
 }
 
+// RestoreConfiguredScalars repairs a read that lagged a write. The /rest/device PUT
+// lands, but the /stat/device list the Read maps from can briefly echo the old
+// value. That stale value contradicts the known plan value and trips "inconsistent
+// result after apply". For a field the controller stores exactly as written, this
+// overlays the configured value back so it round-trips; the next Read then picks up
+// the controller's settled value.
+//
+// Only two fields qualify: name and the port-profile binding (portconf_id). Both
+// were verified to round-trip verbatim against a live controller.
+//
+// The VLAN fields (forward, tagged_vlan_mgmt, native_networkconf_id,
+// excluded_networkconf_ids) are deliberately NOT restored. The controller derives
+// them on write — forward:"disabled" can read back "all", native is injected when
+// blank or cleared otherwise — so its read is authoritative. Restoring a configured
+// VLAN value would re-propose a diff on every plan, and would hide a contradictory
+// config (e.g. a native network set while forward resolves to "all") that should
+// surface as an error instead. A field the user left unset (empty want) also defers
+// to the controller.
+func (po *PortOverride) RestoreConfiguredScalars(want PortOverride) {
+	restore := func(dst *string, src string) {
+		if src != "" && *dst != src {
+			*dst = src
+		}
+	}
+	restore(&po.Name, want.Name)
+	restore(&po.PortconfID, want.PortconfID)
+}
+
 // DeviceConfig is the owned, writable subset of a device document. Scalars ride
 // along as a partial PUT (controller-merged); PortOverrides is rebuilt by merge.
 type DeviceConfig struct {

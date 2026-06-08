@@ -171,6 +171,34 @@ func TestUpdateConfig_NoPortsLeavesArrayUntouched(t *testing.T) {
 	}
 }
 
+// regression test for #101 — RestoreConfiguredScalars restores the two verbatim
+// fields (name + the profile binding) over a lagging read-back, and restores
+// NOTHING from the controller-derived VLAN tuple even when the user configured it
+// (the controller normalizes those server-side; pinning the literal would diff
+// forever). Field dispositions verified live + against the controller source — see
+// the func comment.
+func TestRestoreConfiguredScalars(t *testing.T) {
+	// Read lagged the rename and shows the controller's normalized VLAN fields. The
+	// user configured a new name, a profile binding, and inline VLAN intent (a
+	// native network + forward) that the controller derived differently.
+	read := PortOverride{PortIdx: 1, Name: "old", Forward: "all", NativeNetworkConfID: "netDefault"}
+	want := PortOverride{PortIdx: 1, Name: "new", PortconfID: "prof1", Forward: "customize", NativeNetworkConfID: "netServers"}
+	read.RestoreConfiguredScalars(want)
+
+	if read.Name != "new" {
+		t.Errorf("configured Name should win over the lagged read: got %q, want %q", read.Name, "new")
+	}
+	if read.PortconfID != "prof1" {
+		t.Errorf("configured PortconfID should be restored when the read drops it: got %q", read.PortconfID)
+	}
+	if read.Forward != "all" {
+		t.Errorf("forward is controller-derived and must NOT be restored: got %q, want the read-back %q", read.Forward, "all")
+	}
+	if read.NativeNetworkConfID != "netDefault" {
+		t.Errorf("native_networkconf_id is controller-derived and must NOT be restored: got %q, want the read-back %q", read.NativeNetworkConfID, "netDefault")
+	}
+}
+
 func TestClientsGetByMAC(t *testing.T) {
 	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"u1","mac":"de:ad:be:ef:00:01","name":"printer"}]}`)}
 	u, err := newTestClient(f).Clients().GetByMAC(context.Background(), "DE:AD:BE:EF:00:01")

@@ -354,11 +354,12 @@ func desiredPortOverrides(ctx context.Context, m types.Map, diags *diag.Diagnost
 //     controller hasn't echoed a freshly-written override yet) is sourced from
 //     fallback, so its key doesn't vanish and trip the post-apply consistency
 //     check;
-//   - binding round-trip: when the document echoes the port but drops the
-//     port-profile binding (portconf_id is reflected in /rest/device but not
-//     always the /stat/device list the read uses), the configured port_profile_id
-//     is restored from fallback so a known, user-set value round-trips instead of
-//     reading back null (which would be "inconsistent result after apply").
+//   - scalar round-trip: when the document echoes the port but the read lags the
+//     write, the configured verbatim-stored scalars (name + the profile binding)
+//     are restored from fallback so a known value round-trips instead of the stale
+//     one — "inconsistent result after apply" (e.g. a port rename). The
+//     controller-derived VLAN fields are not restored (RestoreConfiguredScalars
+//     explains why).
 //
 // On Read fallback is nil, so a managed port the controller genuinely lost is
 // dropped (drift the next plan reconciles).
@@ -382,10 +383,10 @@ func buildPortOverridesMap(ctx context.Context, overrides []network.PortOverride
 			if po, ok = fbIdx[k]; !ok {
 				continue
 			}
-		} else if fb, fbOK := fbIdx[k]; fbOK && po.PortconfID == "" && fb.PortconfID != "" {
-			// Echoed override but the document omitted the binding the user set;
-			// restore the configured portconf_id so it round-trips.
-			po.PortconfID = fb.PortconfID
+		} else if fb, fbOK := fbIdx[k]; fbOK {
+			// Echoed override but the read may lag the write; restore the configured
+			// verbatim-stored scalars so the known plan values round-trip.
+			po.RestoreConfiguredScalars(fb)
 		}
 		obj, d := types.ObjectValueFrom(ctx, portOverrideAttrTypes, portOverrideFromNet(po))
 		diags.Append(d...)
