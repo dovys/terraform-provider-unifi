@@ -25,7 +25,7 @@ A UniFi network device (access point, switch, or gateway) identified by MAC. The
 - `led_override` (String) Status-LED behavior: `on`, `off`, or `default` (follow the site setting).
 - `led_override_color` (String) LED color as a hex string (when the model supports a colored LED).
 - `led_override_color_brightness` (Number) LED brightness (0–100), when the model supports it.
-- `mgmt_network_id` (String) Management network (`unifi_network_network` id) the device uses.
+- `mgmt_network_id` (String) The device's **management VLAN** (`unifi_network_network` id). The device 802.1Q-tags its own control-plane traffic (inform, adoption) with this network's VLAN, so it reaches the controller and gets its IP on that subnet **regardless of the upstream switch port's untagged/native VLAN** — an AP on a port whose `native_network_id` is `iot` still lands on the management subnet. Distinct from `config_network` (the device's IP-addressing mode: dhcp/static), which this provider does not model.
 - `name` (String) Device display name.
 - `port_overrides` (Attributes Map) Per-port configuration, keyed by physical port number (e.g. `"1"`). Terraform manages only the ports listed here: each is merged onto the controller's existing override (unmodeled keys are preserved), undeclared ports are left untouched, and removing a port reverts it to defaults. **On import, every port with a live override is captured** so `terraform plan -generate-config-out` reflects the switch — keep the ports you want to manage in config (dropping one reverts it, as does `terraform destroy`). (see [below for nested schema](#nestedatt--port_overrides))
 

@@ -50,6 +50,21 @@ you're bringing existing hardware under management, not provisioning it. `mac` i
 `type`, `state`, `adopted`, `ip`, `version`, `num_ports`). Use it to reference a device you do **not**
 want Terraform to adopt or configure; otherwise just use the resource.
 
+## `mgmt_network_id` — the device's own management VLAN
+
+`mgmt_network_id` is the **management VLAN** an infrastructure device (switch/AP) uses for its own
+control-plane traffic — inform, adoption, telemetry. The device **802.1Q-tags that traffic** onto the
+referenced network's VLAN, so it reaches the controller and gets its management IP on **that subnet,
+regardless of the upstream switch port's untagged/native VLAN**. It serializes to the device document's
+`mgmt_network_id` key (a `networkconf` `_id`) and is **distinct from** the device's `config_network`
+object, which is only its IP-addressing *mode* (`dhcp`/`static`) and which this provider does not model.
+
+This is why it interacts with `native_network_id` the way it does: a port's `native_network_id` governs
+only the **untagged** frames of an attached endpoint. An infra device with `mgmt_network_id` set *tags*
+its management frames, so it lands on the management VLAN even when the port it plugs into has a
+different native VLAN — e.g. an AP cabled to a downlink port whose native VLAN is `iot` still appears
+on the management subnet, because its inform traffic is tagged onto the management VLAN.
+
 ## Why merge `port_overrides`, and ports as a Map
 
 The device write is a **sparse PUT** (`PUT /rest/device/<id>`) — the legacy `/rest` PUT shallow-merges

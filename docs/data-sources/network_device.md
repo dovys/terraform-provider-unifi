@@ -27,7 +27,7 @@ Look up a UniFi network device by `mac` or `id` (one is required) and read its c
 - `led_override` (String) Status-LED behavior.
 - `led_override_color` (String) LED color (hex).
 - `led_override_color_brightness` (Number) LED brightness (0–100).
-- `mgmt_network_id` (String) Management network id.
+- `mgmt_network_id` (String) The device's **management VLAN** (`unifi_network_network` id): the network whose VLAN the device 802.1Q-tags its own control-plane traffic with, so it reaches the controller on that subnet regardless of the upstream port's native VLAN. Distinct from `config_network` (the device's dhcp/static IP-addressing mode).
 - `model` (String) Hardware model code.
 - `name` (String) Device display name.
 - `port_overrides` (Attributes Map) Every per-port override the controller has, keyed by port number. (see [below for nested schema](#nestedatt--port_overrides))

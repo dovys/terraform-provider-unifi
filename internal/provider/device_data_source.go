@@ -69,7 +69,10 @@ func (d *deviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 			"led_override":                  dschema.StringAttribute{Computed: true, MarkdownDescription: "Status-LED behavior."},
 			"led_override_color":            dschema.StringAttribute{Computed: true, MarkdownDescription: "LED color (hex)."},
 			"led_override_color_brightness": dschema.Int64Attribute{Computed: true, MarkdownDescription: "LED brightness (0–100)."},
-			"mgmt_network_id":               dschema.StringAttribute{Computed: true, MarkdownDescription: "Management network id."},
+			"mgmt_network_id": dschema.StringAttribute{Computed: true, MarkdownDescription: "The device's **management VLAN** " +
+				"(`unifi_network_network` id): the network whose VLAN the device 802.1Q-tags its own control-plane traffic " +
+				"with, so it reaches the controller on that subnet regardless of the upstream port's native VLAN. Distinct " +
+				"from `config_network` (the device's dhcp/static IP-addressing mode)."},
 			"port_overrides": dschema.MapNestedAttribute{
 				Computed:            true,
 				MarkdownDescription: "Every per-port override the controller has, keyed by port number.",
