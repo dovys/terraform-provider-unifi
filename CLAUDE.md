@@ -98,10 +98,15 @@ make docs        # regenerate provider docs (tfplugindocs only; CI gate fails on
 make check       # full PR gate locally: build/vet, gofmt, go mod tidy, govulncheck, terraform fmt, docs, lint, unit
 go generate ./...; golangci-lint run; goreleaser check   # releases are automated — never run `goreleaser release` by hand
 ```
-**PR gates** (`.github/workflows/test.yml`, must be green on every PR): build & vet · gofmt · `go mod tidy`
-clean · **govulncheck** (deps + stdlib) · **terraform fmt** (examples) · docs current · golangci-lint · unit.
-**Supply-chain:** every action is pinned to a full commit **SHA** (not `@vN`) + service-container images pinned
-by **digest**; Dependabot bumps both. The release build is `GOFLAGS=-mod=readonly` and runs **no** `go mod tidy`.
+**PR gates** (`.github/workflows/test.yml` — **one consolidated `checks` job** so a single Go install +
+warm build cache is shared, must be green on every PR): build · vet · gofmt · `go mod tidy` clean ·
+**govulncheck** (deps + stdlib) · **terraform fmt** (examples) · docs current · golangci-lint · secret hygiene.
+**Unit tests run only on PRs targeting `main`** (the release-bound fix / `next → main` merges); feature PRs
+into `next` skip them and re-run at the `next → main` merge (run `make test` locally while iterating). CI pins
+Go to the **go.mod toolchain** (`go-version-file: go.mod`), not `stable`, so a new Go release can't void the
+build cache. **Supply-chain:** every action is pinned to a full commit **SHA** (not `@vN`) + service-container
+images pinned by **digest**; Dependabot bumps both **weekly**, grouping each ecosystem's bumps into one PR
+(no per-PR cap). The release build is `GOFLAGS=-mod=readonly` and runs **no** `go mod tidy`.
 **CVE policy — we fix every advisory we find, even ones we didn't introduce.** No one else maintains this
 tree; a `govulncheck` finding (third-party **or** Go stdlib) is ours to clear in the same PR, never to
 ignore or suppress. Stdlib advisories are fixed by **raising the `go.mod` toolchain floor** (e.g.

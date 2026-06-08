@@ -1,61 +1,46 @@
 name: auto-release
 
-# Two-branch release model — CI only TAGS and RELEASES; it never merges or pushes
-# a branch. All merging is done by GitHub's merge button.
+# Two-branch release model — CI only TAGS + RELEASES, never merges/pushes a branch.
+#   main — released code; every substantive push auto-cuts a release.
+#   next — feature staging; never releases.
+# Bump from the merged PR's head + labels:
+#   fix → main = patch · next → main = minor · +release:major = major · release:skip = none
 #
-#   main  — only released code. Every substantive push auto-cuts a release.
-#   next  — staging for features (possibly many PRs). Never releases.
-#
-# Everything is driven by the merged PR's branch + labels:
-#   • a fix PR merged straight into main          → PATCH  (v0.1.2 → v0.1.3)
-#   • a PR from `next` merged into main           → MINOR  (v0.1.x → v0.2.0)
-#   • …same, carrying the `release:major` label   → MAJOR  (v0.x.y → v1.0.0)
-#   • any merge carrying the `release:skip` label → no release at all
-#
-# `release:skip` is the manual escape hatch — label the PR to land a code change
-# on main without cutting a release (e.g. a build-config tweak). It unifies the
-# skip control with the bump control: both are PR labels, no magic commit strings.
-#
-# Two jobs: `gate` reads the PR (a job-level `if` can't query the PR API) and
-# decides release-or-not + the bump; `release` is gated on that and does the work.
-# Tagging AND GoReleaser run in the ONE `release` job on purpose: a tag pushed with
-# the default GITHUB_TOKEN does NOT trigger other workflows (GitHub suppresses it
-# to avoid recursion), so a separate tag-triggered release workflow would never fire.
+# One `release` job: step 1 reads the PR to decide release+bump (a job-level `if`
+# can't call the PR API); every later step is gated on it. Tag + GoReleaser share
+# the job because a tag pushed with GITHUB_TOKEN won't trigger a separate workflow.
 
 on:
   push:
     branches: [main]
-    # Skip releases for purely non-functional merges. paths-ignore skips the run
-    # only when EVERY changed file matches — a code change that also touches docs
-    # or go.mod still releases. (For a code change you still don't want released,
-    # use the `release:skip` label.)
+    # Skip non-functional merges (skips only when EVERY changed file matches; use
+    # the release:skip label for code you don't want released).
     paths-ignore:
-      - '**/*.md'     # docs / readme / changelog / TODO prose
-      - 'docs/**'     # generated provider docs (kept fresh by the PR docs gate)
-      - '.github/**'  # workflows + dependabot (ci: bumps)
-      - 'go.mod'      # dependabot deps: bumps (a real dep add also touches *.go)
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'go.mod'
       - 'go.sum'
 
-# Serialize: two quick merges can't race the tag. Never cancel a release that's
-# already uploading.
+# Serialize so two quick merges can't race the tag; never cancel an uploading release.
 concurrency:
   group: auto-release
   cancel-in-progress: false
 
 permissions:
   contents: write        # push the tag, create the GitHub Release
-  pull-requests: read    # look up the merged PR to read its branch + labels
+  pull-requests: read    # read the merged PR's branch + labels
 
 jobs:
-  # Decide release-or-not and the bump purely from the merged PR's head branch and
-  # labels. Kept separate because the whole release job is gated on its output and a
-  # job-level `if:` expression cannot call the PR API.
-  gate:
+  release:
     runs-on: ubuntu-latest
-    outputs:
-      release: ${{ steps.decide.outputs.release }}
-      bump: ${{ steps.decide.outputs.bump }}
+    env:
+      HAS_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+      # Release never re-resolves modules; -mod=readonly fails on a stale/tampered graph.
+      GOFLAGS: -mod=readonly
     steps:
+      # Decide before checkout/Go so a release:skip merge exits in seconds; gh is
+      # preinstalled and needs no checkout.
       - name: Decide release + bump from the merged PR
         id: decide
         env:
@@ -67,16 +52,11 @@ jobs:
           labels="$(printf '%s' "$resp" | jq -c  'if length>0 then [.[0].labels[].name] else [] end')"
           has() { printf '%s' "$labels" | jq -e --arg l "$1" 'index($l) != null' >/dev/null 2>&1; }
 
-          # Manual escape hatch: the `release:skip` label on the merged PR.
           if has "release:skip"; then
             echo "release=false" >> "$GITHUB_OUTPUT"
-            echo "bump=none"      >> "$GITHUB_OUTPUT"
             echo "::notice::release:skip label present on the merged PR — skipping the release."
             exit 0
           fi
-
-          # Bump: from `next` → minor (major with the release:major label); a fix PR
-          # merged straight to main or a direct push → patch.
           if [ "$head" = "next" ]; then
             if has "release:major"; then bump=major; else bump=minor; fi
           else
@@ -86,41 +66,32 @@ jobs:
           echo "bump=${bump}"  >> "$GITHUB_OUTPUT"
           echo "Release: yes — bump ${bump} (merged PR head: ${head:-<none, direct push → patch>})"
 
-  release:
-    needs: gate
-    if: ${{ needs.gate.outputs.release == 'true' }}
-    runs-on: ubuntu-latest
-    env:
-      HAS_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY != '' }}
-      # Release builds must never re-resolve the module graph: go.mod/go.sum are
-      # kept tidy by the PR gate, and the release runs no `go mod tidy`. With
-      # -mod=readonly a stale/tampered module fails the build instead of being
-      # silently rewritten mid-release.
-      GOFLAGS: -mod=readonly
-    steps:
-      # Actions pinned to a full commit SHA — a mutable tag (@v6/@v7) could be
-      # re-pointed at malicious code that runs here with `contents: write` and
-      # (once configured) the GPG signing key in memory. Dependabot bumps the
-      # SHA + version comment together.
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      # Pinned SHA — runs with contents:write + (when set) the GPG key in memory.
+      - if: steps.decide.outputs.release == 'true'
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
-          fetch-depth: 0          # full history + all tags for version calc + changelog
+          fetch-depth: 0          # full history + tags for version calc
 
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      # Pin to the go.mod toolchain (see test.yml).
+      - if: steps.decide.outputs.release == 'true'
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
-          go-version: 'stable'
+          go-version-file: go.mod
           cache: true
 
-      # Insurance: never cut a release from a tree that doesn't build / pass units.
+      # Don't tag a tree that doesn't build/pass units (the only check for a direct
+      # push to main); GoReleaser reuses this warm cache for the cross-compile.
       - name: Build & unit test
+        if: steps.decide.outputs.release == 'true'
         run: |
           go build ./...
           go test ./... -timeout 120s
 
       - name: Compute next version
         id: ver
+        if: steps.decide.outputs.release == 'true'
         env:
-          BUMP: ${{ needs.gate.outputs.bump }}
+          BUMP: ${{ steps.decide.outputs.bump }}
         run: |
           set -euo pipefail
           latest="$(git tag --list 'v*' --sort=-v:refname | head -n1)"
@@ -138,7 +109,7 @@ jobs:
             fi
             major="${ver%%.*}"; rest="${ver#*.}"; minor="${rest%%.*}"; patch="${rest##*.}"
             case "$BUMP" in
-              # minor/major reset the lower parts to 0 → features land on vX.Y.0.
+              # minor/major reset the lower parts to 0.
               major) next="v$((major + 1)).0.0" ;;
               minor) next="v${major}.$((minor + 1)).0" ;;
               patch) next="v${major}.${minor}.$((patch + 1))" ;;
@@ -153,6 +124,7 @@ jobs:
           echo "Releasing ${next} (${BUMP}; previous ${latest:-<none>})"
 
       - name: Create and push tag
+        if: steps.decide.outputs.release == 'true'
         env:
           NEXT: ${{ steps.ver.outputs.next }}
         run: |
@@ -162,22 +134,21 @@ jobs:
           git tag -a "${NEXT}" -m "Release ${NEXT}"
           git push origin "refs/tags/${NEXT}"
 
-      # Passphraseless key (a passphrase is dead weight in an automated flow).
+      # Passphraseless key (a passphrase is dead weight in automation).
       - name: Import GPG key
-        if: env.HAS_GPG_KEY == 'true'
+        if: ${{ steps.decide.outputs.release == 'true' && env.HAS_GPG_KEY == 'true' }}
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7
         id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Run GoReleaser
+        if: steps.decide.outputs.release == 'true'
         uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7
         with:
           version: '~> v2'
-          # Both branches are non-empty: a GitHub Actions `A && '' || B` ternary
-          # always yields B because the empty string is falsy, so the old form
-          # skipped signing on *every* release even with a key present. Put the
-          # full command in each branch so the truthy side actually wins.
+          # Full command in each branch: `X && '' || Y` always yields Y (the empty
+          # string is falsy), which skipped signing on every release with a key set.
           args: ${{ env.HAS_GPG_KEY == 'true' && 'release --clean' || 'release --clean --skip=sign' }}
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}

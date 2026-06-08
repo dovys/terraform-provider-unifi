@@ -1,34 +1,46 @@
 name: test
 
+# One `checks` job: GitHub bills per job rounded up to the minute, so six parallel
+# jobs each reinstalling Go + recompiling cost ~10 min/run for near-instant work.
+# Sharing one setup-go + build cache roughly halves it. Unit tests run only on PRs
+# into `main` (the release-bound merges); `next` PRs skip them.
 on:
   pull_request:
     paths-ignore:
       - 'README.md'
       - 'CHANGELOG.md'
       - 'docs/**'
-  push:
-    branches:
-      - main
+
+# Cancel a PR branch's in-flight run when a new push supersedes it.
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
-# Every action is pinned to a full commit SHA — mutable tags (@v6) can be
-# re-pointed at malicious code in a repo compromise, the classic Actions
-# supply-chain vector. Dependabot (github-actions) bumps the SHA and the
-# trailing version comment together.
 jobs:
-  build:
-    name: build & vet
+  checks:
+    name: checks
     runs-on: ubuntu-latest
     steps:
+      # Actions pinned to full SHAs (mutable tags are a supply-chain risk);
+      # Dependabot bumps the SHA + version comment together.
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      # First (needs only the checkout) so the secret-leak guard isn't hidden
+      # behind a later build failure.
+      - name: secret hygiene
+        run: ./scripts/check-secrets.sh
+
+      # Pin Go to the go.mod toolchain, not `stable`: `stable`'s version is part of
+      # setup-go's cache key, so a new Go release would void the whole module+build
+      # cache (and the golangci-lint goinstall build) and force a full recompile.
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
-          go-version: 'stable' # always build/test on the latest stable Go
+          go-version-file: go.mod
           cache: true
-      - run: go build ./...
-      - run: go vet ./...
+
       - name: gofmt
         run: |
           unformatted="$(gofmt -s -l .)"
@@ -37,9 +49,9 @@ jobs:
             echo "Run: gofmt -s -w ."
             exit 1
           fi
-      # go.mod / go.sum must already be tidy. The release build runs with
-      # -mod=readonly and no `go mod tidy`, so an untidy module would otherwise
-      # only surface at release time — catch it here, on every PR.
+
+      # Release builds with -mod=readonly and no `go mod tidy`, so catch an untidy
+      # module here instead of at release time.
       - name: go mod tidy is clean
         run: |
           go mod tidy
@@ -47,11 +59,15 @@ jobs:
             echo "::error::go.mod/go.sum not tidy — run 'go mod tidy' and commit."
             exit 1
           fi
-      # Docs are generated from the provider schema + examples. Keep them current
-      # at merge so every released commit carries fresh docs (the release flow
-      # never regenerates docs). Runs ONLY tfplugindocs — NOT `go generate ./...`,
-      # which would invoke the wire codegen that needs the sibling ../unifi-specs
-      # repo (absent in CI).
+
+      - name: build
+        run: go build ./...
+
+      - name: vet
+        run: go vet ./...
+
+      # tfplugindocs only — `go generate` would run the wire codegen, which needs
+      # the sibling ../unifi-specs repo (absent in CI).
       - name: docs are current
         run: |
           go tool tfplugindocs generate --provider-name unifi
@@ -60,79 +76,31 @@ jobs:
             exit 1
           fi
 
-  lint:
-    name: golangci-lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: 'stable'
-          cache: true
-      # golangci-lint refuses to run when its build Go is older than the module's
-      # go directive (go 1.26.3). install-mode goinstall builds golangci-lint
-      # from source with the setup-go toolchain (latest stable, >= our floor),
-      # so the binary's Go always satisfies the directive.
+      # goinstall builds golangci-lint with the setup-go toolchain (>= the module's
+      # go directive, which it requires); reuses the warm GOCACHE from `build`.
       - uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
           version: v2.12.2
           install-mode: goinstall
 
-  govulncheck:
-    name: govulncheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: 'stable'
-          cache: true
-      # Fail the PR on any known vulnerability reachable from our call graph —
-      # third-party deps AND the Go standard library. Tool version pinned; the
-      # advisory DB is fetched from vuln.go.dev at run time.
+      # Fail on any known vuln reachable in our call graph — deps and stdlib (the
+      # latter via the pinned go.mod toolchain floor).
       - name: govulncheck
-        # The toolchain floor lives in go.mod (`toolchain go1.26.4`), so every
-        # build — local, CI, and the goreleaser release binary — runs on the
-        # security-patched stdlib, and this scan inherits it via GOTOOLCHAIN=auto.
-        # (1.26.3 carried GO-2026-5037 crypto/x509 + GO-2026-5039 net/textproto,
-        # both fixed in 1.26.4.) Raise the floor in go.mod when a future advisory
-        # lands — see the CVE policy in CLAUDE.md.
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
           govulncheck ./...
 
-  terraform-fmt:
-    name: terraform fmt
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      # Example HCL is shipped docs (tfplugindocs renders it) — keep it formatted.
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_wrapper: false
-      # Example HCL is the documentation source (tfplugindocs renders it) and is
-      # shipped to users — keep it canonically formatted.
-      - run: terraform fmt -check -recursive examples/
+      - name: terraform fmt
+        run: terraform fmt -check -recursive examples/
 
-  unit:
-    name: unit tests
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
-        with:
-          go-version: 'stable'
-          cache: true
-      - run: go test ./... -timeout 120s -coverprofile=coverage.out
-      - run: go tool cover -func=coverage.out | tail -1
-
-  secret-hygiene:
-    name: secret hygiene
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-      # The live console's address/supernet and the maintainer's password-manager
-      # layout must never enter this (eventually public) repo — HIL operator config
-      # belongs in the gitignored test/hil/secrets.env. This guard fails the PR if
-      # any of those leak into a tracked file (scripts/check-secrets.sh).
-      - run: ./scripts/check-secrets.sh
+      # Only on release-bound PRs (base main); run `make test` locally on `next`
+      # PRs — they re-run here at the `next → main` merge.
+      - name: unit tests
+        if: github.base_ref == 'main'
+        run: |
+          go test ./... -timeout 120s -coverprofile=coverage.out
+          go tool cover -func=coverage.out | tail -1

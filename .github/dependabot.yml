@@ -1,8 +1,12 @@
-# Dependabot configuration — weekly dependency updates.
+# Weekly dependency updates (not daily — one batch per week keeps CI runs down).
+# Volume is controlled by GROUPING, not a PR cap: each ecosystem folds ALL its
+# bumps (major/minor/patch) into a SINGLE grouped PR, so a week yields at most two
+# PRs — one gomod, one github-actions. Groups are per-ecosystem, so the two can't
+# be merged further. If a breaking major ever blocks a grouped PR, close it and
+# `ignore` that one dependency (or split it out).
 # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 version: 2
 updates:
-  # Go module dependencies (go.mod / go.sum at the repo root).
   - package-ecosystem: gomod
     directory: "/"
     schedule:
@@ -10,18 +14,14 @@ updates:
       day: monday
       time: "06:00"
       timezone: Etc/UTC
-    open-pull-requests-limit: 5
     commit-message:
-      # Matches the repo's "<module>: change" convention (deps as the module).
       prefix: deps
     groups:
-      # Fold routine minor/patch bumps into one PR; majors stay individual.
-      gomod-minor-patch:
-        update-types:
-          - minor
-          - patch
+      gomod:
+        patterns: ["*"]
+        update-types: [major, minor, patch]
 
-  # GitHub Actions pinned in .github/workflows/*.
+  # github-actions bumps also keep the SHA/digest pins fresh.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
@@ -29,11 +29,9 @@ updates:
       day: monday
       time: "06:00"
       timezone: Etc/UTC
-    open-pull-requests-limit: 5
     commit-message:
       prefix: ci
     groups:
       github-actions:
-        update-types:
-          - minor
-          - patch
+        patterns: ["*"]
+        update-types: [major, minor, patch]

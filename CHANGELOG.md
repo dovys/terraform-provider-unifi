@@ -12,6 +12,28 @@ below predate the date-based convention.
 
 ## 2026-06-08
 
+### Changed
+
+- **CI restructured to cut GitHub Actions minutes (~half per run).** The `test`
+  workflow's six parallel jobs — each re-installing Go and recompiling the module
+  from scratch, and each billed a full minute — collapse into one `checks` job
+  that shares a single `setup-go` and warm build cache across build, vet, gofmt,
+  `go mod tidy`, docs, golangci-lint, govulncheck, terraform-fmt and secret-hygiene.
+  Added `concurrency` with `cancel-in-progress` so a new push to a PR branch
+  cancels the stale in-flight run. **Unit tests now run only on PRs targeting
+  `main`** (the release-bound merges); feature PRs into `next` skip them. Dropped
+  the redundant full `test` re-run on push-to-`main` — `pull_request` checks
+  already validate the merge result, and the release job independently builds and
+  tests before tagging. The `auto-release` workflow folds its `gate` job into the
+  single `release` job (one runner instead of two; the insurance build's cache is
+  reused by GoReleaser's cross-compile).
+- **CI now pins Go to the `go.mod` toolchain** (`go-version-file: go.mod`) instead
+  of `go-version: stable`. `stable` is a moving target whose version is part of
+  `setup-go`'s cache key, so every new Go release silently invalidated the entire
+  module + build cache (and the golangci-lint goinstall build) and forced a full
+  recompile. Pinning keeps the cache warm until we deliberately raise the floor
+  (e.g. for a stdlib CVE), and makes CI build on the same toolchain as the release.
+
 ### Documentation
 
 - **`unifi_network_device.mgmt_network_id`** — rewrote the schema description (and
