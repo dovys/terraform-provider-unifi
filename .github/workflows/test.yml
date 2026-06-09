@@ -84,7 +84,7 @@ jobs:
       # (install-mode: none, found via $GOPATH/bin on PATH) for caching + annotations.
       - name: Cache golangci-lint binary
         id: golangci-bin
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/go/bin/golangci-lint
           key: golangci-bin-${{ runner.os }}-v2.12.2-${{ hashFiles('go.mod') }}
@@ -105,7 +105,7 @@ jobs:
       # stdlib (the latter via the pinned go.mod toolchain).
       - name: Cache govulncheck binary
         id: govulncheck-bin
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/go/bin/govulncheck
           key: govulncheck-bin-${{ runner.os }}-v1.3.0-${{ hashFiles('go.mod') }}
