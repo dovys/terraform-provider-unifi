@@ -48,19 +48,18 @@ targeting **`next`**. None of them release. When the feature is ready, ship it b
    ```sh
    gh pr create --base main --head next --title "release: <feature>"
    ```
-   (or use GitHub's *Compare & pull request*). For a **breaking** release, add the
-   **`release:major`** label; otherwise it's a minor. (The `release:major`, cosmetic
-   `release:minor`, and `release:skip` labels are pre-created in the repo —
-   `release:major` makes the bump major, `release:skip` skips the release entirely,
-   and minor is the default for any `next → main` merge.)
+   (or use GitHub's *Compare & pull request*). It's a **minor** — there's no major
+   path yet (add one when v1.0 nears).
 2. `test.yml` runs on the PR and tests the **merged result** — so a feature that
    breaks the build literally cannot land on `main`. Merge only when green, using
-   **"Create a merge commit"** (keeps the per-feature commits in the release notes).
-3. The merge pushes `main`, which triggers `auto-release.yml`. It looks up the PR
-   behind the merge: head branch `next` → **minor** (or **major** with the label),
-   with the lower parts reset to zero — `v0.1.x` → **`v0.2.0`**, major → **`v1.0.0`**.
-   It then tags and runs GoReleaser. **No `git merge`, no branch push** — only the
-   tag is pushed by CI.
+   **"Create a merge commit"** — this is **load-bearing**, not just for tidy release
+   notes: the bump is read from git topology, and the merge commit is what makes the
+   merged-in tip of `next` the pushed commit's `HEAD^2`. A squash erases that, and the
+   release would read as a patch.
+3. The merge pushes `main`, which triggers `auto-release.yml`. It reads the bump from
+   **git alone**: the pushed commit is a merge whose `HEAD^2` is contained in `next`
+   → **minor**, lower parts reset to zero (`v0.1.x` → **`v0.2.0`**). It then tags and
+   runs GoReleaser. **No `git merge`, no branch push** — only the tag is pushed by CI.
 
 ### Keeping `next` current
 
@@ -77,16 +76,16 @@ before merging.
 
 ## What triggers — and what doesn't
 
-- The **patch lane** fires only on substantive merges to `main`. **Non-functional
-  merges are skipped** via `paths-ignore` — a push whose changed files are
-  *entirely* within `**/*.md`, `docs/**`, `.github/**`, or `go.mod`/`go.sum` does
-  not release (dependabot bumps, CI tweaks, docs-only changes). A change that also
-  touches Go source still releases.
-- Manual override: add the **`release:skip`** label to a PR to land its change on
-  `main` without cutting a release (e.g. a build-config tweak not worth a version).
-  Skip is a PR label, same axis as the bump — no magic commit strings to remember.
-- The bump is decided purely by the merged PR's source branch (`next` → minor/major,
-  anything else → patch) — there is no automatic minor without a `next → main` merge.
+- **Every push to `main` cuts a release** — docs, CI, and dependency merges
+  included. There's no skip path and no path filter (simple = solid); a docs-only
+  merge ships a patch with refreshed artifacts. So don't push trivia straight to
+  `main` you don't want tagged.
+- The bump is decided **purely from git topology** — no PR API (its commit→PR
+  association lags and once mis-bumped a minor to a patch), no labels, no commit
+  strings. A `next → main` **merge commit** (its `HEAD^2` is contained in `next`) →
+  **minor**; everything else (a squash-merged fix/docs/dep, a direct push, or a fix
+  merged as a merge commit whose `HEAD^2` isn't in `next`) → **patch**. No automatic
+  minor without a real `next → main` merge commit, and no major path yet.
 
 ## Release notes
 
@@ -127,12 +126,15 @@ Reproduce the whole set locally with **`make check`**:
 
 ## Supply-chain hardening
 
-- **Actions pinned to a full commit SHA**, never a mutable tag (`@v6`) — a
+- **3rd-party actions pinned to a full commit SHA**, never a mutable tag — a
   re-pointed tag is the classic Actions compromise (it would run in the release
-  job with `contents: write` and, once configured, the GPG key in memory). The
-  trailing `# v6` comment is informational; **Dependabot** (`github-actions`)
-  bumps the SHA and the comment together. To roll an action by hand, resolve the
-  tag → SHA with `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`.
+  job with `contents: write` and, once configured, the GPG key in memory).
+  **GitHub's own `actions/*`** (checkout, setup-go, cache) ride a floating major
+  tag (`@v6`) — we trust the publisher and it keeps them auto-patched. The trailing
+  `# v7` comment on a pinned action is informational; **Dependabot**
+  (`github-actions`) bumps the SHA + comment together and floats the `actions/*`
+  majors. To roll a pinned action by hand, resolve tag → SHA with
+  `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`.
 - **Tier-2 stack images pinned by digest** (`test/tier2/compose.yaml`: Mongo,
   controller, nginx bridge) — refresh deliberately with
   `docker buildx imagetools inspect <image>:<tag> --format '{{.Manifest.Digest}}'`.

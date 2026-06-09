@@ -2,13 +2,39 @@
 
 All notable changes are documented here as **dated** entries (newest first); add
 yours under today's date in the PR that makes the change. Versioning is decoupled
-from this file: fixes merged to `main` auto-release the next patch (`vX.Y.Z`),
-and features (staged on `next`) ship as a minor (`vX.Y.0`) via a manual workflow
-run — both attach binaries, and each GitHub Release carries the per-version
-commit list (see [`docs/releasing.md`](docs/releasing.md)). The repo is private
+from this file: every push to `main` auto-releases — a fix/docs/dep merge cuts the
+next patch (`vX.Y.Z`), a `next → main` merge commit cuts a minor (`vX.Y.0`). Both
+attach binaries, and each GitHub Release carries the per-version commit list (see
+[`docs/releasing.md`](docs/releasing.md)). The repo is private
 and the provider is **not** published to the Terraform Registry — releases ship
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
+
+## 2026-06-09
+
+### Changed
+
+- **Release automation: the version bump is now read from git topology, not the PR
+  API.** `auto-release.yml` derived the bump by reading the merged PR's head branch
+  via `gh api .../commits/<sha>/pulls`. That endpoint is eventually-consistent — a
+  few seconds after a merge it can return `[]`, and the bump silently fell through to
+  *patch*. It mis-released the `next → main` merge that shipped #90/#91 + the
+  `port_overrides.forward` change as a **patch** (`v0.7.5`) instead of a minor. The
+  decision now comes from the commit graph: a `next → main` release is the only merge
+  commit whose second parent (`HEAD^2`) is contained in `next` → **minor**; anything
+  else (a squash-merged fix, a direct push, or a fix merged as a merge commit whose
+  `HEAD^2` isn't in `next`) → **patch**. No PR API, no merge-message parsing, no
+  association race. **`next → main` must be merged with a real merge commit** (a
+  squash would read as a patch).
+- **Every push to `main` now cuts a release** — the release trigger's `paths-ignore`
+  and the `release:skip`/`release:major`/`release:minor` labels are gone (simple =
+  solid). A docs/CI/dependency merge ships a patch with refreshed artifacts. A major
+  bump has no path yet (added when v1.0 nears).
+- **Action pinning split by trust.** GitHub's own `actions/*` (checkout, setup-go,
+  cache) ride a floating major tag (`@v6`/`@v4`); every 3rd-party action
+  (goreleaser, the GPG import, golangci-lint, setup-terraform) stays pinned to a full
+  commit SHA — the ones near the release's `contents: write` + signing key never
+  float.
 
 ## 2026-06-08
 
