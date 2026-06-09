@@ -108,9 +108,10 @@ warm build cache is shared, must be green on every PR): build · vet · gofmt ·
 **Unit tests run only on PRs targeting `main`** (the release-bound fix / `next → main` merges); feature PRs
 into `next` skip them and re-run at the `next → main` merge (run `make test` locally while iterating). CI pins
 Go to the **go.mod toolchain** (`go-version-file: go.mod`), not `stable`, so a new Go release can't void the
-build cache. **Supply-chain:** every action is pinned to a full commit **SHA** (not `@vN`) + service-container
-images pinned by **digest**; Dependabot bumps both **weekly**, grouping each ecosystem's bumps into one PR
-(no per-PR cap). The release build is `GOFLAGS=-mod=readonly` and runs **no** `go mod tidy`.
+build cache. **Supply-chain:** **3rd-party actions pinned to a full commit SHA** (GitHub's own `actions/*` ride
+a floating `@vN` major tag — trusted publisher, auto-patched) + service-container images pinned by **digest**;
+Dependabot bumps both **weekly**, grouping each ecosystem's bumps into one PR (no per-PR cap). The release build
+is `GOFLAGS=-mod=readonly` and runs **no** `go mod tidy`.
 **CVE policy — we fix every advisory we find, even ones we didn't introduce.** No one else maintains this
 tree; a `govulncheck` finding (third-party **or** Go stdlib) is ours to clear in the same PR, never to
 ignore or suppress. Stdlib advisories are fixed by **raising the `go.mod` toolchain floor** (e.g.
@@ -130,13 +131,14 @@ tiered tests in [`docs/testing.md`](docs/testing.md) (UniFi OS Server can't run 
   merge it yourself when you're confident (and tell the user) or ask first when you're unsure.
 
 ## Releasing (two-branch; full detail in [`docs/releasing.md`](docs/releasing.md))
-Releases are **automatic**; CI **only tags + builds** — never hand-tag, never run `goreleaser release` locally. The
-bump is derived from the merged PR's **source branch**, so target PRs by intent (and **branch off the
-branch you target** — see Conventions):
-- **Fix / small change → branch off `main`, PR into `main`.** On merge it auto-cuts the next **patch** (`v0.1.2`→`v0.1.3`).
-- **Feature (any size, multi-PR) → branch off `next`, PRs into `next`** (which never releases). Ship the feature by merging a
-  **`next → main` PR** (use a **merge commit** — its CI tests the merged result first): head `next` ⇒ **minor**
-  (`v0.2.0`), or add the **`release:major`** label ⇒ **major** (`v1.0.0`). minor/major reset lower parts to 0.
-- After patches land on `main`, refresh `next` by hand (`git checkout next && git merge main`) — CI never writes branches.
-- The **`release:skip`** PR label skips that release; docs/CI/dep-only merges auto-skip via `paths-ignore`.
+Releases are **automatic**; CI **only tags + builds** — never hand-tag, never run `goreleaser release` locally.
+**Every push to `main` cuts a release** (docs and all — simple = solid; no skip labels, no path filters). The
+bump is read from **git topology** (no PR API → no commit→PR association race), so target PRs by intent (and
+**branch off the branch you target** — see Conventions):
+- **Fix / docs / CI / dep change → branch off `main`, PR into `main`** (squash-merge → single-parent commit). On merge it auto-cuts the next **patch** (`v0.1.2`→`v0.1.3`).
+- **Feature (any size, multi-PR) → branch off `next`, PRs into `next`** (which never releases). Ship the feature by
+  merging a **`next → main` PR with a real merge commit** — this is **load-bearing**: the bump is **minor** iff the
+  pushed commit's `HEAD^2` is contained in `next` (a squash would read as a patch). minor resets the patch to 0.
+- After a release lands on `main`, refresh `next` by hand (`git checkout next && git merge main`) — CI never writes branches.
+- A **major** bump has no path yet — add one when v1.0 nears.
 - `CHANGELOG.md` is **date-based** — add your entry in the PR (the release never edits it).
