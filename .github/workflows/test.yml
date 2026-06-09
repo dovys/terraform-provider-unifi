@@ -24,9 +24,10 @@ jobs:
     name: checks
     runs-on: ubuntu-latest
     steps:
-      # Actions pinned to full SHAs (mutable tags are a supply-chain risk);
-      # Dependabot bumps the SHA + version comment together.
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      # GitHub's own actions (actions/*) ride floating major tags — we trust them.
+      # 3rd-party actions stay SHA-pinned (a mutable tag there is a supply-chain
+      # risk); Dependabot bumps the SHA + version comment together.
+      - uses: actions/checkout@v6
 
       # First (needs only the checkout) so the secret-leak guard isn't hidden
       # behind a later build failure.
@@ -36,7 +37,7 @@ jobs:
       # Pin Go to the go.mod toolchain, not `stable`: `stable`'s version is part of
       # setup-go's cache key, so a new Go release would void the whole module+build
       # cache (and the golangci-lint goinstall build) and force a full recompile.
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
@@ -83,7 +84,7 @@ jobs:
       # (install-mode: none, found via $GOPATH/bin on PATH) for caching + annotations.
       - name: Cache golangci-lint binary
         id: golangci-bin
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@v5
         with:
           path: ~/go/bin/golangci-lint
           key: golangci-bin-${{ runner.os }}-v2.12.2-${{ hashFiles('go.mod') }}
@@ -104,7 +105,7 @@ jobs:
       # stdlib (the latter via the pinned go.mod toolchain).
       - name: Cache govulncheck binary
         id: govulncheck-bin
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@v5
         with:
           path: ~/go/bin/govulncheck
           key: govulncheck-bin-${{ runner.os }}-v1.3.0-${{ hashFiles('go.mod') }}

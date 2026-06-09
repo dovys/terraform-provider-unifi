@@ -21,7 +21,8 @@ updates:
         patterns: ["*"]
         update-types: [major, minor, patch]
 
-  # github-actions bumps also keep the SHA/digest pins fresh.
+  # Keeps the 3rd-party action SHA pins fresh and flags new majors for GitHub's own
+  # floating-tag actions/*.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:

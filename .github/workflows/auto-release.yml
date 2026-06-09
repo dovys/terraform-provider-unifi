@@ -1,26 +1,23 @@
 name: auto-release
 
 # Two-branch release model — CI only TAGS + RELEASES, never merges/pushes a branch.
-#   main — released code; every substantive push auto-cuts a release.
+#   main — released code; EVERY push auto-cuts a release (docs and all — simple = solid).
 #   next — feature staging; never releases.
-# Bump from the merged PR's head + labels:
-#   fix → main = patch · next → main = minor · +release:major = major · release:skip = none
 #
-# One `release` job: step 1 reads the PR to decide release+bump (a job-level `if`
-# can't call the PR API); every later step is gated on it. Tag + GoReleaser share
-# the job because a tag pushed with GITHUB_TOKEN won't trigger a separate workflow.
+# No skip paths, no labels — the one decision is the bump, read from git TOPOLOGY (not
+# the PR API). The old `commits/{sha}/pulls` read is eventually-consistent: seconds
+# after a merge it can return [], which once silently mis-bumped a next→main minor down
+# to a patch. Topology has no such race — a next→main release is the ONLY merge commit
+# whose second parent is contained in `next` (the merge brings next's tip in as
+# `HEAD^2`). So:
+#   merge commit whose HEAD^2 ∈ next  → minor
+#   anything else (squash-merged fix/docs/dep, direct push, or a fix merged AS a merge
+#   commit whose HEAD^2 is NOT in next) → patch
+# A major bump has no path yet — add one when v1.0 nears.
 
 on:
   push:
     branches: [main]
-    # Skip non-functional merges (skips only when EVERY changed file matches; use
-    # the release:skip label for code you don't want released).
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.github/**'
-      - 'go.mod'
-      - 'go.sum'
 
 # Serialize so two quick merges can't race the tag; never cancel an uploading release.
 concurrency:
@@ -29,7 +26,6 @@ concurrency:
 
 permissions:
   contents: write        # push the tag, create the GitHub Release
-  pull-requests: read    # read the merged PR's branch + labels
 
 jobs:
   release:
@@ -39,44 +35,33 @@ jobs:
       # Release never re-resolves modules; -mod=readonly fails on a stale/tampered graph.
       GOFLAGS: -mod=readonly
     steps:
-      # Decide before checkout/Go so a release:skip merge exits in seconds; gh is
-      # preinstalled and needs no checkout.
-      - name: Decide release + bump from the merged PR
+      # Runs with contents:write + (when set) the GPG key in memory. GitHub's own
+      # actions ride floating major tags (we trust them); 3rd-party are SHA-pinned.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0          # full history + tags for the bump topology + version calc
+
+      # Decide the bump from git alone — no PR API, no merge-message parsing, so the
+      # commit→PR association lag can't mis-bump. `next` is fetched so HEAD^2 (the
+      # merged-in tip of a next→main merge) can be tested for membership in it.
+      - name: Decide bump from git topology
         id: decide
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          resp="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" 2>/dev/null || echo '[]')"
-          head="$(printf '%s' "$resp"   | jq -r  'if length>0 then .[0].head.ref else "" end')"
-          labels="$(printf '%s' "$resp" | jq -c  'if length>0 then [.[0].labels[].name] else [] end')"
-          has() { printf '%s' "$labels" | jq -e --arg l "$1" 'index($l) != null' >/dev/null 2>&1; }
-
-          if has "release:skip"; then
-            echo "release=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::release:skip label present on the merged PR — skipping the release."
-            exit 0
-          fi
-          if [ "$head" = "next" ]; then
-            if has "release:major"; then bump=major; else bump=minor; fi
+          git fetch --no-tags origin next
+          p2="$(git rev-parse -q --verify 'HEAD^2' || true)"   # empty unless HEAD is a merge
+          if [ -n "$p2" ] && git merge-base --is-ancestor "$p2" origin/next; then
+            bump=minor      # the next→main release merge — HEAD^2 is next's tip
           else
-            bump=patch
+            bump=patch      # squash fix, direct push, or a fix merged as a merge commit
           fi
-          echo "release=true"  >> "$GITHUB_OUTPUT"
-          echo "bump=${bump}"  >> "$GITHUB_OUTPUT"
-          echo "Release: yes — bump ${bump} (merged PR head: ${head:-<none, direct push → patch>})"
-
-      # Pinned SHA — runs with contents:write + (when set) the GPG key in memory.
-      - if: steps.decide.outputs.release == 'true'
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          fetch-depth: 0          # full history + tags for version calc
+          echo "bump=${bump}" >> "$GITHUB_OUTPUT"
+          echo "Releasing — bump ${bump} (HEAD^2=${p2:-<none, single-parent → patch>})"
 
       # Pin to the go.mod toolchain (see test.yml). cache:false — setup-go's auto
       # cache shares the PR job's key (native-arch, "not saved" on hit), so the
       # cross-compile never persists; the release-scoped cache below does instead.
-      - if: steps.decide.outputs.release == 'true'
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -84,8 +69,7 @@ jobs:
       # Persist the cross-compile + module cache across releases (keyed go.mod+go.sum;
       # restore-keys warm the base on a change). #1 saves all six arches; #2+ restore
       # them, so GoReleaser recompiles only changed packages, not stdlib ×6.
-      - if: steps.decide.outputs.release == 'true'
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache@v5
         with:
           path: |
             ~/.cache/go-build
@@ -97,14 +81,12 @@ jobs:
       # Don't tag a tree that doesn't build/pass units (the only check for a direct
       # push to main); GoReleaser reuses this warm cache for the cross-compile.
       - name: Build & unit test
-        if: steps.decide.outputs.release == 'true'
         run: |
           go build ./...
           go test ./... -timeout 120s
 
       - name: Compute next version
         id: ver
-        if: steps.decide.outputs.release == 'true'
         env:
           BUMP: ${{ steps.decide.outputs.bump }}
         run: |
@@ -139,7 +121,6 @@ jobs:
           echo "Releasing ${next} (${BUMP}; previous ${latest:-<none>})"
 
       - name: Create and push tag
-        if: steps.decide.outputs.release == 'true'
         env:
           NEXT: ${{ steps.ver.outputs.next }}
         run: |
@@ -151,14 +132,13 @@ jobs:
 
       # Passphraseless key (a passphrase is dead weight in automation).
       - name: Import GPG key
-        if: ${{ steps.decide.outputs.release == 'true' && env.HAS_GPG_KEY == 'true' }}
+        if: ${{ env.HAS_GPG_KEY == 'true' }}
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7
         id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Run GoReleaser
-        if: steps.decide.outputs.release == 'true'
         uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7
         with:
           version: '~> v2'
