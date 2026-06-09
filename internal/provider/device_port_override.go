@@ -20,6 +20,7 @@ var portOverrideAttrTypes = map[string]attr.Type{
 	"port_profile_id":             types.StringType,
 	"name":                        types.StringType,
 	"poe_mode":                    types.StringType,
+	"disabled":                    types.BoolType,
 	"forward":                     types.StringType,
 	"native_network_id":           types.StringType,
 	"tagged_vlan_mgmt":            types.StringType,
@@ -68,7 +69,8 @@ func portOverrideSchemaAttrs(computed bool) map[string]schema.Attribute {
 		"port_profile_id":             str("Bind the port to a `unifi_network_port_profile` (its `id`). The profile then governs the port's VLAN behavior, so leave the inline VLAN intent (`native_network_id`, `tagged_vlan_mgmt`) unset — the controller nulls them (and the derived `forward`) once a profile is bound."),
 		"name":                        str("Port label."),
 		"poe_mode":                    str("Power over Ethernet: `auto`, `pasv24`, `passthrough`, or `off` (varies by switch). HIL-unverified."),
-		"forward":                     computedStr("VLAN forwarding mode, **derived by the controller** (read-only) from `native_network_id` + `tagged_vlan_mgmt` + `excluded_network_ids`: `all` (trunk), `native`, or `customize`. Set the intent fields instead — the controller computes this. (Binding a port profile governs it.)"),
+		"disabled":                    b("Administratively disable (shut down) the port — no link, no forwarding. Set `false` to re-enable a disabled port to the default trunk; to land it on a specific VLAN instead, omit `disabled` and set the VLAN fields. Mutually exclusive with `port_profile_id`, `native_network_id`, `voice_network_id`, `excluded_network_ids`, and a non-`block_all` `tagged_vlan_mgmt` (a bound port profile governs the port — disable the profile instead)."),
+		"forward":                     computedStr("VLAN forwarding mode, **derived by the controller** (read-only) from `native_network_id` + `tagged_vlan_mgmt` + `excluded_network_ids`: `all` (trunk), `native`, `customize`, or `disabled` (set `disabled = true` rather than aiming for this). Set the intent fields instead — the controller computes this. (Binding a port profile governs it.)"),
 		"native_network_id":           str("Untagged/native network (`unifi_network_network` id) — the port's VLAN intent."),
 		"tagged_vlan_mgmt":            str("Tagged-VLAN handling: `auto` (allow all), `block_all` (native only), or `custom` (allow all but `excluded_network_ids`). The controller derives `forward` from this."),
 		"excluded_network_ids":        set("Tagged networks to exclude when `tagged_vlan_mgmt = custom`."),
@@ -100,6 +102,8 @@ func portOverrideToNet(ctx context.Context, portIdx int, o portOverrideObject, d
 		PortconfID: strOrEmpty(o.PortProfileID),
 		Name:       strOrEmpty(o.Name),
 		PoEMode:    strOrEmpty(o.POEMode),
+		// The merge expands this to the controller's disabled-port shape. #108.
+		Disabled: boolPtr(o.Disabled),
 		// Forward is read-only (controller-derived); it's never written — the
 		// controller computes it from the intent below. So it's omitted here.
 		NativeNetworkConfID:    strOrEmpty(o.NativeNetworkID),
@@ -137,6 +141,7 @@ type portOverrideObject struct {
 	PortProfileID            types.String `tfsdk:"port_profile_id"`
 	Name                     types.String `tfsdk:"name"`
 	POEMode                  types.String `tfsdk:"poe_mode"`
+	Disabled                 types.Bool   `tfsdk:"disabled"`
 	Forward                  types.String `tfsdk:"forward"`
 	NativeNetworkID          types.String `tfsdk:"native_network_id"`
 	TaggedVLANMgmt           types.String `tfsdk:"tagged_vlan_mgmt"`
@@ -160,12 +165,26 @@ type portOverrideObject struct {
 	MulticastRouterMode      types.String `tfsdk:"multicast_router_mode"`
 }
 
+// derivedDisabled reports whether the port is administratively disabled. There is
+// no disabled flag on the controller, so it's inferred from forward=="disabled" —
+// except /stat/device can echo the pre-write forward for a beat, which would flip a
+// known apply result and fail it. A carried intent (po.Disabled, set on the write
+// read-back) therefore wins over the possibly-stale forward; a plain read (nil)
+// falls back to forward. #108.
+func derivedDisabled(po network.PortOverride) types.Bool {
+	if po.Disabled != nil {
+		return types.BoolValue(*po.Disabled)
+	}
+	return types.BoolValue(po.Forward == network.ForwardDisabled)
+}
+
 // portOverrideFromNet builds the framework object for one controller override.
 func portOverrideFromNet(po network.PortOverride) portOverrideObject {
 	return portOverrideObject{
 		PortProfileID:            strToStateOptional(po.PortconfID),
 		Name:                     strToStateOptional(po.Name),
 		POEMode:                  strToStateOptional(po.PoEMode),
+		Disabled:                 derivedDisabled(po),
 		Forward:                  strToStateOptional(po.Forward),
 		NativeNetworkID:          strToStateOptional(po.NativeNetworkConfID),
 		TaggedVLANMgmt:           strToStateOptional(po.TaggedVLANMgmt),

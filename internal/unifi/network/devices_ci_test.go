@@ -207,6 +207,98 @@ func TestRestoreConfiguredScalars(t *testing.T) {
 	}
 }
 
+// Issue #108 — a disabled switch port carries no direct "disable" field. The
+// controller DERIVES forward=disabled from tagged_vlan_mgmt=block_all with an
+// EXPLICITLY empty native VLAN; sending native absent makes the controller inject
+// the default network and derive forward=native instead (the live failure that
+// motivated this). So the write MUST put native="" literally on the wire — which
+// the struct's omitempty can't, hence applyDerivedDisable. This asserts the merged
+// PUT body for a Disabled port is exactly {block_all, native:""}.
+func TestUpdateConfig_PortDisableDerivesBlockAllEmptyNative(t *testing.T) {
+	// Port 5 currently has a native VLAN — the case where naive block_all would
+	// keep it and derive forward=native, not disabled.
+	stat := `{"meta":{"rc":"ok"},"data":[{"_id":"d1","mac":"aa:bb:cc:00:00:01","port_overrides":[
+		{"port_idx":5,"native_networkconf_id":"netA","tagged_vlan_mgmt":"auto","forward":"native"}
+	]}]}`
+	f := fakeQueue(stat, `{"meta":{"rc":"ok"},"data":[{"_id":"d1"}]}`, stat)
+
+	disable := true
+	cfg := DeviceConfig{PortOverrides: []PortOverride{{PortIdx: 5, Disabled: &disable}}}
+	if _, err := newTestClient(f).Devices().UpdateConfig(context.Background(), "d1", cfg, []int{5}); err != nil {
+		t.Fatalf("UpdateConfig: %v", err)
+	}
+
+	// The PUT is the 2nd wire call. Decode the raw body (not via PortOverride — we
+	// must see whether native_networkconf_id is PRESENT as "", which omitempty hides).
+	raw, _ := json.Marshal(f.bodies[1])
+	var putBody struct {
+		PortOverrides []map[string]json.RawMessage `json:"port_overrides"`
+	}
+	if err := json.Unmarshal(raw, &putBody); err != nil {
+		t.Fatalf("decode put body: %v", err)
+	}
+	var p5 map[string]json.RawMessage
+	for _, e := range putBody.PortOverrides {
+		var idx int
+		_ = json.Unmarshal(e["port_idx"], &idx)
+		if idx == 5 {
+			p5 = e
+		}
+	}
+	if p5 == nil {
+		t.Fatalf("port 5 missing from PUT: %s", raw)
+	}
+	if got, ok := p5["tagged_vlan_mgmt"]; !ok || string(got) != `"block_all"` {
+		t.Errorf("tagged_vlan_mgmt = %s (present=%v), want \"block_all\"", got, ok)
+	}
+	got, ok := p5["native_networkconf_id"]
+	if !ok {
+		t.Fatalf("native_networkconf_id absent — controller would inject the default network and derive forward=native, NOT disabled")
+	}
+	if string(got) != `""` {
+		t.Errorf("native_networkconf_id = %s, want \"\" (explicit empty)", got)
+	}
+}
+
+// Issue #108 — an unmanaged disable (nil) leaves a port's fields untouched.
+func TestApplyDerivedDisable_NoopWhenUnmanaged(t *testing.T) {
+	doc := map[string]json.RawMessage{"port_idx": json.RawMessage(`3`), "native_networkconf_id": json.RawMessage(`"netA"`)}
+	applyDerivedDisable(doc, PortOverride{PortIdx: 3}) // Disabled nil
+	if string(doc["native_networkconf_id"]) != `"netA"` {
+		t.Errorf("unmanaged port native VLAN was altered: %s", doc["native_networkconf_id"])
+	}
+	if _, ok := doc["tagged_vlan_mgmt"]; ok {
+		t.Errorf("unmanaged port should not gain tagged_vlan_mgmt: %v", doc["tagged_vlan_mgmt"])
+	}
+}
+
+// Issue #108 — disabled=false re-enables ONLY a port the controller currently has
+// disabled (and only when the user manages no VLAN inline): it reverts to the
+// default trunk (auto + native omitted → controller injects default → forward=all).
+// An already-enabled port, or one whose VLAN the user owns, is left untouched.
+func TestApplyDerivedDisable_ReenableOnlyWhenDisabled(t *testing.T) {
+	enable := false
+	t.Run("disabled port reverts to default trunk", func(t *testing.T) {
+		doc := map[string]json.RawMessage{"port_idx": json.RawMessage(`5`), "forward": json.RawMessage(`"disabled"`),
+			"tagged_vlan_mgmt": json.RawMessage(`"block_all"`), "native_networkconf_id": json.RawMessage(`""`)}
+		applyDerivedDisable(doc, PortOverride{PortIdx: 5, Disabled: &enable})
+		if string(doc["tagged_vlan_mgmt"]) != `"auto"` {
+			t.Errorf("tagged_vlan_mgmt = %s, want \"auto\"", doc["tagged_vlan_mgmt"])
+		}
+		if _, ok := doc["native_networkconf_id"]; ok {
+			t.Errorf("native must be omitted so the controller injects the default: %s", doc["native_networkconf_id"])
+		}
+	})
+	t.Run("already-enabled port left untouched", func(t *testing.T) {
+		doc := map[string]json.RawMessage{"port_idx": json.RawMessage(`6`), "forward": json.RawMessage(`"native"`),
+			"tagged_vlan_mgmt": json.RawMessage(`"auto"`), "native_networkconf_id": json.RawMessage(`"netA"`)}
+		applyDerivedDisable(doc, PortOverride{PortIdx: 6, Disabled: &enable})
+		if string(doc["native_networkconf_id"]) != `"netA"` {
+			t.Errorf("an enabled port's native VLAN must be preserved, got %s", doc["native_networkconf_id"])
+		}
+	})
+}
+
 func TestClientsGetByMAC(t *testing.T) {
 	f := &fakeDoer{resp: okJSON(`{"meta":{"rc":"ok"},"data":[{"_id":"u1","mac":"de:ad:be:ef:00:01","name":"printer"}]}`)}
 	u, err := newTestClient(f).Clients().GetByMAC(context.Background(), "DE:AD:BE:EF:00:01")

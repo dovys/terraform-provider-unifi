@@ -23,6 +23,15 @@ type DevicesService struct{ core *core }
 // Devices returns the devices group.
 func (c *Client) Devices() DevicesService { return DevicesService{core: c.core} }
 
+// forward is controller-DERIVED from tagged_vlan_mgmt + the native VLAN; these are
+// the values applyDerivedDisable writes to disable/re-enable a port. ForwardDisabled
+// is the read-back marker (PortOverride.Disabled).
+const (
+	ForwardDisabled    = "disabled"
+	taggedVLANBlockAll = "block_all"
+	taggedVLANAuto     = "auto"
+)
+
 // PortOverride is one curated entry of a switch's `port_overrides` array, keyed
 // by PortIdx. The controller's full per-port surface is much larger (see
 // wire.Device.PortOverrides); this is the modeled subset the provider writes.
@@ -61,6 +70,12 @@ type PortOverride struct {
 	LLDPMEDEnabled      *bool  `json:"lldpmed_enabled,omitempty"`
 	PortKeepaliveOn     *bool  `json:"port_keepalive_enabled,omitempty"`
 	MulticastRouterMode string `json:"multicast_router_mode,omitempty"`
+
+	// Disabled administratively shuts the port down (issue #108). Three-state like
+	// the pointer fields above: nil = unmanaged, &true = disable, &false = re-enable.
+	// Not a document field — the merge (applyDerivedDisable) translates it to the
+	// VLAN-derived shape the controller actually stores. Excluded from the JSON.
+	Disabled *bool `json:"-"`
 }
 
 // RestoreConfiguredScalars repairs a read that lagged a write. The /rest/device PUT
@@ -91,6 +106,11 @@ func (po *PortOverride) RestoreConfiguredScalars(want PortOverride) {
 	restore(&po.NativeNetworkConfID, want.NativeNetworkConfID)
 	restore(&po.VoiceNetworkConfID, want.VoiceNetworkConfID)
 	restore(&po.TaggedVLANMgmt, want.TaggedVLANMgmt)
+	// Carry the configured `disabled` intent: it's a known plan value but reads back
+	// derived from the lag-prone `forward`, so pin it (see derivedDisabled). #108.
+	if want.Disabled != nil {
+		po.Disabled = want.Disabled
+	}
 }
 
 // DeviceConfig is the owned, writable subset of a device document. Scalars ride
@@ -279,6 +299,7 @@ func mergePortOverrides(existing []map[string]json.RawMessage, desired []PortOve
 		for k, v := range fields {
 			base[k] = v
 		}
+		applyDerivedDisable(base, desired[i])
 		byIdx[idx] = base
 	}
 
@@ -291,6 +312,40 @@ func mergePortOverrides(existing []map[string]json.RawMessage, desired []PortOve
 		result = append(result, byIdx[idx])
 	}
 	return result, nil
+}
+
+// applyDerivedDisable translates the Disabled intent onto a port's merged document.
+// forward is controller-DERIVED from tagged_vlan_mgmt + native, so:
+//   - &true → block_all + an explicitly empty native. (An absent native is injected
+//     with the default network → forward=native, so the "" must hit the wire.)
+//   - &false → re-enable to the default trunk (auto + native omitted → forward=all),
+//     but ONLY a port currently disabled and only when the user sets no VLAN inline;
+//     else no-op (preserve-merge).
+//   - nil → no-op.
+//
+// Verified vs the controller normalizer (service/config/g) + switch firmware
+// (forward=disabled → switch.port.<idx>.status=disabled). #108.
+func applyDerivedDisable(doc map[string]json.RawMessage, po PortOverride) {
+	if po.Disabled == nil {
+		return
+	}
+	if *po.Disabled {
+		doc["tagged_vlan_mgmt"] = json.RawMessage(`"` + taggedVLANBlockAll + `"`)
+		doc["native_networkconf_id"] = json.RawMessage(`""`)
+		return
+	}
+	if !docIsDisabled(doc) || po.TaggedVLANMgmt != "" || po.NativeNetworkConfID != "" || po.PortconfID != "" {
+		return
+	}
+	doc["tagged_vlan_mgmt"] = json.RawMessage(`"` + taggedVLANAuto + `"`)
+	delete(doc, "native_networkconf_id")
+}
+
+// docIsDisabled reports whether a port's merged document is in the controller's
+// disabled shape (derived forward=disabled, or its block_all + empty-native source).
+func docIsDisabled(doc map[string]json.RawMessage) bool {
+	return string(doc["forward"]) == `"`+ForwardDisabled+`"` ||
+		(string(doc["tagged_vlan_mgmt"]) == `"`+taggedVLANBlockAll+`"` && string(doc["native_networkconf_id"]) == `""`)
 }
 
 func hasDesired(desired []PortOverride, idx int) bool {

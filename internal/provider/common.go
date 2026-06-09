@@ -180,6 +180,13 @@ func strOrEmpty(v types.String) string {
 	return v.ValueString()
 }
 
+// configuredString reports whether the attribute carries a concrete, non-empty
+// value the user set — used by cross-field config validation, where null/unknown
+// must be treated as "not set" (no diagnostic on a value the framework can't see yet).
+func configuredString(v types.String) bool {
+	return !v.IsNull() && !v.IsUnknown() && v.ValueString() != ""
+}
+
 // strPtrIfSet returns a pointer to the string only when it is set to a non-empty
 // value, else nil — so omitempty drops it. Use it for fields the controller
 // rejects when sent empty (e.g. wan_ip on a non-static WAN): an unset field must
