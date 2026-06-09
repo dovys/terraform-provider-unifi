@@ -165,12 +165,12 @@ type portOverrideObject struct {
 	MulticastRouterMode      types.String `tfsdk:"multicast_router_mode"`
 }
 
-// derivedDisabled reports whether the port is administratively disabled. The
-// controller has no disabled flag — it's read from forward=="disabled". But just
-// after a write the /stat/device read can still echo the OLD forward; if the user
-// set disabled explicitly, trusting that stale value would flip a known result and
-// fail the apply. So a carried intent (po.Disabled, set on the write read-back) wins;
-// a plain read (nil) falls back to forward. #108.
+// derivedDisabled reports whether the port is administratively disabled. There is
+// no disabled flag on the controller, so it's inferred from forward=="disabled" —
+// except /stat/device can echo the pre-write forward for a beat, which would flip a
+// known apply result and fail it. A carried intent (po.Disabled, set on the write
+// read-back) therefore wins over the possibly-stale forward; a plain read (nil)
+// falls back to forward. #108.
 func derivedDisabled(po network.PortOverride) types.Bool {
 	if po.Disabled != nil {
 		return types.BoolValue(*po.Disabled)

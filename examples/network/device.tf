@@ -38,8 +38,9 @@ resource "unifi_network_device" "garage_switch" {
       poe_mode = "off"
     }
     # Port 8: administratively disabled — link down, no forwarding. The controller
-    # has no direct off switch; `disabled` writes the combination it derives
-    # `forward = "disabled"` from. Mutually exclusive with VLAN/profile fields.
+    # has no off switch of its own; `disabled` writes the VLAN combination it
+    # derives `forward = "disabled"` from. Mutually exclusive with the VLAN/profile
+    # fields, since those would steer the same derivation the other way.
     "8" = {
       name     = "Unused"
       disabled = true
