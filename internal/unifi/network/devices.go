@@ -23,11 +23,9 @@ type DevicesService struct{ core *core }
 // Devices returns the devices group.
 func (c *Client) Devices() DevicesService { return DevicesService{core: c.core} }
 
-// ForwardDisabled is the value the controller DERIVES into `forward` for an
-// administratively disabled switch port. The controller has no direct disable
-// field: forward is a function of tagged_vlan_mgmt + the native VLAN, so block_all
-// with an empty native derives `disabled`, and auto with the default native derives
-// the `all` trunk. See PortOverride.Disabled / applyDerivedDisable.
+// forward is controller-DERIVED from tagged_vlan_mgmt + the native VLAN; these are
+// the values applyDerivedDisable writes to disable/re-enable a port. ForwardDisabled
+// is the read-back marker (PortOverride.Disabled).
 const (
 	ForwardDisabled    = "disabled"
 	taggedVLANBlockAll = "block_all"
@@ -108,12 +106,8 @@ func (po *PortOverride) RestoreConfiguredScalars(want PortOverride) {
 	restore(&po.NativeNetworkConfID, want.NativeNetworkConfID)
 	restore(&po.VoiceNetworkConfID, want.VoiceNetworkConfID)
 	restore(&po.TaggedVLANMgmt, want.TaggedVLANMgmt)
-	// `disabled` can be a KNOWN plan value (the user set true OR false), but it reads
-	// back derived from the controller-computed `forward`, which a lagging read can
-	// echo stale. Carry the configured intent so the derived state pins to it. #108.
-	// (forward/tagged/native themselves needn't be pinned — they're Computed or
-	// user-unset, never known plan values, so a stale read can't trip the post-apply
-	// consistency check.)
+	// Carry the configured `disabled` intent: it's a known plan value but reads back
+	// derived from the lag-prone `forward`, so pin it (see derivedDisabled). #108.
 	if want.Disabled != nil {
 		po.Disabled = want.Disabled
 	}
@@ -320,22 +314,17 @@ func mergePortOverrides(existing []map[string]json.RawMessage, desired []PortOve
 	return result, nil
 }
 
-// applyDerivedDisable translates the Disabled write-intent onto a port's merged
-// document (the existing override with the desired overlay already applied). The
-// controller has no direct disable field — forward is DERIVED from tagged_vlan_mgmt
-// + the native VLAN — so the intent becomes that pair (verified against the
-// controller's normalizer in service/config/g and the switch firmware, where
-// forward=disabled maps to switch.port.<idx>.status=disabled). See issue #108.
+// applyDerivedDisable translates the Disabled intent onto a port's merged document.
+// forward is controller-DERIVED from tagged_vlan_mgmt + native, so:
+//   - &true → block_all + an explicitly empty native. (An absent native is injected
+//     with the default network → forward=native, so the "" must hit the wire.)
+//   - &false → re-enable to the default trunk (auto + native omitted → forward=all),
+//     but ONLY a port currently disabled and only when the user sets no VLAN inline;
+//     else no-op (preserve-merge).
+//   - nil → no-op.
 //
-//   - &true → block_all + an EXPLICITLY empty native. Sending native absent
-//     (omitempty) would make the controller inject the default network and derive
-//     forward=native, so the empty string must hit the wire literally.
-//   - &false → re-enable to the default trunk (auto + native omitted, so the
-//     controller injects the default and derives forward=all) — but ONLY for a port
-//     the controller currently has disabled, and only when the user manages no VLAN
-//     inline. Otherwise it's a no-op: an already-enabled port, or one whose VLAN the
-//     user owns, is left to preserve-merge semantics.
-//   - nil → unmanaged, no-op.
+// Verified vs the controller normalizer (service/config/g) + switch firmware
+// (forward=disabled → switch.port.<idx>.status=disabled). #108.
 func applyDerivedDisable(doc map[string]json.RawMessage, po PortOverride) {
 	if po.Disabled == nil {
 		return
