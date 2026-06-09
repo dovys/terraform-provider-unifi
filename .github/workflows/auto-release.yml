@@ -69,7 +69,7 @@ jobs:
       # Persist the cross-compile + module cache across releases (keyed go.mod+go.sum;
       # restore-keys warm the base on a change). #1 saves all six arches; #2+ restore
       # them, so GoReleaser recompiles only changed packages, not stdlib ×6.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: |
             ~/.cache/go-build
