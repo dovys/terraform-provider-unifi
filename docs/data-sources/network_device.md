@@ -41,6 +41,7 @@ Look up a UniFi network device by `mac` or `id` (one is required) and read its c
 Read-Only:
 
 - `autoneg` (Boolean)
+- `disabled` (Boolean)
 - `dot1x_ctrl` (String)
 - `dot1x_idle_timeout` (Number)
 - `egress_rate_limit_enabled` (Boolean)

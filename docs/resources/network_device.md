@@ -45,6 +45,7 @@ A UniFi network device (access point, switch, or gateway) identified by MAC. The
 Optional:
 
 - `autoneg` (Boolean) Auto-negotiate link speed/duplex.
+- `disabled` (Boolean) Administratively disable (shut down) the port — no link, no forwarding. Set `false` to re-enable a disabled port to the default trunk; to land it on a specific VLAN instead, omit `disabled` and set the VLAN fields. Mutually exclusive with `port_profile_id`, `native_network_id`, `voice_network_id`, `excluded_network_ids`, and a non-`block_all` `tagged_vlan_mgmt` (a bound port profile governs the port — disable the profile instead).
 - `dot1x_ctrl` (String) 802.1X control mode.
 - `dot1x_idle_timeout` (Number) 802.1X idle timeout (seconds).
 - `egress_rate_limit_enabled` (Boolean) Enable an egress rate limit.
@@ -70,4 +71,4 @@ Optional:
 
 Read-Only:
 
-- `forward` (String) VLAN forwarding mode, **derived by the controller** (read-only) from `native_network_id` + `tagged_vlan_mgmt` + `excluded_network_ids`: `all` (trunk), `native`, or `customize`. Set the intent fields instead — the controller computes this. (Binding a port profile governs it.)
+- `forward` (String) VLAN forwarding mode, **derived by the controller** (read-only) from `native_network_id` + `tagged_vlan_mgmt` + `excluded_network_ids`: `all` (trunk), `native`, `customize`, or `disabled` (set `disabled = true` rather than aiming for this). Set the intent fields instead — the controller computes this. (Binding a port profile governs it.)

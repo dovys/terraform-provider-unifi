@@ -37,6 +37,14 @@ resource "unifi_network_device" "garage_switch" {
       name     = "NVR"
       poe_mode = "off"
     }
+    # Port 8: administratively disabled — link down, no forwarding. The controller
+    # has no off switch of its own; `disabled` writes the VLAN combination it
+    # derives `forward = "disabled"` from. Mutually exclusive with the VLAN/profile
+    # fields, since those would steer the same derivation the other way.
+    "8" = {
+      name     = "Unused"
+      disabled = true
+    }
   }
 
   # Safe by default: `terraform destroy` reverts the managed port overrides and

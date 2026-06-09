@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -20,9 +21,10 @@ import (
 )
 
 var (
-	_ resource.Resource                = (*deviceResource)(nil)
-	_ resource.ResourceWithConfigure   = (*deviceResource)(nil)
-	_ resource.ResourceWithImportState = (*deviceResource)(nil)
+	_ resource.Resource                   = (*deviceResource)(nil)
+	_ resource.ResourceWithConfigure      = (*deviceResource)(nil)
+	_ resource.ResourceWithImportState    = (*deviceResource)(nil)
+	_ resource.ResourceWithValidateConfig = (*deviceResource)(nil)
 )
 
 func NewDeviceResource() resource.Resource { return &deviceResource{} }
@@ -128,6 +130,49 @@ func (r *deviceResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 			"state":   schema.Int64Attribute{Computed: true, MarkdownDescription: "Controller state code (`1` = connected)."},
 			"adopted": schema.BoolAttribute{Computed: true, MarkdownDescription: "Whether the device is adopted by this controller."},
 		},
+	}
+}
+
+// ValidateConfig rejects contradictory port overrides at plan time. A disabled
+// port has no VLAN membership and no profile (the controller models it as
+// tagged_vlan_mgmt=block_all with no native VLAN — #108), so pairing disabled =
+// true with a VLAN/profile field would silently lose the latter.
+func (r *deviceResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var m deviceResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &m)...)
+	if resp.Diagnostics.HasError() || m.PortOverrides.IsNull() || m.PortOverrides.IsUnknown() {
+		return
+	}
+	overrides := map[string]portOverrideObject{}
+	resp.Diagnostics.Append(m.PortOverrides.ElementsAs(ctx, &overrides, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	for port, o := range overrides {
+		if !o.Disabled.ValueBool() { // false / null / unknown — nothing to enforce
+			continue
+		}
+		var conflicts []string
+		add := func(name string, set bool) {
+			if set {
+				conflicts = append(conflicts, name)
+			}
+		}
+		add("port_profile_id", configuredString(o.PortProfileID))
+		add("native_network_id", configuredString(o.NativeNetworkID))
+		add("voice_network_id", configuredString(o.VoiceNetworkID))
+		add("excluded_network_ids", !o.ExcludedNetworkIDs.IsNull() && !o.ExcludedNetworkIDs.IsUnknown() && len(o.ExcludedNetworkIDs.Elements()) > 0)
+		add("tagged_vlan_mgmt", configuredString(o.TaggedVLANMgmt) && o.TaggedVLANMgmt.ValueString() != "block_all")
+		if len(conflicts) == 0 {
+			continue
+		}
+		resp.Diagnostics.AddAttributeError(
+			path.Root("port_overrides").AtMapKey(port),
+			"Disabled port cannot also assign VLANs or a profile",
+			fmt.Sprintf("port %s sets disabled = true (an administratively shut-down port), which the controller "+
+				"models as no VLAN membership and no port profile. Remove: %s. (tagged_vlan_mgmt may only be "+
+				"\"block_all\" when disabled.)", port, strings.Join(conflicts, ", ")),
+		)
 	}
 }
 

@@ -10,6 +10,27 @@ and the provider is **not** published to the Terraform Registry — releases shi
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
 
+## 2026-06-09
+
+### Added
+
+- **`unifi_network_device` — administratively disable a switch port** via a new
+  `port_overrides[*].disabled` boolean (issue #108). A UniFi switch has no direct
+  "disable port" field: the controller *derives* `forward = "disabled"` from
+  `tagged_vlan_mgmt = "block_all"` with an **empty** native VLAN, and the switch
+  firmware maps that to `switch.port.<idx>.status = disabled` (a real admin
+  shutdown). Setting `disabled = true` writes exactly that pair — including the
+  native VLAN as a literal empty string, which an absent value can't express
+  (the controller would otherwise inject the default network and derive
+  `forward = "native"`). It reads back from the derived `forward`, and the
+  configured intent survives a lagging read-back so a known `disabled` value
+  round-trips on apply. Setting `disabled = false` re-enables a disabled port to
+  the default trunk (to land it on a specific VLAN instead, omit `disabled` and set
+  the VLAN fields). `disabled` is mutually exclusive with `port_profile_id` and the
+  inline VLAN fields (rejected at plan time). Mechanism confirmed against the
+  controller's port-override normalizer and the USW-Pro-Max firmware. `forward`'s
+  documented derived values now include `disabled`.
+
 ## 2026-06-08
 
 ### Fixed
