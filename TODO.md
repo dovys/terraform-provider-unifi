@@ -28,9 +28,15 @@ gap unlocks only with the matching hardware:
   `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
   DNS. (The `port_overrides` write→read-back contract — which fields the controller
   stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
-  **Administratively disabling a port is not yet modeled** (issue #108): `forward =
-  "disabled"` is derived away by the controller, so there's no working off switch —
-  capture the UI's disable PUT and add a dedicated field.
+  **Administratively disabling a port** (issue #108) is now modeled by the
+  `port_overrides[*].disabled` field. The mechanism is confirmed on two source axes:
+  the controller derives `forward=disabled` only from `tagged_vlan_mgmt=block_all`
+  with an *explicitly empty* native VLAN (`service/config/g` normalizer — an absent
+  native is injected with the default network and yields `forward=native` instead),
+  and the switch firmware maps `forward=disabled` to `switch.port.<idx>.status=
+  disabled` (admin shutdown). **HIL apply-verification still owed:** a reversible
+  probe (capture → set `disabled` on an unused switch port → confirm the port goes
+  admin-down and reads back `forward=disabled` → restore) on the live USW-Pro-Max.
 - **a live controller write-tier run** — `unifi_network_mdns` (new, issue #91):
   confirm the v2 `global/config/network` PUT is **replace-style** as the spec
   notes (the resource GET-merges and PUTs the whole doc, so the required IGMP
