@@ -21,17 +21,28 @@ below predate the date-based convention.
   the write into `/rest/device`, but the `/stat/device` list the read maps from can
   lag a refresh and echo the *pre-rename* name — so the known, configured value
   read back as the old one and contradicted the plan. Apply-time state now restores
-  the configured `name` and `port_profile_id` from the plan when the read lags, so a
-  known value round-trips; once the controller catches up the next plan is clean.
-  Restoration is restricted to these two fields, which the controller stores
-  verbatim (verified live and against the controller's config code). The VLAN fields
-  (`forward`, `tagged_vlan_mgmt`, the native/excluded networks) are server-derived —
-  the controller normalizes them on write — so they are left to the read, where a
-  normalized value can't become a permanent re-proposed diff or mask a contradictory
-  config. (#101)
+  the configured verbatim-stored fields (the port `name`, the `port_profile_id`
+  binding, and the VLAN *intent* — `native_network_id`, `voice_network_id`,
+  `tagged_vlan_mgmt`) from the plan when the read lags, so a known value round-trips;
+  once the controller catches up the next plan is clean. These are the fields the
+  controller stores verbatim, verified live and against the controller's config
+  code. The one field NOT restored is `forward`, which the controller *derives* from
+  the intent — see the `port_overrides` change below. (#101)
 
 ### Changed
 
+- **`unifi_network_device` — `port_overrides[*].forward` is now read-only
+  (Computed).** The controller does not store `forward` as written: it *derives* it
+  from the port's VLAN intent (the native network + `tagged_vlan_mgmt` + excluded
+  set) and rewrites it on every write — verified live (HIL on a switch port), where
+  every value we wrote was recomputed on read-back. A configured `forward` could
+  therefore never round-trip cleanly. Practitioners
+  now express VLAN intent via `native_network_id`, `tagged_vlan_mgmt`, and
+  `excluded_network_ids` and read `forward` back as the controller's computed result.
+  **Breaking** for configs that set `forward` inline on a device port — remove it
+  (the intent fields already determine it). This applies to `unifi_network_device`
+  port overrides only; `unifi_network_port_profile` still stores `forward` verbatim
+  (a profile is a template, derivation runs when it's bound to a port). (#101)
 - **CI now caches the goinstall-built tool binaries and the release cross-compile.**
   Building `golangci-lint` from source was ~80s of every `checks` run, and
   GoReleaser rebuilt all six `GOOS/GOARCH` targets from scratch each release
@@ -76,6 +87,32 @@ below predate the date-based convention.
 
 ### Added
 
+- **`unifi_network_mdns`** — the site's mDNS (Bonjour) reflector scope (issue #91),
+  a singleton on the v2 global network-config document. `mode` is `all` (reflect
+  across every network), `none` (off), or `some` (only the VLANs in `network_ids`).
+  The v2 surface is replace-style with required IGMP/multicast fields, so the
+  resource GET-merges — it overlays only `mdns_enabled_for[_network_ids]` and PUTs
+  the whole document back, leaving the controller's other multicast knobs intact.
+  Destroy is state-removal only (the document always exists); a console without the
+  surface (older firmware) is rejected with a plan-time diagnostic.
+- **`unifi_network_threat_management`** — manages UniFi Threat Management (IDS/IPS),
+  the `ips` settings singleton (issue #90): `mode` (`disabled`/`ids` detection /
+  `ips`/`ipsInline` prevention), `enabled_categories` (the controller's 59-member
+  signature-category Set, validated), `enabled_networks`, and the engine flags
+  (`restrict_torrents`, `honeypot_enabled`, `memory_optimized`,
+  `content_filtering_blocking_page_enabled`). Rides the dedicated settings verbs
+  (`get`/`set/setting/ips`) with a shallow-merge write of the owned fields, so
+  unmodeled fields (per-network `honeypot` entries) survive. Like
+  `unifi_network_settings` it is a singleton: destroy is state removal only, and
+  import seeds the fixed `ips` id. **Enabling IDS/IPS requires a gateway with an
+  active CyberSecure subscription** — the resource gates on the console's `IPS`
+  capability at plan time and, because the controller silently keeps the engine
+  off without an active subscription (it accepts the write but stores `disabled`),
+  verifies at apply time that the requested mode actually took and fails with a
+  clear diagnostic rather than looping on drift. The `disabled`/inert path works
+  everywhere. **The enabled write path is modeled from the reverse-engineered
+  controller spec and is NOT verified against live IDS/IPS hardware** — no
+  CyberSecure-licensed console was available (see TODO).
 - **`unifi_network_network.dhcp_guard_servers`** — the trusted-DHCP-server list
   (up to three, mapped to `dhcpd_ip_1`..`dhcpd_ip_3`) that rogue-DHCP guarding
   needs. Verified live against UniFi Network 10.4.57: enabling

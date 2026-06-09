@@ -355,11 +355,11 @@ func desiredPortOverrides(ctx context.Context, m types.Map, diags *diag.Diagnost
 //     fallback, so its key doesn't vanish and trip the post-apply consistency
 //     check;
 //   - scalar round-trip: when the document echoes the port but the read lags the
-//     write, the configured verbatim-stored scalars (name + the profile binding)
-//     are restored from fallback so a known value round-trips instead of the stale
-//     one — "inconsistent result after apply" (e.g. a port rename). The
-//     controller-derived VLAN fields are not restored (RestoreConfiguredScalars
-//     explains why).
+//     write, the configured verbatim-stored scalars (name, the profile binding, and
+//     the VLAN intent) are restored from fallback so a known value round-trips
+//     instead of the stale one — "inconsistent result after apply" (e.g. a port
+//     rename). The controller-derived `forward` is not restored
+//     (RestoreConfiguredScalars explains why).
 //
 // On Read fallback is nil, so a managed port the controller genuinely lost is
 // dropped (drift the next plan reconciles).

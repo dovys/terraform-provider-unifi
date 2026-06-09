@@ -171,18 +171,20 @@ func TestUpdateConfig_NoPortsLeavesArrayUntouched(t *testing.T) {
 	}
 }
 
-// regression test for #101 — RestoreConfiguredScalars restores the two verbatim
-// fields (name + the profile binding) over a lagging read-back, and restores
-// NOTHING from the controller-derived VLAN tuple even when the user configured it
-// (the controller normalizes those server-side; pinning the literal would diff
-// forever). Field dispositions verified live + against the controller source — see
-// the func comment.
+// regression test for #101 — RestoreConfiguredScalars overlays the verbatim-stored
+// fields (name, profile binding, and the VLAN *intent*: native/voice networks and
+// the tagged-VLAN mode) over a lagging read-back, but leaves `forward` untouched —
+// the controller DERIVES forward from the intent, so it is modeled Computed-only and
+// a stale read of it can't trip the consistency check. Field dispositions verified
+// live + against the controller source — see the func comment.
 func TestRestoreConfiguredScalars(t *testing.T) {
-	// Read lagged the rename and shows the controller's normalized VLAN fields. The
-	// user configured a new name, a profile binding, and inline VLAN intent (a
-	// native network + forward) that the controller derived differently.
-	read := PortOverride{PortIdx: 1, Name: "old", Forward: "all", NativeNetworkConfID: "netDefault"}
-	want := PortOverride{PortIdx: 1, Name: "new", PortconfID: "prof1", Forward: "customize", NativeNetworkConfID: "netServers"}
+	// Read lagged the write and echoes the pre-write values: the old name, no profile
+	// binding, the controller's previously-derived forward, and the old VLAN intent.
+	read := PortOverride{PortIdx: 1, Name: "old", Forward: "all", NativeNetworkConfID: "netDefault", TaggedVLANMgmt: "auto"}
+	// The user configured a new name, a profile binding, and new VLAN intent (native +
+	// voice networks, custom tagged mode). `forward` is Computed — never user-set —
+	// but we plant a value here to prove restore ignores it.
+	want := PortOverride{PortIdx: 1, Name: "new", PortconfID: "prof1", Forward: "customize", NativeNetworkConfID: "netServers", VoiceNetworkConfID: "netVoice", TaggedVLANMgmt: "custom"}
 	read.RestoreConfiguredScalars(want)
 
 	if read.Name != "new" {
@@ -191,11 +193,17 @@ func TestRestoreConfiguredScalars(t *testing.T) {
 	if read.PortconfID != "prof1" {
 		t.Errorf("configured PortconfID should be restored when the read drops it: got %q", read.PortconfID)
 	}
+	if read.NativeNetworkConfID != "netServers" {
+		t.Errorf("native_networkconf_id is verbatim VLAN intent and should be restored: got %q, want %q", read.NativeNetworkConfID, "netServers")
+	}
+	if read.VoiceNetworkConfID != "netVoice" {
+		t.Errorf("voice_networkconf_id is verbatim VLAN intent and should be restored: got %q, want %q", read.VoiceNetworkConfID, "netVoice")
+	}
+	if read.TaggedVLANMgmt != "custom" {
+		t.Errorf("tagged_vlan_mgmt is a verbatim input and should be restored: got %q, want %q", read.TaggedVLANMgmt, "custom")
+	}
 	if read.Forward != "all" {
 		t.Errorf("forward is controller-derived and must NOT be restored: got %q, want the read-back %q", read.Forward, "all")
-	}
-	if read.NativeNetworkConfID != "netDefault" {
-		t.Errorf("native_networkconf_id is controller-derived and must NOT be restored: got %q, want the read-back %q", read.NativeNetworkConfID, "netDefault")
 	}
 }
 

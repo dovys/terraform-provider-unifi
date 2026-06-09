@@ -83,6 +83,12 @@ tracks by index, so controller array reordering yields phantom diffs. Per-entry:
 `aggregate_num_ports`. Omitted ports keep controller defaults; `manage_all_ports` opts into closure.
 No standalone per-port resource (N writers racing one device doc).
 
+`forward` (the VLAN mode: `all`/`native`/`customize`) is **read-only** — the controller derives it from
+the intent fields (`native_network_id` + `tagged_vlan_mgmt` + `excluded_network_ids`) and recomputes it
+on every write, so the practitioner sets the intent and reads `forward` back. (Verified live: every value
+written to a device port came back recomputed. A standalone `unifi_network_port_profile` stores `forward`
+verbatim because the derivation runs only when a profile is *bound* to a device port.)
+
 ## New device, in short
 
 Rack/power it → it appears **pending** → add one `unifi_network_device` (MAC + `wait_for_adoption` +

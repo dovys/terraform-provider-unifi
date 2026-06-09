@@ -28,6 +28,28 @@ gap unlocks only with the matching hardware:
   `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
   DNS. (The `port_overrides` write→read-back contract — which fields the controller
   stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
+  **Administratively disabling a port is not yet modeled** (issue #108): `forward =
+  "disabled"` is derived away by the controller, so there's no working off switch —
+  capture the UI's disable PUT and add a dedicated field.
+- **a live controller write-tier run** — `unifi_network_mdns` (new, issue #91):
+  confirm the v2 `global/config/network` PUT is **replace-style** as the spec
+  notes (the resource GET-merges and PUTs the whole doc, so the required IGMP
+  fields must survive a mDNS-only change), that `some` + `network_ids` actually
+  scopes the reflector, and that the GET shape matches `wire.Global`
+  (decompiled DTO — field types unverified against a live response);
+- **a CyberSecure-licensed gateway** for `unifi_network_threat_management` — the
+  enabled (non-`disabled`) write path is unverified. Confirmed live (UCG Max, no
+  active subscription): the controller lists the `IPS` feature and accepts a
+  `set/setting/ips` write with HTTP 200 but silently keeps `ips_mode="disabled"`
+  and forces `enabled_categories` to `[]`; even the gateway-less Tier-2 controller
+  behaves the same. So the resource gates on the `IPS` capability (plan) + verifies
+  the mode took (apply). Still to verify on a licensed console: that `ips_mode`
+  (`ids`/`ips`/`ipsInline`) + `enabled_categories` actually round-trip, that
+  setting categories with `mode="disabled"` is accepted (it is NOT on an unlicensed
+  console), and that the per-network `honeypot` array survives the shallow merge.
+  NB the live `ips` doc also carries server-managed fields the spec omits
+  (`utm_token`, `ad_blocking_enabled`, `dns_filtering`, `endpoint_scanning`) — left
+  unmodeled per the spec's writable set; reconfirm none are practitioner-writable;
 - **a zone-firewall controller** — `firewall_zone` / `firewall_policy` (the recon
   console runs the mutually-exclusive classic firewall);
 - **a VPN-configured gateway** — `vpn_server` / `vpn_client` and BGP;
@@ -48,8 +70,13 @@ survive. The generic JSON-blob `unifi_network_setting` was **rejected** as a
 smell (it abandons typed attributes + controller-mirroring validators); the
 typed-block model keeps both.
 
-Shipped keys: `ntp`, `country`, `locale`. Remaining (high-value first): `mgmt`,
-`guest_access`, `global_switch`, `global_ap`, `mdns`, `ips`, `radius`. Long-tail
+Shipped keys: `ntp`, `country`, `locale`. The `ips` key ships separately as the
+dedicated `unifi_network_threat_management` resource (IDS/IPS is a large enough
+surface — mode, category set, the engine flags — to warrant its own typed
+resource rather than a `network_settings` block); likewise the mDNS reflector
+scope is its own `unifi_network_mdns` resource (v2 `global/config/network`, not a
+`setting/<key>` block). Remaining (high-value first): `mgmt`, `guest_access`,
+`global_switch`, `global_ap`, `radius`. Long-tail
 / niche keys (`snmp`, `netflow`, `radio_ai`, `rsyslogd`, `dpi`, `teleport`,
 `baresip`, `lcm`, `usg`, `doh`, …) are added on demand; the `super_*` (console-
 internal) and `porta` (hardware-only) keys are out of scope. Each new key is one

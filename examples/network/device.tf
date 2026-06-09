@@ -25,10 +25,10 @@ resource "unifi_network_device" "garage_switch" {
     # Port 7: move a single port to the IoT VLAN inline — an access port
     # untagged on IoT, no tagged VLANs — without defining a reusable profile.
     # Use this for a one-off; reach for a port_profile when several ports share
-    # the same policy.
+    # the same policy. `forward` is computed by the controller from this intent
+    # (native network + tagged_vlan_mgmt), so it isn't set here.
     "7" = {
       name              = "Thermostat"
-      forward           = "native"
       native_network_id = unifi_network_network.iot.id
       tagged_vlan_mgmt  = "block_all"
     }
