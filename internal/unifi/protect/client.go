@@ -59,3 +59,9 @@ func (c *Client) Liveviews() LiveviewService {
 func (c *Client) NVR() NVRService {
 	return NVRService{core: c.core}
 }
+
+// Automations returns the automations group (list + batch-PATCH; no per-id or
+// create/delete route — see AutomationService).
+func (c *Client) Automations() AutomationService {
+	return AutomationService{core: c.core}
+}
