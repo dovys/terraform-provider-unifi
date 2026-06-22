@@ -137,3 +137,25 @@ resource "unifi_protect_viewer" "lobby_tv" {
   name     = "Lobby TV"
   liveview = unifi_protect_liveview.lobby.id
 }
+
+# Manage the auth header on an existing "Ring" automation's HTTP_REQUEST webhook
+# (created in the Protect UI). Import by its 24-hex id; the token comes from a
+# secret manager at apply time and is write-only (never stored in state).
+import {
+  to = unifi_protect_automation.ring
+  id = "665f1a2b3c4d5e6f70819293"
+}
+
+resource "unifi_protect_automation" "ring" {
+  header_name  = "X-Webhook-Token"
+  header_value = var.ring_webhook_token # write-only; from Vault/SOPS/etc.
+
+  # Write-only values are undiffed; bump this when you rotate the token so
+  # Terraform re-applies it (e.g. a hash of the secret).
+  header_value_wo_version = sha256(var.ring_webhook_token)
+}
+
+variable "ring_webhook_token" {
+  type      = string
+  sensitive = true
+}

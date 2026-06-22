@@ -10,6 +10,24 @@ and the provider is **not** published to the Terraform Registry — releases shi
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
 
+## 2026-06-22
+
+### Added
+
+- **`unifi_protect_automation`** — manage one webhook header on an existing
+  Protect automation's `HTTP_REQUEST` action (issue #117). Keeps a rotating auth
+  header (e.g. `X-Webhook-Token`) in Terraform, sourced from a secret manager at
+  apply time. `header_value` is **write-only** (applied, never read back into
+  state) so the secret never persists in state. Import/update-only: the
+  automation must already exist (created in the Protect UI), the target action is
+  matched by `type == HTTP_REQUEST` (and must be unique), and `destroy` removes
+  it from state without touching the controller — the automations route has no
+  safe per-id delete (`DELETE` wipes all automations). Reads list-then-filter by
+  id (no per-id route); writes go through the batch-`PATCH` route, echoing the
+  full `actions[]` back (the controller replaces the array wholesale). **Writes
+  are HIL-unverified.** Requires the `automation` codegen root added in
+  `unifi-specs` so `wire.Automation` types are generated.
+
 ## 2026-06-09
 
 ### Added
