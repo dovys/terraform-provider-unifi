@@ -222,7 +222,7 @@ func TestLiveviewGetByName(t *testing.T) {
 // TestAutomationGetListFilters confirms Get reads the list route and filters by
 // id (there is no per-id route), and that a missing id maps to ErrNotFound.
 func TestAutomationGetListFilters(t *testing.T) {
-	f := &fakeDoer{resp: okJSON(`[{"id":"a1","name":"Ring"},{"id":"a2","name":"Motion"}]`)}
+	f := &fakeDoer{resp: okJSON(`[{"id":"a1","name":"webhook"},{"id":"a2","name":"Motion"}]`)}
 	c := newTestClient(f)
 
 	auto, err := c.Automations().Get(context.Background(), "a2")
@@ -246,7 +246,7 @@ func TestAutomationGetListFilters(t *testing.T) {
 func TestAutomationUpdateBatchEnvelope(t *testing.T) {
 	f := &fakeDoer{resp: &transport.Response{
 		StatusCode: http.StatusMultiStatus,
-		Body:       []byte(`[{"status":200,"response":{"id":"a1","name":"Ring"}}]`),
+		Body:       []byte(`[{"status":200,"response":{"id":"a1","name":"webhook"}}]`),
 	}}
 	type overlay struct {
 		Actions []interface{} `json:"actions"`

@@ -32,10 +32,9 @@ type protectAutomationResource struct {
 }
 
 type protectAutomationResourceModel struct {
-	ID               types.String `tfsdk:"id"`
-	HeaderName       types.String `tfsdk:"header_name"`
-	HeaderValue      types.String `tfsdk:"header_value"` // write-only: lives in config, never state
-	HeaderValueWOVer types.String `tfsdk:"header_value_wo_version"`
+	ID          types.String `tfsdk:"id"`
+	HeaderName  types.String `tfsdk:"header_name"`
+	HeaderValue types.String `tfsdk:"header_value"` // write-only: lives in config, never state
 }
 
 func (r *protectAutomationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -45,22 +44,21 @@ func (r *protectAutomationResource) Metadata(_ context.Context, req resource.Met
 func (r *protectAutomationResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages one webhook header on an **existing** UniFi Protect automation's `HTTP_REQUEST` action " +
-			"(`/proxy/protect/api/automations`). Use it to keep a rotating auth header (e.g. `X-Webhook-Token`) in Terraform, " +
-			"sourced from a secret manager at apply time. Import/update-only: the automation must already exist (created in the " +
-			"Protect UI); `terraform destroy` removes it from state without touching the controller (the automations route has no " +
-			"safe per-id delete). The target action is matched by `type == HTTP_REQUEST` and that action must be unique. " +
-			"`header_value` is **write-only** — applied but never read back into state, so the secret never persists in state and " +
-			"out-of-band changes to its value are not detected. **Writes are HIL-unverified — see the provider TODO.**",
+			"(`/proxy/protect/api/automations`) — e.g. a rotating auth header (`X-Token`) sourced from a secret manager. " +
+			"Import/update-only: the automation is created in the Protect UI; `terraform destroy` only removes it from state " +
+			"(no per-id delete — `DELETE` wipes all automations). The target `HTTP_REQUEST` action must be unique. `header_value` " +
+			"is **write-only** (never stored in or read back from state, so out-of-band changes aren't detected); rotate it with " +
+			"`terraform apply -replace`. **Writes are HIL-unverified — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Protect automation object id (24-hex). Import key.",
+				MarkdownDescription: "Protect automation object id (24-hex). Import key is `<id>/<header_name>`.",
 				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"header_name": schema.StringAttribute{
 				Required: true,
-				MarkdownDescription: "Name of the webhook header to manage on the `HTTP_REQUEST` action (e.g. `X-Webhook-Token`). " +
+				MarkdownDescription: "Name of the webhook header on the `HTTP_REQUEST` action (e.g. `X-Token`). " +
 					"Other headers on the action are left untouched.",
 				Validators: []validator.String{stringvalidator.LengthAtLeast(1)},
 			},
@@ -69,14 +67,6 @@ func (r *protectAutomationResource) Schema(_ context.Context, _ resource.SchemaR
 				Sensitive:           true,
 				WriteOnly:           true,
 				MarkdownDescription: "Value to set for `header_name`. Write-only: sent on apply but never stored in or read back from state.",
-			},
-			// Write-only values are undiffed, so a rotated token alone triggers no
-			// apply. Bumping this companion forces the update that re-sends it.
-			"header_value_wo_version": schema.StringAttribute{
-				Optional: true,
-				MarkdownDescription: "Change-trigger for the write-only `header_value`. Since write-only values are never " +
-					"stored or diffed, set this to a new value (e.g. a hash or timestamp of the token) whenever you rotate " +
-					"`header_value` so Terraform re-applies it.",
 			},
 		},
 	}
@@ -94,6 +84,13 @@ func (r *protectAutomationResource) Create(ctx context.Context, req resource.Cre
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)     // header_value is null here (write-only)
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...) // write-only header_value lives here
 	if resp.Diagnostics.HasError() {
+		return
+	}
+	// The automation must already exist — there is no create API. Without an id
+	// (or an import block) there is nothing to configure.
+	if plan.ID.IsUnknown() || plan.ID.IsNull() || strings.TrimSpace(plan.ID.ValueString()) == "" {
+		resp.Diagnostics.AddError("Missing automation id",
+			"Set `id` to an existing Protect automation (created in the Protect UI), or adopt it with an `import {}` block.")
 		return
 	}
 	r.applyConfig(ctx, &plan, config.HeaderValue, &resp.Diagnostics)
@@ -118,8 +115,8 @@ func (r *protectAutomationResource) Read(ctx context.Context, req resource.ReadR
 		resp.Diagnostics.AddError("Failed to read automation", err.Error())
 		return
 	}
-	// Reconcile only id and the managed header's presence; header_value is
-	// write-only and stays out of state.
+	// Only id is reconciled: header_name is the user's selector and header_value
+	// is write-only, so neither is read back from the controller.
 	state.ID = types.StringValue(auto.Id)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -143,13 +140,20 @@ func (r *protectAutomationResource) Update(ctx context.Context, req resource.Upd
 func (r *protectAutomationResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
 }
 
+// ImportState takes `<id>/<header_name>` so the imported resource reaches a clean
+// plan — the controller can't tell us which header the user owns. A bare id also
+// works but leaves header_name to the first apply.
 func (r *protectAutomationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), strings.TrimSpace(req.ID))...)
+	id, headerName, ok := strings.Cut(strings.TrimSpace(req.ID), "/")
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), strings.TrimSpace(id))...)
+	if ok {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("header_name"), strings.TrimSpace(headerName))...)
+	}
 }
 
-// applyConfig lists the automations, finds the one by id, sets header_name to
-// headerValue on its sole HTTP_REQUEST action, and batch-PATCHes the full
-// actions[] back (the controller replaces the array wholesale).
+// applyConfig sets header_name=headerValue on the automation's sole HTTP_REQUEST
+// action and batch-PATCHes the full actions[] back — the controller replaces the
+// array wholesale, so the other actions must be echoed unchanged.
 func (r *protectAutomationResource) applyConfig(ctx context.Context, plan *protectAutomationResourceModel, headerValue types.String, diags *diag.Diagnostics) {
 	auto, err := r.protect.Automations().Get(ctx, plan.ID.ValueString())
 	if err != nil {
@@ -175,11 +179,10 @@ type automationConfig struct {
 	Actions []interface{} `json:"actions"`
 }
 
-// setHeaderOnHTTPAction returns the full actions[] (as untyped maps the
-// controller round-trips) with name=value set on the single HTTP_REQUEST
-// action's metadata.headers. headers is an array of [name, value] string
-// tuples; an existing pair for name is replaced, else the pair is appended.
-// Errors if there is not exactly one HTTP_REQUEST action.
+// setHeaderOnHTTPAction returns actions[] as untyped maps with name=value set on
+// the sole HTTP_REQUEST action's metadata.headers (an array of [name, value]
+// tuples; replaced if present, else appended). Errors unless exactly one
+// HTTP_REQUEST action exists.
 func setHeaderOnHTTPAction(actions []wire.AutomationAction, name, value string) ([]interface{}, error) {
 	httpIdx := -1
 	for i := range actions {

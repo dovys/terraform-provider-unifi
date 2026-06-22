@@ -3,12 +3,12 @@
 page_title: "unifi_protect_automation Resource - unifi"
 subcategory: ""
 description: |-
-  Manages one webhook header on an existing UniFi Protect automation's HTTP_REQUEST action (/proxy/protect/api/automations). Use it to keep a rotating auth header (e.g. X-Webhook-Token) in Terraform, sourced from a secret manager at apply time. Import/update-only: the automation must already exist (created in the Protect UI); terraform destroy removes it from state without touching the controller (the automations route has no safe per-id delete). The target action is matched by type == HTTP_REQUEST and that action must be unique. header_value is write-only — applied but never read back into state, so the secret never persists in state and out-of-band changes to its value are not detected. Writes are HIL-unverified — see the provider TODO.
+  Manages one webhook header on an existing UniFi Protect automation's HTTP_REQUEST action (/proxy/protect/api/automations) — e.g. a rotating auth header (X-Token) sourced from a secret manager. Import/update-only: the automation is created in the Protect UI; terraform destroy only removes it from state (no per-id delete — DELETE wipes all automations). The target HTTP_REQUEST action must be unique. header_value is write-only (never stored in or read back from state, so out-of-band changes aren't detected); rotate it with terraform apply -replace. Writes are HIL-unverified — see the provider TODO.
 ---
 
 # unifi_protect_automation (Resource)
 
-Manages one webhook header on an **existing** UniFi Protect automation's `HTTP_REQUEST` action (`/proxy/protect/api/automations`). Use it to keep a rotating auth header (e.g. `X-Webhook-Token`) in Terraform, sourced from a secret manager at apply time. Import/update-only: the automation must already exist (created in the Protect UI); `terraform destroy` removes it from state without touching the controller (the automations route has no safe per-id delete). The target action is matched by `type == HTTP_REQUEST` and that action must be unique. `header_value` is **write-only** — applied but never read back into state, so the secret never persists in state and out-of-band changes to its value are not detected. **Writes are HIL-unverified — see the provider TODO.**
+Manages one webhook header on an **existing** UniFi Protect automation's `HTTP_REQUEST` action (`/proxy/protect/api/automations`) — e.g. a rotating auth header (`X-Token`) sourced from a secret manager. Import/update-only: the automation is created in the Protect UI; `terraform destroy` only removes it from state (no per-id delete — `DELETE` wipes all automations). The target `HTTP_REQUEST` action must be unique. `header_value` is **write-only** (never stored in or read back from state, so out-of-band changes aren't detected); rotate it with `terraform apply -replace`. **Writes are HIL-unverified — see the provider TODO.**
 
 
 
@@ -19,10 +19,9 @@ Manages one webhook header on an **existing** UniFi Protect automation's `HTTP_R
 
 > **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
 
-- `header_name` (String) Name of the webhook header to manage on the `HTTP_REQUEST` action (e.g. `X-Webhook-Token`). Other headers on the action are left untouched.
+- `header_name` (String) Name of the webhook header on the `HTTP_REQUEST` action (e.g. `X-Token`). Other headers on the action are left untouched.
 - `header_value` (String, Sensitive, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Value to set for `header_name`. Write-only: sent on apply but never stored in or read back from state.
 
 ### Optional
 
-- `header_value_wo_version` (String) Change-trigger for the write-only `header_value`. Since write-only values are never stored or diffed, set this to a new value (e.g. a hash or timestamp of the token) whenever you rotate `header_value` so Terraform re-applies it.
-- `id` (String) Protect automation object id (24-hex). Import key.
+- `id` (String) Protect automation object id (24-hex). Import key is `<id>/<header_name>`.

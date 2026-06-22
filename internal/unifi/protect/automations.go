@@ -51,7 +51,8 @@ type batchPatchItem struct {
 	Body any    `json:"body"`
 }
 
-// batchPatchResult is one entry of the HTTP 207 batch-PATCH response array.
+// batchPatchResult is one 207 entry: a per-item status that can report failure
+// under an overall 207, plus the updated object.
 type batchPatchResult struct {
 	Status   int             `json:"status"`
 	Response wire.Automation `json:"response"`

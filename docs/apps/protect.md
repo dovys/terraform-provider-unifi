@@ -56,7 +56,7 @@ nvr_settings is a singleton. All over `/proxy/protect/api/...`; field schemas pe
 | `unifi_protect_sensor` | `/proxy/protect/api/sensors/<id>` | UP-Sense: motion/temp/humidity/leak thresholds, mount type. **HIL.** |
 | `unifi_protect_chime` | `/proxy/protect/api/chimes/<id>` | Chime: volume, paired-doorbell associations, ringtones. **HIL.** |
 | `unifi_protect_viewer` | `/proxy/protect/api/viewers/<id>` | Viewport: the liveview it displays. **HIL.** |
-| `unifi_protect_automation` | `/proxy/protect/api/automations` | Manages one webhook header (`header_name`/`header_value`) on an existing automation's sole `HTTP_REQUEST` action. **Import/update-only** (the automation is created in-app); **destroy is state removal** — the route has no per-id delete (`DELETE` wipes all automations). `header_value` is **write-only** (never read back into state). List-then-filter Read (no per-id route); batch-`PATCH` write echoes the full `actions[]` back. **HIL.** |
+| `unifi_protect_automation` | `/proxy/protect/api/automations` | Manages one webhook header on an existing automation's sole `HTTP_REQUEST` action. Import/update-only (created in-app); `destroy` is state-removal (no per-id delete — `DELETE` wipes all automations); `header_value` write-only. **HIL.** |
 
 **Data sources.** Only `data.unifi_protect_camera` ships initially (the object most likely referenced
 without being managed). Add `liveview`/`nvr` data sources later if asked.

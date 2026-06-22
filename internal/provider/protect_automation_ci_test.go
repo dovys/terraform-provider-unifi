@@ -15,7 +15,7 @@ func httpAction(headers ...[]string) wire.AutomationAction {
 		hs[i] = []interface{}{h[0], h[1]}
 	}
 	meta := map[string]interface{}{
-		"url":     "https://hooks.example.com/ring",
+		"url":     "https://example.com/webhook",
 		"method":  "POST",
 		"headers": hs,
 	}
@@ -29,9 +29,9 @@ func TestSetHeaderReplacesExisting(t *testing.T) {
 	setLight := wire.AutomationActionType("SET_LIGHT")
 	actions := []wire.AutomationAction{
 		{Type: &setLight},
-		httpAction([]string{"X-Webhook-Token", "old"}, []string{"Content-Type", "application/json"}),
+		httpAction([]string{"X-Token", "old"}, []string{"Content-Type", "application/json"}),
 	}
-	out, err := setHeaderOnHTTPAction(actions, "X-Webhook-Token", "new")
+	out, err := setHeaderOnHTTPAction(actions, "X-Token", "new")
 	if err != nil {
 		t.Fatalf("setHeaderOnHTTPAction: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestSetHeaderReplacesExisting(t *testing.T) {
 		t.Fatalf("got %d actions, want 2 (other action preserved)", len(out))
 	}
 	meta := out[1].(map[string]interface{})["metadata"].(map[string]interface{})
-	if meta["url"] != "https://hooks.example.com/ring" || meta["method"] != "POST" {
+	if meta["url"] != "https://example.com/webhook" || meta["method"] != "POST" {
 		t.Errorf("action url/method not carried back: %+v", meta)
 	}
 	headers := meta["headers"].([]interface{})
@@ -47,8 +47,8 @@ func TestSetHeaderReplacesExisting(t *testing.T) {
 		t.Fatalf("got %d headers, want 2 (replace not append)", len(headers))
 	}
 	tok := headers[0].([]interface{})
-	if tok[0] != "X-Webhook-Token" || tok[1] != "new" {
-		t.Errorf("token header = %v, want [X-Webhook-Token new]", tok)
+	if tok[0] != "X-Token" || tok[1] != "new" {
+		t.Errorf("token header = %v, want [X-Token new]", tok)
 	}
 	ct := headers[1].([]interface{})
 	if ct[0] != "Content-Type" {
@@ -59,7 +59,7 @@ func TestSetHeaderReplacesExisting(t *testing.T) {
 // TestSetHeaderAppendsNew adds a header absent from the action.
 func TestSetHeaderAppendsNew(t *testing.T) {
 	actions := []wire.AutomationAction{httpAction([]string{"Content-Type", "application/json"})}
-	out, err := setHeaderOnHTTPAction(actions, "X-Webhook-Token", "secret")
+	out, err := setHeaderOnHTTPAction(actions, "X-Token", "secret")
 	if err != nil {
 		t.Fatalf("setHeaderOnHTTPAction: %v", err)
 	}
@@ -68,8 +68,8 @@ func TestSetHeaderAppendsNew(t *testing.T) {
 		t.Fatalf("got %d headers, want 2 (append)", len(headers))
 	}
 	last := headers[1].([]interface{})
-	if last[0] != "X-Webhook-Token" || last[1] != "secret" {
-		t.Errorf("appended header = %v, want [X-Webhook-Token secret]", last)
+	if last[0] != "X-Token" || last[1] != "secret" {
+		t.Errorf("appended header = %v, want [X-Token secret]", last)
 	}
 }
 
@@ -77,7 +77,7 @@ func TestSetHeaderAppendsNew(t *testing.T) {
 // two-element string arrays (the wire tuple shape), not as an object.
 func TestSetHeaderTupleRoundTrip(t *testing.T) {
 	actions := []wire.AutomationAction{httpAction()}
-	out, err := setHeaderOnHTTPAction(actions, "X-Webhook-Token", "secret")
+	out, err := setHeaderOnHTTPAction(actions, "X-Token", "secret")
 	if err != nil {
 		t.Fatalf("setHeaderOnHTTPAction: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestSetHeaderTupleRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal: %v", err)
 	}
-	if got := string(raw); !strings.Contains(got, `"headers":[["X-Webhook-Token","secret"]]`) {
+	if got := string(raw); !strings.Contains(got, `"headers":[["X-Token","secret"]]`) {
 		t.Errorf("serialized headers = %s, want [name,value] tuple array", got)
 	}
 }
