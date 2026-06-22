@@ -232,6 +232,7 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewProtectChimeResource,
 		NewProtectViewerResource,
 		NewProtectLiveviewResource,
+		NewProtectAutomationResource,
 		// Access app (c.Access()…) — private web-UI API over the one cookie session.
 		// All Access write surfaces are reverse-engineered and HIL-unverified (no
 		// live Access console; X-API-KEY is Network-only) — see TODO.md.

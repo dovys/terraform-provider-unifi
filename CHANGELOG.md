@@ -10,6 +10,17 @@ and the provider is **not** published to the Terraform Registry — releases shi
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
 
+## 2026-06-22
+
+### Added
+
+- **`unifi_protect_automation`** — manage one webhook header on an existing
+  Protect automation's sole `HTTP_REQUEST` action (issue #117), for a rotating
+  write-only auth header sourced from a secret manager (rotate via `-replace`).
+  Import/update-only by `<id>/<header_name>` (the automation is created in-app);
+  `destroy` is state-removal only — the route has no per-id delete (`DELETE`
+  wipes all automations). **Writes are HIL-unverified.**
+
 ## 2026-06-09
 
 ### Added

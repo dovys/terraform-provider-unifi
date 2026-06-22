@@ -91,6 +91,11 @@ A resource is checkable only when it meets the Definition of Done ([development.
         surface; `forget_on_destroy` unadopts). **All HIL-unverified** (no live device on the recon
         console — see `TODO.md`); chime per-doorbell `ringSettings` deferred (references unmodeled
         ringtone objects).
+  - [x] **P5c — automation webhook header (issue #117):** `unifi_protect_automation` manages one
+        webhook header on an existing automation's sole `HTTP_REQUEST` action. Import/update-only
+        (created in-app), `header_value` write-only, list-then-filter Read + batch-`PATCH` write (no
+        per-id route; `DELETE` wipes all automations so destroy is state-removal). Needs the
+        `automation` codegen root in `unifi-specs`. **HIL-unverified.**
 - [x] **P7** Access app (`unifi_access_*`): design ([apps/access.md](apps/access.md)). Access ships only an
       Integration-API openapi (wrong surface); the private web-UI API is reverse-engineered from the Access
       Go binary (`../unifi-specs/access/v4.2.27`), so fidelity is lower than Protect's vendor OpenAPI and the

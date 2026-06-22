@@ -33,7 +33,9 @@ captures them** (this doc is updated then, with the per-resource field tables).
 > shipped Protect OpenAPI). Resources: `unifi_protect_camera` (+ `data.unifi_protect_camera`) and
 > `unifi_protect_nvr_settings` (P5a); `unifi_protect_light`, `unifi_protect_sensor`,
 > `unifi_protect_chime`, `unifi_protect_viewer` (configure-existing, keyed by MAC), and
-> `unifi_protect_liveview` (full CRUD; `slots` as a nested block) (P5b). **No `api_key`, one session.**
+> `unifi_protect_liveview` (full CRUD; `slots` as a nested block) (P5b);
+> `unifi_protect_automation` (manage a webhook header on an existing automation; write-only token).
+> **No `api_key`, one session.**
 > **Config writes are HIL-unverified** (recon is read-only — see [`../../TODO.md`](../../TODO.md)); the
 > liveview `slots` shape and chime `ringSettings` (deferred) await a live/HIL capture.
 
@@ -54,6 +56,7 @@ nvr_settings is a singleton. All over `/proxy/protect/api/...`; field schemas pe
 | `unifi_protect_sensor` | `/proxy/protect/api/sensors/<id>` | UP-Sense: motion/temp/humidity/leak thresholds, mount type. **HIL.** |
 | `unifi_protect_chime` | `/proxy/protect/api/chimes/<id>` | Chime: volume, paired-doorbell associations, ringtones. **HIL.** |
 | `unifi_protect_viewer` | `/proxy/protect/api/viewers/<id>` | Viewport: the liveview it displays. **HIL.** |
+| `unifi_protect_automation` | `/proxy/protect/api/automations` | Manages one webhook header on an existing automation's sole `HTTP_REQUEST` action. Import/update-only (created in-app); `destroy` is state-removal (no per-id delete — `DELETE` wipes all automations); `header_value` write-only. **HIL.** |
 
 **Data sources.** Only `data.unifi_protect_camera` ships initially (the object most likely referenced
 without being managed). Add `liveview`/`nvr` data sources later if asked.

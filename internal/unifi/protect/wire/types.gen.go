@@ -58,6 +58,72 @@ func (e AirQualityStatStatus) Valid() bool {
 	}
 }
 
+// Defines values for AutomationActionType.
+const (
+	ALARMINTEGRATION  AutomationActionType = "ALARM_INTEGRATION"
+	HTTPREQUEST       AutomationActionType = "HTTP_REQUEST"
+	OPENDOOR          AutomationActionType = "OPEN_DOOR"
+	PLAYBUZZER        AutomationActionType = "PLAY_BUZZER"
+	PLAYSIREN         AutomationActionType = "PLAY_SIREN"
+	PLAYSPEAKER       AutomationActionType = "PLAY_SPEAKER"
+	PLAYTEXTONSPEAKER AutomationActionType = "PLAY_TEXT_ON_SPEAKER"
+	PTZ               AutomationActionType = "PTZ"
+	SENDNOTIFICATION  AutomationActionType = "SEND_NOTIFICATION"
+	SENDSLACKMESSAGE  AutomationActionType = "SEND_SLACK_MESSAGE"
+	SETLIGHT          AutomationActionType = "SET_LIGHT"
+	SETSETTINGS       AutomationActionType = "SET_SETTINGS"
+)
+
+// Valid indicates whether the value is a known member of the AutomationActionType enum.
+func (e AutomationActionType) Valid() bool {
+	switch e {
+	case ALARMINTEGRATION:
+		return true
+	case HTTPREQUEST:
+		return true
+	case OPENDOOR:
+		return true
+	case PLAYBUZZER:
+		return true
+	case PLAYSIREN:
+		return true
+	case PLAYSPEAKER:
+		return true
+	case PLAYTEXTONSPEAKER:
+		return true
+	case PTZ:
+		return true
+	case SENDNOTIFICATION:
+		return true
+	case SENDSLACKMESSAGE:
+		return true
+	case SETLIGHT:
+		return true
+	case SETSETTINGS:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AutomationSourceType.
+const (
+	Exclude AutomationSourceType = "exclude"
+	Include AutomationSourceType = "include"
+)
+
+// Valid indicates whether the value is a known member of the AutomationSourceType enum.
+func (e AutomationSourceType) Valid() bool {
+	switch e {
+	case Exclude:
+		return true
+	case Include:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for BridgeFwUpdateState.
 const (
 	BridgeFwUpdateStateDownloading     BridgeFwUpdateState = "downloading"
@@ -2922,6 +2988,147 @@ type AlarmSensorSettings struct {
 type AudioSettings struct {
 	// Style What audio style camera is using
 	Style *[]interface{} `json:"style"`
+}
+
+// Automation defines model for automation.
+type Automation struct {
+	// Actions A list of automation actions
+	Actions []AutomationAction `json:"actions"`
+
+	// Conditions Conditions of automation sources
+	Conditions []AutomationCondition `json:"conditions"`
+
+	// Cooldown Cooldown settings of automation
+	Cooldown AutomationCooldown `json:"cooldown"`
+
+	// CreatedAt Automation creation time
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Deleted Soft delete automation
+	Deleted bool `json:"deleted"`
+
+	// Editable DEPRECATED: Is automation can be edited
+	Editable bool `json:"editable"`
+
+	// Enable Is automation enabled
+	Enable bool `json:"enable"`
+
+	// GlobalId Global ID of automation
+	GlobalId *string `json:"globalId"`
+
+	// HistoryConditions History conditions of automation sources (history look back period, AND conditions)
+	HistoryConditions []AutomationHistoryCondition `json:"historyConditions"`
+	Id                string                       `json:"id"`
+
+	// IsBlockedByArmMode Is automation blocked by arm mode
+	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
+
+	// IsCreatedBySystem DEPRECATED: Is automation created by system
+	IsCreatedBySystem bool `json:"isCreatedBySystem"`
+
+	// IsExternal Is automation from external UOS automation manager
+	IsExternal *bool  `json:"isExternal"`
+	ModelKey   string `json:"modelKey"`
+
+	// Name Name of automation
+	Name string `json:"name"`
+
+	// Schedules Schedules of automation sources
+	Schedules []AutomationSchedule `json:"schedules"`
+
+	// Sources A list of automation sources
+	Sources []AutomationSource `json:"sources"`
+	Status  AutomationStatus   `json:"status"`
+
+	// UsedInArmMode Is automation used in arm mode
+	UsedInArmMode *bool `json:"usedInArmMode"`
+
+	// User Creator of automation
+	User *string `json:"user"`
+}
+
+// AutomationAction defines model for automation.action.
+type AutomationAction struct {
+	// Action Action for automation manager
+	Action *string `json:"action"`
+
+	// Metadata Action metadata for automation manager
+	Metadata *map[string]interface{} `json:"metadata"`
+
+	// Order Order of action in automation manager, -1 means order of actions is not important
+	Order *float64 `json:"order"`
+
+	// Type Action type for automation manager
+	Type *AutomationActionType `json:"type"`
+}
+
+// AutomationActionType Action type for automation manager
+type AutomationActionType string
+
+// AutomationCondition defines model for automation.condition.
+type AutomationCondition struct {
+	// Condition Conditions of automation manager
+	Condition *map[string]interface{} `json:"condition"`
+}
+
+// AutomationCooldown defines model for automation.cooldown.
+type AutomationCooldown struct {
+	// Enable Is automation cooldown enabled
+	Enable *bool `json:"enable"`
+
+	// LastExecutedAt Last executed at timestamp
+	LastExecutedAt *float64 `json:"lastExecutedAt"`
+
+	// Timeout Default cooldown timeout of automation. Default - 600000
+	Timeout *float64 `json:"timeout"`
+}
+
+// AutomationHistoryCondition defines model for automation.historyCondition.
+type AutomationHistoryCondition struct {
+	// Conditions History conditions of automation manager
+	Conditions *[]interface{} `json:"conditions"`
+
+	// Period Period to look back for history conditions in milliseconds
+	Period *float64 `json:"period"`
+}
+
+// AutomationSchedule defines model for automation.schedule.
+type AutomationSchedule struct {
+	// Schedule Schedule of automation manager
+	Schedule *map[string]interface{} `json:"schedule"`
+}
+
+// AutomationSource defines model for automation.source.
+type AutomationSource struct {
+	// Buttons Buttons of automation source
+	Buttons *[]interface{} `json:"buttons"`
+
+	// Device Source device for automation manager
+	Device *string `json:"device"`
+
+	// Type Type of import of source device
+	Type *AutomationSourceType `json:"type"`
+
+	// Zones Included zones of automation source
+	Zones *map[string]interface{} `json:"zones"`
+}
+
+// AutomationSourceType Type of import of source device
+type AutomationSourceType string
+
+// AutomationStatus defines model for automation.status.
+type AutomationStatus struct {
+	// LastDetectionEventId Last detection eventId of automation executions in last 24h
+	LastDetectionEventId *string `json:"lastDetectionEventId"`
+
+	// LastExecutedAt Last timestamp of automation executions in last 24h
+	LastExecutedAt *float64 `json:"lastExecutedAt"`
+
+	// LastExecutedState Missing description
+	LastExecutedState *string `json:"lastExecutedState"`
+
+	// Total Total count of automation executions in last 24h
+	Total *float64 `json:"total"`
 }
 
 // BluetoothConnectionState defines model for bluetoothConnectionState.

@@ -137,3 +137,22 @@ resource "unifi_protect_viewer" "lobby_tv" {
   name     = "Lobby TV"
   liveview = unifi_protect_liveview.lobby.id
 }
+
+# Manage the auth header on an existing automation's HTTP_REQUEST webhook
+# (created in the Protect UI). Import by `<automation_id>/<header_name>`; the
+# token comes from a secret manager and is write-only (never stored in state).
+# Write-only values are undiffed, so rotate the token with `apply -replace`.
+import {
+  to = unifi_protect_automation.webhook
+  id = "665f1a2b3c4d5e6f70819293/X-Token"
+}
+
+resource "unifi_protect_automation" "webhook" {
+  header_name  = "X-Token"
+  header_value = var.webhook_token # write-only; from Vault/SOPS/etc.
+}
+
+variable "webhook_token" {
+  type      = string
+  sensitive = true
+}

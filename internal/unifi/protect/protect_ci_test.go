@@ -218,3 +218,77 @@ func TestLiveviewGetByName(t *testing.T) {
 		t.Errorf("id = %q, want lv2", lv.Id)
 	}
 }
+
+// TestAutomationGetListFilters confirms Get reads the list route and filters by
+// id (there is no per-id route), and that a missing id maps to ErrNotFound.
+func TestAutomationGetListFilters(t *testing.T) {
+	f := &fakeDoer{resp: okJSON(`[{"id":"a1","name":"webhook"},{"id":"a2","name":"Motion"}]`)}
+	c := newTestClient(f)
+
+	auto, err := c.Automations().Get(context.Background(), "a2")
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if f.method != http.MethodGet || f.path != "/proxy/protect/api/automations" {
+		t.Errorf("Get = %s %s, want GET /proxy/protect/api/automations", f.method, f.path)
+	}
+	if auto.Id != "a2" {
+		t.Errorf("id = %q, want a2", auto.Id)
+	}
+	if _, err := c.Automations().Get(context.Background(), "missing"); err != ErrNotFound {
+		t.Errorf("absent id err = %v, want ErrNotFound", err)
+	}
+}
+
+// TestAutomationUpdateBatchEnvelope asserts Update wraps the overlay in the
+// one-element batch array, PATCHes the collection path (no id suffix), and
+// decodes the 207 {status,response} envelope into the inner automation.
+func TestAutomationUpdateBatchEnvelope(t *testing.T) {
+	f := &fakeDoer{resp: &transport.Response{
+		StatusCode: http.StatusMultiStatus,
+		Body:       []byte(`[{"status":200,"response":{"id":"a1","name":"webhook"}}]`),
+	}}
+	type overlay struct {
+		Actions []interface{} `json:"actions"`
+	}
+	got, err := newTestClient(f).Automations().Update(context.Background(), "a1", overlay{Actions: []interface{}{}})
+	if err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+	if f.method != http.MethodPatch || f.path != "/proxy/protect/api/automations" {
+		t.Errorf("Update = %s %s, want PATCH /proxy/protect/api/automations", f.method, f.path)
+	}
+	if got.Id != "a1" {
+		t.Errorf("decoded inner automation id = %q, want a1", got.Id)
+	}
+	// The request body must be the batch array: [{id, body:{...}}].
+	raw, _ := json.Marshal(f.body)
+	if !strings.Contains(string(raw), `"id":"a1"`) || !strings.Contains(string(raw), `"body"`) {
+		t.Errorf("batch request body = %s, want [{id,body}] envelope", raw)
+	}
+}
+
+// TestAutomationUpdateInnerStatusError surfaces a non-200 inner status (the 207
+// envelope can report a per-item failure under an overall 207).
+func TestAutomationUpdateInnerStatusError(t *testing.T) {
+	f := &fakeDoer{resp: &transport.Response{
+		StatusCode: http.StatusMultiStatus,
+		Body:       []byte(`[{"status":400,"response":{"id":"a1"}}]`),
+	}}
+	type overlay struct {
+		Actions []interface{} `json:"actions"`
+	}
+	if _, err := newTestClient(f).Automations().Update(context.Background(), "a1", overlay{}); err == nil {
+		t.Fatal("inner status 400: want error, got nil")
+	}
+}
+
+func TestAutomationUpdateRequiresID(t *testing.T) {
+	f := &fakeDoer{resp: okJSON(`[]`)}
+	if _, err := newTestClient(f).Automations().Update(context.Background(), "", struct{}{}); err == nil {
+		t.Fatal("Update with empty id: want error, got nil")
+	}
+	if f.method != "" {
+		t.Errorf("empty-id Update must not hit the wire, method = %q", f.method)
+	}
+}
