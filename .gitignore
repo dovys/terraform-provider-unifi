@@ -39,7 +39,7 @@ unifi-inventory.json
 /re/
 
 # Claude Code local working dir — track shared skills/commands, ignore the rest
-# (worktrees, local settings, scratch). Mirrors the convention in ../infra.
+# (worktrees, local settings, scratch).
 .claude/*
 !.claude/skills/
 !.claude/commands/
