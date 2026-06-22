@@ -37,7 +37,7 @@ jobs:
     steps:
       # Runs with contents:write + (when set) the GPG key in memory. GitHub's own
       # actions ride floating major tags (we trust them); 3rd-party are SHA-pinned.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0          # full history + tags for the bump topology + version calc
 

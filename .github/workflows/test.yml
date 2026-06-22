@@ -27,7 +27,7 @@ jobs:
       # GitHub's own actions (actions/*) ride floating major tags — we trust them.
       # 3rd-party actions stay SHA-pinned (a mutable tag there is a supply-chain
       # risk); Dependabot bumps the SHA + version comment together.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # First (needs only the checkout) so the secret-leak guard isn't hidden
       # behind a later build failure.
