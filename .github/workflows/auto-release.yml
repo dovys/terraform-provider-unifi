@@ -35,6 +35,11 @@ jobs:
     runs-on: self-hosted
     container:
       image: ghcr.io/actions/actions-runner:latest
+    # In a container job GitHub's default `run` shell is `sh` (dash), which lacks
+    # `set -o pipefail`; force bash so the steps' strict-mode prelude works.
+    defaults:
+      run:
+        shell: bash
     env:
       HAS_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY != '' }}
       # Release never re-resolves modules; -mod=readonly fails on a stale/tampered graph.
