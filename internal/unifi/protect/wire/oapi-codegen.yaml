@@ -11,3 +11,12 @@ generate:
   models: true
 output-options:
   skip-prune: true
+  # The controller returns `date-time` fields as epoch-millis numbers, RFC 3339
+  # strings, or null, inconsistently per field; plain time.Time rejects the
+  # numeric form and one bad field fails the whole decode. FlexTime (flextime.go)
+  # accepts all three. No import — it's in this same `wire` package.
+  type-mapping:
+    string:
+      formats:
+        date-time:
+          type: FlexTime

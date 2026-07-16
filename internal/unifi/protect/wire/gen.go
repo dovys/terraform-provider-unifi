@@ -22,5 +22,9 @@
 // components, into a temp file — then codegens from that. The committed spec
 // stays canonical 3.1; only this focused projection feeds codegen.
 //
-//go:generate sh -c "uv run ../../../../../unifi-specs/tools/protect_codegen_spec.py ../../../../../unifi-specs/protect/v7.1.69/openapi.yaml /tmp/protect-codegen.yaml && go tool oapi-codegen -config oapi-codegen.yaml /tmp/protect-codegen.yaml"
+// The roots are listed explicitly (not left to the projector's defaults): they
+// are exactly the resources this provider models, and an omission silently drops
+// a resource's types on regen instead of erroring.
+//
+//go:generate sh -c "uv run ../../../../../unifi-specs/tools/protect_codegen_spec.py ../../../../../unifi-specs/protect/v7.1.69/openapi.yaml /tmp/protect-codegen.yaml camera liveview nvr light sensor chime viewer bridge speaker nvrUpdate chimeUpdate talkbackSettingsUpdate automation && go tool oapi-codegen -config oapi-codegen.yaml /tmp/protect-codegen.yaml"
 package wire
