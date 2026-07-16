@@ -55,15 +55,24 @@ want Terraform to adopt or configure; otherwise just use the resource.
 `mgmt_network_id` is the **management VLAN** an infrastructure device (switch/AP) uses for its own
 control-plane traffic — inform, adoption, telemetry. The device **802.1Q-tags that traffic** onto the
 referenced network's VLAN, so it reaches the controller and gets its management IP on **that subnet,
-regardless of the upstream switch port's untagged/native VLAN**. It serializes to the device document's
-`mgmt_network_id` key (a `networkconf` `_id`) and is **distinct from** the device's `config_network`
-object, which is only its IP-addressing *mode* (`dhcp`/`static`) and which this provider does not model.
+regardless of the upstream switch port's native VLAN — with one exception below**. It serializes to the
+device document's `mgmt_network_id` key (a `networkconf` `_id`) and is **distinct from** the device's
+`config_network` object, which is only its IP-addressing *mode* (`dhcp`/`static`) and which this
+provider does not model.
 
 This is why it interacts with `native_network_id` the way it does: a port's `native_network_id` governs
 only the **untagged** frames of an attached endpoint. An infra device with `mgmt_network_id` set *tags*
-its management frames, so it lands on the management VLAN even when the port it plugs into has a
-different native VLAN — e.g. an AP cabled to a downlink port whose native VLAN is `iot` still appears
-on the management subnet, because its inform traffic is tagged onto the management VLAN.
+its management frames, so it lands on the management VLAN even when the port has a different native VLAN
+— e.g. an AP on a downlink port whose native VLAN is `iot` still appears on the management subnet,
+because its inform traffic is tagged onto mgmt.
+
+**The exception — and it's a footgun: the port's native VLAN must not itself be the management VLAN.**
+A native VLAN is by definition the *untagged* one, so it is never part of the port's tagged set. Make
+the native VLAN equal to `mgmt_network_id`'s VLAN and the device's own tagged management frames are
+dropped — it loses adoption, fails DHCP on the management subnet, and strands itself on a self-assigned
+fallback address off every managed VLAN while (for an AP) still serving Wi-Fi from its last-known config,
+so nothing looks broken. On a `customize` trunk carrying tagged management, set `native_network_id` to a
+VLAN the device never tags — the unused default VLAN is the safe parking slot.
 
 ## Why merge `port_overrides`, and ports as a Map
 

@@ -101,20 +101,23 @@ func (r *portProfileResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Validators: []validator.String{stringvalidator.OneOf("all", "native", "customize", "disabled")},
 			},
 			"native_network_id": optStr("Native (untagged) network (`unifi_network_network` id): frames arriving without a " +
-				"VLAN tag are placed on this network, and this network egresses untagged. On an access port it's the port's VLAN."),
+				"VLAN tag are placed on this network, and this network egresses untagged. On an access port it's the port's VLAN. " +
+				"**The native VLAN is never carried tagged** — even on a trunk — so a device that 802.1Q-tags this same VLAN " +
+				"(e.g. an access point tagging its own management onto it via `mgmt_network_id`) has those frames dropped. Never " +
+				"make a trunk's native VLAN the management VLAN its APs tag: they lose their management path and strand themselves."),
 			"tagged_vlan_mgmt": schema.StringAttribute{
 				Optional: true,
 				Computed: true,
 				MarkdownDescription: "Which tagged VLANs the port trunks: `auto` (Allow All — every VLAN created in UniFi), " +
-					"`block_all` (Access Port — only the untagged `native_network_id` passes), or `custom` (trunk all VLANs " +
-					"*except* those listed in `excluded_network_ids`).",
+					"`block_all` (Access Port — only the untagged `native_network_id` passes), or `custom` (trunk every VLAN " +
+					"*except* the untagged native VLAN and those listed in `excluded_network_ids`).",
 				Validators: []validator.String{stringvalidator.OneOf("auto", "block_all", "custom")},
 			},
 			"excluded_network_ids": schema.SetAttribute{
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
-				MarkdownDescription: "Tagged networks (`unifi_network_network` ids) to **block** on the trunk when `tagged_vlan_mgmt = custom`; every other VLAN is allowed through.",
+				MarkdownDescription: "Tagged networks (`unifi_network_network` ids) to **block** on the trunk when `tagged_vlan_mgmt = custom`. Every VLAN except these *and the untagged native VLAN* is carried tagged — the native VLAN is never in the tagged set.",
 			},
 			"voice_network_id": optStr("Voice VLAN network (`unifi_network_network` id): a second tagged VLAN for VoIP phones, " +
 				"advertised to them via LLDP-MED so voice traffic is separated from the data VLAN."),
