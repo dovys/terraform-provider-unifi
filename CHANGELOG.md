@@ -10,6 +10,17 @@ and the provider is **not** published to the Terraform Registry — releases shi
 as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
 below predate the date-based convention.
 
+## 2026-10-25
+
+### Security
+
+- Clear every open `govulncheck` advisory: Go toolchain → `go1.26.10` (stdlib
+  GO-2026-6218/6090/5972/5026), `google.golang.org/grpc` → v1.84.0 (GO-2026-6061),
+  `golang.org/x/text` (GO-2026-5970), `kin-openapi` → v0.152.0 and
+  `oapi-codegen` → v2.8.1 (Dependabot alerts); also `terraform-plugin-log`
+  v0.11.0, `oapi-codegen/runtime` v1.8.0, `x/time` v0.16.0. Supersedes Dependabot #130–#137,
+  which each failed CI on the advisories the others fixed.
+
 ## 2026-06-22
 
 ### Added
