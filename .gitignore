@@ -28,13 +28,11 @@ test/hil/secrets.env
 # Live network snapshot — local acceptance fixture only (real MACs/IPs); never commit
 unifi-inventory.json
 
-# Reverse-engineering captures — raw API dumps (real MACs/IPs/secrets); never
-# commit. Redact via scripts/redact-capture.py before sharing (docs/reverse-engineering.md).
+# Raw API captures (real MACs/IPs/secrets); never commit. Redact with
+# scripts/redact-capture.py before sharing.
 /re-captures/
 
-# Reverse-engineering scratch space — vendor binaries/firmware, decompiled
-# source, notes, any RE working files. Dumping ground; never commit (both the
-# dot and non-dot forms are covered).
+# Local API-discovery scratch space (notes, working files); never commit.
 /.re/
 /re/
 

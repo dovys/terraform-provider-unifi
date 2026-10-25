@@ -1,82 +1,76 @@
 # TODO
 
-Tracked improvements that aren't blocking a phase. Phase-scoped work lives in
-[`docs/roadmap.md`](docs/roadmap.md); cross-cutting polish lives here.
+Open work that isn't a roadmap phase. Phases, deferred resources and design questions live in [`docs/roadmap.md`](docs/roadmap.md). Test tiers are described in [`docs/testing.md`](docs/testing.md). Below, "live write run" means the W0–W2 rungs of `./test-hil.sh write` against a live console, and "W3 rig" means a disposable controller and devices.
+
+## Known bugs
+
+- `unifi_network_wan_sla`: the provider sends the monitor `type` in lowercase (`icmp`), but the API accepts only `ICMP`, `DNS` and `SPEED_LIMIT`. Fix the validator and wire value, then un-skip `test/acc/wan_sla_acc_test.go`.
+- `unifi_network_wan`: an update PUT returns `api.err.InvalidPayload` for any field. The Tier-2 test skips the update step until this is fixed.
 
 ## Verify against hardware
 
-The additive **write-verification** tier ([`docs/testing.md`](docs/testing.md)
-§"Write verification") has been run against the live console — W0 (control-plane
-data), W1 (gateway-inert), W2 (AP/switch) — so every Network resource reachable
-by a safe create-and-drop is now **HIL-confirmed** end-to-end (create → update →
-import → second-empty-plan → destroy, clean): firewall groups, user groups,
-RADIUS profiles/accounts (the `x_password` write-only round-trip included), DNS
-records, DHCP reservations, static routes, port forwards, traffic rules/routes,
-firewall rules, port profiles, WLAN/AP groups, and a Protect liveview.
+<!-- docs/testing.md and test/hil/README.md link to this heading by name. -->
 
-What's left genuinely needs hardware this network doesn't have, so it is **not
-tracked field-by-field here** — the resource schemas carry an `HIL-unverified`
-note and the deferred phases live in [`docs/roadmap.md`](docs/roadmap.md). Each
-gap unlocks only with the matching hardware:
+These writes ship but have not been confirmed on real hardware. Their schemas should carry the `HIL-unverified` marker; *Schema text* below tracks the gaps.
 
-- **a real AP MAC + a write-tier run** — `unifi_network_client_ap_lock` (new,
-  issue #82) is the one Network write not yet HIL-confirmed: verify the sparse
-  `fixed_ap_*` PUT pins the client and leaves a coexisting reservation's
-  `fixed_ip` intact, that re-pinning `ap_mac` takes effect, and that destroy
-  (`fixed_ap_enabled=false`) clears the lock without forgetting the client;
-- **a disposable gateway/switch rig** — device adopt/forget + config PUT, the
-  `device.state` enum, and `unifi_network_settings` write semantics, and dynamic
-  DNS. (The `port_overrides` write→read-back contract — which fields the controller
-  stores verbatim vs derives — is verified; see `RestoreConfiguredScalars`.)
-- **a live controller write-tier run** — `unifi_network_mdns` (new, issue #91):
-  confirm the v2 `global/config/network` PUT is **replace-style** as the spec
-  notes (the resource GET-merges and PUTs the whole doc, so the required IGMP
-  fields must survive a mDNS-only change), that `some` + `network_ids` actually
-  scopes the reflector, and that the GET shape matches `wire.Global`
-  (decompiled DTO — field types unverified against a live response);
-- **a CyberSecure-licensed gateway** for `unifi_network_threat_management` — the
-  enabled (non-`disabled`) write path is unverified. Confirmed live (UCG Max, no
-  active subscription): the controller lists the `IPS` feature and accepts a
-  `set/setting/ips` write with HTTP 200 but silently keeps `ips_mode="disabled"`
-  and forces `enabled_categories` to `[]`; even the gateway-less Tier-2 controller
-  behaves the same. So the resource gates on the `IPS` capability (plan) + verifies
-  the mode took (apply). Still to verify on a licensed console: that `ips_mode`
-  (`ids`/`ips`/`ipsInline`) + `enabled_categories` actually round-trip, that
-  setting categories with `mode="disabled"` is accepted (it is NOT on an unlicensed
-  console), and that the per-network `honeypot` array survives the shallow merge.
-  NB the live `ips` doc also carries server-managed fields the spec omits
-  (`utm_token`, `ad_blocking_enabled`, `dns_filtering`, `endpoint_scanning`) — left
-  unmodeled per the spec's writable set; reconfirm none are practitioner-writable;
-- **a zone-firewall controller** — `firewall_zone` / `firewall_policy` (the recon
-  console runs the mutually-exclusive classic firewall);
-- **a VPN-configured gateway** — `vpn_server` / `vpn_client` and BGP;
-- **Protect write access / a live Access console** — the Protect camera/NVR +
-  light/sensor/chime/viewer PATCH paths (and wiring the per-camera capability
-  gate), and the RE'd `access_*` write surface (door groups, policies, holidays,
-  doors, guards).
+### Network
 
-## Settings — grow `unifi_network_settings` key coverage
+- `unifi_network_client_ap_lock` (#82). Needs: live write run with a real AP. No Tier-2 test exists, since the Docker controller has no AP. Confirm:
+  - the controller accepts an unadopted `ap_mac` (check before writing one);
+  - the sparse `fixed_ap_*` PUT pins the client and leaves a coexisting reservation's `fixed_ip` intact;
+  - re-pinning `ap_mac` takes effect;
+  - destroy (`fixed_ap_enabled = false`) clears the lock without forgetting the client.
+- `unifi_network_mdns` (#91). Needs: live write run. The v2 `global/config/network` PUT replaces the whole document, so the resource GET-merges before writing. Tier 2 covers the lifecycle. Confirm:
+  - the required IGMP fields survive an mDNS-only change;
+  - `mode = "some"` with `network_ids` scopes the reflector;
+  - the live GET matches `wire.Global`.
+- `unifi_network_threat_management` (#90). Needs: CyberSecure-licensed gateway. Without a subscription the controller keeps `ips_mode = "disabled"` and empties `enabled_categories`, so only the disabled path is verified. Confirm:
+  - `ips_mode` (`ids`, `ips`, `ipsInline`) and `enabled_categories` round-trip;
+  - whether categories are accepted while `ips_mode = "disabled"`;
+  - the per-network `honeypot` array survives the shallow merge;
+  - the unmodeled `utm_token`, `ad_blocking_enabled`, `dns_filtering` and `endpoint_scanning` fields are server-managed.
 
-`unifi_network_settings` ships: one resource whose sections are managed à la
-carte, an **optional nested block per `setting/<key>`** (a null block is
-unmanaged — Read/apply touch only declared blocks, so managing one key never
-pulls another into state). It rides the dedicated settings verbs (`GET
-get/setting/<key>`, `POST set/setting/<key>`) — *not* `/rest` — and writes
-shallow-merge the configured fields over the stored section so unmodeled fields
-survive. The generic JSON-blob `unifi_network_setting` was **rejected** as a
-smell (it abandons typed attributes + controller-mirroring validators); the
-typed-block model keeps both.
+### Protect
 
-Shipped keys: `ntp`, `country`, `locale`. The `ips` key ships separately as the
-dedicated `unifi_network_threat_management` resource (IDS/IPS is a large enough
-surface — mode, category set, the engine flags — to warrant its own typed
-resource rather than a `network_settings` block); likewise the mDNS reflector
-scope is its own `unifi_network_mdns` resource (v2 `global/config/network`, not a
-`setting/<key>` block). Remaining (high-value first): `mgmt`, `guest_access`,
-`global_switch`, `global_ap`, `radius`. Long-tail
-/ niche keys (`snmp`, `netflow`, `radio_ai`, `rsyslogd`, `dpi`, `teleport`,
-`baresip`, `lcm`, `usg`, `doh`, …) are added on demand; the `super_*` (console-
-internal) and `porta` (hardware-only) keys are out of scope. Each new key is one
-`settingKeyHandler` table entry + its schema block; secrets (`x_*`) get
-`Sensitive`, and confirm the key's live GET field set + shallow-merge semantics
-as it's added.
+- Camera capability gate. Needs: live console with cameras. Confirm `ModifyPlan` rejects a feature on a camera without the HDR, mic, status-LED, smart-detect or doorbell-LCD flag. Only the positive case has been seen.
+- `unifi_protect_liveview`. Needs: live write run. W0 confirmed a liveview with no slots; confirm the slot shape (cameras and cycle settings).
+- `unifi_protect_automation` (#117). Needs: live write run. Confirm the batch PATCH of the sole `HTTP_REQUEST` action's header and the list-then-filter Read.
+
+### Access
+
+`unifi_access_door_group`, `unifi_access_policy`, `unifi_access_holiday_group`, `unifi_access_door` and `unifi_access_door_guard` are built from the API spec and have never run against a live console. Needs: live Access console. Confirm:
+
+- the CRUD paths, the success codes in the `{code, msg, data}` envelope, and the `/door_ids` response shape;
+- `unifi_access_door` `floor_name` and `unifi_access_policy` `schedule_id` and `resources`, which the read view doesn't echo, so refresh can't detect drift on them.
+
+### W3 rig
+
+These mutate shared state or have an outward effect, so they wait for a W3 rig (see the W3 row in [`docs/testing.md`](docs/testing.md)).
+
+- `unifi_network_device`: adopt and forget via `/cmd/devmgr`, the config PUT, the `device.state` enum, and `port_overrides` writes, including the accepted `poe_mode` values.
+- `unifi_network_network`: create and update a real, non-inert network.
+- `unifi_network_wlan`: create and update an enabled SSID.
+- `unifi_network_settings`: write semantics.
+- `unifi_network_dynamic_dns`: covered by Tier 2, never written on hardware.
+- Protect devices (camera, light, sensor, chime, viewer): the config PATCH paths, and unadopt through `forget_on_destroy`.
+- `unifi_protect_nvr_settings`: writes.
+
+### Open questions
+
+These need a live controller; the [roadmap](docs/roadmap.md) open questions have detail.
+
+- `unifi_network_wan`: whether `wan_type` and `network_group` change in place or need `RequiresReplace`.
+- Sparse PUT: how to clear an owned `omitempty` field.
+
+### Schema text
+
+- `unifi_network_client_ap_lock`, `unifi_network_mdns` and `unifi_network_wan_sla` lack the `HIL-unverified` marker, and `unifi_network_threat_management` words it differently. The `wan_sla` text should also flag the `type` casing bug.
+- `unifi_protect_liveview` marks the whole resource `HIL-unverified`; narrow it to slots.
+
+## Settings keys
+
+`unifi_network_settings` ships `ntp`, `country` and `locale`. Next, highest value first: `mgmt`, `guest_access`, `global_switch`, `global_ap`, `radius`.
+
+Long tail, added on request: `snmp`, `netflow`, `radio_ai`, `rsyslogd`, `dpi`, `teleport`, `baresip`, `lcm`, `usg`, `doh` and others. Out of scope: `super_*` (console-internal) and `porta` (hardware-only).
+
+To add a key: write one `settingKeyHandler` entry and its schema block in `internal/provider/network_settings_resource.go`, mark `x_*` fields `Sensitive`, and confirm the key's live GET field set and shallow-merge behavior.
