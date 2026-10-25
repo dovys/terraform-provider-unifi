@@ -80,6 +80,25 @@ before merging.
   included. There's no skip path and no path filter (simple = solid); a docs-only
   merge ships a patch with refreshed artifacts. So don't push trivia straight to
   `main` you don't want tagged.
+- **Dependabot Go-module minor/patch PRs auto-merge** once `test` is green
+  (`dependabot-automerge.yml`, squash → patch release). A `GITHUB_TOKEN` merge fires
+  no push event, so it dispatches `auto-release` itself. Majors, github-actions bumps
+  (`GITHUB_TOKEN` can't merge workflow-file edits), and any PR with a non-Dependabot
+  commit wait for review. Dependabot never raises the go.mod `toolchain`, so a new
+  **stdlib** advisory turns every Dependabot PR red until a human bumps it.
+- **Already-released HEAD fails the release** rather than double-tagging. If
+  GoReleaser fails after the tag push, delete the tag (`git push origin :refs/tags/vX.Y.Z`)
+  and re-run.
+
+### Self-hosted runner
+
+`auto-release` is the only job on the self-hosted `self-hosted` runner; PR checks run
+GitHub-hosted. A `pull_request` run executes the **PR's own** workflow files, so a
+fork can set `runs-on: self-hosted` — YAML can't keep it off. The boundary is the org
+runner group, which an org admin must configure **before the repo is public**:
+selected repositories → this repo only; selected workflows →
+`<org>/terraform-provider-unifi/.github/workflows/auto-release.yml@refs/heads/main`.
+Also set Actions → *Require approval for all external contributors*.
 - The bump is decided **purely from git topology** — no PR API (its commit→PR
   association lags and once mis-bumped a minor to a patch), no labels, no commit
   strings. A `next → main` **merge commit** (its `HEAD^2` is contained in `next`) →
@@ -135,8 +154,8 @@ Reproduce the whole set locally with **`make check`**:
   (`github-actions`) bumps the SHA + comment together and floats the `actions/*`
   majors. To roll a pinned action by hand, resolve tag → SHA with
   `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`.
-- **Tier-2 stack images pinned by digest** (`test/tier2/compose.yaml`: Mongo,
-  controller, nginx bridge) — refresh deliberately with
+- **Images pinned by digest** (`test/tier2/compose.yaml`: Mongo, controller,
+  nginx bridge; the release job's runner container) — refresh deliberately with
   `docker buildx imagetools inspect <image>:<tag> --format '{{.Manifest.Digest}}'`.
 - **Release build is `-mod=readonly` with no `go mod tidy`** — a tampered or
   stale module graph fails the build instead of being silently rewritten while a

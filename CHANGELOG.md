@@ -21,6 +21,13 @@ below predate the date-based convention.
   v0.11.0, `oapi-codegen/runtime` v1.8.0, `x/time` v0.16.0. Supersedes Dependabot #130–#137,
   which each failed CI on the advisories the others fixed.
 
+### Changed
+
+- CI: PR checks run GitHub-hosted; only the main-branch release stays on the
+  self-hosted runner (image digest-pinned, no persisted write token).
+- Dependabot Go-module minor/patch PRs auto-merge on green CI and cut a patch
+  release (7-day cooldown); majors are grouped separately for review.
+
 ## 2026-06-22
 
 ### Added

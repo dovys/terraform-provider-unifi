@@ -1,0 +1,57 @@
+name: dependabot-automerge
+
+# Squash-merges a green Dependabot Go-module minor/patch PR and releases it; see
+# docs/releasing.md. Never checks out PR code, so the write token never meets it.
+on:
+  workflow_run:
+    workflows: [test]
+    types: [completed]
+
+permissions:
+  contents: write       # merge
+  pull-requests: write  # merge
+  actions: write        # dispatch auto-release
+
+concurrency:
+  group: dependabot-automerge
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.actor.login == 'dependabot[bot]' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'dependabot/go_modules/')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      OWNER: ${{ github.repository_owner }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+    steps:
+      - name: Merge minor/patch bump
+        run: |
+          set -euo pipefail
+          pr="$(gh api "repos/$GH_REPO/pulls?state=open&base=main&head=$OWNER:$HEAD_BRANCH" \
+            --jq ".[] | select(.user.login == \"dependabot[bot]\" and .head.sha == \"$HEAD_SHA\") | .number")"
+          if [ -z "$pr" ]; then
+            echo "No open Dependabot PR at $HEAD_SHA (superseded or already merged)."; exit 0
+          fi
+          # Every commit must be Dependabot's: a human push onto its branch needs review.
+          others="$(gh api "repos/$GH_REPO/pulls/$pr/commits" --jq '[.[] | select(.author.login != "dependabot[bot]")] | length')"
+          if [ "$others" != 0 ]; then
+            echo "PR #$pr has non-Dependabot commits; leaving it for review."; exit 0
+          fi
+          # Dependabot records each bump's semver class in the commit trailer.
+          msg="$(gh api "repos/$GH_REPO/commits/$HEAD_SHA" --jq .commit.message)"
+          if grep -q 'update-type: version-update:semver-major' <<<"$msg"; then
+            echo "PR #$pr includes a major bump; leaving it for review."; exit 0
+          fi
+          # sha= refuses the merge if the branch moved after CI ran.
+          gh api -X PUT "repos/$GH_REPO/pulls/$pr/merge" -f merge_method=squash -f sha="$HEAD_SHA"
+          gh workflow run auto-release.yml --ref main
+          # 422 if the repo already auto-deletes merged branches.
+          gh api -X DELETE "repos/$GH_REPO/git/refs/heads/$HEAD_BRANCH" || true

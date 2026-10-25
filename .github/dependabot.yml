@@ -1,9 +1,6 @@
-# Weekly dependency updates (not daily — one batch per week keeps CI runs down).
-# Volume is controlled by GROUPING, not a PR cap: each ecosystem folds ALL its
-# bumps (major/minor/patch) into a SINGLE grouped PR, so a week yields at most two
-# PRs — one gomod, one github-actions. Groups are per-ecosystem, so the two can't
-# be merged further. If a breaking major ever blocks a grouped PR, close it and
-# `ignore` that one dependency (or split it out).
+# Weekly dependency updates, grouped per ecosystem. Minor+patch bumps share one
+# group PR, which dependabot-automerge.yml merges once CI is green (cutting a
+# patch release). Majors get their own group PR and wait for a human.
 # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 version: 2
 updates:
@@ -16,10 +13,17 @@ updates:
       timezone: Etc/UTC
     commit-message:
       prefix: deps
+    # A compromised release ships signed with no human look; most are yanked
+    # within days. Security updates ignore cooldown.
+    cooldown:
+      default-days: 7
     groups:
       gomod:
         patterns: ["*"]
-        update-types: [major, minor, patch]
+        update-types: [minor, patch]
+      gomod-major:
+        patterns: ["*"]
+        update-types: [major]
 
   # Keeps the 3rd-party action SHA pins fresh and flags new majors for GitHub's own
   # floating-tag actions/*.
@@ -35,4 +39,7 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
-        update-types: [major, minor, patch]
+        update-types: [minor, patch]
+      github-actions-major:
+        patterns: ["*"]
+        update-types: [major]

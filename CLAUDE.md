@@ -110,8 +110,10 @@ into `next` skip them and re-run at the `next → main` merge (run `make test` l
 Go to the **go.mod toolchain** (`go-version-file: go.mod`), not `stable`, so a new Go release can't void the
 build cache. **Supply-chain:** **3rd-party actions pinned to a full commit SHA** (GitHub's own `actions/*` ride
 a floating `@vN` major tag — trusted publisher, auto-patched) + service-container images pinned by **digest**;
-Dependabot bumps both **weekly**, grouping each ecosystem's bumps into one PR (no per-PR cap). The release build
-is `GOFLAGS=-mod=readonly` and runs **no** `go mod tidy`.
+Dependabot bumps both **weekly** (one minor+patch group PR per ecosystem, majors separate); green Go-module
+minor/patch PRs **auto-merge** and release (`dependabot-automerge.yml`). The release build
+is `GOFLAGS=-mod=readonly` and runs **no** `go mod tidy`. **PR checks never run on the self-hosted `self-hosted`
+runner** — only the main-branch release does (docs/releasing.md "Self-hosted runner").
 **CVE policy — we fix every advisory we find, even ones we didn't introduce.** No one else maintains this
 tree; a `govulncheck` finding (third-party **or** Go stdlib) is ours to clear in the same PR, never to
 ignore or suppress. Stdlib advisories are fixed by **raising the `go.mod` toolchain floor** (e.g.

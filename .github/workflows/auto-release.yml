@@ -18,6 +18,7 @@ name: auto-release
 on:
   push:
     branches: [main]
+  workflow_dispatch:      # dependabot-automerge.yml's merge fires no push event
 
 # Serialize so two quick merges can't race the tag; never cancel an uploading release.
 concurrency:
@@ -32,9 +33,11 @@ jobs:
     # Self-hosted self-hosted runner (ARC, containerMode: kubernetes). The minimal
     # runner pod has no toolchain, so the job declares a container + sets up Go
     # in-job (setup-go); GoReleaser and the GPG-import action bring their own.
+    # Never a PR: see docs/releasing.md "Self-hosted runner".
+    if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
     container:
-      image: ghcr.io/actions/actions-runner:latest
+      image: ghcr.io/actions/actions-runner:latest@sha256:e275409999c37162649aa050ca573f03eab2eabcb3a1e7fcc47548de6b4f9690
     # In a container job GitHub's default `run` shell is `sh` (dash), which lacks
     # `set -o pipefail`; force bash so the steps' strict-mode prelude works.
     defaults:
@@ -50,15 +53,24 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0          # full history + tags for the bump topology + version calc
+          # Build/test run dependency code; keep the write token out of .git/config.
+          persist-credentials: false
 
       # Decide the bump from git alone — no PR API, no merge-message parsing, so the
       # commit→PR association lag can't mis-bump. `next` is fetched so HEAD^2 (the
       # merged-in tip of a next→main merge) can be tested for membership in it.
       - name: Decide bump from git topology
         id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git fetch --no-tags origin next
+          if released="$(git tag --points-at HEAD 'v*')" && [ -n "$released" ]; then
+            echo "::error::HEAD is already released as ${released}; refusing to tag it again." >&2
+            exit 1
+          fi
+          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" \
+            fetch --no-tags origin next
           p2="$(git rev-parse -q --verify 'HEAD^2' || true)"   # empty unless HEAD is a merge
           if [ -n "$p2" ] && git merge-base --is-ancestor "$p2" origin/next; then
             bump=minor      # the next→main release merge — HEAD^2 is next's tip
@@ -143,12 +155,14 @@ jobs:
       - name: Create and push tag
         env:
           NEXT: ${{ steps.ver.outputs.next }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "${NEXT}" -m "Release ${NEXT}"
-          git push origin "refs/tags/${NEXT}"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c http.extraheader="AUTHORIZATION: basic ${auth}" push origin "refs/tags/${NEXT}"
 
       # Passphraseless key (a passphrase is dead weight in automation).
       - name: Import GPG key

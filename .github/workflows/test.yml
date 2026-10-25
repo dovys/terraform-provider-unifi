@@ -22,12 +22,8 @@ permissions:
 jobs:
   checks:
     name: checks
-    # Self-hosted self-hosted runner (ARC, containerMode: kubernetes). The minimal
-    # runner pod has no toolchain, so the job declares a container + sets up Go,
-    # golangci-lint and terraform in-job.
-    runs-on: self-hosted
-    container:
-      image: ghcr.io/actions/actions-runner:latest
+    # Never the self-hosted runner — see docs/releasing.md "Self-hosted runner".
+    runs-on: ubuntu-latest
     steps:
       # GitHub's own actions (actions/*) ride floating major tags — we trust them.
       # 3rd-party actions stay SHA-pinned (a mutable tag there is a supply-chain
@@ -41,7 +37,7 @@ jobs:
 
       # Pin Go to the go.mod toolchain, not `stable`: `stable`'s version is part of
       # setup-go's cache key, so a new Go release would void the whole module+build
-      # cache (and the golangci-lint goinstall build) and force a full recompile.
+      # cache and force a full recompile.
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
@@ -82,9 +78,7 @@ jobs:
             exit 1
           fi
 
-      # Prebuilt binary (the action's default), not goinstall: compiling
-      # golangci-lint from source OOM-kills in the memory-limited kube-mode pod.
-      # v2.12.2's release binary is built with Go >=1.26, so it parses this
+      # v2.12.2's prebuilt binary is built with Go >=1.26, so it parses this
       # module's go directive.
       - uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
@@ -94,8 +88,7 @@ jobs:
           # regression there would land silently. One pass covers all tiers.
           args: --build-tags=acc,hil
 
-
-      # Same for govulncheck. Fails on any known vuln in our call graph — deps +
+      # Fails on any known vuln in our call graph — deps +
       # stdlib (the latter via the pinned go.mod toolchain).
       - name: Cache govulncheck binary
         id: govulncheck-bin
