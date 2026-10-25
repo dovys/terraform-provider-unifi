@@ -30,19 +30,8 @@ permissions:
 
 jobs:
   release:
-    # Self-hosted self-hosted runner (ARC, containerMode: kubernetes). The minimal
-    # runner pod has no toolchain, so the job declares a container + sets up Go
-    # in-job (setup-go); GoReleaser and the GPG-import action bring their own.
-    # Never a PR: see docs/releasing.md "Self-hosted runner".
     if: github.ref == 'refs/heads/main'
-    runs-on: self-hosted
-    container:
-      image: ghcr.io/actions/actions-runner:latest@sha256:e275409999c37162649aa050ca573f03eab2eabcb3a1e7fcc47548de6b4f9690
-    # In a container job GitHub's default `run` shell is `sh` (dash), which lacks
-    # `set -o pipefail`; force bash so the steps' strict-mode prelude works.
-    defaults:
-      run:
-        shell: bash
+    runs-on: ubuntu-latest
     env:
       HAS_GPG_KEY: ${{ secrets.GPG_PRIVATE_KEY != '' }}
       # Release never re-resolves modules; -mod=readonly fails on a stale/tampered graph.
@@ -141,16 +130,6 @@ jobs:
           fi
           echo "next=${next}" >> "$GITHUB_OUTPUT"
           echo "Releasing ${next} (${BUMP}; previous ${latest:-<none>})"
-
-      # actions-runner ships gpg-agent but not the `gpg` CLI (apt
-      # --no-install-recommends drops it) — the GPG-import action and GoReleaser
-      # checksum signing both shell out to it. Install before the tag push so an
-      # apt hiccup can't orphan a tag; idempotent; runner has NOPASSWD sudo.
-      - name: Ensure gpg CLI is present
-        if: ${{ env.HAS_GPG_KEY == 'true' }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends gnupg
 
       - name: Create and push tag
         env:

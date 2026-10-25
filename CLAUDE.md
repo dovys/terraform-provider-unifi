@@ -91,11 +91,11 @@ Treat every tracked file as public. `scripts/check-secrets.sh` is the first CI s
 ## CI and supply chain
 
 - `.github/workflows/test.yml` is one `checks` job (shared Go install and build cache): secret hygiene, build, vet, gofmt, `go mod tidy` clean, govulncheck (deps and stdlib), terraform fmt on examples, docs current, golangci-lint.
-- PRs that touch only `README.md`, `CHANGELOG.md`, or `docs/**` run no checks. Run `make check` (at least `make docs`) locally for those.
+- `checks` runs on every PR (it is the required status) and waits for approval on fork PRs.
 - Unit tests run only on PRs into `main`. PRs into `next` skip them; they run at the `next → main` merge. Run `make test` locally while iterating.
 - CI pins Go with `go-version-file: go.mod`, never `stable`.
-- PR checks run on `ubuntu-latest`. Only the release job uses a self-hosted runner; never move PR checks onto it ([docs/releasing.md](docs/releasing.md#self-hosted-runner)).
-- Third-party actions are pinned to a full commit SHA. GitHub's own `actions/*` float on `@vN`. Service-container and release images are pinned by digest.
+- Every job runs on `ubuntu-latest`. Never add a self-hosted runner: a public repo's PRs run their own workflow files on it.
+- Third-party actions are pinned to a full commit SHA. GitHub's own `actions/*` float on `@vN`. Service-container images are pinned by digest.
 - The release build uses `GOFLAGS=-mod=readonly` and runs no `go mod tidy`.
 - Dependabot runs weekly and groups each ecosystem's minor+patch bumps into one PR; majors get their own PR. `dependabot-automerge.yml` squash-merges a green Go-module minor/patch PR, which cuts a patch release.
 

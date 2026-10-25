@@ -23,6 +23,8 @@ below predate the date-based convention.
 
 ### Changed
 
+- CI: the release job moved to GitHub-hosted runners; nothing runs self-hosted.
+  `checks` runs on every PR (no `paths-ignore`) so it can be a required status.
 - CI: PR checks run GitHub-hosted; only the main-branch release stays on the
   self-hosted runner (image digest-pinned, no persisted write token).
 - Dependabot Go-module minor/patch PRs auto-merge on green CI and cut a patch

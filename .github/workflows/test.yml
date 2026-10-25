@@ -1,15 +1,11 @@
 name: test
 
-# One `checks` job: GitHub bills per job rounded up to the minute, so six parallel
-# jobs each reinstalling Go + recompiling cost ~10 min/run for near-instant work.
-# Sharing one setup-go + build cache roughly halves it. Unit tests run only on PRs
-# into `main` (the release-bound merges); `next` PRs skip them.
+# One `checks` job so every gate shares one Go install + warm build cache. Unit tests
+# run only on PRs into `main` (the release-bound merges); `next` PRs skip them.
+# No paths-ignore: `checks` is a required status, so it must report on every PR.
+# Fork PRs wait for maintainer approval (repo setting), so outsiders can't trigger it.
 on:
   pull_request:
-    paths-ignore:
-      - 'README.md'
-      - 'CHANGELOG.md'
-      - 'docs/**'
 
 # Cancel a PR branch's in-flight run when a new push supersedes it.
 concurrency:
@@ -22,7 +18,6 @@ permissions:
 jobs:
   checks:
     name: checks
-    # Never the self-hosted runner — see docs/releasing.md "Self-hosted runner".
     runs-on: ubuntu-latest
     steps:
       # GitHub's own actions (actions/*) ride floating major tags — we trust them.

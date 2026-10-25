@@ -89,16 +89,10 @@ before merging.
 - **Already-released HEAD fails the release** rather than double-tagging. If
   GoReleaser fails after the tag push, delete the tag (`git push origin :refs/tags/vX.Y.Z`)
   and re-run.
-
-### Self-hosted runner
-
-`auto-release` is the only job on the self-hosted `self-hosted` runner; PR checks run
-GitHub-hosted. A `pull_request` run executes the **PR's own** workflow files, so a
-fork can set `runs-on: self-hosted` — YAML can't keep it off. The boundary is the org
-runner group, which an org admin must configure **before the repo is public**:
-selected repositories → this repo only; selected workflows →
-`<org>/terraform-provider-unifi/.github/workflows/auto-release.yml@refs/heads/main`.
-Also set Actions → *Require approval for all external contributors*.
+- **Every job runs GitHub-hosted (`ubuntu-latest`); there is no self-hosted runner.**
+  A `pull_request` run executes the PR's own workflow files, so a self-hosted runner
+  on a public repo would run any fork's code. Fork PRs wait for maintainer approval
+  (Actions setting *Require approval for all external contributors*).
 - The bump is decided **purely from git topology** — no PR API (its commit→PR
   association lags and once mis-bumped a minor to a patch), no labels, no commit
   strings. A `next → main` **merge commit** (its `HEAD^2` is contained in `next`) →
@@ -155,7 +149,7 @@ Reproduce the whole set locally with **`make check`**:
   majors. To roll a pinned action by hand, resolve tag → SHA with
   `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`.
 - **Images pinned by digest** (`test/tier2/compose.yaml`: Mongo, controller,
-  nginx bridge; the release job's runner container) — refresh deliberately with
+  nginx bridge) — refresh deliberately with
   `docker buildx imagetools inspect <image>:<tag> --format '{{.Manifest.Digest}}'`.
 - **Release build is `-mod=readonly` with no `go mod tidy`** — a tampered or
   stale module graph fails the build instead of being silently rewritten while a
