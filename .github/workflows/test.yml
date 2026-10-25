@@ -38,7 +38,7 @@ jobs:
       # Pin Go to the go.mod toolchain, not `stable`: `stable`'s version is part of
       # setup-go's cache key, so a new Go release would void the whole module+build
       # cache and force a full recompile.
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
@@ -92,7 +92,7 @@ jobs:
       # stdlib (the latter via the pinned go.mod toolchain).
       - name: Cache govulncheck binary
         id: govulncheck-bin
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/go/bin/govulncheck
           key: govulncheck-bin-${{ runner.os }}-v1.3.0-${{ hashFiles('go.mod') }}

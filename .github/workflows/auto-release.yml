@@ -83,7 +83,7 @@ jobs:
       # Pin to the go.mod toolchain (see test.yml). cache:false — setup-go's auto
       # cache shares the PR job's key (native-arch, "not saved" on hit), so the
       # cross-compile never persists; the release-scoped cache below does instead.
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: false
@@ -91,7 +91,7 @@ jobs:
       # Persist the cross-compile + module cache across releases (keyed go.mod+go.sum;
       # restore-keys warm the base on a change). #1 saves all six arches; #2+ restore
       # them, so GoReleaser recompiles only changed packages, not stdlib ×6.
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.cache/go-build
