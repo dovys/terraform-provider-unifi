@@ -27,6 +27,8 @@ below predate the date-based convention.
   self-hosted runner (image digest-pinned, no persisted write token).
 - Dependabot Go-module minor/patch PRs auto-merge on green CI and cut a patch
   release (7-day cooldown); majors are grouped separately for review.
+- `CLAUDE.md` invariant 9 now documents the existing GET-overlay-PUT exception
+  for replace-style surfaces (`unifi_network_mdns`) and device `port_overrides`.
 
 ## 2026-06-22
 
