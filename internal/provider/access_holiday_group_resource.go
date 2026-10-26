@@ -55,7 +55,7 @@ func (r *accessHolidayGroupResource) Schema(_ context.Context, _ resource.Schema
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A UniFi Access holiday group — a named set of holidays used to scope unlock schedules. Managed over " +
 			"the private Access API (`/proxy/access/api/v2/holiday_group`). Membership is the set of holiday `unique_id`s in " +
-			"`holiday_ids`; the holidays themselves are not modeled by this resource. **Modeled from the reverse-engineered " +
+			"`holiday_ids`; the holidays themselves are not modeled by this resource. **Modeled from the undocumented " +
 			"Access API and not yet verified against a live console — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

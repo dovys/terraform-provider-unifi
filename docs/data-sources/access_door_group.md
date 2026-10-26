@@ -3,12 +3,12 @@
 page_title: "unifi_access_door_group Data Source - unifi"
 subcategory: ""
 description: |-
-  Look up a UniFi Access door group by id (unique_id) or name (read-only). Use it to reference a door group that Terraform does not manage. Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.
+  Look up a UniFi Access door group by id (unique_id) or name (read-only). Use it to reference a door group that Terraform does not manage. Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.
 ---
 
 # unifi_access_door_group (Data Source)
 
-Look up a UniFi Access door group by `id` (`unique_id`) or `name` (read-only). Use it to reference a door group that Terraform does not manage. **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**
+Look up a UniFi Access door group by `id` (`unique_id`) or `name` (read-only). Use it to reference a door group that Terraform does not manage. **Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**
 
 
 

@@ -5,10 +5,9 @@ yours under today's date in the PR that makes the change. Versioning is decouple
 from this file: every push to `main` auto-releases — a fix/docs/dep merge cuts the
 next patch (`vX.Y.Z`), a `next → main` merge commit cuts a minor (`vX.Y.0`). Both
 attach binaries, and each GitHub Release carries the per-version commit list (see
-[`docs/releasing.md`](docs/releasing.md)). The repo is private
-and the provider is **not** published to the Terraform Registry — releases ship
-as GoReleaser artifacts on the private repo only. Sections tagged `[vX.Y.Z]`
-below predate the date-based convention.
+[`docs/releasing.md`](docs/releasing.md)). Releases ship as GoReleaser
+artifacts on GitHub Releases; the Terraform Registry listing is pending.
+Sections tagged `[vX.Y.Z]` below predate the date-based convention.
 
 ## 2026-10-25
 
@@ -20,6 +19,10 @@ below predate the date-based convention.
   `oapi-codegen` → v2.8.1 (Dependabot alerts); also `terraform-plugin-log`
   v0.11.0, `oapi-codegen/runtime` v1.8.0, `x/time` v0.16.0. Supersedes Dependabot #130–#137,
   which each failed CI on the advisories the others fixed.
+- `TF_LOG=debug` wire logging no longer prints a body that fails JSON parsing
+  (it bypassed field redaction); it logs the body's length and content type.
+- `SECURITY.md`: report vulnerabilities through GitHub private vulnerability
+  reporting.
 
 ### Changed
 
@@ -29,6 +32,15 @@ below predate the date-based convention.
   self-hosted runner (image digest-pinned, no persisted write token).
 - Dependabot Go-module minor/patch PRs auto-merge on green CI and cut a patch
   release (7-day cooldown); majors are grouped separately for review.
+- Generated wire types no longer carry the API spec's field descriptions; the
+  codegen pipeline (`scripts/wire-gen.sh`) strips them first and reads the spec
+  root from `UNIFI_SPECS`.
+- `examples/provider.tf` moved to `examples/provider/provider.tf`, so the
+  registry index page shows it as Example Usage.
+- `scripts/check-secrets.sh` reads extra forbidden strings from an optional,
+  gitignored `scripts/secret-denylist.local`.
+- `make vulncheck` scans with the go.mod toolchain; `make lint` covers the
+  `acc`/`hil` build tags, as CI does.
 - `CLAUDE.md` invariant 9 now documents the existing GET-overlay-PUT exception
   for replace-style surfaces (`unifi_network_mdns`) and device `port_overrides`.
 
@@ -434,9 +446,8 @@ below predate the date-based convention.
   console-global). Responses are unwrapped from Access's `{code,msg,data}`
   envelope inside the client. Object types are generated `wire` structs
   (`internal/unifi/access/wire`, oapi-codegen types-only) projected from the
-  reverse-engineered Access spec (`../unifi-specs/access/v4.2.27`) by the shared
-  projection (`unifi-specs/tools/access_codegen_spec.py`, reusing the Protect
-  closure-trim/hoist/widen transforms). Ships `data.unifi_access_door_group`
+  maintainer's Access 4.2.27 API spec by a projection shared with Protect
+  (closure-trim/hoist/widen). Ships `data.unifi_access_door_group`
   (look up a door group by `id` or `name`) and the managed
   `unifi_access_door_group` resource (create/update/delete a named set of doors;
   membership read back from the dedicated `/door_ids` endpoint). Its CRUD paths +
@@ -469,9 +480,8 @@ below predate the date-based convention.
   (the private REST API at `/proxy/protect/api/...`, no `api_key`). Its object
   types are generated `wire` structs (`internal/unifi/protect/wire`,
   oapi-codegen types-only) projected from the spec Protect itself ships
-  (`../unifi-specs/protect/v7.1.69`); a deterministic 3.1→3.0 + closure-trim +
-  enum/object-hoist projection (`unifi-specs/tools/protect_codegen_spec.py`)
-  feeds codegen. New: `unifi_protect_camera` (configure-existing, doorbells
+  (v7.1.69); a deterministic 3.1→3.0 + closure-trim + enum/object-hoist
+  projection feeds codegen. New: `unifi_protect_camera` (configure-existing, doorbells
   included; owned-field PATCH merge) + `data.unifi_protect_camera`, and
   `unifi_protect_nvr_settings` (the NVR singleton, import/update-only).
   **Config writes are HIL-unverified** (the recon console is read-only) — see
@@ -491,8 +501,7 @@ below predate the date-based convention.
   change).** The flat `internal/unifi` method-per-operation client is replaced by
   a substruct `network.Client` (`c.Network().WAN().SLAs()…`) whose object types
   are generated `wire` structs (`internal/unifi/network/wire`, oapi-codegen
-  types-only) regenerated from the version-anchored sibling spec
-  (`../unifi-specs`). `internal/unifi` is now just the console session
+  types-only) regenerated from the maintainer's version-pinned API spec. `internal/unifi` is now just the console session
   (transport, capabilities, site management, and the `Network()` accessor).
   Generic collections (`LegacyCollection`, `V2Collection`) carry the per-surface
   CRUD contract; custom collections handle id-in-body GET-merge-PUT and

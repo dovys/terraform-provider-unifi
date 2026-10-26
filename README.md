@@ -107,7 +107,7 @@ The provider reuses one login across provider blocks with the same settings and 
 
 ## Examples
 
-[examples/provider.tf](examples/provider.tf) is the minimal config above. The other directories under [examples/](examples/) are organized by use case (`network/`, `protect/`, `access/`, `console/`, `dns/`, `data/`). [examples/real-home/](examples/real-home/) is a complete home network: WANs, VLANs, Wi-Fi, firewall, DNS, reservations, devices, and the console certificate.
+[examples/provider/provider.tf](examples/provider/provider.tf) is the minimal config above. The other directories under [examples/](examples/) are organized by use case (`network/`, `protect/`, `access/`, `console/`, `dns/`, `data/`). [examples/real-home/](examples/real-home/) is a complete home network: WANs, VLANs, Wi-Fi, firewall, DNS, reservations, devices, and the console certificate.
 
 ## Safety
 

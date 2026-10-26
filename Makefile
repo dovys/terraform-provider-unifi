@@ -20,10 +20,11 @@ testacc:
 testhil:
 	./test-hil.sh
 
-# Static analysis. golangci-lint must be installed (CI installs it).
+# Static analysis. golangci-lint must be installed (CI installs it). The build
+# tags lint the tag-gated test tiers too, as CI does.
 lint:
 	go vet ./...
-	golangci-lint run ./...
+	golangci-lint run --build-tags=acc,hil ./...
 
 # Format Go sources and example HCL in place.
 fmt:
@@ -35,19 +36,20 @@ tffmt:
 	terraform fmt -check -recursive examples/
 
 # Scan for known vulnerabilities reachable from our call graph — deps and the Go
-# standard library (mirrors the CI govulncheck gate). GOTOOLCHAIN pins the scan
-# to the security-patched 1.26.4 stdlib (see test.yml); pinned tool version;
-# advisory DB fetched from vuln.go.dev.
+# standard library (mirrors the CI govulncheck gate). The stdlib scanned is the
+# go.mod toolchain's; pinned tool version; advisory DB fetched from vuln.go.dev.
 vulncheck:
-	GOTOOLCHAIN=go1.26.4 go run golang.org/x/vuln/cmd/govulncheck@v1.3.0 ./...
+	go run golang.org/x/vuln/cmd/govulncheck@v1.3.0 ./...
 
-# Regenerate everything (docs + wire codegen). Needs the sibling ../unifi-specs
-# repo for the wire `go:generate` directives — local dev only, never CI.
+# Regenerate everything (docs + wire codegen). The wire `go:generate` directives
+# read the API spec root from UNIFI_SPECS (the maintainer's version-pinned spec,
+# not public) — local dev only, never CI.
 generate:
-	go generate ./...
+	@test -n "$(UNIFI_SPECS)" || { echo "generate: set UNIFI_SPECS to the API spec root (e.g. make generate UNIFI_SPECS=/path/to/specs)"; exit 1; }
+	UNIFI_SPECS="$(abspath $(UNIFI_SPECS))" go generate ./...
 
-# Regenerate ONLY the provider docs (tfplugindocs). No wire codegen, no
-# ../unifi-specs needed — mirrors the CI docs-freshness gate in test.yml.
+# Regenerate ONLY the provider docs (tfplugindocs). No wire codegen, no spec
+# needed — mirrors the CI docs-freshness gate in test.yml.
 docs:
 	go tool tfplugindocs generate --provider-name unifi
 
@@ -64,7 +66,7 @@ check: build
 	$(MAKE) vulncheck
 	$(MAKE) tffmt
 	$(MAKE) docs && git diff --exit-code docs/
-	golangci-lint run ./...
+	golangci-lint run --build-tags=acc,hil ./...
 	$(MAKE) test
 
 .PHONY: default build test testacc testhil lint fmt tffmt vulncheck generate docs tidy check

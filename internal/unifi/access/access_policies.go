@@ -13,7 +13,7 @@ import (
 // write body (AccessPolicyBo) and the read body (AccessPolicy) are different
 // shapes — the controller binds the BO on POST/PUT but returns the richer read
 // view on GET — so Create/Update and Get use distinct wire types. These paths
-// are modeled from the reverse-engineered access_policy controller and are
+// are modeled from the undocumented access_policy controller and are
 // provisional pending a live/HIL capture (see TODO.md).
 const (
 	accessPoliciesPath = "api/v2/access_policies"

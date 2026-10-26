@@ -59,7 +59,7 @@ func (r *accessDoorResource) Schema(_ context.Context, _ resource.SchemaRequest,
 		MarkdownDescription: "Configures an existing UniFi Access door (`/proxy/access/api/v2/locations/door/{id}`). Doors are " +
 			"**discovered**, not created — this resource is update/import-only: it adopts an existing door by `door_id` and " +
 			"manages its name, floor, and type; destroying it stops managing the door without deleting it. **Modeled from the " +
-			"reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**",
+			"undocumented Access API and not yet verified against a live console — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

@@ -145,7 +145,7 @@ func sleep(ctx context.Context, d time.Duration) error {
 // debugHTTP logs one request/response pair — method, URL, JSON body, with
 // secret-bearing fields masked — through tflog at DEBUG. Every classic request
 // and the login pass through it, so it captures the exact body the controller
-// accepts or rejects: the tool for reverse-engineering which fields a surface
+// accepts or rejects: the tool for discovering which fields a surface
 // will PUT/POST vs only GET. status 0 / nil respBody denotes a transport-level
 // failure (no response).
 //
@@ -195,23 +195,24 @@ var secretKeyHints = []string{
 	"apikey", "applicationkey", "consumerkey", "accesskey",
 }
 
-// redactJSON pretty-prints JSON with secret-bearing values masked. On a parse
-// failure it returns the raw text, truncated, so a non-JSON body still shows.
+// redactJSON pretty-prints JSON with secret-bearing values masked. A body that
+// isn't JSON can't be redacted field-by-field (an HTML error page or form body
+// may still carry a secret), so it is summarized as length + sniffed type only.
 func redactJSON(b []byte) string {
 	var v any
 	if err := json.Unmarshal(b, &v); err != nil {
-		s := strings.TrimSpace(string(b))
-		if len(s) > 2000 {
-			s = s[:2000] + "…(truncated)"
-		}
-		return s
+		return nonJSONSummary(b)
 	}
 	redactValue(v)
 	out, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
-		return string(b)
+		return nonJSONSummary(b)
 	}
 	return string(out)
+}
+
+func nonJSONSummary(b []byte) string {
+	return fmt.Sprintf("<non-JSON body: %d bytes, %s>", len(b), http.DetectContentType(b))
 }
 
 // redactValue walks a decoded JSON value in place, masking every value under a

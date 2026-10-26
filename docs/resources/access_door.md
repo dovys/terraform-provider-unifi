@@ -3,12 +3,12 @@
 page_title: "unifi_access_door Resource - unifi"
 subcategory: ""
 description: |-
-  Configures an existing UniFi Access door (/proxy/access/api/v2/locations/door/{id}). Doors are discovered, not created — this resource is update/import-only: it adopts an existing door by door_id and manages its name, floor, and type; destroying it stops managing the door without deleting it. Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.
+  Configures an existing UniFi Access door (/proxy/access/api/v2/locations/door/{id}). Doors are discovered, not created — this resource is update/import-only: it adopts an existing door by door_id and manages its name, floor, and type; destroying it stops managing the door without deleting it. Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.
 ---
 
 # unifi_access_door (Resource)
 
-Configures an existing UniFi Access door (`/proxy/access/api/v2/locations/door/{id}`). Doors are **discovered**, not created — this resource is update/import-only: it adopts an existing door by `door_id` and manages its name, floor, and type; destroying it stops managing the door without deleting it. **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**
+Configures an existing UniFi Access door (`/proxy/access/api/v2/locations/door/{id}`). Doors are **discovered**, not created — this resource is update/import-only: it adopts an existing door by `door_id` and manages its name, floor, and type; destroying it stops managing the door without deleting it. **Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**
 
 
 

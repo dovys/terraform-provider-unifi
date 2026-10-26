@@ -1,5 +1,5 @@
 # UniFi Access — over the one console session (no api_key). The door-group write
-# surface is reverse-engineered and HIL-unverified (see TODO.md).
+# surface is modeled from the undocumented API and HIL-unverified (see TODO.md).
 
 # Reference an existing door group by name (read-only lookup).
 data "unifi_access_door_group" "lobby" {

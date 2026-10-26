@@ -64,7 +64,7 @@ jobs:
         run: go vet ./...
 
       # tfplugindocs only — `go generate` would run the wire codegen, which needs
-      # the sibling ../unifi-specs repo (absent in CI).
+      # the maintainer's API spec (UNIFI_SPECS, absent in CI).
       - name: docs are current
         run: |
           go tool tfplugindocs generate --provider-name unifi

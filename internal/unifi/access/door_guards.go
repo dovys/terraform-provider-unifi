@@ -12,7 +12,7 @@ import (
 // configuration (the set of users authorized to act as guards for that door),
 // read and written under the door's path. There is no create or delete — the
 // guard set is replaced in place via PUT, so it is an update-only sub-resource
-// keyed by door_id. Modeled from the reverse-engineered door_guard controller;
+// keyed by door_id. Modeled from the undocumented door_guard controller;
 // provisional pending a live/HIL capture (see TODO.md). The user_ids are opaque
 // references the operator supplies — the provider does not model Access users.
 const doorGuardSuffix = "/door_guard"

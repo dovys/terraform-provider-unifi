@@ -1,7 +1,6 @@
 // Package wire holds the generated Go types for the UniFi Access private API:
-// structs and enum constants, projected from the version-anchored OpenAPI spec
-// in the sibling unifi-specs repository (reverse-engineered from the Access Go
-// binary — see ../../../../../unifi-specs/access/v4.2.27/SOURCE.md).
+// structs and enum constants, generated from the maintainer's version-pinned
+// API spec (not public).
 //
 // Types only. The ergonomic, hand-written client (groups, the {code,msg,data}
 // envelope, CRUD) lives in the parent `access` package and picks the types it
@@ -9,14 +8,12 @@
 //
 // The output is unversioned on purpose (see the Network wire package): the
 // provider tracks the latest modeled controller; on a firmware/spec bump,
-// re-point the path below at the new version's openapi.yaml and regenerate.
+// re-point the path below at the new version and regenerate.
 //
-// The shipped spec has 2018 components (most are runtime/event types the
-// provider never models). The :generate step runs a deterministic projection
-// (unifi-specs/tools/access_codegen_spec.py): closure-trim to the modeled
-// roots + hoist inline enums/objects to uniquely-named components, into a temp
-// file — then codegens from that. The committed spec stays canonical; only this
-// focused projection feeds codegen.
+// The spec has 2018 components (most are runtime/event types the provider never
+// models), so scripts/wire-gen.sh first runs a deterministic projection shipped
+// with the spec: closure-trim to the modeled roots + hoist inline enums/objects
+// to uniquely-named components — then codegens from that.
 //
-//go:generate sh -c "uv run ../../../../../unifi-specs/tools/access_codegen_spec.py ../../../../../unifi-specs/access/v4.2.27/openapi.yaml /tmp/access-codegen.yaml && go tool oapi-codegen -config oapi-codegen.yaml /tmp/access-codegen.yaml"
+//go:generate bash ../../../../scripts/wire-gen.sh $UNIFI_SPECS/access/v4.2.27/openapi.yaml $UNIFI_SPECS/tools/access_codegen_spec.py
 package wire

@@ -1,13 +1,14 @@
 package transport
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
 
 // TestRedactJSON proves the wire-debug dump masks secret-bearing fields at any
 // depth (the login body, write-only passphrases the controller echoes) while
-// leaving ordinary fields readable for reverse-engineering.
+// leaving ordinary fields readable for debugging.
 func TestRedactJSON(t *testing.T) {
 	in := []byte(`{
 		"username": "network-admin",
@@ -83,8 +84,27 @@ func TestRedactJSONConsoleCertificate(t *testing.T) {
 	}
 }
 
+// TestRedactJSONNonJSON: a body that fails to parse can't be field-redacted, so
+// none of its content may reach the log — only its length and sniffed type.
 func TestRedactJSONNonJSON(t *testing.T) {
-	if got := redactJSON([]byte("not json")); got != "not json" {
-		t.Errorf("non-JSON body should pass through, got %q", got)
+	cases := map[string]struct {
+		body     string
+		wantType string
+	}{
+		"form":      {"username=admin&password=hunter2", "text/plain"},
+		"html":      {"<html><body>token=hunter2</body></html>", "text/html"},
+		"truncated": {`{"password":"hunter2"`, "text/plain"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			got := redactJSON([]byte(tc.body))
+			if strings.Contains(got, "hunter2") || strings.Contains(got, "admin") {
+				t.Errorf("non-JSON body content leaked: %q", got)
+			}
+			want := fmt.Sprintf("%d bytes", len(tc.body))
+			if !strings.Contains(got, want) || !strings.Contains(got, tc.wantType) {
+				t.Errorf("redactJSON = %q, want length %q and type %q", got, want, tc.wantType)
+			}
+		})
 	}
 }

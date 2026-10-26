@@ -3,12 +3,12 @@
 page_title: "unifi_access_door_group Resource - unifi"
 subcategory: ""
 description: |-
-  A UniFi Access door group — a named set of doors used to scope access policies. Managed over the private Access API (/proxy/access/api/v2/access/door_group). Members are read back from the dedicated /door_ids endpoint. Floor groups (member floors) are out of scope for now (no read path is modeled). Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.
+  A UniFi Access door group — a named set of doors used to scope access policies. Managed over the private Access API (/proxy/access/api/v2/access/door_group). Members are read back from the dedicated /door_ids endpoint. Floor groups (member floors) are out of scope for now (no read path is modeled). Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.
 ---
 
 # unifi_access_door_group (Resource)
 
-A UniFi Access door group — a named set of doors used to scope access policies. Managed over the private Access API (`/proxy/access/api/v2/access/door_group`). Members are read back from the dedicated `/door_ids` endpoint. Floor groups (member floors) are out of scope for now (no read path is modeled). **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**
+A UniFi Access door group — a named set of doors used to scope access policies. Managed over the private Access API (`/proxy/access/api/v2/access/door_group`). Members are read back from the dedicated `/door_ids` endpoint. Floor groups (member floors) are out of scope for now (no read path is modeled). **Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**
 
 
 

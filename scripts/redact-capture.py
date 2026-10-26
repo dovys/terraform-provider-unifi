@@ -1,10 +1,10 @@
 #!/usr/bin/env -S uv run python
 """Redact a raw UniFi API capture so only its *shape* survives.
 
-Reverse-engineering the private UniFi APIs means pasting captured JSON around
-(see docs/reverse-engineering.md). Raw captures are real network data: secrets,
-PSKs, tokens, MACs, IPs, emails. We only ever need the **structure, field
-names, and enum values** — never the values themselves. This walks a JSON
+Studying the private UniFi APIs means pasting captured JSON around. Raw
+captures are real network data: secrets, PSKs, tokens, MACs, IPs, emails. We
+only ever need the **structure, field names, and enum values** — never the
+values themselves. This walks a JSON
 document and:
 
   * replaces the *value* of any key whose name looks like a secret

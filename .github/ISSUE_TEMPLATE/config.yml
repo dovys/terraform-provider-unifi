@@ -1,6 +1,9 @@
 # Force reporters through the structured forms above.
 blank_issues_enabled: false
 contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/dovys/terraform-provider-unifi/security/advisories/new
+    about: Report privately — never in a public issue. See SECURITY.md.
   - name: Documentation
     url: https://github.com/dovys/terraform-provider-unifi/tree/main/docs
     about: Architecture, per-app resource reference, and testing — check here before filing.

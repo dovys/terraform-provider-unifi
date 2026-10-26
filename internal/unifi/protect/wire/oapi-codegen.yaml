@@ -2,9 +2,9 @@
 #
 # Types only: models + enum constants. Operations and the ergonomic substruct
 # client are hand-written in the parent `protect` package — the generated
-# operation layer keys off the reverse-engineered private-API operationIds and
-# is deliberately not generated. skip-prune keeps every modeled object's type
-# available for the facade to pick from.
+# operation layer keys off the private-API operationIds and is deliberately not
+# generated. skip-prune keeps every modeled object's type available for the
+# facade to pick from.
 package: wire
 output: types.gen.go
 generate:

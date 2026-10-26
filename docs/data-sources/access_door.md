@@ -3,12 +3,12 @@
 page_title: "unifi_access_door Data Source - unifi"
 subcategory: ""
 description: |-
-  Look up a UniFi Access door by id (unique_id) or name (read-only). Use it to obtain a door's id for unifi_access_door_group / unifi_access_door / unifi_access_door_guard. Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.
+  Look up a UniFi Access door by id (unique_id) or name (read-only). Use it to obtain a door's id for unifi_access_door_group / unifi_access_door / unifi_access_door_guard. Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.
 ---
 
 # unifi_access_door (Data Source)
 
-Look up a UniFi Access door by `id` (`unique_id`) or `name` (read-only). Use it to obtain a door's id for `unifi_access_door_group` / `unifi_access_door` / `unifi_access_door_guard`. **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**
+Look up a UniFi Access door by `id` (`unique_id`) or `name` (read-only). Use it to obtain a door's id for `unifi_access_door_group` / `unifi_access_door` / `unifi_access_door_guard`. **Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**
 
 
 

@@ -23,7 +23,7 @@ var (
 )
 
 // NewAccessDoorGroupResource constructs the managed door-group resource. door_group
-// is the one Access object the reverse-engineered spec provides a write DTO for, so
+// is the one Access object the spec provides a write DTO for, so
 // it is the Access app's first managed resource. Its CRUD paths and the
 // {code,msg,data} envelope contract are HIL-unverified (no live Access console) —
 // the schema and TODO.md flag this; the verification items in TODO.md should be
@@ -50,7 +50,7 @@ func (r *accessDoorGroupResource) Schema(_ context.Context, _ resource.SchemaReq
 		MarkdownDescription: "A UniFi Access door group — a named set of doors used to scope access policies. Managed over the " +
 			"private Access API (`/proxy/access/api/v2/access/door_group`). Members are read back from the dedicated " +
 			"`/door_ids` endpoint. Floor groups (member floors) are out of scope for now (no read path is modeled). " +
-			"**Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**",
+			"**Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

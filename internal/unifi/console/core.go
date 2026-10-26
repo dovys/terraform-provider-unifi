@@ -10,11 +10,10 @@
 //	c.Console().Certificates().StartChallenge(ctx, req)
 //
 // Wire types (types.go) are HAND-WRITTEN — a documented exception to invariant 2
-// (generated wire from ../unifi-specs). This OS surface is in no OpenAPI spec;
-// it was reverse-engineered from the console UI bundle's zod schemas, so there
-// is nothing to codegen from. The surface is tiny (one resource family), and
-// hand-authoring a synthetic spec for it would be disproportionate. The endpoint
-// map + schemas are recorded in ../unifi-specs/unifi-os for reproducibility.
+// (generated wire types). This OS surface is in no OpenAPI spec, so there is
+// nothing to codegen from; it is modeled from the requests the console's own UI
+// makes. The surface is tiny (one resource family), and hand-authoring a
+// synthetic spec for it would be disproportionate.
 package console
 
 import (

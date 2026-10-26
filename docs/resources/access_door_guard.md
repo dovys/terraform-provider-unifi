@@ -3,12 +3,12 @@
 page_title: "unifi_access_door_guard Resource - unifi"
 subcategory: ""
 description: |-
-  Manages the guard user set of a UniFi Access door (/proxy/access/api/v2/locations/door/{id}/door_guard). A door guard is the set of users authorized to act as guards for one door. This is an update/import-only sub-resource keyed by door_id: it replaces the door's guard set and destroying it stops managing the set without changing it (set user_ids = [] to clear). The user_ids are opaque references to existing Access users — the provider does not model users. Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.
+  Manages the guard user set of a UniFi Access door (/proxy/access/api/v2/locations/door/{id}/door_guard). A door guard is the set of users authorized to act as guards for one door. This is an update/import-only sub-resource keyed by door_id: it replaces the door's guard set and destroying it stops managing the set without changing it (set user_ids = [] to clear). The user_ids are opaque references to existing Access users — the provider does not model users. Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.
 ---
 
 # unifi_access_door_guard (Resource)
 
-Manages the guard user set of a UniFi Access door (`/proxy/access/api/v2/locations/door/{id}/door_guard`). A door guard is the set of users authorized to act as guards for one door. This is an update/import-only sub-resource keyed by `door_id`: it replaces the door's guard set and destroying it stops managing the set without changing it (set `user_ids = []` to clear). The `user_ids` are opaque references to existing Access users — the provider does not model users. **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**
+Manages the guard user set of a UniFi Access door (`/proxy/access/api/v2/locations/door/{id}/door_guard`). A door guard is the set of users authorized to act as guards for one door. This is an update/import-only sub-resource keyed by `door_id`: it replaces the door's guard set and destroying it stops managing the set without changing it (set `user_ids = []` to clear). The `user_ids` are opaque references to existing Access users — the provider does not model users. **Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**
 
 
 

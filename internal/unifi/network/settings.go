@@ -13,7 +13,7 @@ import (
 // is a shallow merge over the stored section (send only the fields to change;
 // composite values whole), so callers pass an omitempty owned-field overlay
 // rather than a whole document. Each section's field set is the controller's own
-// validated writable set (see ../unifi-specs objects/setting.json).
+// validated writable set, per the version-pinned API spec.
 func (c *Client) Settings() SettingCollection {
 	return SettingCollection{core: c.core}
 }

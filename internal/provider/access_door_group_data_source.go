@@ -43,7 +43,7 @@ func (d *accessDoorGroupDataSource) Metadata(_ context.Context, req datasource.M
 func (d *accessDoorGroupDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Look up a UniFi Access door group by `id` (`unique_id`) or `name` (read-only). Use it to reference a " +
-			"door group that Terraform does not manage. **Modeled from the reverse-engineered Access API and not yet verified " +
+			"door group that Terraform does not manage. **Modeled from the undocumented Access API and not yet verified " +
 			"against a live console — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

@@ -35,7 +35,7 @@ func (d *accessDoorGuardDataSource) Metadata(_ context.Context, req datasource.M
 func (d *accessDoorGuardDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Look up the guard user set of a UniFi Access door by `door_id` (read-only). **Modeled from the " +
-			"reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**",
+			"undocumented Access API and not yet verified against a live console — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

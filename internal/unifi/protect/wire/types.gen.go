@@ -2696,130 +2696,80 @@ func (e ViewerSupportFileState) Valid() bool {
 
 // AccessChannel defines model for accessChannel.
 type AccessChannel struct {
-	// Bitrate Bitrate of the channel in bits per second (bps)
-	Bitrate *float64 `json:"bitrate"`
-
-	// Fps Frames per second of the channel
-	Fps *float64 `json:"fps"`
-
-	// FpsValues The allowed FPS values for this channel
-	FpsValues *[]interface{} `json:"fpsValues"`
-
-	// Height Height of the channel
-	Height *float64 `json:"height"`
-
-	// Id ID of the channel (High: 0, Medium: 1, Low: 2)
-	Id *float64 `json:"id"`
-
-	// LocalStreamName Local stream name of the channel
-	LocalStreamName *string `json:"localStreamName"`
-
-	// Quality Quality of the channel
-	Quality *AccessChannelQuality `json:"quality"`
-
-	// Width Width of the channel
-	Width *float64 `json:"width"`
+	Bitrate         *float64              `json:"bitrate"`
+	Fps             *float64              `json:"fps"`
+	FpsValues       *[]interface{}        `json:"fpsValues"`
+	Height          *float64              `json:"height"`
+	Id              *float64              `json:"id"`
+	LocalStreamName *string               `json:"localStreamName"`
+	Quality         *AccessChannelQuality `json:"quality"`
+	Width           *float64              `json:"width"`
 }
 
-// AccessChannelQuality Quality of the channel
+// AccessChannelQuality defines model for accessChannelQuality.
 type AccessChannelQuality string
 
 // AccessDeviceDoorInfo defines model for accessDeviceDoorInfo.
 type AccessDeviceDoorInfo struct {
-	// CanLock Whether the door device can be locked now
-	CanLock *bool `json:"canLock"`
-
-	// LockState The lock state of door device
+	CanLock   *bool   `json:"canLock"`
 	LockState *string `json:"lockState"`
 }
 
 // AccessDeviceFeatureFlags defines model for accessDeviceFeatureFlags.
 type AccessDeviceFeatureFlags struct {
-	// SupportLivestream Whether the device supports live streaming or not
-	SupportLivestream *bool `json:"supportLivestream"`
-
-	// SupportMicManagement Indicates if the device supports mic management
+	SupportLivestream    *bool `json:"supportLivestream"`
 	SupportMicManagement *bool `json:"supportMicManagement"`
-
-	// SupportUnlock Indicates if the device supports locking and unlocking functionality
-	SupportUnlock *bool `json:"supportUnlock"`
+	SupportUnlock        *bool `json:"supportUnlock"`
 }
 
 // AccessDeviceLedSettings defines model for accessDeviceLedSettings.
 type AccessDeviceLedSettings struct {
-	// IsEnabled Whether the LED is enabled or not
 	IsEnabled *bool `json:"isEnabled"`
 }
 
 // AccessDeviceMetadata defines model for accessDeviceMetadata.
 type AccessDeviceMetadata struct {
-	// Channels The channel info of the access device
-	Channels *[]AccessChannel `json:"channels"`
-
-	// ConnectedSince Unix timestamp of when the device connected to the console in second
-	ConnectedSince *float64 `json:"connectedSince"`
-
-	// DisableRecordingByDefault Whether the recording should be disabled by default
-	DisableRecordingByDefault *bool                    `json:"disableRecordingByDefault"`
-	DoorInfo                  AccessDeviceDoorInfo     `json:"doorInfo"`
-	FeatureFlags              AccessDeviceFeatureFlags `json:"featureFlags"`
-	LedSettings               AccessDeviceLedSettings  `json:"ledSettings"`
-
-	// MicVolume Mic volume: a number from 0-100.
-	MicVolume       *float64                    `json:"micVolume"`
-	PairedInfo      AccessDevicePairedInfo      `json:"pairedInfo"`
-	SpeakerSettings AccessDeviceSpeakerSettings `json:"speakerSettings"`
-
-	// TalkbackSettings A list of supported talkback settings
-	TalkbackSettings *[]TalkbackSettings `json:"talkbackSettings"`
+	Channels                  *[]AccessChannel            `json:"channels"`
+	ConnectedSince            *float64                    `json:"connectedSince"`
+	DisableRecordingByDefault *bool                       `json:"disableRecordingByDefault"`
+	DoorInfo                  AccessDeviceDoorInfo        `json:"doorInfo"`
+	FeatureFlags              AccessDeviceFeatureFlags    `json:"featureFlags"`
+	LedSettings               AccessDeviceLedSettings     `json:"ledSettings"`
+	MicVolume                 *float64                    `json:"micVolume"`
+	PairedInfo                AccessDevicePairedInfo      `json:"pairedInfo"`
+	SpeakerSettings           AccessDeviceSpeakerSettings `json:"speakerSettings"`
+	TalkbackSettings          *[]TalkbackSettings         `json:"talkbackSettings"`
 }
 
 // AccessDevicePairedInfo defines model for accessDevicePairedInfo.
 type AccessDevicePairedInfo struct {
-	// Guid The GUID of the paired location or device.
 	Guid *string `json:"guid"`
-
-	// Name The display name of the paired location or device.
 	Name *string `json:"name"`
-
-	// Uri The URI to access the paired location or device.
-	Uri *string `json:"uri"`
+	Uri  *string `json:"uri"`
 }
 
 // AccessDeviceSpeakerSettings defines model for accessDeviceSpeakerSettings.
 type AccessDeviceSpeakerSettings struct {
-	// AreSystemSoundsEnabled Whether or not system sounds on camera are enabled
 	AreSystemSoundsEnabled *bool `json:"areSystemSoundsEnabled"`
 }
 
 // AccessMethodSettings defines model for accessMethodSettings.
 type AccessMethodSettings struct {
-	// Methods The access methods for the camera
 	Methods *[]interface{} `json:"methods"`
 }
 
 // Agreements defines model for agreements.
 type Agreements struct {
-	// AiReportingAgreement AI reporting agreement
-	AiReportingAgreement AgreementsAiReporting `json:"aiReportingAgreement"`
-
-	// SmartDetectAgreement Smart detection agreement
+	AiReportingAgreement AgreementsAiReporting    `json:"aiReportingAgreement"`
 	SmartDetectAgreement AgreementsSmartDetection `json:"smartDetectAgreement"`
 }
 
 // AgreementsAiReporting defines model for agreements.aiReporting.
 type AgreementsAiReporting struct {
-	// ActualContract Actual version of Ironclad AI reporting contract
-	ActualContract *string `json:"actualContract"`
-
-	// ActualContractLink Actual link to Ironclad AI reporting agreement
+	ActualContract     *string `json:"actualContract"`
 	ActualContractLink *string `json:"actualContractLink"`
-
-	// ActualVersion Actual version of Ironclad AI reporting agreement
-	ActualVersion *string `json:"actualVersion"`
-
-	// Status Status of smart detection agreement
-	Status *string `json:"status"`
+	ActualVersion      *string `json:"actualVersion"`
+	Status             *string `json:"status"`
 }
 
 // AgreementsAiReportingUpdate defines model for agreements.aiReportingUpdate.
@@ -2827,17 +2777,10 @@ type AgreementsAiReportingUpdate = map[string]interface{}
 
 // AgreementsSmartDetection defines model for agreements.smartDetection.
 type AgreementsSmartDetection struct {
-	// ActualContract Actual version of Ironclad smart detection contract
-	ActualContract *string `json:"actualContract"`
-
-	// ActualContractLink Actual link to Ironclad smart detection agreement
+	ActualContract     *string `json:"actualContract"`
 	ActualContractLink *string `json:"actualContractLink"`
-
-	// ActualVersion Actual version of Ironclad smart detection agreement
-	ActualVersion *string `json:"actualVersion"`
-
-	// Status Status of smart detection agreement
-	Status *string `json:"status"`
+	ActualVersion      *string `json:"actualVersion"`
+	Status             *string `json:"status"`
 }
 
 // AgreementsSmartDetectionUpdate defines model for agreements.smartDetectionUpdate.
@@ -2845,116 +2788,62 @@ type AgreementsSmartDetectionUpdate = map[string]interface{}
 
 // AgreementsUpdate defines model for agreementsUpdate.
 type AgreementsUpdate struct {
-	// AiReportingAgreement AI reporting agreement
-	AiReportingAgreement *AgreementsAiReportingUpdate `json:"aiReportingAgreement,omitempty"`
-
-	// SmartDetectAgreement Smart detection agreement
+	AiReportingAgreement *AgreementsAiReportingUpdate    `json:"aiReportingAgreement,omitempty"`
 	SmartDetectAgreement *AgreementsSmartDetectionUpdate `json:"smartDetectAgreement,omitempty"`
 }
 
 // AiFeatureFlag defines model for aiFeatureFlag.
 type AiFeatureFlag struct {
-	// SupportAiSummary Whether any adopted AI Processor supports AI summary.
-	SupportAiSummary *map[string]interface{} `json:"supportAiSummary"`
-
-	// SupportFaceEnhancement Whether any adopted AI Processor supports face enhancement.
-	SupportFaceEnhancement *map[string]interface{} `json:"supportFaceEnhancement"`
-
-	// SupportFaceRecognition Whether any adopted AI Processor supports face recognition.
-	SupportFaceRecognition *map[string]interface{} `json:"supportFaceRecognition"`
-
-	// SupportImageSearch Whether any adopted AI Processor supports image search.
-	SupportImageSearch *map[string]interface{} `json:"supportImageSearch"`
-
-	// SupportLicensePlateRecognition Whether any adopted AI Processor supports license plate recognition.
+	SupportAiSummary               *map[string]interface{} `json:"supportAiSummary"`
+	SupportFaceEnhancement         *map[string]interface{} `json:"supportFaceEnhancement"`
+	SupportFaceRecognition         *map[string]interface{} `json:"supportFaceRecognition"`
+	SupportImageSearch             *map[string]interface{} `json:"supportImageSearch"`
 	SupportLicensePlateRecognition *map[string]interface{} `json:"supportLicensePlateRecognition"`
-
-	// SupportMessageProxy Whether any adopted AI Processor supports message proxy.
-	SupportMessageProxy *map[string]interface{} `json:"supportMessageProxy"`
-
-	// SupportPersonReId Whether any adopted AI Processor supports person re-identification.
-	SupportPersonReId *map[string]interface{} `json:"supportPersonReId"`
-
-	// SupportPoseEstimation Whether any adopted AI Processor supports pose estimation.
-	SupportPoseEstimation *map[string]interface{} `json:"supportPoseEstimation"`
-
-	// SupportRecognizeAnything Whether any adopted AI Processor supports recognize anything (RAM).
-	SupportRecognizeAnything *map[string]interface{} `json:"supportRecognizeAnything"`
-
-	// SupportRetroactiveProcessing Whether any adopted AI Processor supports retroactive processing.
-	SupportRetroactiveProcessing *map[string]interface{} `json:"supportRetroactiveProcessing"`
-
-	// SupportTts Whether any adopted AI Processor supports text-to-speech.
-	SupportTts *map[string]interface{} `json:"supportTts"`
+	SupportMessageProxy            *map[string]interface{} `json:"supportMessageProxy"`
+	SupportPersonReId              *map[string]interface{} `json:"supportPersonReId"`
+	SupportPoseEstimation          *map[string]interface{} `json:"supportPoseEstimation"`
+	SupportRecognizeAnything       *map[string]interface{} `json:"supportRecognizeAnything"`
+	SupportRetroactiveProcessing   *map[string]interface{} `json:"supportRetroactiveProcessing"`
+	SupportTts                     *map[string]interface{} `json:"supportTts"`
 }
 
 // AiSummarySettings defines model for aiSummarySettings.
 type AiSummarySettings struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras"`
-
-	// Enabled Whether or not the ai feature is enabled (default: false)
-	Enabled *bool `json:"enabled"`
+	AllCameras *bool          `json:"allCameras"`
+	Cameras    *[]interface{} `json:"cameras"`
+	Enabled    *bool          `json:"enabled"`
 }
 
 // AiSummarySettingsUpdate defines model for aiSummarySettingsUpdate.
 type AiSummarySettingsUpdate struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras,omitempty"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras,omitempty"`
-
-	// Enabled Whether or not the ai feature is enabled (default: false)
-	Enabled *bool `json:"enabled,omitempty"`
+	AllCameras *bool          `json:"allCameras,omitempty"`
+	Cameras    *[]interface{} `json:"cameras,omitempty"`
+	Enabled    *bool          `json:"enabled,omitempty"`
 }
 
 // AirQualityAlertSettings defines model for airQualityAlertSettings.
 type AirQualityAlertSettings struct {
-	// HighThreshold High threshold value.
 	HighThreshold *float64 `json:"highThreshold"`
-
-	// IsEnabled Enable alerts.
-	IsEnabled *bool `json:"isEnabled"`
-
-	// LowThreshold Low threshold value.
-	LowThreshold *float64 `json:"lowThreshold"`
+	IsEnabled     *bool    `json:"isEnabled"`
+	LowThreshold  *float64 `json:"lowThreshold"`
 }
 
 // AirQualitySettings defines model for airQualitySettings.
 type AirQualitySettings struct {
-	// AlertInterval Alert interval in seconds (5-30).
-	AlertInterval    *float64                `json:"alertInterval"`
-	AqiSettings      AirQualityAlertSettings `json:"aqiSettings"`
-	Co2Settings      AirQualityAlertSettings `json:"co2Settings"`
-	HumiditySettings AirQualityAlertSettings `json:"humiditySettings"`
-
-	// NightModeBrightness Night mode ring LED brightness (0-100).
-	NightModeBrightness *float64 `json:"nightModeBrightness"`
-
-	// NightModeEnabled Enable night mode LED dimming.
-	NightModeEnabled *bool `json:"nightModeEnabled"`
-
-	// NightModeEndTime Night mode end time (24-hour HH:MM).
-	NightModeEndTime *string `json:"nightModeEndTime"`
-
-	// NightModeStartTime Night mode start time (24-hour HH:MM).
-	NightModeStartTime *string                 `json:"nightModeStartTime"`
-	Pm10p0Settings     AirQualityAlertSettings `json:"pm10p0Settings"`
-	Pm1p0Settings      AirQualityAlertSettings `json:"pm1p0Settings"`
-	Pm2p5Settings      AirQualityAlertSettings `json:"pm2p5Settings"`
-	Pm4p0Settings      AirQualityAlertSettings `json:"pm4p0Settings"`
-
-	// ReadingInterval Reading interval in seconds (5-30).
-	ReadingInterval *float64 `json:"readingInterval"`
-
-	// RingLedBrightness Ring LED brightness (0-100).
-	RingLedBrightness *float64 `json:"ringLedBrightness"`
-
-	// RingLedMetric Ring LED metric (0 = CO2, 1 = AQI).
+	AlertInterval       *float64                `json:"alertInterval"`
+	AqiSettings         AirQualityAlertSettings `json:"aqiSettings"`
+	Co2Settings         AirQualityAlertSettings `json:"co2Settings"`
+	HumiditySettings    AirQualityAlertSettings `json:"humiditySettings"`
+	NightModeBrightness *float64                `json:"nightModeBrightness"`
+	NightModeEnabled    *bool                   `json:"nightModeEnabled"`
+	NightModeEndTime    *string                 `json:"nightModeEndTime"`
+	NightModeStartTime  *string                 `json:"nightModeStartTime"`
+	Pm10p0Settings      AirQualityAlertSettings `json:"pm10p0Settings"`
+	Pm1p0Settings       AirQualityAlertSettings `json:"pm1p0Settings"`
+	Pm2p5Settings       AirQualityAlertSettings `json:"pm2p5Settings"`
+	Pm4p0Settings       AirQualityAlertSettings `json:"pm4p0Settings"`
+	ReadingInterval     *float64                `json:"readingInterval"`
+	RingLedBrightness   *float64                `json:"ringLedBrightness"`
 	RingLedMetric       *float64                `json:"ringLedMetric"`
 	TemperatureSettings AirQualityAlertSettings `json:"temperatureSettings"`
 	TvocSettings        AirQualityAlertSettings `json:"tvocSettings"`
@@ -2964,1620 +2853,736 @@ type AirQualitySettings struct {
 
 // AirQualityStat defines model for airQualityStat.
 type AirQualityStat struct {
-	// Status What range does the measured metric fall into
 	Status *AirQualityStatStatus `json:"status"`
-
-	// Value Decimal value of the metric measured by the sensor
-	Value *float64 `json:"value"`
+	Value  *float64              `json:"value"`
 }
 
-// AirQualityStatStatus What range does the measured metric fall into
+// AirQualityStatStatus defines model for airQualityStatStatus.
 type AirQualityStatStatus string
 
 // AlarmSensorSettings defines model for alarmSensorSettings.
 type AlarmSensorSettings struct {
-	// IsEnabled Enable smoke and carbon monoxide alarm sensor.
 	IsEnabled *bool `json:"isEnabled"`
 }
 
 // AudioSettings defines model for audioSettings.
 type AudioSettings struct {
-	// Style What audio style camera is using
 	Style *[]interface{} `json:"style"`
 }
 
 // Automation defines model for automation.
 type Automation struct {
-	// Actions A list of automation actions
-	Actions []AutomationAction `json:"actions"`
-
-	// Conditions Conditions of automation sources
-	Conditions []AutomationCondition `json:"conditions"`
-
-	// Cooldown Cooldown settings of automation
-	Cooldown AutomationCooldown `json:"cooldown"`
-
-	// CreatedAt Automation creation time
-	CreatedAt FlexTime `json:"createdAt"`
-
-	// Deleted Soft delete automation
-	Deleted bool `json:"deleted"`
-
-	// Editable DEPRECATED: Is automation can be edited
-	Editable bool `json:"editable"`
-
-	// Enable Is automation enabled
-	Enable bool `json:"enable"`
-
-	// GlobalId Global ID of automation
-	GlobalId *string `json:"globalId"`
-
-	// HistoryConditions History conditions of automation sources (history look back period, AND conditions)
-	HistoryConditions []AutomationHistoryCondition `json:"historyConditions"`
-	Id                string                       `json:"id"`
-
-	// IsBlockedByArmMode Is automation blocked by arm mode
-	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
-
-	// IsCreatedBySystem DEPRECATED: Is automation created by system
-	IsCreatedBySystem bool `json:"isCreatedBySystem"`
-
-	// IsExternal Is automation from external UOS automation manager
-	IsExternal *bool  `json:"isExternal"`
-	ModelKey   string `json:"modelKey"`
-
-	// Name Name of automation
-	Name string `json:"name"`
-
-	// Schedules Schedules of automation sources
-	Schedules []AutomationSchedule `json:"schedules"`
-
-	// Sources A list of automation sources
-	Sources []AutomationSource `json:"sources"`
-	Status  AutomationStatus   `json:"status"`
-
-	// UsedInArmMode Is automation used in arm mode
-	UsedInArmMode *bool `json:"usedInArmMode"`
-
-	// User Creator of automation
-	User *string `json:"user"`
+	Actions            []AutomationAction           `json:"actions"`
+	Conditions         []AutomationCondition        `json:"conditions"`
+	Cooldown           AutomationCooldown           `json:"cooldown"`
+	CreatedAt          FlexTime                     `json:"createdAt"`
+	Deleted            bool                         `json:"deleted"`
+	Editable           bool                         `json:"editable"`
+	Enable             bool                         `json:"enable"`
+	GlobalId           *string                      `json:"globalId"`
+	HistoryConditions  []AutomationHistoryCondition `json:"historyConditions"`
+	Id                 string                       `json:"id"`
+	IsBlockedByArmMode bool                         `json:"isBlockedByArmMode"`
+	IsCreatedBySystem  bool                         `json:"isCreatedBySystem"`
+	IsExternal         *bool                        `json:"isExternal"`
+	ModelKey           string                       `json:"modelKey"`
+	Name               string                       `json:"name"`
+	Schedules          []AutomationSchedule         `json:"schedules"`
+	Sources            []AutomationSource           `json:"sources"`
+	Status             AutomationStatus             `json:"status"`
+	UsedInArmMode      *bool                        `json:"usedInArmMode"`
+	User               *string                      `json:"user"`
 }
 
 // AutomationAction defines model for automation.action.
 type AutomationAction struct {
-	// Action Action for automation manager
-	Action *string `json:"action"`
-
-	// Metadata Action metadata for automation manager
+	Action   *string                 `json:"action"`
 	Metadata *map[string]interface{} `json:"metadata"`
-
-	// Order Order of action in automation manager, -1 means order of actions is not important
-	Order *float64 `json:"order"`
-
-	// Type Action type for automation manager
-	Type *AutomationActionType `json:"type"`
+	Order    *float64                `json:"order"`
+	Type     *AutomationActionType   `json:"type"`
 }
 
-// AutomationActionType Action type for automation manager
+// AutomationActionType defines model for automation.actionType.
 type AutomationActionType string
 
 // AutomationCondition defines model for automation.condition.
 type AutomationCondition struct {
-	// Condition Conditions of automation manager
 	Condition *map[string]interface{} `json:"condition"`
 }
 
 // AutomationCooldown defines model for automation.cooldown.
 type AutomationCooldown struct {
-	// Enable Is automation cooldown enabled
-	Enable *bool `json:"enable"`
-
-	// LastExecutedAt Last executed at timestamp
+	Enable         *bool    `json:"enable"`
 	LastExecutedAt *float64 `json:"lastExecutedAt"`
-
-	// Timeout Default cooldown timeout of automation. Default - 600000
-	Timeout *float64 `json:"timeout"`
+	Timeout        *float64 `json:"timeout"`
 }
 
 // AutomationHistoryCondition defines model for automation.historyCondition.
 type AutomationHistoryCondition struct {
-	// Conditions History conditions of automation manager
 	Conditions *[]interface{} `json:"conditions"`
-
-	// Period Period to look back for history conditions in milliseconds
-	Period *float64 `json:"period"`
+	Period     *float64       `json:"period"`
 }
 
 // AutomationSchedule defines model for automation.schedule.
 type AutomationSchedule struct {
-	// Schedule Schedule of automation manager
 	Schedule *map[string]interface{} `json:"schedule"`
 }
 
 // AutomationSource defines model for automation.source.
 type AutomationSource struct {
-	// Buttons Buttons of automation source
-	Buttons *[]interface{} `json:"buttons"`
-
-	// Device Source device for automation manager
-	Device *string `json:"device"`
-
-	// Type Type of import of source device
-	Type *AutomationSourceType `json:"type"`
-
-	// Zones Included zones of automation source
-	Zones *map[string]interface{} `json:"zones"`
+	Buttons *[]interface{}          `json:"buttons"`
+	Device  *string                 `json:"device"`
+	Type    *AutomationSourceType   `json:"type"`
+	Zones   *map[string]interface{} `json:"zones"`
 }
 
-// AutomationSourceType Type of import of source device
+// AutomationSourceType defines model for automation.sourceType.
 type AutomationSourceType string
 
 // AutomationStatus defines model for automation.status.
 type AutomationStatus struct {
-	// LastDetectionEventId Last detection eventId of automation executions in last 24h
-	LastDetectionEventId *string `json:"lastDetectionEventId"`
-
-	// LastExecutedAt Last timestamp of automation executions in last 24h
-	LastExecutedAt *float64 `json:"lastExecutedAt"`
-
-	// LastExecutedState Missing description
-	LastExecutedState *string `json:"lastExecutedState"`
-
-	// Total Total count of automation executions in last 24h
-	Total *float64 `json:"total"`
+	LastDetectionEventId *string  `json:"lastDetectionEventId"`
+	LastExecutedAt       *float64 `json:"lastExecutedAt"`
+	LastExecutedState    *string  `json:"lastExecutedState"`
+	Total                *float64 `json:"total"`
 }
 
 // BluetoothConnectionState defines model for bluetoothConnectionState.
 type BluetoothConnectionState struct {
-	// SignalNoiseRatio dB value represents the ratio between the received signal power and the noise floor power, indicating how much stronger the signal is compared to background noise.
 	SignalNoiseRatio *float64 `json:"signalNoiseRatio"`
-
-	// SignalQuality Percent representation of Bluetooth signal strength.
-	SignalQuality *float64 `json:"signalQuality"`
-
-	// SignalStrength dBm value of Bluetooth signal strength.
-	SignalStrength *float64 `json:"signalStrength"`
+	SignalQuality    *float64 `json:"signalQuality"`
+	SignalStrength   *float64 `json:"signalStrength"`
 }
 
 // Bridge defines model for bridge.
 type Bridge struct {
-	// AnonymousDeviceId Persistent unique device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId"`
-
-	// CanAdopt Whether or not the device can be adopted.
-	CanAdopt *bool `json:"canAdopt"`
-
-	// Clients Array of IoT devices mac that bridge is reserving for
-	Clients *[]interface{} `json:"clients"`
-
-	// ConnectedSince Unix timestamp of when the device connected to the NVR.
-	ConnectedSince *float64 `json:"connectedSince"`
-
-	// ConnectionHost The ip or hostname the device uses to connect.
-	ConnectionHost *string `json:"connectionHost"`
-
-	// DisplayName The device display name.
-	DisplayName *string `json:"displayName"`
-
-	// FirmwareBuild The build # of the firmware that is installed.
-	FirmwareBuild *string `json:"firmwareBuild"`
-
-	// FirmwareVersion The version of firmware that is installed on the device.
-	FirmwareVersion *string `json:"firmwareVersion"`
-
-	// FwUpdateState The device FW update state.
-	FwUpdateState *BridgeFwUpdateState `json:"fwUpdateState"`
-
-	// GlobalAlarmManagerScopeNames The global alarm manager scope names for the device.
-	GlobalAlarmManagerScopeNames *[]interface{} `json:"globalAlarmManagerScopeNames"`
-
-	// Guid Unique id of the device
-	Guid *string `json:"guid"`
-
-	// HardwareRevision Hardware revision of the device
-	HardwareRevision *string `json:"hardwareRevision"`
-
-	// Host The primary IP address of the device.
-	Host *string `json:"host"`
-	Id   string  `json:"id"`
-
-	// IsAdopted Whether or not the device is adopted.
-	IsAdopted *bool `json:"isAdopted"`
-
-	// IsAdoptedByOther Whether or not the device is adopted by the other controller.
-	IsAdoptedByOther *bool `json:"isAdoptedByOther"`
-
-	// IsAdopting Whether or not the device is currently being adopted.
-	IsAdopting *bool `json:"isAdopting"`
-
-	// IsAttemptingToConnect Whether the device is attempting to connect to the controller
-	IsAttemptingToConnect *bool `json:"isAttemptingToConnect"`
-
-	// IsBlockedByArmMode Whether the device is blocked by arm mode
-	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
-
-	// IsConnected Whether the device IPC is connected?
-	IsConnected *bool `json:"isConnected"`
-
-	// IsDownloadingFW Whether the device is currently downloading a FW for an upgrade
-	IsDownloadingFW *bool `json:"isDownloadingFW"`
-
-	// IsProvisioned Whether or not the device is provisioned.
-	IsProvisioned *bool `json:"isProvisioned"`
-
-	// IsRebooting Whether the device is currently rebooting
-	IsRebooting *bool `json:"isRebooting"`
-
-	// IsRestoring Whether or not the device is currently being restored.
-	IsRestoring *bool `json:"isRestoring"`
-
-	// IsReverting Whether the device is currently reverting to a previous firmware version
-	IsReverting *bool `json:"isReverting"`
-
-	// IsSshEnabled Whether or not SSH is enabled
-	IsSshEnabled *bool `json:"isSshEnabled"`
-
-	// IsUpdating Whether the device is currently updating
-	IsUpdating *bool `json:"isUpdating"`
-
-	// LastDisconnect Unix timestamp of the last time the device disconnected.
-	LastDisconnect *float64 `json:"lastDisconnect"`
-
-	// LastSeen Unix timestamp of when the device was last connected.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// LatestFirmwareSizeBytes The latest firmware size of the device in bytes.
-	LatestFirmwareSizeBytes *float64 `json:"latestFirmwareSizeBytes"`
-
-	// LatestFirmwareVersion The latest firmware version of the device.
-	LatestFirmwareVersion *string `json:"latestFirmwareVersion"`
-
-	// Mac The primary MAC address of the device.
-	Mac string `json:"mac"`
-
-	// MaxClients The max acceptable client number of a V2 bridge. V1 bridge does not support this feature.
-	MaxClients *float64 `json:"maxClients"`
-
-	// MinFirmwareVersion The minimum firmware version supported for this device with the current Protect version.
-	MinFirmwareVersion *string `json:"minFirmwareVersion"`
-	ModelKey           string  `json:"modelKey"`
-
-	// Name The name of the device.
-	Name *string `json:"name"`
-
-	// NvrMac The MAC address of the NVR managed this device.
-	NvrMac *string `json:"nvrMac"`
-
-	// Platform The bridge platform
-	Platform *string `json:"platform"`
-
-	// PreviousFirmwareUrl The FUS download URL for the previous firmware version.
-	PreviousFirmwareUrl *string `json:"previousFirmwareUrl"`
-
-	// PreviousFirmwareVersion The previously installed firmware version before the last update.
-	PreviousFirmwareVersion *string `json:"previousFirmwareVersion"`
-
-	// ReleaseNotePath The release note path for constructing firmware release note URLs.
-	ReleaseNotePath *string `json:"releaseNotePath"`
-
-	// State Connection state of the device.
-	State *BridgeState `json:"state"`
-
-	// SupportFileCreatedAt The support file created at for the device.
-	SupportFileCreatedAt *float64 `json:"supportFileCreatedAt"`
-
-	// SupportFileName The support file name for the device.
-	SupportFileName *string `json:"supportFileName"`
-
-	// SupportFileState The support file state for the device.
-	SupportFileState *BridgeSupportFileState `json:"supportFileState"`
-
-	// Sysid The device sysid. (hex string)
-	Sysid *string `json:"sysid"`
-
-	// Type The device model name.
-	Type *string `json:"type"`
-
-	// UpSince Unix timestamp of when the device started up.
-	UpSince *float64 `json:"upSince"`
-
-	// UplinkDevice Which uplink device currently connected to.
-	UplinkDevice *map[string]interface{} `json:"uplinkDevice"`
-
-	// Uptime device uptime in second.
-	Uptime               *float64             `json:"uptime"`
-	WifiConnectionState  WifiConnectionState  `json:"wifiConnectionState"`
-	WiredConnectionState WiredConnectionState `json:"wiredConnectionState"`
+	AnonymousDeviceId            *string                 `json:"anonymousDeviceId"`
+	CanAdopt                     *bool                   `json:"canAdopt"`
+	Clients                      *[]interface{}          `json:"clients"`
+	ConnectedSince               *float64                `json:"connectedSince"`
+	ConnectionHost               *string                 `json:"connectionHost"`
+	DisplayName                  *string                 `json:"displayName"`
+	FirmwareBuild                *string                 `json:"firmwareBuild"`
+	FirmwareVersion              *string                 `json:"firmwareVersion"`
+	FwUpdateState                *BridgeFwUpdateState    `json:"fwUpdateState"`
+	GlobalAlarmManagerScopeNames *[]interface{}          `json:"globalAlarmManagerScopeNames"`
+	Guid                         *string                 `json:"guid"`
+	HardwareRevision             *string                 `json:"hardwareRevision"`
+	Host                         *string                 `json:"host"`
+	Id                           string                  `json:"id"`
+	IsAdopted                    *bool                   `json:"isAdopted"`
+	IsAdoptedByOther             *bool                   `json:"isAdoptedByOther"`
+	IsAdopting                   *bool                   `json:"isAdopting"`
+	IsAttemptingToConnect        *bool                   `json:"isAttemptingToConnect"`
+	IsBlockedByArmMode           bool                    `json:"isBlockedByArmMode"`
+	IsConnected                  *bool                   `json:"isConnected"`
+	IsDownloadingFW              *bool                   `json:"isDownloadingFW"`
+	IsProvisioned                *bool                   `json:"isProvisioned"`
+	IsRebooting                  *bool                   `json:"isRebooting"`
+	IsRestoring                  *bool                   `json:"isRestoring"`
+	IsReverting                  *bool                   `json:"isReverting"`
+	IsSshEnabled                 *bool                   `json:"isSshEnabled"`
+	IsUpdating                   *bool                   `json:"isUpdating"`
+	LastDisconnect               *float64                `json:"lastDisconnect"`
+	LastSeen                     *float64                `json:"lastSeen"`
+	LatestFirmwareSizeBytes      *float64                `json:"latestFirmwareSizeBytes"`
+	LatestFirmwareVersion        *string                 `json:"latestFirmwareVersion"`
+	Mac                          string                  `json:"mac"`
+	MaxClients                   *float64                `json:"maxClients"`
+	MinFirmwareVersion           *string                 `json:"minFirmwareVersion"`
+	ModelKey                     string                  `json:"modelKey"`
+	Name                         *string                 `json:"name"`
+	NvrMac                       *string                 `json:"nvrMac"`
+	Platform                     *string                 `json:"platform"`
+	PreviousFirmwareUrl          *string                 `json:"previousFirmwareUrl"`
+	PreviousFirmwareVersion      *string                 `json:"previousFirmwareVersion"`
+	ReleaseNotePath              *string                 `json:"releaseNotePath"`
+	State                        *BridgeState            `json:"state"`
+	SupportFileCreatedAt         *float64                `json:"supportFileCreatedAt"`
+	SupportFileName              *string                 `json:"supportFileName"`
+	SupportFileState             *BridgeSupportFileState `json:"supportFileState"`
+	Sysid                        *string                 `json:"sysid"`
+	Type                         *string                 `json:"type"`
+	UpSince                      *float64                `json:"upSince"`
+	UplinkDevice                 *map[string]interface{} `json:"uplinkDevice"`
+	Uptime                       *float64                `json:"uptime"`
+	WifiConnectionState          WifiConnectionState     `json:"wifiConnectionState"`
+	WiredConnectionState         WiredConnectionState    `json:"wiredConnectionState"`
 }
 
 // BridgeCandidate defines model for bridgeCandidate.
 type BridgeCandidate struct {
-	// Id Bridge candidate ID.
-	Id *string `json:"id"`
-
-	// LastSeen Unix timestamp of when the Bluetooth device was last discovered by the bridge.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// SignalQuality Percent representation of Bluetooth signal strength from the Bluetooth device to the bridge candidate.
+	Id            *string  `json:"id"`
+	LastSeen      *float64 `json:"lastSeen"`
 	SignalQuality *float64 `json:"signalQuality"`
 }
 
-// BridgeFwUpdateState The device FW update state.
+// BridgeFwUpdateState defines model for bridgeFwUpdateState.
 type BridgeFwUpdateState string
 
-// BridgeState Connection state of the device.
+// BridgeState defines model for bridgeState.
 type BridgeState string
 
-// BridgeSupportFileState The support file state for the device.
+// BridgeSupportFileState defines model for bridgeSupportFileState.
 type BridgeSupportFileState string
 
 // Camera defines model for camera.
 type Camera struct {
-	// AccessDeviceMetadata Metadata for the Access device
-	AccessDeviceMetadata AccessDeviceMetadata `json:"accessDeviceMetadata"`
-
-	// AccessMethodSettings The access methods for the camera
-	AccessMethodSettings AccessMethodSettings `json:"accessMethodSettings"`
-
-	// ActivePatrolSlot The slot number (0-4) of the patrol that is currently running, or null if no patrol is running
-	ActivePatrolSlot *float64 `json:"activePatrolSlot"`
-
-	// AiPortCapacityPoints The capacity points of the camera for AI Port
-	AiPortCapacityPoints *float64 `json:"aiPortCapacityPoints"`
-
-	// AiPortCompatibleResolutions Which ResolutionIds are compatible with AI Port limits (3840x2160)
-	AiPortCompatibleResolutions *[]interface{} `json:"aiPortCompatibleResolutions"`
-
-	// AiPortCompatibleResolutionsInHallway Which ResolutionIds are compatible with AI Port limits in Hallway mode
-	AiPortCompatibleResolutionsInHallway *[]interface{} `json:"aiPortCompatibleResolutionsInHallway"`
-	Alarms                               CameraAlarm    `json:"alarms"`
-
-	// AnonymousDeviceId Persistent unique device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId"`
-
-	// ApMac The MAC address of the AP that discovered this camera over wireless uplink
-	ApMac *string `json:"apMac"`
-
-	// ApMgmtIp The management IP address of the AP that discovered this camera over wireless uplink
-	ApMgmtIp *string `json:"apMgmtIp"`
-
-	// ApRssi The received signal strength indication of the AP that discovered this camera over wireless uplink
-	ApRssi *float64 `json:"apRssi"`
-
-	// AudioBitrate The camera audio bitrate.
-	AudioBitrate *float64 `json:"audioBitrate"`
-
-	// AudioSettings Camera audio settings
-	AudioSettings AudioSettings `json:"audioSettings"`
-
-	// AutoRetentionLqMs Auto-calculated LQ retention in milliseconds. Set by retention balancer. Null if camera has user override or insufficient data.
-	AutoRetentionLqMs *float64 `json:"autoRetentionLqMs"`
-
-	// AutoRetentionMs Auto-calculated HQ retention in milliseconds. Set by retention balancer. Null if camera has user override or insufficient data.
-	AutoRetentionMs *float64 `json:"autoRetentionMs"`
-
-	// BrightnessSettings LED brightness settings
-	BrightnessSettings CameraBrightnessSettings `json:"brightnessSettings"`
-
-	// CanAdopt Whether or not the device can be adopted.
-	CanAdopt *bool `json:"canAdopt"`
-
-	// CanCreateAccessEvent Whether or not the camera can create access events
-	CanCreateAccessEvent *bool `json:"canCreateAccessEvent"`
-
-	// CanManage Whether the camera can manage? (alias to canAdopt)
-	CanManage *bool `json:"canManage"`
-
-	// Channels A list of channels.
-	Channels []Channel `json:"channels"`
-
-	// ChimeDuration How long your doorbell rings in milliseconds when someone presses the button. (0-10000 ms)
-	ChimeDuration *float64 `json:"chimeDuration"`
-
-	// ClarityZones An array of clarity zones.
-	ClarityZones []ClarityZone `json:"clarityZones"`
-
-	// ConnectedSince Unix timestamp of when the device connected to the NVR.
-	ConnectedSince *float64 `json:"connectedSince"`
-
-	// ConnectionHost The ip or hostname the device uses to connect.
-	ConnectionHost *string `json:"connectionHost"`
-
-	// CurrentResolution What's the current camera streaming resolution?
-	CurrentResolution *string `json:"currentResolution"`
-
-	// DisplayName The device display name.
-	DisplayName     *string               `json:"displayName"`
-	DoorbellSession CameraDoorbellSession `json:"doorbellSession"`
-
-	// DownScaleMode How much the camera video resolution is down-scaled.
-	DownScaleMode float64 `json:"downScaleMode"`
-
-	// ElementInfo The element information provided by this camera while it was probing for a wireless network
-	ElementInfo *string `json:"elementInfo"`
-
-	// EnableNfc Whether Near-field communication (NFC) is enabled (legacy code for Access integration)
-	EnableNfc *bool `json:"enableNfc"`
-
-	// ExcludeZones An array of exclude zones.
-	ExcludeZones       []ExcludeZone            `json:"excludeZones"`
-	ExtendedAiFeatures CameraExtendedAiFeatures `json:"extendedAiFeatures"`
-
-	// FaceUnlockSettings Face unlock settings
-	FaceUnlockSettings FaceUnlockSettings `json:"faceUnlockSettings"`
-
-	// FeatureFlags Feature flags of the camera
-	FeatureFlags FeatureFlags `json:"featureFlags"`
-
-	// FingerprintSettings fingerprint settings for touch sensor
-	FingerprintSettings FingerprintSettings `json:"fingerprintSettings"`
-	FingerprintState    FingerprintState    `json:"fingerprintState"`
-
-	// FirmwareBuild The build # of the firmware that is installed.
-	FirmwareBuild *string `json:"firmwareBuild"`
-
-	// FirmwareVersion The version of firmware that is installed on the device.
-	FirmwareVersion *string `json:"firmwareVersion"`
-
-	// FwUpdateState The device FW update state.
-	FwUpdateState *CameraFwUpdateState `json:"fwUpdateState"`
-
-	// GlobalAlarmManagerScopeNames The global alarm manager scope names for the device.
-	GlobalAlarmManagerScopeNames *[]interface{} `json:"globalAlarmManagerScopeNames"`
-
-	// GreetingSettings Greeting settings
-	GreetingSettings CameraGreetingSettings `json:"greetingSettings"`
-
-	// Guid Unique id of the device
-	Guid *string `json:"guid"`
-
-	// HallwayMode Whether hallway mode is enabled for this camera and at what sensor rotation.
-	HallwayMode CameraHallwayMode `json:"hallwayMode"`
-
-	// HardwareRevision Hardware revision of the device
-	HardwareRevision *string `json:"hardwareRevision"`
-
-	// HasPackageCamera Whether the camera has a package camera.
-	HasPackageCamera *bool `json:"hasPackageCamera"`
-
-	// HasRecordingStarted Indicates that camera stream is being pushed to Protect.
-	HasRecordingStarted *bool `json:"hasRecordingStarted"`
-
-	// HasRecordings Missing description
-	HasRecordings *bool `json:"hasRecordings"`
-
-	// HasSpeaker Whether the camera has a speaker.
-	HasSpeaker *bool `json:"hasSpeaker"`
-
-	// HasWifi Whether the camera has the wifi.
-	HasWifi *bool `json:"hasWifi"`
-
-	// HdrMode Whether High Dynamic Range is on or off
-	HdrMode *bool `json:"hdrMode"`
-
-	// HdrType High Dynamic Range (HDR) mode setting.
-	HdrType *string `json:"hdrType"`
-
-	// HomekitAccessoryId Unique identifier of this device for use in the unifi-homekit service
-	HomekitAccessoryId *float64 `json:"homekitAccessoryId"`
-
-	// HomekitSettings Homekit settings.
-	HomekitSettings HomekitSettings `json:"homekitSettings"`
-
-	// Host The primary IP address of the device.
-	Host *string `json:"host"`
-
-	// HqBytesPerDay HQ recording rate in bytes per day, averaged over last 7 days. For retention calculations only.
-	HqBytesPerDay *float64 `json:"hqBytesPerDay"`
-
-	// HubMac Connected uplink Hub mac
-	HubMac *string `json:"hubMac"`
-	Id     string  `json:"id"`
-
-	// InterfaceSettings Interface settings
-	InterfaceSettings CameraInterfaceSettings `json:"interfaceSettings"`
-
-	// Is2K Whether the camera HQ is 2K resolution.
-	Is2K *bool `json:"is2K"`
-
-	// Is4K Whether the camera HQ is 4K resolution.
-	Is4K *bool `json:"is4K"`
-
-	// IsAccessDevice Whether or not the camera is an Access Device after migration
-	IsAccessDevice *bool `json:"isAccessDevice"`
-
-	// IsAccessFloodlightTriggerEnabled Whether access floodlight trigger is enabled
-	IsAccessFloodlightTriggerEnabled bool `json:"isAccessFloodlightTriggerEnabled"`
-
-	// IsAdopted Whether or not the device is adopted.
-	IsAdopted *bool `json:"isAdopted"`
-
-	// IsAdoptedByAccessApp Whether the camera is adopted by Access application
-	IsAdoptedByAccessApp bool `json:"isAdoptedByAccessApp"`
-
-	// IsAdoptedByOther Whether or not the device is adopted by the other controller.
-	IsAdoptedByOther *bool `json:"isAdoptedByOther"`
-
-	// IsAdopting Whether or not the device is currently being adopted.
-	IsAdopting *bool `json:"isAdopting"`
-
-	// IsAttemptingToConnect Whether the device is attempting to connect to the controller
-	IsAttemptingToConnect *bool `json:"isAttemptingToConnect"`
-
-	// IsBlockedByArmMode Whether the device is blocked by arm mode
-	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
-
-	// IsConnected Whether the device IPC is connected?
-	IsConnected *bool `json:"isConnected"`
-
-	// IsDark Whether the camera is currently in dark scene.
-	IsDark *bool `json:"isDark"`
-
-	// IsDeleting Whether the camera is currently in the process of being deleted
-	IsDeleting *bool `json:"isDeleting"`
-
-	// IsDownloadingFW Whether the device is currently downloading a FW for an upgrade
-	IsDownloadingFW *bool `json:"isDownloadingFW"`
-
-	// IsExtenderInstalledEver Whether the camera has been installed with extenders ever
-	IsExtenderInstalledEver *bool `json:"isExtenderInstalledEver"`
-
-	// IsIntercom Whether or not the camera is an Intercom Series
-	IsIntercom *bool `json:"isIntercom"`
-
-	// IsLiveHeatmapEnabled Whether the camera is currently live-heatmap enabled or not.
-	IsLiveHeatmapEnabled *bool `json:"isLiveHeatmapEnabled"`
-
-	// IsManaged Whether the camera is managed? (alias to isAdopted)
-	IsManaged *bool `json:"isManaged"`
-
-	// IsMicEnabled Whether or not the microphone on camera is enabled
-	IsMicEnabled *bool `json:"isMicEnabled"`
-
-	// IsMissingRecordingDetected Whether BE has detected a missing recording for this device right now.
-	IsMissingRecordingDetected *bool `json:"isMissingRecordingDetected"`
-
-	// IsMotionDetected Whether the camera is currently detecting motion
-	IsMotionDetected *bool `json:"isMotionDetected"`
-
-	// IsPairedWithAiPort Whether the camera is paired with AI Port
-	IsPairedWithAiPort bool `json:"isPairedWithAiPort"`
-
-	// IsPoorNetwork Whether the camera is currently in poor network state.
-	IsPoorNetwork *bool `json:"isPoorNetwork"`
-
-	// IsProbingForWifi Whether the camera is probing for a network over wireless uplink
-	IsProbingForWifi *bool `json:"isProbingForWifi"`
-
-	// IsProvisioned Whether or not the device is provisioned.
-	IsProvisioned *bool `json:"isProvisioned"`
-
-	// IsReaderPro Whether or not the camera is a Reader Pro Series
-	IsReaderPro *bool `json:"isReaderPro"`
-
-	// IsRebooting Whether the device is currently rebooting
-	IsRebooting *bool `json:"isRebooting"`
-
-	// IsRecording Whether the camera is currently recording
-	IsRecording *bool `json:"isRecording"`
-
-	// IsRecordingsPaused System has paused recordings for this camera (e.g., RAID recovery).
-	IsRecordingsPaused bool `json:"isRecordingsPaused"`
-
-	// IsRecordingsPausedChangedAt Timestamp when isRecordingsPaused last changed. Used for grace period. Not persistent.
-	IsRecordingsPausedChangedAt *float64 `json:"isRecordingsPausedChangedAt"`
-
-	// IsRestoring Whether or not the device is currently being restored.
-	IsRestoring *bool `json:"isRestoring"`
-
-	// IsReverting Whether the device is currently reverting to a previous firmware version
-	IsReverting *bool `json:"isReverting"`
-
-	// IsSmartDetected Whether the camera is currently detecting smart motion
-	IsSmartDetected *bool `json:"isSmartDetected"`
-
-	// IsSshEnabled Whether or not SSH is enabled
-	IsSshEnabled *bool `json:"isSshEnabled"`
-
-	// IsThirdPartyCamera Whether the camera is a third party camera
-	IsThirdPartyCamera bool `json:"isThirdPartyCamera"`
-
-	// IsUpdating Whether the device is currently updating
-	IsUpdating *bool `json:"isUpdating"`
-
-	// IsWaterproofCaseAttached Whether the waterproof case is attached.
-	IsWaterproofCaseAttached *bool `json:"isWaterproofCaseAttached"`
-
-	// IsWirelessUplinkEnabled is wireless uplink enabled?
-	IsWirelessUplinkEnabled *bool `json:"isWirelessUplinkEnabled"`
-
-	// IspSettings Image Signal Processor settings.
-	IspSettings IspSettings `json:"ispSettings"`
-
-	// LastDisconnect Unix timestamp of the last time the device disconnected.
-	LastDisconnect *float64 `json:"lastDisconnect"`
-
-	// LastMotion Unix timestamp of the last recorded motion.
-	LastMotion *float64 `json:"lastMotion"`
-
-	// LastRing Unix timestamp of the last time the doorbell ring button was pressed.
-	LastRing *float64 `json:"lastRing"`
-
-	// LastSeen Unix timestamp of when the device was last connected.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// LatestFirmwareSizeBytes The latest firmware size of the device in bytes.
-	LatestFirmwareSizeBytes *float64 `json:"latestFirmwareSizeBytes"`
-
-	// LatestFirmwareVersion The latest firmware version of the device.
-	LatestFirmwareVersion *string `json:"latestFirmwareVersion"`
-
-	// LcdMessage Message that's set on the LCD screen (for doorbells and/or other devices with LCD screens).
-	LcdMessage LcdMessage `json:"lcdMessage"`
-
-	// LedSettings LED settings.
-	LedSettings LedSettings `json:"ledSettings"`
-
-	// Lenses An array of lenses.
-	Lenses *[]Lens `json:"lenses"`
-
-	// LowMemoryDisabledProcesses Processes disabled due to low memory (audioEvents, smartDetect). Null when no memory pressure.
-	LowMemoryDisabledProcesses *[]interface{} `json:"lowMemoryDisabledProcesses"`
-
-	// LqBytesPerDay LQ recording rate in bytes per day, averaged over last 7 days. For retention calculations only.
-	LqBytesPerDay *float64 `json:"lqBytesPerDay"`
-
-	// Mac The primary MAC address of the device.
-	Mac string `json:"mac"`
-
-	// MarketName The market name of camera.
-	MarketName *string `json:"marketName"`
-
-	// MicVolume Mic volume: a number from 0-100.
-	MicVolume *float64 `json:"micVolume"`
-
-	// MinFirmwareVersion The minimum firmware version supported for this device with the current Protect version.
-	MinFirmwareVersion *string `json:"minFirmwareVersion"`
-	ModelKey           string  `json:"modelKey"`
-
-	// MotionZones An array of motion zones.
-	MotionZones []MotionZone `json:"motionZones"`
-
-	// Name The name of the device.
-	Name *string `json:"name"`
-
-	// NeedUpdateBeforeAdoption Whether or not the camera needs to be firmware updated before adoption
-	NeedUpdateBeforeAdoption *bool `json:"needUpdateBeforeAdoption"`
-
-	// NfcSettings Nfc settings for nfc sensor
-	NfcSettings NfcSettings `json:"nfcSettings"`
-	NfcState    NfcState    `json:"nfcState"`
-
-	// NvrMac The MAC address of the NVR managed this device.
-	NvrMac *string `json:"nvrMac"`
-
-	// OptimizeIrSettings Optimize IR settings
-	OptimizeIrSettings OptimizeIrSettings `json:"optimizeIrSettings"`
-
-	// OsdSettings On Screen Display settings.
-	OsdSettings OsdSettings `json:"osdSettings"`
-
-	// ParentCameraGroupId The ID of the parent camera group
-	ParentCameraGroupId *string `json:"parentCameraGroupId"`
-
-	// PhyRate DEPRECATED! Use wiredConnectionState.phyRate instead.
-	PhyRate *float64 `json:"phyRate"`
-
-	// PinCodeSettings Pin code settings
-	PinCodeSettings CameraPinCodeSettings `json:"pinCodeSettings"`
-
-	// Platform The camera platform.
-	Platform *string `json:"platform"`
-
-	// PreviousFirmwareUrl The FUS download URL for the previous firmware version.
-	PreviousFirmwareUrl *string `json:"previousFirmwareUrl"`
-
-	// PreviousFirmwareVersion The previously installed firmware version before the last update.
-	PreviousFirmwareVersion *string `json:"previousFirmwareVersion"`
-
-	// PrivacyZones An array of privacy zones.
-	PrivacyZones []PrivacyZone `json:"privacyZones"`
-
-	// Ptz PTZ settings and state
-	Ptz CameraPtz `json:"ptz"`
-
-	// PtzControlEnabled Whether the user has enabled PTZ control for this camera
-	PtzControlEnabled bool `json:"ptzControlEnabled"`
-
-	// ReaderSettings Reader related settings
-	ReaderSettings CameraReaderSettings `json:"readerSettings"`
-
-	// ReceiverGroups Which receiver group this camera is attached to.
-	ReceiverGroups []ReceiverGroup `json:"receiverGroups"`
-
-	// RecordingPath Absolute path where recordings are stored for this camera. Managed by the multipath middleware.
-	RecordingPath *string `json:"recordingPath"`
-
-	// RecordingPathFailedAt Timestamp when the current storage console became unhealthy. Used for failover timeout tracking. Null when storage is healthy.
-	RecordingPathFailedAt *float64 `json:"recordingPathFailedAt"`
-
-	// RecordingPathSettings Settings for camera recording storage location.
-	RecordingPathSettings RecordingPathSettings `json:"recordingPathSettings"`
-
-	// RecordingSchedulesV2 The recording schedule for this camera
-	RecordingSchedulesV2 []ScheduleRule `json:"recordingSchedulesV2"`
-
-	// RecordingSettings Recording settings for the camera.
-	RecordingSettings CameraRecordingSettings `json:"recordingSettings"`
-
-	// RecordingsPausedReason Reason why recordings are paused.
-	RecordingsPausedReason *CameraRecordingsPausedReason `json:"recordingsPausedReason"`
-
-	// ReleaseNotePath The release note path for constructing firmware release note URLs.
-	ReleaseNotePath *string `json:"releaseNotePath"`
-
-	// RtspClient RTSP client to be used when pulling the video stream
-	RtspClient *CameraRtspClient `json:"rtspClient"`
-
-	// SecondLensSmartDetectZones An array of second lens smart detection zones.
-	SecondLensSmartDetectZones []SmartDetectZone `json:"secondLensSmartDetectZones"`
-
-	// Shortcuts A list of camera shortcuts
-	Shortcuts []Shortcut `json:"shortcuts"`
-
-	// SmartDetectLines An array of smart detection lines.
-	SmartDetectLines []SmartDetectLine `json:"smartDetectLines"`
-
-	// SmartDetectLoiterZones An array of smart detection loiter zones.
-	SmartDetectLoiterZones []SmartDetectLoiterZone `json:"smartDetectLoiterZones"`
-
-	// SmartDetectSettings Smart detection settings for the camera.
-	SmartDetectSettings SmartDetectSettings `json:"smartDetectSettings"`
-
-	// SmartDetectZones An array of smart detection zones.
-	SmartDetectZones []SmartDetectZone `json:"smartDetectZones"`
-
-	// SpeakerSettings Speaker settings.
-	SpeakerSettings SpeakerSettings `json:"speakerSettings"`
-
-	// State Connection state of the device.
-	State *CameraState `json:"state"`
-
-	// Stats Statistics for the camera.
-	Stats CameraStats `json:"stats"`
-
-	// StitchDistance Stitch distance
-	StitchDistance *float64 `json:"stitchDistance"`
-
-	// StopStreamLevel Which level of the camera stream is stopped.
-	StopStreamLevel *float64 `json:"stopStreamLevel"`
-
-	// StreamSharing Camera stream sharing.
-	StreamSharing StreamSharing `json:"streamSharing"`
-
-	// StreamingChannels Which camera channels currently have an open in-stream
-	StreamingChannels *[]interface{} `json:"streamingChannels"`
-
-	// SupportAiPortResolution Whether the camera resolution can be made compatible with AI Port limits (3840x2160)
-	SupportAiPortResolution *bool `json:"supportAiPortResolution"`
-
-	// SupportAiPortResolutionInHallway Whether the camera supports AI Port resolution in Hallway mode
-	SupportAiPortResolutionInHallway *bool `json:"supportAiPortResolutionInHallway"`
-
-	// SupportFileCreatedAt The support file created at for the device.
-	SupportFileCreatedAt *float64 `json:"supportFileCreatedAt"`
-
-	// SupportFileName The support file name for the device.
-	SupportFileName *string `json:"supportFileName"`
-
-	// SupportFileState The support file state for the device.
-	SupportFileState *CameraSupportFileState `json:"supportFileState"`
-
-	// SupportUcp4 Whether or not the camera supports UCP4 protocol
-	SupportUcp4 bool `json:"supportUcp4"`
-
-	// SupportedScalingResolutions What resolutions does this camera support streaming in?
-	SupportedScalingResolutions *[]interface{} `json:"supportedScalingResolutions"`
-
-	// Sysid The device sysid. (hex string)
-	Sysid *string `json:"sysid"`
-
-	// TalkbackSettings Talkback settings.
-	TalkbackSettings TalkbackSettings `json:"talkbackSettings"`
-
-	// Template Which template this camera belongs to.
-	Template *string `json:"template"`
-
-	// ThirdPartyCameraInfo Paired third party camera info connected to AI port
-	ThirdPartyCameraInfo     ThirdPartyCamera         `json:"thirdPartyCameraInfo"`
-	TiltLimitsOfPrivacyZones TiltLimitsOfPrivacyZones `json:"tiltLimitsOfPrivacyZones"`
-
-	// Type The device model name.
-	Type *string `json:"type"`
-
-	// UpSince Unix timestamp of when the device started up.
-	UpSince *float64 `json:"upSince"`
-
-	// UplinkDevice Which uplink device currently connected to.
-	UplinkDevice *map[string]interface{} `json:"uplinkDevice"`
-
-	// Uptime device uptime in second.
-	Uptime *float64 `json:"uptime"`
-
-	// UserConfiguredAp Whether the connected AP is user configured
-	UserConfiguredAp bool `json:"userConfiguredAp"`
-
-	// VideoCodec Video codec used by the device video streams
-	VideoCodec *string `json:"videoCodec"`
-
-	// VideoCodecLastSwitchAt Timestamp of the last time when video codec settings had any changes
-	VideoCodecLastSwitchAt *float64 `json:"videoCodecLastSwitchAt"`
-
-	// VideoCodecState Is the video codec configured, currently being changed, or in a failed state
-	VideoCodecState float64 `json:"videoCodecState"`
-
-	// VideoCodecSwitchingSince If videoCodecState is 1 then this contains the start time of the switch
-	VideoCodecSwitchingSince *float64 `json:"videoCodecSwitchingSince"`
-
-	// VideoInputMode Current video input mode of the camera
-	VideoInputMode *CameraVideoInputMode `json:"videoInputMode"`
-
-	// VideoMode Current video mode of the camera
-	VideoMode *CameraVideoMode `json:"videoMode"`
-
-	// VideoReconfigurationInProgress Whether video settings, which need EMS stream to reset, are are being updated.
-	VideoReconfigurationInProgress *bool `json:"videoReconfigurationInProgress"`
-
-	// Voltage AC voltage.
-	Voltage              *float64             `json:"voltage"`
-	WifiConnectionState  WifiConnectionState  `json:"wifiConnectionState"`
-	WiredConnectionState WiredConnectionState `json:"wiredConnectionState"`
+	AccessDeviceMetadata                 AccessDeviceMetadata          `json:"accessDeviceMetadata"`
+	AccessMethodSettings                 AccessMethodSettings          `json:"accessMethodSettings"`
+	ActivePatrolSlot                     *float64                      `json:"activePatrolSlot"`
+	AiPortCapacityPoints                 *float64                      `json:"aiPortCapacityPoints"`
+	AiPortCompatibleResolutions          *[]interface{}                `json:"aiPortCompatibleResolutions"`
+	AiPortCompatibleResolutionsInHallway *[]interface{}                `json:"aiPortCompatibleResolutionsInHallway"`
+	Alarms                               CameraAlarm                   `json:"alarms"`
+	AnonymousDeviceId                    *string                       `json:"anonymousDeviceId"`
+	ApMac                                *string                       `json:"apMac"`
+	ApMgmtIp                             *string                       `json:"apMgmtIp"`
+	ApRssi                               *float64                      `json:"apRssi"`
+	AudioBitrate                         *float64                      `json:"audioBitrate"`
+	AudioSettings                        AudioSettings                 `json:"audioSettings"`
+	AutoRetentionLqMs                    *float64                      `json:"autoRetentionLqMs"`
+	AutoRetentionMs                      *float64                      `json:"autoRetentionMs"`
+	BrightnessSettings                   CameraBrightnessSettings      `json:"brightnessSettings"`
+	CanAdopt                             *bool                         `json:"canAdopt"`
+	CanCreateAccessEvent                 *bool                         `json:"canCreateAccessEvent"`
+	CanManage                            *bool                         `json:"canManage"`
+	Channels                             []Channel                     `json:"channels"`
+	ChimeDuration                        *float64                      `json:"chimeDuration"`
+	ClarityZones                         []ClarityZone                 `json:"clarityZones"`
+	ConnectedSince                       *float64                      `json:"connectedSince"`
+	ConnectionHost                       *string                       `json:"connectionHost"`
+	CurrentResolution                    *string                       `json:"currentResolution"`
+	DisplayName                          *string                       `json:"displayName"`
+	DoorbellSession                      CameraDoorbellSession         `json:"doorbellSession"`
+	DownScaleMode                        float64                       `json:"downScaleMode"`
+	ElementInfo                          *string                       `json:"elementInfo"`
+	EnableNfc                            *bool                         `json:"enableNfc"`
+	ExcludeZones                         []ExcludeZone                 `json:"excludeZones"`
+	ExtendedAiFeatures                   CameraExtendedAiFeatures      `json:"extendedAiFeatures"`
+	FaceUnlockSettings                   FaceUnlockSettings            `json:"faceUnlockSettings"`
+	FeatureFlags                         FeatureFlags                  `json:"featureFlags"`
+	FingerprintSettings                  FingerprintSettings           `json:"fingerprintSettings"`
+	FingerprintState                     FingerprintState              `json:"fingerprintState"`
+	FirmwareBuild                        *string                       `json:"firmwareBuild"`
+	FirmwareVersion                      *string                       `json:"firmwareVersion"`
+	FwUpdateState                        *CameraFwUpdateState          `json:"fwUpdateState"`
+	GlobalAlarmManagerScopeNames         *[]interface{}                `json:"globalAlarmManagerScopeNames"`
+	GreetingSettings                     CameraGreetingSettings        `json:"greetingSettings"`
+	Guid                                 *string                       `json:"guid"`
+	HallwayMode                          CameraHallwayMode             `json:"hallwayMode"`
+	HardwareRevision                     *string                       `json:"hardwareRevision"`
+	HasPackageCamera                     *bool                         `json:"hasPackageCamera"`
+	HasRecordingStarted                  *bool                         `json:"hasRecordingStarted"`
+	HasRecordings                        *bool                         `json:"hasRecordings"`
+	HasSpeaker                           *bool                         `json:"hasSpeaker"`
+	HasWifi                              *bool                         `json:"hasWifi"`
+	HdrMode                              *bool                         `json:"hdrMode"`
+	HdrType                              *string                       `json:"hdrType"`
+	HomekitAccessoryId                   *float64                      `json:"homekitAccessoryId"`
+	HomekitSettings                      HomekitSettings               `json:"homekitSettings"`
+	Host                                 *string                       `json:"host"`
+	HqBytesPerDay                        *float64                      `json:"hqBytesPerDay"`
+	HubMac                               *string                       `json:"hubMac"`
+	Id                                   string                        `json:"id"`
+	InterfaceSettings                    CameraInterfaceSettings       `json:"interfaceSettings"`
+	Is2K                                 *bool                         `json:"is2K"`
+	Is4K                                 *bool                         `json:"is4K"`
+	IsAccessDevice                       *bool                         `json:"isAccessDevice"`
+	IsAccessFloodlightTriggerEnabled     bool                          `json:"isAccessFloodlightTriggerEnabled"`
+	IsAdopted                            *bool                         `json:"isAdopted"`
+	IsAdoptedByAccessApp                 bool                          `json:"isAdoptedByAccessApp"`
+	IsAdoptedByOther                     *bool                         `json:"isAdoptedByOther"`
+	IsAdopting                           *bool                         `json:"isAdopting"`
+	IsAttemptingToConnect                *bool                         `json:"isAttemptingToConnect"`
+	IsBlockedByArmMode                   bool                          `json:"isBlockedByArmMode"`
+	IsConnected                          *bool                         `json:"isConnected"`
+	IsDark                               *bool                         `json:"isDark"`
+	IsDeleting                           *bool                         `json:"isDeleting"`
+	IsDownloadingFW                      *bool                         `json:"isDownloadingFW"`
+	IsExtenderInstalledEver              *bool                         `json:"isExtenderInstalledEver"`
+	IsIntercom                           *bool                         `json:"isIntercom"`
+	IsLiveHeatmapEnabled                 *bool                         `json:"isLiveHeatmapEnabled"`
+	IsManaged                            *bool                         `json:"isManaged"`
+	IsMicEnabled                         *bool                         `json:"isMicEnabled"`
+	IsMissingRecordingDetected           *bool                         `json:"isMissingRecordingDetected"`
+	IsMotionDetected                     *bool                         `json:"isMotionDetected"`
+	IsPairedWithAiPort                   bool                          `json:"isPairedWithAiPort"`
+	IsPoorNetwork                        *bool                         `json:"isPoorNetwork"`
+	IsProbingForWifi                     *bool                         `json:"isProbingForWifi"`
+	IsProvisioned                        *bool                         `json:"isProvisioned"`
+	IsReaderPro                          *bool                         `json:"isReaderPro"`
+	IsRebooting                          *bool                         `json:"isRebooting"`
+	IsRecording                          *bool                         `json:"isRecording"`
+	IsRecordingsPaused                   bool                          `json:"isRecordingsPaused"`
+	IsRecordingsPausedChangedAt          *float64                      `json:"isRecordingsPausedChangedAt"`
+	IsRestoring                          *bool                         `json:"isRestoring"`
+	IsReverting                          *bool                         `json:"isReverting"`
+	IsSmartDetected                      *bool                         `json:"isSmartDetected"`
+	IsSshEnabled                         *bool                         `json:"isSshEnabled"`
+	IsThirdPartyCamera                   bool                          `json:"isThirdPartyCamera"`
+	IsUpdating                           *bool                         `json:"isUpdating"`
+	IsWaterproofCaseAttached             *bool                         `json:"isWaterproofCaseAttached"`
+	IsWirelessUplinkEnabled              *bool                         `json:"isWirelessUplinkEnabled"`
+	IspSettings                          IspSettings                   `json:"ispSettings"`
+	LastDisconnect                       *float64                      `json:"lastDisconnect"`
+	LastMotion                           *float64                      `json:"lastMotion"`
+	LastRing                             *float64                      `json:"lastRing"`
+	LastSeen                             *float64                      `json:"lastSeen"`
+	LatestFirmwareSizeBytes              *float64                      `json:"latestFirmwareSizeBytes"`
+	LatestFirmwareVersion                *string                       `json:"latestFirmwareVersion"`
+	LcdMessage                           LcdMessage                    `json:"lcdMessage"`
+	LedSettings                          LedSettings                   `json:"ledSettings"`
+	Lenses                               *[]Lens                       `json:"lenses"`
+	LowMemoryDisabledProcesses           *[]interface{}                `json:"lowMemoryDisabledProcesses"`
+	LqBytesPerDay                        *float64                      `json:"lqBytesPerDay"`
+	Mac                                  string                        `json:"mac"`
+	MarketName                           *string                       `json:"marketName"`
+	MicVolume                            *float64                      `json:"micVolume"`
+	MinFirmwareVersion                   *string                       `json:"minFirmwareVersion"`
+	ModelKey                             string                        `json:"modelKey"`
+	MotionZones                          []MotionZone                  `json:"motionZones"`
+	Name                                 *string                       `json:"name"`
+	NeedUpdateBeforeAdoption             *bool                         `json:"needUpdateBeforeAdoption"`
+	NfcSettings                          NfcSettings                   `json:"nfcSettings"`
+	NfcState                             NfcState                      `json:"nfcState"`
+	NvrMac                               *string                       `json:"nvrMac"`
+	OptimizeIrSettings                   OptimizeIrSettings            `json:"optimizeIrSettings"`
+	OsdSettings                          OsdSettings                   `json:"osdSettings"`
+	ParentCameraGroupId                  *string                       `json:"parentCameraGroupId"`
+	PhyRate                              *float64                      `json:"phyRate"`
+	PinCodeSettings                      CameraPinCodeSettings         `json:"pinCodeSettings"`
+	Platform                             *string                       `json:"platform"`
+	PreviousFirmwareUrl                  *string                       `json:"previousFirmwareUrl"`
+	PreviousFirmwareVersion              *string                       `json:"previousFirmwareVersion"`
+	PrivacyZones                         []PrivacyZone                 `json:"privacyZones"`
+	Ptz                                  CameraPtz                     `json:"ptz"`
+	PtzControlEnabled                    bool                          `json:"ptzControlEnabled"`
+	ReaderSettings                       CameraReaderSettings          `json:"readerSettings"`
+	ReceiverGroups                       []ReceiverGroup               `json:"receiverGroups"`
+	RecordingPath                        *string                       `json:"recordingPath"`
+	RecordingPathFailedAt                *float64                      `json:"recordingPathFailedAt"`
+	RecordingPathSettings                RecordingPathSettings         `json:"recordingPathSettings"`
+	RecordingSchedulesV2                 []ScheduleRule                `json:"recordingSchedulesV2"`
+	RecordingSettings                    CameraRecordingSettings       `json:"recordingSettings"`
+	RecordingsPausedReason               *CameraRecordingsPausedReason `json:"recordingsPausedReason"`
+	ReleaseNotePath                      *string                       `json:"releaseNotePath"`
+	RtspClient                           *CameraRtspClient             `json:"rtspClient"`
+	SecondLensSmartDetectZones           []SmartDetectZone             `json:"secondLensSmartDetectZones"`
+	Shortcuts                            []Shortcut                    `json:"shortcuts"`
+	SmartDetectLines                     []SmartDetectLine             `json:"smartDetectLines"`
+	SmartDetectLoiterZones               []SmartDetectLoiterZone       `json:"smartDetectLoiterZones"`
+	SmartDetectSettings                  SmartDetectSettings           `json:"smartDetectSettings"`
+	SmartDetectZones                     []SmartDetectZone             `json:"smartDetectZones"`
+	SpeakerSettings                      SpeakerSettings               `json:"speakerSettings"`
+	State                                *CameraState                  `json:"state"`
+	Stats                                CameraStats                   `json:"stats"`
+	StitchDistance                       *float64                      `json:"stitchDistance"`
+	StopStreamLevel                      *float64                      `json:"stopStreamLevel"`
+	StreamSharing                        StreamSharing                 `json:"streamSharing"`
+	StreamingChannels                    *[]interface{}                `json:"streamingChannels"`
+	SupportAiPortResolution              *bool                         `json:"supportAiPortResolution"`
+	SupportAiPortResolutionInHallway     *bool                         `json:"supportAiPortResolutionInHallway"`
+	SupportFileCreatedAt                 *float64                      `json:"supportFileCreatedAt"`
+	SupportFileName                      *string                       `json:"supportFileName"`
+	SupportFileState                     *CameraSupportFileState       `json:"supportFileState"`
+	SupportUcp4                          bool                          `json:"supportUcp4"`
+	SupportedScalingResolutions          *[]interface{}                `json:"supportedScalingResolutions"`
+	Sysid                                *string                       `json:"sysid"`
+	TalkbackSettings                     TalkbackSettings              `json:"talkbackSettings"`
+	Template                             *string                       `json:"template"`
+	ThirdPartyCameraInfo                 ThirdPartyCamera              `json:"thirdPartyCameraInfo"`
+	TiltLimitsOfPrivacyZones             TiltLimitsOfPrivacyZones      `json:"tiltLimitsOfPrivacyZones"`
+	Type                                 *string                       `json:"type"`
+	UpSince                              *float64                      `json:"upSince"`
+	UplinkDevice                         *map[string]interface{}       `json:"uplinkDevice"`
+	Uptime                               *float64                      `json:"uptime"`
+	UserConfiguredAp                     bool                          `json:"userConfiguredAp"`
+	VideoCodec                           *string                       `json:"videoCodec"`
+	VideoCodecLastSwitchAt               *float64                      `json:"videoCodecLastSwitchAt"`
+	VideoCodecState                      float64                       `json:"videoCodecState"`
+	VideoCodecSwitchingSince             *float64                      `json:"videoCodecSwitchingSince"`
+	VideoInputMode                       *CameraVideoInputMode         `json:"videoInputMode"`
+	VideoMode                            *CameraVideoMode              `json:"videoMode"`
+	VideoReconfigurationInProgress       *bool                         `json:"videoReconfigurationInProgress"`
+	Voltage                              *float64                      `json:"voltage"`
+	WifiConnectionState                  WifiConnectionState           `json:"wifiConnectionState"`
+	WiredConnectionState                 WiredConnectionState          `json:"wiredConnectionState"`
 }
 
 // CameraAlarm defines model for cameraAlarm.
 type CameraAlarm struct {
-	// AutoTrackingThermalThresholdReached Whether Auto-tracking thermal threshold reached. lensThermal > 1
-	AutoTrackingThermalThresholdReached *bool `json:"autoTrackingThermalThresholdReached"`
-
-	// LensThermal Thermal level of lens
-	LensThermal *float64 `json:"lensThermal"`
-
-	// LensThermalThresholdReached Whether lens thermal threshold reached. lensThermal > 2
-	LensThermalThresholdReached *bool `json:"lensThermalThresholdReached"`
-
-	// MotorOverheated Whether motor overheated. tiltThermal > 0
-	MotorOverheated *bool `json:"motorOverheated"`
-
-	// PanTiltMotorFaults Faults of pan/tilt motor (calibration, stuck)
-	PanTiltMotorFaults *[]interface{} `json:"panTiltMotorFaults"`
-
-	// TiltThermal Thermal level of tilt motor
-	TiltThermal *float64 `json:"tiltThermal"`
+	AutoTrackingThermalThresholdReached *bool          `json:"autoTrackingThermalThresholdReached"`
+	LensThermal                         *float64       `json:"lensThermal"`
+	LensThermalThresholdReached         *bool          `json:"lensThermalThresholdReached"`
+	MotorOverheated                     *bool          `json:"motorOverheated"`
+	PanTiltMotorFaults                  *[]interface{} `json:"panTiltMotorFaults"`
+	TiltThermal                         *float64       `json:"tiltThermal"`
 }
 
 // CameraBrightnessSettings defines model for cameraBrightnessSettings.
 type CameraBrightnessSettings struct {
-	// AutoBrightness Indicates whether brightness adjustment is in auto mode.
-	AutoBrightness *bool `json:"autoBrightness"`
-
-	// Brightness Manual brightness level, from 0 to 100 (percent). Only applicable when autoBrightness is false
-	Brightness *float64 `json:"brightness"`
+	AutoBrightness *bool    `json:"autoBrightness"`
+	Brightness     *float64 `json:"brightness"`
 }
 
 // CameraDoorbellSession defines model for cameraDoorbellSession.
 type CameraDoorbellSession struct {
-	// DirectoryId Directory ID if the call was initiated via a directory entry
-	DirectoryId *string `json:"directoryId"`
-
-	// SessionId Unique identifier of the doorbell session
-	SessionId *string `json:"sessionId"`
-
-	// Status Status of the doorbell session
-	Status *CameraDoorbellSessionStatus `json:"status"`
+	DirectoryId *string                      `json:"directoryId"`
+	SessionId   *string                      `json:"sessionId"`
+	Status      *CameraDoorbellSessionStatus `json:"status"`
 }
 
-// CameraDoorbellSessionStatus Status of the doorbell session
+// CameraDoorbellSessionStatus defines model for cameraDoorbellSessionStatus.
 type CameraDoorbellSessionStatus string
 
 // CameraEdgeRecording defines model for cameraEdgeRecording.
 type CameraEdgeRecording struct {
-	// DeviceMac Device mac address edge recording is enabled for
-	DeviceMac *string `json:"deviceMac"`
-
-	// RecordMode Record mode to store recordings in camera SD card
-	RecordMode *CameraEdgeRecordingRecordMode `json:"recordMode"`
-
-	// RecordStreamNumber Record stream number stored in camera
-	RecordStreamNumber *float64 `json:"recordStreamNumber"`
+	DeviceMac          *string                        `json:"deviceMac"`
+	RecordMode         *CameraEdgeRecordingRecordMode `json:"recordMode"`
+	RecordStreamNumber *float64                       `json:"recordStreamNumber"`
 }
 
-// CameraEdgeRecordingRecordMode Record mode to store recordings in camera SD card
+// CameraEdgeRecordingRecordMode defines model for cameraEdgeRecordingRecordMode.
 type CameraEdgeRecordingRecordMode string
 
 // CameraExtendedAiFeatures defines model for cameraExtendedAiFeatures.
 type CameraExtendedAiFeatures struct {
-	// SmartDetectTypes Extended smart detection types.
 	SmartDetectTypes *[]interface{} `json:"smartDetectTypes"`
 }
 
-// CameraFwUpdateState The device FW update state.
+// CameraFwUpdateState defines model for cameraFwUpdateState.
 type CameraFwUpdateState string
 
 // CameraGreetingSettings defines model for cameraGreetingSettings.
 type CameraGreetingSettings struct {
-	// GreetingBroadcastName The name to broadcast during the greeting
 	GreetingBroadcastName *CameraGreetingSettingsGreetingBroadcastName `json:"greetingBroadcastName"`
-
-	// GreetingText The text to display during the greeting
-	GreetingText *CameraGreetingSettingsGreetingText `json:"greetingText"`
+	GreetingText          *CameraGreetingSettingsGreetingText          `json:"greetingText"`
 }
 
-// CameraGreetingSettingsGreetingBroadcastName The name to broadcast during the greeting
+// CameraGreetingSettingsGreetingBroadcastName defines model for cameraGreetingSettingsGreetingBroadcastName.
 type CameraGreetingSettingsGreetingBroadcastName string
 
-// CameraGreetingSettingsGreetingText The text to display during the greeting
+// CameraGreetingSettingsGreetingText defines model for cameraGreetingSettingsGreetingText.
 type CameraGreetingSettingsGreetingText string
 
-// CameraHallwayMode Whether hallway mode is enabled for this camera and at what sensor rotation.
+// CameraHallwayMode defines model for cameraHallwayMode.
 type CameraHallwayMode string
 
 // CameraInterfaceSettings defines model for cameraInterfaceSettings.
 type CameraInterfaceSettings struct {
-	// BgImageId The ID of the background image to display on the interface.
-	BgImageId *string `json:"bgImageId"`
-
-	// CallMethod The method to use to call the interface.
-	CallMethod *CameraInterfaceSettingsCallMethod `json:"callMethod"`
-
-	// Heading The heading to display on the interface.
-	Heading *string `json:"heading"`
-
-	// Layout The layout of the interface.
-	Layout *CameraInterfaceSettingsLayout `json:"layout"`
-
-	// LogoImageId The ID of the logo image to display on the interface.
-	LogoImageId *string `json:"logoImageId"`
-
-	// ShowLogo Indicates whether the logo is displayed on the interface.
-	ShowLogo *bool `json:"showLogo"`
-
-	// ShowTime Indicates whether the time is displayed on the interface status bar.
-	ShowTime *bool `json:"showTime"`
-
-	// ShowWeather Indicates whether the weather is displayed on the interface status bar.
-	ShowWeather *bool `json:"showWeather"`
-
-	// SubHeading The subheading to display on the interface.
-	SubHeading *string `json:"subHeading"`
+	BgImageId   *string                            `json:"bgImageId"`
+	CallMethod  *CameraInterfaceSettingsCallMethod `json:"callMethod"`
+	Heading     *string                            `json:"heading"`
+	Layout      *CameraInterfaceSettingsLayout     `json:"layout"`
+	LogoImageId *string                            `json:"logoImageId"`
+	ShowLogo    *bool                              `json:"showLogo"`
+	ShowTime    *bool                              `json:"showTime"`
+	ShowWeather *bool                              `json:"showWeather"`
+	SubHeading  *string                            `json:"subHeading"`
 }
 
-// CameraInterfaceSettingsCallMethod The method to use to call the interface.
+// CameraInterfaceSettingsCallMethod defines model for cameraInterfaceSettingsCallMethod.
 type CameraInterfaceSettingsCallMethod string
 
-// CameraInterfaceSettingsLayout The layout of the interface.
+// CameraInterfaceSettingsLayout defines model for cameraInterfaceSettingsLayout.
 type CameraInterfaceSettingsLayout string
 
 // CameraPinCodeSettings defines model for cameraPinCodeSettings.
 type CameraPinCodeSettings struct {
-	// PinCodeLengthRange The length of the pin code
 	PinCodeLengthRange *CameraPinCodeSettingsPinCodeLengthRange `json:"pinCodeLengthRange"`
-
-	// PinCodeShuffle Whether the pin code is shuffled
-	PinCodeShuffle *bool `json:"pinCodeShuffle"`
+	PinCodeShuffle     *bool                                    `json:"pinCodeShuffle"`
 }
 
-// CameraPinCodeSettingsPinCodeLengthRange The length of the pin code
+// CameraPinCodeSettingsPinCodeLengthRange defines model for cameraPinCodeSettingsPinCodeLengthRange.
 type CameraPinCodeSettingsPinCodeLengthRange string
 
 // CameraPtz defines model for cameraPtz.
 type CameraPtz struct {
-	// PauseAutoTrackingUntilTs Pause until timestamp (ms)
-	PauseAutoTrackingUntilTs *float64 `json:"pauseAutoTrackingUntilTs"`
-
-	// RecentAutoHomeReturnAt Auto home return at
-	RecentAutoHomeReturnAt *float64 `json:"recentAutoHomeReturnAt"`
-
-	// RecentMoveAutoTrackResumeAtTs Timestamp (ms) when auto-tracking resumes after manual move
+	PauseAutoTrackingUntilTs      *float64 `json:"pauseAutoTrackingUntilTs"`
+	RecentAutoHomeReturnAt        *float64 `json:"recentAutoHomeReturnAt"`
 	RecentMoveAutoTrackResumeAtTs *float64 `json:"recentMoveAutoTrackResumeAtTs"`
-
-	// ReturnHomeAfterInactivityMs Return home after inactivity ms. null = disabled.
-	ReturnHomeAfterInactivityMs *float64 `json:"returnHomeAfterInactivityMs"`
+	ReturnHomeAfterInactivityMs   *float64 `json:"returnHomeAfterInactivityMs"`
 }
 
 // CameraReaderSettings defines model for cameraReaderSettings.
 type CameraReaderSettings struct {
-	// AllowThirdPartyNfcCards Whether to allow third party NFC cards
-	AllowThirdPartyNfcCards *bool `json:"allowThirdPartyNfcCards"`
-
-	// DoorEntryMethod The entry method of the door
-	DoorEntryMethod *CameraReaderSettingsDoorEntryMethod `json:"doorEntryMethod"`
-
-	// DoorId The id of the door
-	DoorId *string `json:"doorId"`
-
-	// DoorName The name of the door
-	DoorName *string `json:"doorName"`
-
-	// Language The language of the camera
-	Language *CameraReaderSettingsLanguage `json:"language"`
-
-	// ScreenOffTimeout The timeout for the LCD screen to turn off
-	ScreenOffTimeout *CameraReaderSettingsScreenOffTimeout `json:"screenOffTimeout"`
-
-	// UnlockDuration The duration of the unlock
-	UnlockDuration *float64 `json:"unlockDuration"`
+	AllowThirdPartyNfcCards *bool                                 `json:"allowThirdPartyNfcCards"`
+	DoorEntryMethod         *CameraReaderSettingsDoorEntryMethod  `json:"doorEntryMethod"`
+	DoorId                  *string                               `json:"doorId"`
+	DoorName                *string                               `json:"doorName"`
+	Language                *CameraReaderSettingsLanguage         `json:"language"`
+	ScreenOffTimeout        *CameraReaderSettingsScreenOffTimeout `json:"screenOffTimeout"`
+	UnlockDuration          *float64                              `json:"unlockDuration"`
 }
 
-// CameraReaderSettingsDoorEntryMethod The entry method of the door
+// CameraReaderSettingsDoorEntryMethod defines model for cameraReaderSettingsDoorEntryMethod.
 type CameraReaderSettingsDoorEntryMethod string
 
-// CameraReaderSettingsLanguage The language of the camera
+// CameraReaderSettingsLanguage defines model for cameraReaderSettingsLanguage.
 type CameraReaderSettingsLanguage string
 
-// CameraReaderSettingsScreenOffTimeout The timeout for the LCD screen to turn off
+// CameraReaderSettingsScreenOffTimeout defines model for cameraReaderSettingsScreenOffTimeout.
 type CameraReaderSettingsScreenOffTimeout string
 
 // CameraRecordingSettings defines model for cameraRecordingSettings.
 type CameraRecordingSettings struct {
-	// AccessEventPostPaddingSecs How many seconds added after access event end.
-	AccessEventPostPaddingSecs *float64 `json:"accessEventPostPaddingSecs"`
-
-	// AccessEventPrePaddingSecs How many seconds added before access event start.
-	AccessEventPrePaddingSecs *float64 `json:"accessEventPrePaddingSecs"`
-
-	// CreateAccessEvent Whether events triggered by Access application are allowed to be created.
-	CreateAccessEvent *bool `json:"createAccessEvent"`
-
-	// EnableMotionDetection Enable motion detection
-	EnableMotionDetection *bool `json:"enableMotionDetection"`
-
-	// EndMotionEventDelay End Motion Event Delay in milliseconds, affect motion detection only.
-	EndMotionEventDelay *float64 `json:"endMotionEventDelay"`
-
-	// Geofencing What mode you want to use for recording.
-	Geofencing *CameraRecordingSettingsGeofencing `json:"geofencing"`
-
-	// InScheduleMode What mode when inside schedule
-	InScheduleMode *CameraRecordingSettingsInScheduleMode `json:"inScheduleMode"`
-
-	// MinMotionEventTrigger Minimum Motion Event Trigger in milliseconds, affect motion detection only.
-	MinMotionEventTrigger *float64 `json:"minMotionEventTrigger"`
-
-	// Mode What mode you want to use for recording.
-	Mode *CameraRecordingSettingsMode `json:"mode"`
-
-	// MotionAlgorithm What motion algorithm you want to use for recording.
-	MotionAlgorithm *CameraRecordingSettingsMotionAlgorithm `json:"motionAlgorithm"`
-
-	// OutScheduleMode What mode when outside schedule
-	OutScheduleMode *CameraRecordingSettingsOutScheduleMode `json:"outScheduleMode"`
-
-	// PostPaddingSecs How many seconds added after motion detection end.
-	PostPaddingSecs *float64 `json:"postPaddingSecs"`
-
-	// PrePaddingSecs How many seconds added before motion detection start.
-	PrePaddingSecs *float64 `json:"prePaddingSecs"`
-
-	// RecordAudio Record audio.
-	RecordAudio *bool `json:"recordAudio"`
-
-	// RecordVideo Record video.
-	RecordVideo *bool `json:"recordVideo"`
-
-	// RetentionDurationLQMs Duration in milliseconds to retain LQ videos before staging them for recycling.
-	RetentionDurationLQMs *float64 `json:"retentionDurationLQMs"`
-
-	// RetentionDurationMs Duration in milliseconds to retain videos before staging them for recycling.
-	RetentionDurationMs *float64 `json:"retentionDurationMs"`
-
-	// SmartDetectPostPaddingSecs How many seconds added after smart detection event end.
-	SmartDetectPostPaddingSecs *float64 `json:"smartDetectPostPaddingSecs"`
-
-	// SmartDetectPrePaddingSecs How many seconds added before smart detection event start.
-	SmartDetectPrePaddingSecs *float64 `json:"smartDetectPrePaddingSecs"`
-
-	// SuppressIlluminationSurge Suppress Illumination Surge.
-	SuppressIlluminationSurge *bool `json:"suppressIlluminationSurge"`
-
-	// UseNewMotionAlgorithm Whether camera use experimental motion algorithm
-	UseNewMotionAlgorithm *bool `json:"useNewMotionAlgorithm"`
+	AccessEventPostPaddingSecs *float64                                `json:"accessEventPostPaddingSecs"`
+	AccessEventPrePaddingSecs  *float64                                `json:"accessEventPrePaddingSecs"`
+	CreateAccessEvent          *bool                                   `json:"createAccessEvent"`
+	EnableMotionDetection      *bool                                   `json:"enableMotionDetection"`
+	EndMotionEventDelay        *float64                                `json:"endMotionEventDelay"`
+	Geofencing                 *CameraRecordingSettingsGeofencing      `json:"geofencing"`
+	InScheduleMode             *CameraRecordingSettingsInScheduleMode  `json:"inScheduleMode"`
+	MinMotionEventTrigger      *float64                                `json:"minMotionEventTrigger"`
+	Mode                       *CameraRecordingSettingsMode            `json:"mode"`
+	MotionAlgorithm            *CameraRecordingSettingsMotionAlgorithm `json:"motionAlgorithm"`
+	OutScheduleMode            *CameraRecordingSettingsOutScheduleMode `json:"outScheduleMode"`
+	PostPaddingSecs            *float64                                `json:"postPaddingSecs"`
+	PrePaddingSecs             *float64                                `json:"prePaddingSecs"`
+	RecordAudio                *bool                                   `json:"recordAudio"`
+	RecordVideo                *bool                                   `json:"recordVideo"`
+	RetentionDurationLQMs      *float64                                `json:"retentionDurationLQMs"`
+	RetentionDurationMs        *float64                                `json:"retentionDurationMs"`
+	SmartDetectPostPaddingSecs *float64                                `json:"smartDetectPostPaddingSecs"`
+	SmartDetectPrePaddingSecs  *float64                                `json:"smartDetectPrePaddingSecs"`
+	SuppressIlluminationSurge  *bool                                   `json:"suppressIlluminationSurge"`
+	UseNewMotionAlgorithm      *bool                                   `json:"useNewMotionAlgorithm"`
 }
 
-// CameraRecordingSettingsGeofencing What mode you want to use for recording.
+// CameraRecordingSettingsGeofencing defines model for cameraRecordingSettingsGeofencing.
 type CameraRecordingSettingsGeofencing string
 
-// CameraRecordingSettingsInScheduleMode What mode when inside schedule
+// CameraRecordingSettingsInScheduleMode defines model for cameraRecordingSettingsInScheduleMode.
 type CameraRecordingSettingsInScheduleMode string
 
-// CameraRecordingSettingsMode What mode you want to use for recording.
+// CameraRecordingSettingsMode defines model for cameraRecordingSettingsMode.
 type CameraRecordingSettingsMode string
 
-// CameraRecordingSettingsMotionAlgorithm What motion algorithm you want to use for recording.
+// CameraRecordingSettingsMotionAlgorithm defines model for cameraRecordingSettingsMotionAlgorithm.
 type CameraRecordingSettingsMotionAlgorithm string
 
-// CameraRecordingSettingsOutScheduleMode What mode when outside schedule
+// CameraRecordingSettingsOutScheduleMode defines model for cameraRecordingSettingsOutScheduleMode.
 type CameraRecordingSettingsOutScheduleMode string
 
-// CameraRecordingsPausedReason Reason why recordings are paused.
+// CameraRecordingsPausedReason defines model for cameraRecordingsPausedReason.
 type CameraRecordingsPausedReason string
 
-// CameraRtspClient RTSP client to be used when pulling the video stream
+// CameraRtspClient defines model for cameraRtspClient.
 type CameraRtspClient string
 
 // CameraSdCard defines model for cameraSdCard.
 type CameraSdCard struct {
-	// Health Storage slot health i/o health
-	Health *float64 `json:"health"`
-
-	// HealthStatus Computed health status based on health numeric value.
-	HealthStatus *string `json:"healthStatus"`
-
-	// HotPlugCapable Whether storage can be removed while powered on (true for SD, false for SSD)
-	HotPlugCapable *bool `json:"hotPlugCapable"`
-
-	// Mounts Storage slot mounts
-	Mounts *[]interface{} `json:"mounts"`
-
-	// SdRecordingSupported Whether the camera supports SD recording
-	SdRecordingSupported *bool `json:"sdRecordingSupported"`
-
-	// Serial Storage slot serial number
-	Serial *string `json:"serial"`
-
-	// Size Storage slot total storage size
-	Size *float64 `json:"size"`
-
-	// SlotId Computed slot identifier (e.g., "sd.0", "ssd.0", or "sd" for legacy firmware)
-	SlotId *string `json:"slotId"`
-
-	// SlotIdx Slot index within each storage type, starts from 0
-	SlotIdx *float64 `json:"slotIdx"`
-
-	// State Storage slot state
-	State *CameraSdCardState `json:"state"`
-
-	// Type Storage type: "SD" for µSD card, "SSD" for SSD disk
-	Type *CameraSdCardType `json:"type"`
-
-	// UsedSize Used size on storage slot for recordings.
-	UsedSize *float64 `json:"usedSize"`
+	Health               *float64           `json:"health"`
+	HealthStatus         *string            `json:"healthStatus"`
+	HotPlugCapable       *bool              `json:"hotPlugCapable"`
+	Mounts               *[]interface{}     `json:"mounts"`
+	SdRecordingSupported *bool              `json:"sdRecordingSupported"`
+	Serial               *string            `json:"serial"`
+	Size                 *float64           `json:"size"`
+	SlotId               *string            `json:"slotId"`
+	SlotIdx              *float64           `json:"slotIdx"`
+	State                *CameraSdCardState `json:"state"`
+	Type                 *CameraSdCardType  `json:"type"`
+	UsedSize             *float64           `json:"usedSize"`
 }
 
-// CameraSdCardState Storage slot state
+// CameraSdCardState defines model for cameraSdCardState.
 type CameraSdCardState string
 
-// CameraSdCardType Storage type: "SD" for µSD card, "SSD" for SSD disk
+// CameraSdCardType defines model for cameraSdCardType.
 type CameraSdCardType string
 
-// CameraState Connection state of the device.
+// CameraState defines model for cameraState.
 type CameraState string
 
 // CameraStats defines model for cameraStats.
 type CameraStats struct {
-	// EdgeRecording Edge recording stats for camera.
-	EdgeRecording CameraEdgeRecording `json:"edgeRecording"`
-
-	// SdCard SD card status for the camera.
-	SdCard CameraSdCard `json:"sdCard"`
-
-	// SdCardStorageCapacityMs Time in ms in which sd card would be filled.
-	SdCardStorageCapacityMs *float64 `json:"sdCardStorageCapacityMs"`
-
-	// Storage Storage stats for the camera.
-	Storage CameraStatsStorage `json:"storage"`
-
-	// StorageSlots All storage slots for the device
-	StorageSlots *[]CameraSdCard `json:"storageSlots"`
-
-	// TotalStorageCapacityMs Time in ms until all storage (combined capacity) would be filled.
-	TotalStorageCapacityMs *float64 `json:"totalStorageCapacityMs"`
-
-	// Video Video statistics for the camera.
-	Video VideoStats `json:"video"`
-
-	// Wifi DEPRECATED! Use wifiConnectionState instead.
-	Wifi WifiStatus `json:"wifi"`
-
-	// WifiQuality Wifi signal quality for the device.
-	WifiQuality *float64 `json:"wifiQuality"`
-
-	// WifiStrength Wifi signal strength for the device.
-	WifiStrength *float64 `json:"wifiStrength"`
+	EdgeRecording           CameraEdgeRecording `json:"edgeRecording"`
+	SdCard                  CameraSdCard        `json:"sdCard"`
+	SdCardStorageCapacityMs *float64            `json:"sdCardStorageCapacityMs"`
+	Storage                 CameraStatsStorage  `json:"storage"`
+	StorageSlots            *[]CameraSdCard     `json:"storageSlots"`
+	TotalStorageCapacityMs  *float64            `json:"totalStorageCapacityMs"`
+	Video                   VideoStats          `json:"video"`
+	Wifi                    WifiStatus          `json:"wifi"`
+	WifiQuality             *float64            `json:"wifiQuality"`
+	WifiStrength            *float64            `json:"wifiStrength"`
 }
 
 // CameraStatsStorage defines model for cameraStatsStorage.
 type CameraStatsStorage struct {
-	// ChannelStorage Storage recording size distribution per quality channel.
 	ChannelStorage *map[string]interface{} `json:"channelStorage"`
-
-	// Rate Storage fill rate, in B/ms.
-	Rate *float64 `json:"rate"`
-
-	// Used Storage space used by the camera footage, in bytes.
-	Used *float64 `json:"used"`
+	Rate           *float64                `json:"rate"`
+	Used           *float64                `json:"used"`
 }
 
-// CameraSupportFileState The support file state for the device.
+// CameraSupportFileState defines model for cameraSupportFileState.
 type CameraSupportFileState string
 
-// CameraVideoInputMode Current video input mode of the camera
+// CameraVideoInputMode defines model for cameraVideoInputMode.
 type CameraVideoInputMode string
 
-// CameraVideoMode Current video mode of the camera
+// CameraVideoMode defines model for cameraVideoMode.
 type CameraVideoMode string
 
 // Channel defines model for channel.
 type Channel struct {
-	// AutoBitrate Whether or not the auto bitrate is enabled.
-	AutoBitrate *bool `json:"autoBitrate"`
-
-	// AutoFps Whether or not the auto FPS is enabled.
-	AutoFps *bool `json:"autoFps"`
-
-	// Bitrate The maximum bits per second this channel should use.
-	Bitrate *float64 `json:"bitrate"`
-
-	// Enabled Whether or not the channel is enabled.
-	Enabled *bool `json:"enabled"`
-
-	// Fps The FPS to use for this channel.
-	Fps *float64 `json:"fps"`
-
-	// FpsValues The allowed FPS values for this channel.
-	FpsValues *[]interface{} `json:"fpsValues"`
-
-	// Height The height of the video stream for this channel.
-	Height *float64 `json:"height"`
-
-	// Id The ID of the channel (IDs are only unique per camera).
-	Id *float64 `json:"id"`
-
-	// IdrInterval Number of seconds between IDRs.
-	IdrInterval *float64 `json:"idrInterval"`
-
-	// InternalRtspAlias The internal RTSP alias for this channel.
-	InternalRtspAlias *string `json:"internalRtspAlias"`
-
-	// IsInternalRtspEnabled Whether or not internal RTSP relaying is enabled for this channel.
-	IsInternalRtspEnabled *bool `json:"isInternalRtspEnabled"`
-
-	// IsRtspEnabled Whether or not RTSP relaying is enabled for this channel.
-	IsRtspEnabled *bool `json:"isRtspEnabled"`
-
-	// MaxBitrate The maximum allowed bits per second.
-	MaxBitrate *float64 `json:"maxBitrate"`
-
-	// MinBitrate The minimum allowed bits per second.
-	MinBitrate *float64 `json:"minBitrate"`
-
-	// MinClientAdaptiveBitRate The minimum allowed bps for this channel (used for adaptive bitrate).
-	MinClientAdaptiveBitRate *float64 `json:"minClientAdaptiveBitRate"`
-
-	// MinMotionAdaptiveBitRate The minimum allowed bps for this channel (used for adaptive bitrate).
-	MinMotionAdaptiveBitRate *float64 `json:"minMotionAdaptiveBitRate"`
-
-	// Name The name of the channel.
-	Name *ChannelName `json:"name"`
-
-	// RtspAlias The RTSP alias for this channel.
-	RtspAlias *string `json:"rtspAlias"`
-
-	// ValidBitrateRangeMargin The minimal allowed valid bitrate range margin.
-	ValidBitrateRangeMargin *float64 `json:"validBitrateRangeMargin"`
-
-	// VideoId The videoID of the channel.
-	VideoId *ChannelVideoId `json:"videoId"`
-
-	// Width The width of the video stream for this channel.
-	Width *float64 `json:"width"`
+	AutoBitrate              *bool           `json:"autoBitrate"`
+	AutoFps                  *bool           `json:"autoFps"`
+	Bitrate                  *float64        `json:"bitrate"`
+	Enabled                  *bool           `json:"enabled"`
+	Fps                      *float64        `json:"fps"`
+	FpsValues                *[]interface{}  `json:"fpsValues"`
+	Height                   *float64        `json:"height"`
+	Id                       *float64        `json:"id"`
+	IdrInterval              *float64        `json:"idrInterval"`
+	InternalRtspAlias        *string         `json:"internalRtspAlias"`
+	IsInternalRtspEnabled    *bool           `json:"isInternalRtspEnabled"`
+	IsRtspEnabled            *bool           `json:"isRtspEnabled"`
+	MaxBitrate               *float64        `json:"maxBitrate"`
+	MinBitrate               *float64        `json:"minBitrate"`
+	MinClientAdaptiveBitRate *float64        `json:"minClientAdaptiveBitRate"`
+	MinMotionAdaptiveBitRate *float64        `json:"minMotionAdaptiveBitRate"`
+	Name                     *ChannelName    `json:"name"`
+	RtspAlias                *string         `json:"rtspAlias"`
+	ValidBitrateRangeMargin  *float64        `json:"validBitrateRangeMargin"`
+	VideoId                  *ChannelVideoId `json:"videoId"`
+	Width                    *float64        `json:"width"`
 }
 
-// ChannelName The name of the channel.
+// ChannelName defines model for channelName.
 type ChannelName string
 
-// ChannelVideoId The videoID of the channel.
+// ChannelVideoId defines model for channelVideoId.
 type ChannelVideoId string
 
 // Chime defines model for chime.
 type Chime struct {
-	// AnonymousDeviceId Persistent unique device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId"`
-
-	// ApMac The MAC address of the AP that discovered this chime over wireless uplink
-	ApMac *string `json:"apMac"`
-
-	// ApMgmtIp The management IP address of the AP that discovered this chime over wireless uplink
-	ApMgmtIp *string `json:"apMgmtIp"`
-
-	// ApRssi The received signal strength indication of the AP that discovered this chime over wireless uplink
-	ApRssi *float64 `json:"apRssi"`
-
-	// CameraIds The list of (doorbell-only) cameras which this chime is paired to.
-	CameraIds []string `json:"cameraIds"`
-
-	// CanAdopt Whether or not the device can be adopted.
-	CanAdopt *bool `json:"canAdopt"`
-
-	// ConnectedSince Unix timestamp of when the device connected to the NVR.
-	ConnectedSince *float64 `json:"connectedSince"`
-
-	// ConnectionHost The ip or hostname the device uses to connect.
-	ConnectionHost *string `json:"connectionHost"`
-
-	// DisplayName The device display name.
-	DisplayName *string `json:"displayName"`
-
-	// ElementInfo The element information provided by this chime while it was probing for a wireless network
-	ElementInfo *string `json:"elementInfo"`
-
-	// FeatureFlags Feature flags of the chime
-	FeatureFlags ChimeFeatureFlags `json:"featureFlags"`
-
-	// FirmwareBuild The build # of the firmware that is installed.
-	FirmwareBuild *string `json:"firmwareBuild"`
-
-	// FirmwareVersion The version of firmware that is installed on the device.
-	FirmwareVersion *string `json:"firmwareVersion"`
-
-	// FwUpdateState The device FW update state.
-	FwUpdateState *ChimeFwUpdateState `json:"fwUpdateState"`
-
-	// GlobalAlarmManagerScopeNames The global alarm manager scope names for the device.
-	GlobalAlarmManagerScopeNames *[]interface{} `json:"globalAlarmManagerScopeNames"`
-
-	// Guid Unique id of the device
-	Guid *string `json:"guid"`
-
-	// HardwareRevision Hardware revision of the device
-	HardwareRevision *string `json:"hardwareRevision"`
-
-	// HasWifi Whether the chime has the wifi.
-	HasWifi *bool `json:"hasWifi"`
-
-	// Host The primary IP address of the device.
-	Host *string `json:"host"`
-	Id   string  `json:"id"`
-
-	// IsAdopted Whether or not the device is adopted.
-	IsAdopted *bool `json:"isAdopted"`
-
-	// IsAdoptedByOther Whether or not the device is adopted by the other controller.
-	IsAdoptedByOther *bool `json:"isAdoptedByOther"`
-
-	// IsAdopting Whether or not the device is currently being adopted.
-	IsAdopting *bool `json:"isAdopting"`
-
-	// IsAttemptingToConnect Whether the device is attempting to connect to the controller
-	IsAttemptingToConnect *bool `json:"isAttemptingToConnect"`
-
-	// IsBlockedByArmMode Whether the device is blocked by arm mode
-	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
-
-	// IsConnected Whether the device IPC is connected?
-	IsConnected *bool `json:"isConnected"`
-
-	// IsDownloadingFW Whether the device is currently downloading a FW for an upgrade
-	IsDownloadingFW *bool `json:"isDownloadingFW"`
-
-	// IsProbingForWifi Whether the device is probing for a network over wireless uplink
-	IsProbingForWifi *bool `json:"isProbingForWifi"`
-
-	// IsProvisioned Whether or not the device is provisioned.
-	IsProvisioned *bool `json:"isProvisioned"`
-
-	// IsRebooting Whether the device is currently rebooting
-	IsRebooting *bool `json:"isRebooting"`
-
-	// IsRestoring Whether or not the device is currently being restored.
-	IsRestoring *bool `json:"isRestoring"`
-
-	// IsReverting Whether the device is currently reverting to a previous firmware version
-	IsReverting *bool `json:"isReverting"`
-
-	// IsSshEnabled Whether or not SSH is enabled
-	IsSshEnabled *bool `json:"isSshEnabled"`
-
-	// IsUpdating Whether the device is currently updating
-	IsUpdating *bool `json:"isUpdating"`
-
-	// IsWirelessUplinkEnabled is wireless uplink enabled?
-	IsWirelessUplinkEnabled *bool `json:"isWirelessUplinkEnabled"`
-
-	// LastDisconnect Unix timestamp of the last time the device disconnected.
-	LastDisconnect *float64 `json:"lastDisconnect"`
-
-	// LastRing Unix timestamp of the last time the chime rang.
-	LastRing *float64 `json:"lastRing"`
-
-	// LastSeen Unix timestamp of when the device was last connected.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// LatestFirmwareSizeBytes The latest firmware size of the device in bytes.
-	LatestFirmwareSizeBytes *float64 `json:"latestFirmwareSizeBytes"`
-
-	// LatestFirmwareVersion The latest firmware version of the device.
-	LatestFirmwareVersion *string `json:"latestFirmwareVersion"`
-
-	// Mac The primary MAC address of the device.
-	Mac string `json:"mac"`
-
-	// MarketName The marketing name for the chime.
-	MarketName *string `json:"marketName"`
-
-	// MinFirmwareVersion The minimum firmware version supported for this device with the current Protect version.
-	MinFirmwareVersion *string `json:"minFirmwareVersion"`
-	ModelKey           string  `json:"modelKey"`
-
-	// Name The name of the device.
-	Name *string `json:"name"`
-
-	// NvrMac The MAC address of the NVR managed this device.
-	NvrMac *string `json:"nvrMac"`
-
-	// Platform The chime platform
-	Platform *string `json:"platform"`
-
-	// PreviousFirmwareUrl The FUS download URL for the previous firmware version.
-	PreviousFirmwareUrl *string `json:"previousFirmwareUrl"`
-
-	// PreviousFirmwareVersion The previously installed firmware version before the last update.
-	PreviousFirmwareVersion *string `json:"previousFirmwareVersion"`
-
-	// ReleaseNotePath The release note path for constructing firmware release note URLs.
-	ReleaseNotePath *string `json:"releaseNotePath"`
-
-	// RepeatTimes Repeat time of playing chime
-	RepeatTimes *float64 `json:"repeatTimes"`
-
-	// RingSettings List of custom ringtone settings for (doorbell-only) cameras paired to this chime.
-	RingSettings []RingSettings `json:"ringSettings"`
-
-	// SpeakerTrackList available speaker track list of chime
-	SpeakerTrackList []interface{} `json:"speakerTrackList"`
-
-	// State Connection state of the device.
-	State *ChimeState `json:"state"`
-
-	// SupportFileCreatedAt The support file created at for the device.
-	SupportFileCreatedAt *float64 `json:"supportFileCreatedAt"`
-
-	// SupportFileName The support file name for the device.
-	SupportFileName *string `json:"supportFileName"`
-
-	// SupportFileState The support file state for the device.
-	SupportFileState *ChimeSupportFileState `json:"supportFileState"`
-
-	// Sysid The device sysid. (hex string)
-	Sysid *string `json:"sysid"`
-
-	// Type The device model name.
-	Type *string `json:"type"`
-
-	// UpSince Unix timestamp of when the device started up.
-	UpSince *float64 `json:"upSince"`
-
-	// UplinkDevice Which uplink device currently connected to.
-	UplinkDevice *map[string]interface{} `json:"uplinkDevice"`
-
-	// Uptime device uptime in second.
-	Uptime *float64 `json:"uptime"`
-
-	// UserConfiguredAp Whether the connected AP is user configured
-	UserConfiguredAp bool `json:"userConfiguredAp"`
-
-	// Volume Speaker volume: a number from 0-100.
-	Volume               *float64             `json:"volume"`
-	WifiConnectionState  WifiConnectionState  `json:"wifiConnectionState"`
-	WiredConnectionState WiredConnectionState `json:"wiredConnectionState"`
+	AnonymousDeviceId            *string                 `json:"anonymousDeviceId"`
+	ApMac                        *string                 `json:"apMac"`
+	ApMgmtIp                     *string                 `json:"apMgmtIp"`
+	ApRssi                       *float64                `json:"apRssi"`
+	CameraIds                    []string                `json:"cameraIds"`
+	CanAdopt                     *bool                   `json:"canAdopt"`
+	ConnectedSince               *float64                `json:"connectedSince"`
+	ConnectionHost               *string                 `json:"connectionHost"`
+	DisplayName                  *string                 `json:"displayName"`
+	ElementInfo                  *string                 `json:"elementInfo"`
+	FeatureFlags                 ChimeFeatureFlags       `json:"featureFlags"`
+	FirmwareBuild                *string                 `json:"firmwareBuild"`
+	FirmwareVersion              *string                 `json:"firmwareVersion"`
+	FwUpdateState                *ChimeFwUpdateState     `json:"fwUpdateState"`
+	GlobalAlarmManagerScopeNames *[]interface{}          `json:"globalAlarmManagerScopeNames"`
+	Guid                         *string                 `json:"guid"`
+	HardwareRevision             *string                 `json:"hardwareRevision"`
+	HasWifi                      *bool                   `json:"hasWifi"`
+	Host                         *string                 `json:"host"`
+	Id                           string                  `json:"id"`
+	IsAdopted                    *bool                   `json:"isAdopted"`
+	IsAdoptedByOther             *bool                   `json:"isAdoptedByOther"`
+	IsAdopting                   *bool                   `json:"isAdopting"`
+	IsAttemptingToConnect        *bool                   `json:"isAttemptingToConnect"`
+	IsBlockedByArmMode           bool                    `json:"isBlockedByArmMode"`
+	IsConnected                  *bool                   `json:"isConnected"`
+	IsDownloadingFW              *bool                   `json:"isDownloadingFW"`
+	IsProbingForWifi             *bool                   `json:"isProbingForWifi"`
+	IsProvisioned                *bool                   `json:"isProvisioned"`
+	IsRebooting                  *bool                   `json:"isRebooting"`
+	IsRestoring                  *bool                   `json:"isRestoring"`
+	IsReverting                  *bool                   `json:"isReverting"`
+	IsSshEnabled                 *bool                   `json:"isSshEnabled"`
+	IsUpdating                   *bool                   `json:"isUpdating"`
+	IsWirelessUplinkEnabled      *bool                   `json:"isWirelessUplinkEnabled"`
+	LastDisconnect               *float64                `json:"lastDisconnect"`
+	LastRing                     *float64                `json:"lastRing"`
+	LastSeen                     *float64                `json:"lastSeen"`
+	LatestFirmwareSizeBytes      *float64                `json:"latestFirmwareSizeBytes"`
+	LatestFirmwareVersion        *string                 `json:"latestFirmwareVersion"`
+	Mac                          string                  `json:"mac"`
+	MarketName                   *string                 `json:"marketName"`
+	MinFirmwareVersion           *string                 `json:"minFirmwareVersion"`
+	ModelKey                     string                  `json:"modelKey"`
+	Name                         *string                 `json:"name"`
+	NvrMac                       *string                 `json:"nvrMac"`
+	Platform                     *string                 `json:"platform"`
+	PreviousFirmwareUrl          *string                 `json:"previousFirmwareUrl"`
+	PreviousFirmwareVersion      *string                 `json:"previousFirmwareVersion"`
+	ReleaseNotePath              *string                 `json:"releaseNotePath"`
+	RepeatTimes                  *float64                `json:"repeatTimes"`
+	RingSettings                 []RingSettings          `json:"ringSettings"`
+	SpeakerTrackList             []interface{}           `json:"speakerTrackList"`
+	State                        *ChimeState             `json:"state"`
+	SupportFileCreatedAt         *float64                `json:"supportFileCreatedAt"`
+	SupportFileName              *string                 `json:"supportFileName"`
+	SupportFileState             *ChimeSupportFileState  `json:"supportFileState"`
+	Sysid                        *string                 `json:"sysid"`
+	Type                         *string                 `json:"type"`
+	UpSince                      *float64                `json:"upSince"`
+	UplinkDevice                 *map[string]interface{} `json:"uplinkDevice"`
+	Uptime                       *float64                `json:"uptime"`
+	UserConfiguredAp             bool                    `json:"userConfiguredAp"`
+	Volume                       *float64                `json:"volume"`
+	WifiConnectionState          WifiConnectionState     `json:"wifiConnectionState"`
+	WiredConnectionState         WiredConnectionState    `json:"wiredConnectionState"`
 }
 
 // ChimeFeatureFlags defines model for chimeFeatureFlags.
 type ChimeFeatureFlags struct {
-	// HasHttpsClientOTA Whether the device supports HTTPS client for OTA firmware updates.
-	HasHttpsClientOTA *bool `json:"hasHttpsClientOTA"`
-
-	// HasWifi Whether the device has the wifi.
-	HasWifi *bool `json:"hasWifi"`
-
-	// SupportCustomRingtone Whether the device supports custom ringtone feature.
+	HasHttpsClientOTA     *bool `json:"hasHttpsClientOTA"`
+	HasWifi               *bool `json:"hasWifi"`
 	SupportCustomRingtone *bool `json:"supportCustomRingtone"`
 }
 
 // ChimeFeatureFlagsUpdate defines model for chimeFeatureFlagsUpdate.
 type ChimeFeatureFlagsUpdate struct {
-	// HasHttpsClientOTA Whether the device supports HTTPS client for OTA firmware updates.
-	HasHttpsClientOTA *bool `json:"hasHttpsClientOTA,omitempty"`
-
-	// HasWifi Whether the device has the wifi.
-	HasWifi *bool `json:"hasWifi,omitempty"`
-
-	// SupportCustomRingtone Whether the device supports custom ringtone feature.
+	HasHttpsClientOTA     *bool `json:"hasHttpsClientOTA,omitempty"`
+	HasWifi               *bool `json:"hasWifi,omitempty"`
 	SupportCustomRingtone *bool `json:"supportCustomRingtone,omitempty"`
 }
 
-// ChimeFwUpdateState The device FW update state.
+// ChimeFwUpdateState defines model for chimeFwUpdateState.
 type ChimeFwUpdateState string
 
-// ChimeState Connection state of the device.
+// ChimeState defines model for chimeState.
 type ChimeState string
 
-// ChimeSupportFileState The support file state for the device.
+// ChimeSupportFileState defines model for chimeSupportFileState.
 type ChimeSupportFileState string
 
 // ChimeUpdate defines model for chimeUpdate.
 type ChimeUpdate struct {
-	// CameraIds The list of (doorbell-only) cameras which this chime is paired to.
-	CameraIds *[]string `json:"cameraIds,omitempty"`
-
-	// FeatureFlags Feature flags of the chime
-	FeatureFlags *ChimeFeatureFlagsUpdate `json:"featureFlags,omitempty"`
-
-	// IsBlockedByArmMode Whether the device is blocked by arm mode
-	IsBlockedByArmMode *bool `json:"isBlockedByArmMode,omitempty"`
-
-	// IsSshEnabled Whether or not SSH is enabled
-	IsSshEnabled *bool `json:"isSshEnabled,omitempty"`
-
-	// IsWirelessUplinkEnabled is wireless uplink enabled?
-	IsWirelessUplinkEnabled *bool `json:"isWirelessUplinkEnabled,omitempty"`
-
-	// Name The name of the device.
-	Name *string `json:"name,omitempty"`
-
-	// RepeatTimes Repeat time of playing chime
-	RepeatTimes *float64 `json:"repeatTimes,omitempty"`
-
-	// RingSettings List of custom ringtone settings for (doorbell-only) cameras paired to this chime.
-	RingSettings *[]RingSettingsUpdate `json:"ringSettings,omitempty"`
-
-	// SpeakerTrackList available speaker track list of chime
-	SpeakerTrackList *[]interface{} `json:"speakerTrackList,omitempty"`
-
-	// UserConfiguredAp Whether the connected AP is user configured
-	UserConfiguredAp *bool `json:"userConfiguredAp,omitempty"`
-
-	// Volume Speaker volume: a number from 0-100.
-	Volume               *float64                    `json:"volume,omitempty"`
-	WifiConnectionState  *WifiConnectionStateUpdate  `json:"wifiConnectionState,omitempty"`
-	WiredConnectionState *WiredConnectionStateUpdate `json:"wiredConnectionState,omitempty"`
+	CameraIds               *[]string                   `json:"cameraIds,omitempty"`
+	FeatureFlags            *ChimeFeatureFlagsUpdate    `json:"featureFlags,omitempty"`
+	IsBlockedByArmMode      *bool                       `json:"isBlockedByArmMode,omitempty"`
+	IsSshEnabled            *bool                       `json:"isSshEnabled,omitempty"`
+	IsWirelessUplinkEnabled *bool                       `json:"isWirelessUplinkEnabled,omitempty"`
+	Name                    *string                     `json:"name,omitempty"`
+	RepeatTimes             *float64                    `json:"repeatTimes,omitempty"`
+	RingSettings            *[]RingSettingsUpdate       `json:"ringSettings,omitempty"`
+	SpeakerTrackList        *[]interface{}              `json:"speakerTrackList,omitempty"`
+	UserConfiguredAp        *bool                       `json:"userConfiguredAp,omitempty"`
+	Volume                  *float64                    `json:"volume,omitempty"`
+	WifiConnectionState     *WifiConnectionStateUpdate  `json:"wifiConnectionState,omitempty"`
+	WiredConnectionState    *WiredConnectionStateUpdate `json:"wiredConnectionState,omitempty"`
 }
 
 // ClarityZone defines model for clarityZone.
 type ClarityZone struct {
-	// Color Color of the zone.
-	Color *string `json:"color"`
-
-	// Id ID of the zone. (start from 1)
-	Id *float64 `json:"id"`
-
-	// MergeId For merging zones in FE
-	MergeId *string `json:"mergeId"`
-
-	// Name Name of the zone.
-	Name *string `json:"name"`
-
-	// Points An array of arrays of [x, y]
-	Points *[]interface{} `json:"points"`
-
-	// Quality Quality of the zone.
-	Quality *float64 `json:"quality"`
+	Color   *string        `json:"color"`
+	Id      *float64       `json:"id"`
+	MergeId *string        `json:"mergeId"`
+	Name    *string        `json:"name"`
+	Points  *[]interface{} `json:"points"`
+	Quality *float64       `json:"quality"`
 }
 
 // DbRecoveryOptions defines model for dbRecoveryOptions.
 type DbRecoveryOptions struct {
-	// CanRecover Whether the DB recovery is possible.
-	CanRecover *bool `json:"canRecover"`
-
-	// HasConfigBackup Whether config backup is available from download.
-	HasConfigBackup *bool `json:"hasConfigBackup"`
-
-	// HasDbBackup Whether DB backup is available for current Protect version.
-	HasDbBackup *bool `json:"hasDbBackup"`
-
-	// HddFailing Whether ustorage reports HDD as failing.
-	HddFailing *bool `json:"hddFailing"`
-
-	// PartitionReadonly Whether Protect partition is marked as readonly.
+	CanRecover        *bool `json:"canRecover"`
+	HasConfigBackup   *bool `json:"hasConfigBackup"`
+	HasDbBackup       *bool `json:"hasDbBackup"`
+	HddFailing        *bool `json:"hddFailing"`
 	PartitionReadonly *bool `json:"partitionReadonly"`
 }
 
@@ -4586,1661 +3591,752 @@ type DbRecoveryOptionsUpdate = map[string]interface{}
 
 // DegreesRange defines model for degreesRange.
 type DegreesRange struct {
-	// Max The maximum allowed range.
-	Max *float64 `json:"max"`
-
-	// Min The minimum allowed range.
-	Min *float64 `json:"min"`
-
-	// Step The minimum step.
+	Max  *float64 `json:"max"`
+	Min  *float64 `json:"min"`
 	Step *float64 `json:"step"`
 }
 
 // DetectionRange defines model for detectionRange.
 type DetectionRange struct {
-	// Max Maximum detection range of radar in cm.
 	Max *float64 `json:"max"`
-
-	// Min Minimum detection range of radar in cm.
 	Min *float64 `json:"min"`
 }
 
 // DeviceFirmwareSettings defines model for deviceFirmwareSettings.
 type DeviceFirmwareSettings struct {
-	// ConfiguredBy Where this config from. could be uos | protect
-	ConfiguredBy *string `json:"configuredBy"`
-
-	// IsAutoUpdateEnabled Whether auto update enabled.
-	IsAutoUpdateEnabled *bool `json:"isAutoUpdateEnabled"`
-
-	// Schedule auto update schedule
-	Schedule DeviceFirmwareUpdateSchedule `json:"schedule"`
+	ConfiguredBy        *string                      `json:"configuredBy"`
+	IsAutoUpdateEnabled *bool                        `json:"isAutoUpdateEnabled"`
+	Schedule            DeviceFirmwareUpdateSchedule `json:"schedule"`
 }
 
 // DeviceFirmwareSettingsUpdate defines model for deviceFirmwareSettingsUpdate.
 type DeviceFirmwareSettingsUpdate struct {
-	// ConfiguredBy Where this config from. could be uos | protect
-	ConfiguredBy *string `json:"configuredBy,omitempty"`
-
-	// IsAutoUpdateEnabled Whether auto update enabled.
-	IsAutoUpdateEnabled *bool `json:"isAutoUpdateEnabled,omitempty"`
-
-	// Schedule auto update schedule
-	Schedule *DeviceFirmwareUpdateScheduleUpdate `json:"schedule,omitempty"`
+	ConfiguredBy        *string                             `json:"configuredBy,omitempty"`
+	IsAutoUpdateEnabled *bool                               `json:"isAutoUpdateEnabled,omitempty"`
+	Schedule            *DeviceFirmwareUpdateScheduleUpdate `json:"schedule,omitempty"`
 }
 
 // DeviceFirmwareUpdateSchedule defines model for deviceFirmwareUpdateSchedule.
 type DeviceFirmwareUpdateSchedule struct {
-	// Hour Which hour to update firmware
 	Hour *float64 `json:"hour"`
 }
 
 // DeviceFirmwareUpdateScheduleUpdate defines model for deviceFirmwareUpdateScheduleUpdate.
 type DeviceFirmwareUpdateScheduleUpdate struct {
-	// Hour Which hour to update firmware
 	Hour *float64 `json:"hour,omitempty"`
 }
 
 // DevicePowerSupply defines model for devicePowerSupply.
 type DevicePowerSupply struct {
-	// IsPowerInsufficient True when reported PoE is below requiredPoeType; null until both are known.
-	IsPowerInsufficient *bool `json:"isPowerInsufficient"`
-
-	// PoeType The current PoE type of power supply.
-	PoeType *DevicePowerSupplyPoeType `json:"poeType"`
-
-	// RequiredPoeType Minimum PoE class the device requires (e.g. IEEE 802.3bt).
-	RequiredPoeType *DevicePowerSupplyRequiredPoeType `json:"requiredPoeType"`
+	IsPowerInsufficient *bool                             `json:"isPowerInsufficient"`
+	PoeType             *DevicePowerSupplyPoeType         `json:"poeType"`
+	RequiredPoeType     *DevicePowerSupplyRequiredPoeType `json:"requiredPoeType"`
 }
 
-// DevicePowerSupplyPoeType The current PoE type of power supply.
+// DevicePowerSupplyPoeType defines model for devicePowerSupplyPoeType.
 type DevicePowerSupplyPoeType string
 
-// DevicePowerSupplyRequiredPoeType Minimum PoE class the device requires (e.g. IEEE 802.3bt).
+// DevicePowerSupplyRequiredPoeType defines model for devicePowerSupplyRequiredPoeType.
 type DevicePowerSupplyRequiredPoeType string
 
 // DoorbellSettings defines model for doorbellSettings.
 type DoorbellSettings struct {
-	// AllMessages All the messages (default + custom).
-	AllMessages *[]interface{} `json:"allMessages"`
-
-	// CustomImages A list of custom doorbell images for client preview.
-	CustomImages *[]interface{} `json:"customImages"`
-
-	// CustomMessages A list of custom doorbell messages.
-	CustomMessages *[]interface{} `json:"customMessages"`
-
-	// DefaultMessageResetTimeoutMs Default timeout for resetting LCD screen to the default message.
-	DefaultMessageResetTimeoutMs *float64 `json:"defaultMessageResetTimeoutMs"`
-
-	// DefaultMessageText Default text to display on the LCD screen.
-	DefaultMessageText *string `json:"defaultMessageText"`
+	AllMessages                  *[]interface{} `json:"allMessages"`
+	CustomImages                 *[]interface{} `json:"customImages"`
+	CustomMessages               *[]interface{} `json:"customMessages"`
+	DefaultMessageResetTimeoutMs *float64       `json:"defaultMessageResetTimeoutMs"`
+	DefaultMessageText           *string        `json:"defaultMessageText"`
 }
 
 // DoorbellSettingsUpdate defines model for doorbellSettingsUpdate.
 type DoorbellSettingsUpdate struct {
-	// CustomImages A list of custom doorbell images for client preview.
-	CustomImages *[]interface{} `json:"customImages,omitempty"`
-
-	// CustomMessages A list of custom doorbell messages.
-	CustomMessages *[]interface{} `json:"customMessages,omitempty"`
-
-	// DefaultMessageResetTimeoutMs Default timeout for resetting LCD screen to the default message.
-	DefaultMessageResetTimeoutMs *float64 `json:"defaultMessageResetTimeoutMs,omitempty"`
-
-	// DefaultMessageText Default text to display on the LCD screen.
-	DefaultMessageText *string `json:"defaultMessageText,omitempty"`
+	CustomImages                 *[]interface{} `json:"customImages,omitempty"`
+	CustomMessages               *[]interface{} `json:"customMessages,omitempty"`
+	DefaultMessageResetTimeoutMs *float64       `json:"defaultMessageResetTimeoutMs,omitempty"`
+	DefaultMessageText           *string        `json:"defaultMessageText,omitempty"`
 }
 
 // ExcludeZone defines model for excludeZone.
 type ExcludeZone struct {
-	// Color Color of the zone.
-	Color *string `json:"color"`
-
-	// Id ID of the zone. (start from 1)
-	Id *float64 `json:"id"`
-
-	// MergeId For merging zones in FE
-	MergeId *string `json:"mergeId"`
-
-	// Name Name of the zone.
-	Name *string `json:"name"`
-
-	// Points An array of arrays of [x, y]
-	Points *[]interface{} `json:"points"`
+	Color   *string        `json:"color"`
+	Id      *float64       `json:"id"`
+	MergeId *string        `json:"mergeId"`
+	Name    *string        `json:"name"`
+	Points  *[]interface{} `json:"points"`
 }
 
 // ExpansionUnit defines model for expansionUnit.
 type ExpansionUnit struct {
-	// Disks Disks that are part of this expansion unit's RAID.
-	Disks *[]UstorageDisk `json:"disks"`
-
-	// Index Expansion unit index (1-based, matches peripheral state).
-	Index *float64 `json:"index"`
-
-	// IsPresent Whether the expansion unit is physically connected.
-	IsPresent *bool `json:"isPresent"`
-
-	// IsRecordingCapable Whether the expansion unit can be used for recording.
-	IsRecordingCapable *bool `json:"isRecordingCapable"`
-
-	// IsRecordingPauseAllowedDuringRaidSync Whether user has allowed pausing recordings during RAID sync. Null if no preference set, defaults to pausing not allowed
-	IsRecordingPauseAllowedDuringRaidSync *bool `json:"isRecordingPauseAllowedDuringRaidSync"`
-
-	// LastSeen UNIX timestamp of when the unit became isPresent: false.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// SpaceId Space UUID from ustate. Null if space info unavailable.
-	SpaceId *string `json:"spaceId"`
-
-	// SpaceState Space state from ustate. Values: UNSPECIFIED, REMOVED, HEALTHY, AT_RISK, READ_ONLY, FAILED, ERASING, FORMATTING, SCANNING, MERGED.
-	SpaceState *string `json:"spaceState"`
-
-	// SyncingEstimateMs Estimated milliseconds until RAID sync completes. Null if not syncing or unavailable.
-	SyncingEstimateMs *float64 `json:"syncingEstimateMs"`
-
-	// SyncingProgress RAID sync progress ratio (0 to 1). Null if not syncing.
-	SyncingProgress *float64 `json:"syncingProgress"`
-
-	// SyncingSince UNIX timestamp when RAID sync started. Null if not syncing.
-	SyncingSince *float64 `json:"syncingSince"`
-
-	// TotalBytes Total storage capacity in bytes across all disks in this unit. Null if space info unavailable.
-	TotalBytes *float64 `json:"totalBytes"`
-
-	// UsedBytes Used storage in bytes across all disks in this unit. Null if space info unavailable.
-	UsedBytes *float64 `json:"usedBytes"`
+	Disks                                 *[]UstorageDisk `json:"disks"`
+	Index                                 *float64        `json:"index"`
+	IsPresent                             *bool           `json:"isPresent"`
+	IsRecordingCapable                    *bool           `json:"isRecordingCapable"`
+	IsRecordingPauseAllowedDuringRaidSync *bool           `json:"isRecordingPauseAllowedDuringRaidSync"`
+	LastSeen                              *float64        `json:"lastSeen"`
+	SpaceId                               *string         `json:"spaceId"`
+	SpaceState                            *string         `json:"spaceState"`
+	SyncingEstimateMs                     *float64        `json:"syncingEstimateMs"`
+	SyncingProgress                       *float64        `json:"syncingProgress"`
+	SyncingSince                          *float64        `json:"syncingSince"`
+	TotalBytes                            *float64        `json:"totalBytes"`
+	UsedBytes                             *float64        `json:"usedBytes"`
 }
 
 // ExpansionUnitRetention defines model for expansionUnitRetention.
 type ExpansionUnitRetention struct {
-	// AutoBalanceStorageBytes Storage bytes available for auto-balanced cameras on this unit.
-	AutoBalanceStorageBytes *float64 `json:"autoBalanceStorageBytes"`
-
-	// EstimatedHqRetentionDays Estimated HQ retention days for auto-balanced cameras on this unit.
+	AutoBalanceStorageBytes  *float64 `json:"autoBalanceStorageBytes"`
 	EstimatedHqRetentionDays *float64 `json:"estimatedHqRetentionDays"`
-
-	// EstimatedLqRetentionDays Estimated LQ retention days for auto-balanced cameras on this unit.
 	EstimatedLqRetentionDays *float64 `json:"estimatedLqRetentionDays"`
-
-	// TotalHqBytesPerDay Total HQ bytes per day for auto-balanced cameras on this unit.
-	TotalHqBytesPerDay *float64 `json:"totalHqBytesPerDay"`
-
-	// TotalLqBytesPerDay Total LQ bytes per day for auto-balanced cameras on this unit.
-	TotalLqBytesPerDay *float64 `json:"totalLqBytesPerDay"`
-
-	// UnitIndex Expansion unit index (1, 2, etc.).
-	UnitIndex *float64 `json:"unitIndex"`
+	TotalHqBytesPerDay       *float64 `json:"totalHqBytesPerDay"`
+	TotalLqBytesPerDay       *float64 `json:"totalLqBytesPerDay"`
+	UnitIndex                *float64 `json:"unitIndex"`
 }
 
 // Extenders defines model for extenders.
 type Extenders struct {
-	// FlashRange Spotlight range of the camera
-	FlashRange *float64 `json:"flashRange"`
-
-	// HasFlash Whether flash supported
-	HasFlash *bool `json:"hasFlash"`
-
-	// HasIR Whether ir supported
-	HasIR *bool `json:"hasIR"`
-
-	// HasRadar Whether radar supported
-	HasRadar *bool `json:"hasRadar"`
-
-	// IsAttached Whether extender attached
-	IsAttached *bool `json:"isAttached"`
-
-	// RadarRangeMax Maximum detection range of radar in cm. null if not available
+	FlashRange    *float64 `json:"flashRange"`
+	HasFlash      *bool    `json:"hasFlash"`
+	HasIR         *bool    `json:"hasIR"`
+	HasRadar      *bool    `json:"hasRadar"`
+	IsAttached    *bool    `json:"isAttached"`
 	RadarRangeMax *float64 `json:"radarRangeMax"`
-
-	// RadarRangeMin Minimum detection range of radar in cm. null if not available
 	RadarRangeMin *float64 `json:"radarRangeMin"`
 }
 
 // FaceEnhanceSettings defines model for faceEnhanceSettings.
 type FaceEnhanceSettings struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras"`
-
-	// Enabled Deprecated - Whether or not the face enhance feature is enabled (always true)
-	Enabled *bool `json:"enabled"`
+	AllCameras *bool          `json:"allCameras"`
+	Cameras    *[]interface{} `json:"cameras"`
+	Enabled    *bool          `json:"enabled"`
 }
 
 // FaceEnhanceSettingsUpdate defines model for faceEnhanceSettingsUpdate.
 type FaceEnhanceSettingsUpdate struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras,omitempty"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras,omitempty"`
-
-	// Enabled Deprecated - Whether or not the face enhance feature is enabled (always true)
-	Enabled *bool `json:"enabled,omitempty"`
+	AllCameras *bool          `json:"allCameras,omitempty"`
+	Cameras    *[]interface{} `json:"cameras,omitempty"`
+	Enabled    *bool          `json:"enabled,omitempty"`
 }
 
 // FaceRecognitionSettings defines model for faceRecognitionSettings.
 type FaceRecognitionSettings struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras"`
-
-	// Enabled Whether or not the ai feature is enabled (default: false)
-	Enabled *bool `json:"enabled"`
+	AllCameras *bool          `json:"allCameras"`
+	Cameras    *[]interface{} `json:"cameras"`
+	Enabled    *bool          `json:"enabled"`
 }
 
 // FaceRecognitionSettingsUpdate defines model for faceRecognitionSettingsUpdate.
 type FaceRecognitionSettingsUpdate struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras,omitempty"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras,omitempty"`
-
-	// Enabled Whether or not the ai feature is enabled (default: false)
-	Enabled *bool `json:"enabled,omitempty"`
+	AllCameras *bool          `json:"allCameras,omitempty"`
+	Cameras    *[]interface{} `json:"cameras,omitempty"`
+	Enabled    *bool          `json:"enabled,omitempty"`
 }
 
 // FaceUnlockSettings defines model for faceUnlockSettings.
 type FaceUnlockSettings struct {
-	// FaceDetectionSensitive The sensitivity of the face detection
 	FaceDetectionSensitive *FaceUnlockSettingsFaceDetectionSensitive `json:"faceDetectionSensitive"`
-
-	// LastUpdateTime The last update time of all face info from User Assets
-	LastUpdateTime *float64 `json:"lastUpdateTime"`
-
-	// LicenseConfigured Whether the face license is configured on the camera
-	LicenseConfigured *bool `json:"licenseConfigured"`
+	LastUpdateTime         *float64                                  `json:"lastUpdateTime"`
+	LicenseConfigured      *bool                                     `json:"licenseConfigured"`
 }
 
-// FaceUnlockSettingsFaceDetectionSensitive The sensitivity of the face detection
+// FaceUnlockSettingsFaceDetectionSensitive defines model for faceUnlockSettingsFaceDetectionSensitive.
 type FaceUnlockSettingsFaceDetectionSensitive string
 
 // FeatureFlags defines model for featureFlags.
 type FeatureFlags struct {
-	// Audio What audio features do the camera support.
-	Audio *[]interface{} `json:"audio"`
-
-	// AudioCodecs What audio codecs do the camera support.
-	AudioCodecs *[]interface{} `json:"audioCodecs"`
-
-	// AudioStyle What audio styles does the camera support.
-	AudioStyle *[]interface{} `json:"audioStyle"`
-
-	// CanAdjustIrLedLevel Whether the camera has adjustable IR
-	CanAdjustIrLedLevel *bool `json:"canAdjustIrLedLevel"`
-
-	// CanAdjustIspSettings Whether the camera can adjust ISP settings
-	CanAdjustIspSettings *bool `json:"canAdjustIspSettings"`
-
-	// CanAdjustSpeakerVolume Whether the camera can adjust speaker volume
-	CanAdjustSpeakerVolume *bool `json:"canAdjustSpeakerVolume"`
-
-	// CanMagicZoom Whether the camera can magic zoom
-	CanMagicZoom *bool `json:"canMagicZoom"`
-
-	// CanOpticalZoom Whether the camera can zoom optically
-	CanOpticalZoom *bool `json:"canOpticalZoom"`
-
-	// CanTouchFocus Whether the camera can touch focus
-	CanTouchFocus *bool `json:"canTouchFocus"`
-
-	// ClarityZones Whether camera support clarity zones
-	ClarityZones *map[string]interface{} `json:"clarityZones"`
-
-	// DownScaleLevels Resolution labels for each down-scale mode index (descending by resolution size, index 0 = highest), provided by firmware v5.1.240+
-	DownScaleLevels *[]interface{} `json:"downScaleLevels"`
-
-	// DownScaleResolutions Available resolutions when down-scaling, as [width, height] pairs
-	DownScaleResolutions *[]interface{} `json:"downScaleResolutions"`
-
-	// ExcludeZones Whether camera support exclude zones
-	ExcludeZones *map[string]interface{} `json:"excludeZones"`
-
-	// FlashRange Spotlight range of the camera
-	FlashRange *float64 `json:"flashRange"`
-
-	// Focus Focus capability of the camera.
-	Focus FocusCapability `json:"focus"`
-
-	// HallwayModeWarningRequired Whether camera should show hallway mode warning due to AI limitations
-	HallwayModeWarningRequired *bool `json:"hallwayModeWarningRequired"`
-
-	// HasAccelerometer Whether the camera has an accelerometer
-	HasAccelerometer *bool `json:"hasAccelerometer"`
-
-	// HasAec Whether the camera has acoustic echo cancellation
-	HasAec *bool `json:"hasAec"`
-
-	// HasAutoICROnly Whether the camera supports Auto-ICR-Filter-Only mode
-	HasAutoICROnly *bool `json:"hasAutoICROnly"`
-
-	// HasBluetooth Whether the camera has bluetooth
-	HasBluetooth *bool `json:"hasBluetooth"`
-
-	// HasChime Whether the camera has a mechanical chime
-	HasChime *bool `json:"hasChime"`
-
-	// HasColorLcdScreen Whether camera support color LCD screen
-	HasColorLcdScreen *bool `json:"hasColorLcdScreen"`
-
-	// HasEdgeRecording Whether camera support edge recording
-	HasEdgeRecording *bool `json:"hasEdgeRecording"`
-
-	// HasExternalIr Whether the camera has external IR
-	HasExternalIr *bool `json:"hasExternalIr"`
-
-	// HasFingerprintSensor Whether the camera has a fingerprint sensor
-	HasFingerprintSensor *bool `json:"hasFingerprintSensor"`
-
-	// HasFisheye Whether the camera has a fisheye lens
-	HasFisheye *bool `json:"hasFisheye"`
-
-	// HasFlash Whether camera support internal flash LED
-	HasFlash *bool `json:"hasFlash"`
-
-	// HasHallwayMode Whether camera support hallway mode
-	HasHallwayMode *bool `json:"hasHallwayMode"`
-
-	// HasHallwayModeHdrOnRequired Whether camera needs HDR enabled before hallway mode can be activated
-	HasHallwayModeHdrOnRequired *bool `json:"hasHallwayModeHdrOnRequired"`
-
-	// HasHdr Whether the camera supports High Dynamic Range mode
-	HasHdr *bool `json:"hasHdr"`
-
-	// HasHorizontalFlip Whether the camera support horizontal flip
-	HasHorizontalFlip *bool `json:"hasHorizontalFlip"`
-
-	// HasIcrSensitivity Whether the camera has ICR sensitivity
-	HasIcrSensitivity *bool `json:"hasIcrSensitivity"`
-
-	// HasInfrared Whether the camera has infrared
-	HasInfrared *bool `json:"hasInfrared"`
-
-	// HasLcdScreen Whether the camera has a LCD screen
-	HasLcdScreen *bool `json:"hasLcdScreen"`
-
-	// HasLdc Whether the camera has lens distortion correction
-	HasLdc *bool `json:"hasLdc"`
-
-	// HasLedIr Whether the camera has LED IR
-	HasLedIr *bool `json:"hasLedIr"`
-
-	// HasLedStatus Whether the camera has LED status
-	HasLedStatus *bool `json:"hasLedStatus"`
-
-	// HasLineCrossing Whether camera support line crossing
-	HasLineCrossing *bool `json:"hasLineCrossing"`
-
-	// HasLineCrossingCounting Whether camera support line crossing counting
-	HasLineCrossingCounting *bool `json:"hasLineCrossingCounting"`
-
-	// HasLineIn Whether the camera has line in
-	HasLineIn *bool `json:"hasLineIn"`
-
-	// HasLiveviewTracking Whether camera support liveview tracking
-	HasLiveviewTracking *bool `json:"hasLiveviewTracking"`
-
-	// HasLprReflex Whether camera support LPR reflex
-	HasLprReflex *bool `json:"hasLprReflex"`
-
-	// HasLuxCheck Whether camera support lux check
-	HasLuxCheck *bool `json:"hasLuxCheck"`
-
-	// HasManualPersonOfInterest Whether camera support manual Poi
-	HasManualPersonOfInterest *bool `json:"hasManualPersonOfInterest"`
-
-	// HasMic Whether the camera has a microphone
-	HasMic *bool `json:"hasMic"`
-
-	// HasMotionDetection Whether the camera can report motion events. True for native cameras with motion algorithms, and for third-party ONVIF cameras that expose PullPoint motion events.
-	HasMotionDetection *bool `json:"hasMotionDetection"`
-
-	// HasMotionZones Whether the camera supports motion zones
-	HasMotionZones *bool `json:"hasMotionZones"`
-
-	// HasOptimizeIr Whether camera support optimize IR
-	HasOptimizeIr *bool `json:"hasOptimizeIr"`
-
-	// HasPackageCamera Device has a secondary package camera.
-	HasPackageCamera *bool `json:"hasPackageCamera"`
-
-	// HasPackageZoneSupportForPrimaryLens Whether camera support package zone for primary lens
-	HasPackageZoneSupportForPrimaryLens *bool `json:"hasPackageZoneSupportForPrimaryLens"`
-
-	// HasPackageZoneSupportForSecondaryLens Whether camera support package zone for secondary lens
-	HasPackageZoneSupportForSecondaryLens *bool `json:"hasPackageZoneSupportForSecondaryLens"`
-
-	// HasPrivacyMask Whether the camera supports privacy masking
-	HasPrivacyMask *bool `json:"hasPrivacyMask"`
-
-	// HasRtc Whether the camera has a real-time clock
-	HasRtc *bool `json:"hasRtc"`
-
-	// HasSdCard Whether the camera has an SD card
-	HasSdCard *bool `json:"hasSdCard"`
-
-	// HasSmartDetect Whether the camera supports smart detect.
-	HasSmartDetect *bool `json:"hasSmartDetect"`
-
-	// HasSmartZoom Whether camera support smart zoom
-	HasSmartZoom *bool `json:"hasSmartZoom"`
-
-	// HasSmokeCover Whether camera support smoke cover
-	HasSmokeCover *bool `json:"hasSmokeCover"`
-
-	// HasSpeaker Whether the camera has a speaker to support talkback
-	HasSpeaker *bool `json:"hasSpeaker"`
-
-	// HasSquareEventThumbnail Whether thumbnails are square.
-	HasSquareEventThumbnail *bool `json:"hasSquareEventThumbnail"`
-
-	// HasTamperDetection Whether camera support tamper detection
-	HasTamperDetection *bool `json:"hasTamperDetection"`
-
-	// HasVerticalFlip Whether the camera support vertical flip
-	HasVerticalFlip *bool `json:"hasVerticalFlip"`
-
-	// HasWdr Whether the camera supports Wide Dynamic Range mode
-	HasWdr *bool `json:"hasWdr"`
-
-	// HasWifi Whether the camera has wifi
-	HasWifi *bool       `json:"hasWifi"`
-	Hotplug HotplugItem `json:"hotplug"`
-
-	// IsDoorbell Whether camera is a doorbell model
-	IsDoorbell *bool `json:"isDoorbell"`
-
-	// IsPtz Whether camera is a ptz model
-	IsPtz *bool `json:"isPtz"`
-
-	// LensModel Model of the attached lens
-	LensModel *FeatureFlagsLensModel `json:"lensModel"`
-
-	// LensType Type of the attached lens
-	LensType *FeatureFlagsLensType `json:"lensType"`
-
-	// MaxScaleDownLevel How much can the camera resolution be down-scaled
-	MaxScaleDownLevel *float64 `json:"maxScaleDownLevel"`
-
-	// MotionAlgorithms What motion algorithms do the camera support.
-	MotionAlgorithms *[]interface{} `json:"motionAlgorithms"`
-
-	// MountPositions What mount positions do the camera support.
-	MountPositions *[]interface{} `json:"mountPositions"`
-
-	// Pan Pan capability of the camera.
-	Pan PanCapability `json:"pan"`
-
-	// PresetMinDuration Minimum duration of ptz preset in seconds
-	PresetMinDuration *float64 `json:"presetMinDuration"`
-
-	// PresetTour Whether the camera supports Patrols and Cruises
-	PresetTour *bool `json:"presetTour"`
-
-	// PrivacyMaskCapability The capability of privacy masks.
-	PrivacyMaskCapability PrivacyMaskCapability `json:"privacyMaskCapability"`
-
-	// Reader Reader related feature flags
-	Reader ReaderFeatureFlags `json:"reader"`
-
-	// SmartDetectAudioTypes What smart detection audio types do the camera support.
-	SmartDetectAudioTypes *[]interface{} `json:"smartDetectAudioTypes"`
-
-	// SmartDetectTypes What smart detection object types do the camera support.
-	SmartDetectTypes *[]interface{} `json:"smartDetectTypes"`
-
-	// StitchDistance Whether camera support stitch distance
-	StitchDistance *map[string]interface{} `json:"stitchDistance"`
-
-	// Storage Storage slot configuration (sdSlotCount, ssdSlotCount)
-	Storage *map[string]interface{} `json:"storage"`
-
-	// StreamEncryptable Whether the camera supports encrypting the video stream
-	StreamEncryptable *bool `json:"streamEncryptable"`
-
-	// SupportCustomRingtone Whether the camera supports custom ringtone
-	SupportCustomRingtone *bool `json:"supportCustomRingtone"`
-
-	// SupportDoorAccessConfig whether the camera support door access
-	SupportDoorAccessConfig *bool `json:"supportDoorAccessConfig"`
-
-	// SupportFullHdSnapshot Whether camera support full HD or higher resolution snapshot
-	SupportFullHdSnapshot *bool `json:"supportFullHdSnapshot"`
-
-	// SupportLocate Whether camera support locate
-	SupportLocate *bool `json:"supportLocate"`
-
-	// SupportLpDetectionWithoutVehicle Whether the camera supports license plate detection without vehicle
-	SupportLpDetectionWithoutVehicle *bool `json:"supportLpDetectionWithoutVehicle"`
-
-	// SupportMinMotionAdaptiveBitrate Whether camera support custom values for min motion adaptive bitrate
-	SupportMinMotionAdaptiveBitrate *bool `json:"supportMinMotionAdaptiveBitrate"`
-
-	// SupportNfc Whether the camera supports Near-field communication (NFC) reader
-	SupportNfc *bool `json:"supportNfc"`
-
-	// SupportPtzTrackingTimeout Whether the camera supports PTZ tracking timeout
-	SupportPtzTrackingTimeout *bool `json:"supportPtzTrackingTimeout"`
-
-	// SupportPtzVehicleTracking Whether the camera supports PTZ vehicle auto tracking
-	SupportPtzVehicleTracking *bool `json:"supportPtzVehicleTracking"`
-
-	// Tilt Tilt capability of the camera.
-	Tilt TiltCapability `json:"tilt"`
-
-	// VerticalFlipWarning Whether camera should show vertical flip warning
-	VerticalFlipWarning *bool `json:"verticalFlipWarning"`
-
-	// VideoCodecs What video codecs do the camera support.
-	VideoCodecs *[]interface{} `json:"videoCodecs"`
-
-	// VideoDeviceCount Number of video devices for GetEdgeRecordingFiles deviceID
-	VideoDeviceCount *float64 `json:"videoDeviceCount"`
-
-	// VideoInputModes Video input modes supported by the camera
-	VideoInputModes *[]interface{} `json:"videoInputModes"`
-
-	// VideoModeMaxFps A list of maximal FPS for each supported video mode
-	VideoModeMaxFps *[]interface{} `json:"videoModeMaxFps"`
-
-	// VideoModes A list of supported video modes by the camera
-	VideoModes *[]interface{} `json:"videoModes"`
-
-	// Zoom Zoom capability of the camera.
-	Zoom ZoomCapability `json:"zoom"`
+	Audio                                 *[]interface{}          `json:"audio"`
+	AudioCodecs                           *[]interface{}          `json:"audioCodecs"`
+	AudioStyle                            *[]interface{}          `json:"audioStyle"`
+	CanAdjustIrLedLevel                   *bool                   `json:"canAdjustIrLedLevel"`
+	CanAdjustIspSettings                  *bool                   `json:"canAdjustIspSettings"`
+	CanAdjustSpeakerVolume                *bool                   `json:"canAdjustSpeakerVolume"`
+	CanMagicZoom                          *bool                   `json:"canMagicZoom"`
+	CanOpticalZoom                        *bool                   `json:"canOpticalZoom"`
+	CanTouchFocus                         *bool                   `json:"canTouchFocus"`
+	ClarityZones                          *map[string]interface{} `json:"clarityZones"`
+	DownScaleLevels                       *[]interface{}          `json:"downScaleLevels"`
+	DownScaleResolutions                  *[]interface{}          `json:"downScaleResolutions"`
+	ExcludeZones                          *map[string]interface{} `json:"excludeZones"`
+	FlashRange                            *float64                `json:"flashRange"`
+	Focus                                 FocusCapability         `json:"focus"`
+	HallwayModeWarningRequired            *bool                   `json:"hallwayModeWarningRequired"`
+	HasAccelerometer                      *bool                   `json:"hasAccelerometer"`
+	HasAec                                *bool                   `json:"hasAec"`
+	HasAutoICROnly                        *bool                   `json:"hasAutoICROnly"`
+	HasBluetooth                          *bool                   `json:"hasBluetooth"`
+	HasChime                              *bool                   `json:"hasChime"`
+	HasColorLcdScreen                     *bool                   `json:"hasColorLcdScreen"`
+	HasEdgeRecording                      *bool                   `json:"hasEdgeRecording"`
+	HasExternalIr                         *bool                   `json:"hasExternalIr"`
+	HasFingerprintSensor                  *bool                   `json:"hasFingerprintSensor"`
+	HasFisheye                            *bool                   `json:"hasFisheye"`
+	HasFlash                              *bool                   `json:"hasFlash"`
+	HasHallwayMode                        *bool                   `json:"hasHallwayMode"`
+	HasHallwayModeHdrOnRequired           *bool                   `json:"hasHallwayModeHdrOnRequired"`
+	HasHdr                                *bool                   `json:"hasHdr"`
+	HasHorizontalFlip                     *bool                   `json:"hasHorizontalFlip"`
+	HasIcrSensitivity                     *bool                   `json:"hasIcrSensitivity"`
+	HasInfrared                           *bool                   `json:"hasInfrared"`
+	HasLcdScreen                          *bool                   `json:"hasLcdScreen"`
+	HasLdc                                *bool                   `json:"hasLdc"`
+	HasLedIr                              *bool                   `json:"hasLedIr"`
+	HasLedStatus                          *bool                   `json:"hasLedStatus"`
+	HasLineCrossing                       *bool                   `json:"hasLineCrossing"`
+	HasLineCrossingCounting               *bool                   `json:"hasLineCrossingCounting"`
+	HasLineIn                             *bool                   `json:"hasLineIn"`
+	HasLiveviewTracking                   *bool                   `json:"hasLiveviewTracking"`
+	HasLprReflex                          *bool                   `json:"hasLprReflex"`
+	HasLuxCheck                           *bool                   `json:"hasLuxCheck"`
+	HasManualPersonOfInterest             *bool                   `json:"hasManualPersonOfInterest"`
+	HasMic                                *bool                   `json:"hasMic"`
+	HasMotionDetection                    *bool                   `json:"hasMotionDetection"`
+	HasMotionZones                        *bool                   `json:"hasMotionZones"`
+	HasOptimizeIr                         *bool                   `json:"hasOptimizeIr"`
+	HasPackageCamera                      *bool                   `json:"hasPackageCamera"`
+	HasPackageZoneSupportForPrimaryLens   *bool                   `json:"hasPackageZoneSupportForPrimaryLens"`
+	HasPackageZoneSupportForSecondaryLens *bool                   `json:"hasPackageZoneSupportForSecondaryLens"`
+	HasPrivacyMask                        *bool                   `json:"hasPrivacyMask"`
+	HasRtc                                *bool                   `json:"hasRtc"`
+	HasSdCard                             *bool                   `json:"hasSdCard"`
+	HasSmartDetect                        *bool                   `json:"hasSmartDetect"`
+	HasSmartZoom                          *bool                   `json:"hasSmartZoom"`
+	HasSmokeCover                         *bool                   `json:"hasSmokeCover"`
+	HasSpeaker                            *bool                   `json:"hasSpeaker"`
+	HasSquareEventThumbnail               *bool                   `json:"hasSquareEventThumbnail"`
+	HasTamperDetection                    *bool                   `json:"hasTamperDetection"`
+	HasVerticalFlip                       *bool                   `json:"hasVerticalFlip"`
+	HasWdr                                *bool                   `json:"hasWdr"`
+	HasWifi                               *bool                   `json:"hasWifi"`
+	Hotplug                               HotplugItem             `json:"hotplug"`
+	IsDoorbell                            *bool                   `json:"isDoorbell"`
+	IsPtz                                 *bool                   `json:"isPtz"`
+	LensModel                             *FeatureFlagsLensModel  `json:"lensModel"`
+	LensType                              *FeatureFlagsLensType   `json:"lensType"`
+	MaxScaleDownLevel                     *float64                `json:"maxScaleDownLevel"`
+	MotionAlgorithms                      *[]interface{}          `json:"motionAlgorithms"`
+	MountPositions                        *[]interface{}          `json:"mountPositions"`
+	Pan                                   PanCapability           `json:"pan"`
+	PresetMinDuration                     *float64                `json:"presetMinDuration"`
+	PresetTour                            *bool                   `json:"presetTour"`
+	PrivacyMaskCapability                 PrivacyMaskCapability   `json:"privacyMaskCapability"`
+	Reader                                ReaderFeatureFlags      `json:"reader"`
+	SmartDetectAudioTypes                 *[]interface{}          `json:"smartDetectAudioTypes"`
+	SmartDetectTypes                      *[]interface{}          `json:"smartDetectTypes"`
+	StitchDistance                        *map[string]interface{} `json:"stitchDistance"`
+	Storage                               *map[string]interface{} `json:"storage"`
+	StreamEncryptable                     *bool                   `json:"streamEncryptable"`
+	SupportCustomRingtone                 *bool                   `json:"supportCustomRingtone"`
+	SupportDoorAccessConfig               *bool                   `json:"supportDoorAccessConfig"`
+	SupportFullHdSnapshot                 *bool                   `json:"supportFullHdSnapshot"`
+	SupportLocate                         *bool                   `json:"supportLocate"`
+	SupportLpDetectionWithoutVehicle      *bool                   `json:"supportLpDetectionWithoutVehicle"`
+	SupportMinMotionAdaptiveBitrate       *bool                   `json:"supportMinMotionAdaptiveBitrate"`
+	SupportNfc                            *bool                   `json:"supportNfc"`
+	SupportPtzTrackingTimeout             *bool                   `json:"supportPtzTrackingTimeout"`
+	SupportPtzVehicleTracking             *bool                   `json:"supportPtzVehicleTracking"`
+	Tilt                                  TiltCapability          `json:"tilt"`
+	VerticalFlipWarning                   *bool                   `json:"verticalFlipWarning"`
+	VideoCodecs                           *[]interface{}          `json:"videoCodecs"`
+	VideoDeviceCount                      *float64                `json:"videoDeviceCount"`
+	VideoInputModes                       *[]interface{}          `json:"videoInputModes"`
+	VideoModeMaxFps                       *[]interface{}          `json:"videoModeMaxFps"`
+	VideoModes                            *[]interface{}          `json:"videoModes"`
+	Zoom                                  ZoomCapability          `json:"zoom"`
 }
 
-// FeatureFlagsLensModel Model of the attached lens
+// FeatureFlagsLensModel defines model for featureFlagsLensModel.
 type FeatureFlagsLensModel string
 
-// FeatureFlagsLensType Type of the attached lens
+// FeatureFlagsLensType defines model for featureFlagsLensType.
 type FeatureFlagsLensType string
 
 // FingerprintSettings defines model for fingerprintSettings.
 type FingerprintSettings struct {
-	// Enable Whether fingerprint enabled
-	Enable *bool `json:"enable"`
-
-	// EnablePrintLatency Whether print latency enabled
-	EnablePrintLatency *bool `json:"enablePrintLatency"`
-
-	// Mode Fingerprint sensor mode
-	Mode *string `json:"mode"`
-
-	// ReportCaptureComplete Whether response expected
-	ReportCaptureComplete *bool `json:"reportCaptureComplete"`
-
-	// ReportFingerTouch Whether report finger touch
-	ReportFingerTouch *bool `json:"reportFingerTouch"`
+	Enable                *bool   `json:"enable"`
+	EnablePrintLatency    *bool   `json:"enablePrintLatency"`
+	Mode                  *string `json:"mode"`
+	ReportCaptureComplete *bool   `json:"reportCaptureComplete"`
+	ReportFingerTouch     *bool   `json:"reportFingerTouch"`
 }
 
 // FingerprintState defines model for fingerprintState.
 type FingerprintState struct {
-	// FingerprintId Enrolling Id of fingerprint
-	FingerprintId *string `json:"fingerprintId"`
-
-	// Free Free slots of fingerprint
-	Free *float64 `json:"free"`
-
-	// Progress Percentage of enrolling progress
-	Progress *float64 `json:"progress"`
-
-	// Status Fingerprint state
-	Status *FingerprintStateStatus `json:"status"`
-
-	// Total Total slots of fingerprint
-	Total *float64 `json:"total"`
+	FingerprintId *string                 `json:"fingerprintId"`
+	Free          *float64                `json:"free"`
+	Progress      *float64                `json:"progress"`
+	Status        *FingerprintStateStatus `json:"status"`
+	Total         *float64                `json:"total"`
 }
 
-// FingerprintStateStatus Fingerprint state
+// FingerprintStateStatus defines model for fingerprintStateStatus.
 type FingerprintStateStatus string
 
 // FocusCapability defines model for focusCapability.
 type FocusCapability struct {
-	// Degrees The degree range of the capability.
 	Degrees DegreesRange `json:"degrees"`
-
-	// Steps The step range of the capability.
-	Steps StepsRange `json:"steps"`
+	Steps   StepsRange   `json:"steps"`
 }
 
 // GlassBreakSensorSettings defines model for glassBreakSensorSettings.
 type GlassBreakSensorSettings struct {
-	// IsEnabled Enable glass break sensor.
-	IsEnabled *bool `json:"isEnabled"`
-
-	// Sensitivity Glass break sensitivity (0-100).
+	IsEnabled   *bool    `json:"isEnabled"`
 	Sensitivity *float64 `json:"sensitivity"`
 }
 
 // HomekitSettings defines model for homekitSettings.
 type HomekitSettings struct {
-	// DoorbellMuted Whether doorbell is muted in homekit app
-	DoorbellMuted *bool `json:"doorbellMuted"`
-
-	// MicrophoneMuted Whether microphone is muted in homekit app
-	MicrophoneMuted *bool `json:"microphoneMuted"`
-
-	// RecordingActive Whether recording is active in homekit app
-	RecordingActive *bool `json:"recordingActive"`
-
-	// SpeakerMuted Whether speaker is muted in homekit app
-	SpeakerMuted *bool `json:"speakerMuted"`
-
-	// StreamInProgress Whether homekit video/audio/talkback stream is in progress.
-	StreamInProgress *bool `json:"streamInProgress"`
-
-	// TalkbackSettingsActive Whether homekit specific talkback settings have been applied to the camera.
+	DoorbellMuted          *bool `json:"doorbellMuted"`
+	MicrophoneMuted        *bool `json:"microphoneMuted"`
+	RecordingActive        *bool `json:"recordingActive"`
+	SpeakerMuted           *bool `json:"speakerMuted"`
+	StreamInProgress       *bool `json:"streamInProgress"`
 	TalkbackSettingsActive *bool `json:"talkbackSettingsActive"`
 }
 
 // HotplugItem defines model for hotplugItem.
 type HotplugItem struct {
-	// Audio Whether audio attached, null if not supported
-	Audio    *bool     `json:"audio"`
-	Extender Extenders `json:"extender"`
-
-	// SdCardAttached Whether SD card is attached
-	SdCardAttached *bool `json:"sdCardAttached"`
-
-	// StandaloneAdoption Whether camera is supported for adoption without video attached
-	StandaloneAdoption *bool `json:"standaloneAdoption"`
-
-	// Video Whether video attached, null if not supported
-	Video *bool `json:"video"`
+	Audio              *bool     `json:"audio"`
+	Extender           Extenders `json:"extender"`
+	SdCardAttached     *bool     `json:"sdCardAttached"`
+	StandaloneAdoption *bool     `json:"standaloneAdoption"`
+	Video              *bool     `json:"video"`
 }
 
 // HumiditySensor defines model for humiditySensor.
 type HumiditySensor struct {
-	// Status What range does the measured metric fall into
 	Status *HumiditySensorStatus `json:"status"`
-
-	// Value Decimal value of the metric measured by the sensor
-	Value *float64 `json:"value"`
+	Value  *float64              `json:"value"`
 }
 
 // HumiditySensorSettings defines model for humiditySensorSettings.
 type HumiditySensorSettings struct {
-	// HighThreshold Humidity high level threshold from 1 to 99 (%).
 	HighThreshold *float64 `json:"highThreshold"`
-
-	// IsEnabled Enable relative humidity sensor.
-	IsEnabled *bool `json:"isEnabled"`
-
-	// LowThreshold Humidity low level threshold from 1 to 99 (%).
-	LowThreshold *float64 `json:"lowThreshold"`
-
-	// Margin Humidity threshold detection hysteresis margin (%). Read-only value decided by sensor implementation.
-	Margin *float64 `json:"margin"`
+	IsEnabled     *bool    `json:"isEnabled"`
+	LowThreshold  *float64 `json:"lowThreshold"`
+	Margin        *float64 `json:"margin"`
 }
 
-// HumiditySensorStatus What range does the measured metric fall into
+// HumiditySensorStatus defines model for humiditySensorStatus.
 type HumiditySensorStatus string
 
 // IspSettings defines model for ispSettings.
 type IspSettings struct {
-	// AeMode Auto Exposure mode.
-	AeMode *IspSettingsAeMode `json:"aeMode"`
-
-	// Brightness Brightness.
-	Brightness *float64 `json:"brightness"`
-
-	// Contrast Contrast.
-	Contrast *float64 `json:"contrast"`
-
-	// DZoomCenterX dZoomCenterX.
-	DZoomCenterX *float64 `json:"dZoomCenterX"`
-
-	// DZoomCenterY dZoomCenterY.
-	DZoomCenterY *float64 `json:"dZoomCenterY"`
-
-	// DZoomScale dZoomCenterY.
-	DZoomScale *float64 `json:"dZoomScale"`
-
-	// DZoomStreamId dZoomStreamId.
-	DZoomStreamId *float64 `json:"dZoomStreamId"`
-
-	// Denoise Denoise Level.
-	Denoise *float64 `json:"denoise"`
-
-	// FocusMode Focus Mode (certain camera models only)
-	FocusMode *IspSettingsFocusMode `json:"focusMode"`
-
-	// FocusPosition Focus Position (only if focusMode is set to manual). UVC Pro Only.
-	FocusPosition *float64 `json:"focusPosition"`
-
-	// HdrMode High Dynamic Range mode in ISP setting
-	HdrMode *IspSettingsHdrMode `json:"hdrMode"`
-
-	// Hue Hue.
-	Hue *float64 `json:"hue"`
-
-	// IcrCustomValue ICR custom value. (0 - 10, total 11 levels)
-	IcrCustomValue *float64 `json:"icrCustomValue"`
-
-	// IcrSensitivity ICR sensitivity. (0: Low, 1: Medium, 2: High, 3: Custom)
-	IcrSensitivity *float64 `json:"icrSensitivity"`
-
-	// IcrSwitchMode ICR switch mode.
-	IcrSwitchMode *IspSettingsIcrSwitchMode `json:"icrSwitchMode"`
-
-	// IrLedLevel IR LED Level. (1-255)
-	IrLedLevel *float64 `json:"irLedLevel"`
-
-	// IrLedMode IR LED Mode.
-	IrLedMode *IspSettingsIrLedMode `json:"irLedMode"`
-
-	// Is3dnrEnabled Is 3DNR Enabled
-	Is3dnrEnabled *bool `json:"is3dnrEnabled"`
-
-	// IsAggressiveAntiFlickerEnabled Is Aggressive Anti-Flicker Enabled
-	IsAggressiveAntiFlickerEnabled *bool `json:"isAggressiveAntiFlickerEnabled"`
-
-	// IsAutoRotateEnabled Is auto rotate enabled (G3-FLEX only). When true, isFlippedVertical and isFlippedHorizontal are false automatically.
-	IsAutoRotateEnabled *bool `json:"isAutoRotateEnabled"`
-
-	// IsColorNightVisionEnabled Is color night vision enabled
-	IsColorNightVisionEnabled *bool `json:"isColorNightVisionEnabled"`
-
-	// IsExternalIrEnabled Is External IR Enabled
-	IsExternalIrEnabled *bool `json:"isExternalIrEnabled"`
-
-	// IsFlippedHorizontal Flip the image horizontally.
-	IsFlippedHorizontal *bool `json:"isFlippedHorizontal"`
-
-	// IsFlippedVertical Flip the image vertically.
-	IsFlippedVertical *bool `json:"isFlippedVertical"`
-
-	// IsLdcEnabled Is Lens Distortion Correction enabled
-	IsLdcEnabled *bool `json:"isLdcEnabled"`
-
-	// IsPauseMotionEnabled Is pause motion detection on day/night switch enabled
-	IsPauseMotionEnabled *bool `json:"isPauseMotionEnabled"`
-
-	// IsSmokeCoverModeEnabled Is smoke cover mode toggled.
-	IsSmokeCoverModeEnabled *bool `json:"isSmokeCoverModeEnabled"`
-
-	// MountPosition Fisheye model (AI-360) mounting position
-	MountPosition *IspSettingsMountPosition `json:"mountPosition"`
-
-	// Saturation Saturation Level.
-	Saturation *float64 `json:"saturation"`
-
-	// SceneMode Scene Mode
-	SceneMode *IspSettingsSceneMode `json:"sceneMode"`
-
-	// Sharpness Sharpness Level.
-	Sharpness *float64 `json:"sharpness"`
-
-	// SpotlightDuration Spotlight duration (in second)
-	SpotlightDuration *float64 `json:"spotlightDuration"`
-
-	// TouchFocusX Touch focus center x coordinate
-	TouchFocusX *float64 `json:"touchFocusX"`
-
-	// TouchFocusY Touch focus center y coordinate
-	TouchFocusY *float64 `json:"touchFocusY"`
-
-	// Wdr Wide Dynamic Range Level.
-	Wdr *float64 `json:"wdr"`
-
-	// ZoomPosition Zoom Level (certain camera models only)
-	ZoomPosition *float64 `json:"zoomPosition"`
+	AeMode                         *IspSettingsAeMode        `json:"aeMode"`
+	Brightness                     *float64                  `json:"brightness"`
+	Contrast                       *float64                  `json:"contrast"`
+	DZoomCenterX                   *float64                  `json:"dZoomCenterX"`
+	DZoomCenterY                   *float64                  `json:"dZoomCenterY"`
+	DZoomScale                     *float64                  `json:"dZoomScale"`
+	DZoomStreamId                  *float64                  `json:"dZoomStreamId"`
+	Denoise                        *float64                  `json:"denoise"`
+	FocusMode                      *IspSettingsFocusMode     `json:"focusMode"`
+	FocusPosition                  *float64                  `json:"focusPosition"`
+	HdrMode                        *IspSettingsHdrMode       `json:"hdrMode"`
+	Hue                            *float64                  `json:"hue"`
+	IcrCustomValue                 *float64                  `json:"icrCustomValue"`
+	IcrSensitivity                 *float64                  `json:"icrSensitivity"`
+	IcrSwitchMode                  *IspSettingsIcrSwitchMode `json:"icrSwitchMode"`
+	IrLedLevel                     *float64                  `json:"irLedLevel"`
+	IrLedMode                      *IspSettingsIrLedMode     `json:"irLedMode"`
+	Is3dnrEnabled                  *bool                     `json:"is3dnrEnabled"`
+	IsAggressiveAntiFlickerEnabled *bool                     `json:"isAggressiveAntiFlickerEnabled"`
+	IsAutoRotateEnabled            *bool                     `json:"isAutoRotateEnabled"`
+	IsColorNightVisionEnabled      *bool                     `json:"isColorNightVisionEnabled"`
+	IsExternalIrEnabled            *bool                     `json:"isExternalIrEnabled"`
+	IsFlippedHorizontal            *bool                     `json:"isFlippedHorizontal"`
+	IsFlippedVertical              *bool                     `json:"isFlippedVertical"`
+	IsLdcEnabled                   *bool                     `json:"isLdcEnabled"`
+	IsPauseMotionEnabled           *bool                     `json:"isPauseMotionEnabled"`
+	IsSmokeCoverModeEnabled        *bool                     `json:"isSmokeCoverModeEnabled"`
+	MountPosition                  *IspSettingsMountPosition `json:"mountPosition"`
+	Saturation                     *float64                  `json:"saturation"`
+	SceneMode                      *IspSettingsSceneMode     `json:"sceneMode"`
+	Sharpness                      *float64                  `json:"sharpness"`
+	SpotlightDuration              *float64                  `json:"spotlightDuration"`
+	TouchFocusX                    *float64                  `json:"touchFocusX"`
+	TouchFocusY                    *float64                  `json:"touchFocusY"`
+	Wdr                            *float64                  `json:"wdr"`
+	ZoomPosition                   *float64                  `json:"zoomPosition"`
 }
 
-// IspSettingsAeMode Auto Exposure mode.
+// IspSettingsAeMode defines model for ispSettingsAeMode.
 type IspSettingsAeMode string
 
-// IspSettingsFocusMode Focus Mode (certain camera models only)
+// IspSettingsFocusMode defines model for ispSettingsFocusMode.
 type IspSettingsFocusMode string
 
-// IspSettingsHdrMode High Dynamic Range mode in ISP setting
+// IspSettingsHdrMode defines model for ispSettingsHdrMode.
 type IspSettingsHdrMode string
 
-// IspSettingsIcrSwitchMode ICR switch mode.
+// IspSettingsIcrSwitchMode defines model for ispSettingsIcrSwitchMode.
 type IspSettingsIcrSwitchMode string
 
-// IspSettingsIrLedMode IR LED Mode.
+// IspSettingsIrLedMode defines model for ispSettingsIrLedMode.
 type IspSettingsIrLedMode string
 
-// IspSettingsMountPosition Fisheye model (AI-360) mounting position
+// IspSettingsMountPosition defines model for ispSettingsMountPosition.
 type IspSettingsMountPosition string
 
-// IspSettingsSceneMode Scene Mode
+// IspSettingsSceneMode defines model for ispSettingsSceneMode.
 type IspSettingsSceneMode string
 
 // LcdMessage defines model for lcdMessage.
 type LcdMessage struct {
-	// ResetAt Unix timestamp of when the LCD message should be reset to the default. Set NULL to never reset.
-	ResetAt *float64 `json:"resetAt"`
-
-	// Text The content to display on the LCD screen.
-	Text *string `json:"text"`
-
-	// Type The type of the LCD message.
-	Type *LcdMessageType `json:"type"`
+	ResetAt *float64        `json:"resetAt"`
+	Text    *string         `json:"text"`
+	Type    *LcdMessageType `json:"type"`
 }
 
-// LcdMessageType The type of the LCD message.
+// LcdMessageType defines model for lcdMessageType.
 type LcdMessageType string
 
 // LeakSensorSettings defines model for leakSensorSettings.
 type LeakSensorSettings struct {
-	// IsExternalEnabled Enable external water leak detection.
 	IsExternalEnabled *bool `json:"isExternalEnabled"`
-
-	// IsInternalEnabled Enable internal water leak detection.
 	IsInternalEnabled *bool `json:"isInternalEnabled"`
 }
 
 // LedSettings defines model for ledSettings.
 type LedSettings struct {
-	// FloodLed Indicates whether the flood LED is enabled.
-	FloodLed *bool `json:"floodLed"`
-
-	// IsEnabled Indicates whether the status LED is enabled.
-	IsEnabled *bool `json:"isEnabled"`
-
-	// WelcomeLed Indicates whether the welcome LED is enabled.
+	FloodLed   *bool `json:"floodLed"`
+	IsEnabled  *bool `json:"isEnabled"`
 	WelcomeLed *bool `json:"welcomeLed"`
 }
 
 // Lens defines model for lens.
 type Lens struct {
-	// Id Lens id
-	Id *float64 `json:"id"`
-
-	// Video Video statistics for the lens.
+	Id    *float64   `json:"id"`
 	Video VideoStats `json:"video"`
 }
 
 // LicensePlateRecognitionSettings defines model for licensePlateRecognitionSettings.
 type LicensePlateRecognitionSettings struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras"`
-
-	// Enabled Whether or not the ai feature is enabled (default: false)
-	Enabled *bool `json:"enabled"`
+	AllCameras *bool          `json:"allCameras"`
+	Cameras    *[]interface{} `json:"cameras"`
+	Enabled    *bool          `json:"enabled"`
 }
 
 // LicensePlateRecognitionSettingsUpdate defines model for licensePlateRecognitionSettingsUpdate.
 type LicensePlateRecognitionSettingsUpdate struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras,omitempty"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras,omitempty"`
-
-	// Enabled Whether or not the ai feature is enabled (default: false)
-	Enabled *bool `json:"enabled,omitempty"`
+	AllCameras *bool          `json:"allCameras,omitempty"`
+	Cameras    *[]interface{} `json:"cameras,omitempty"`
+	Enabled    *bool          `json:"enabled,omitempty"`
 }
 
 // Light defines model for light.
 type Light struct {
-	// AnonymousDeviceId Persistent unique device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId"`
-
-	// Camera Which camera is configured to be paired to this light.
-	Camera *string `json:"camera"`
-
-	// CanAdopt Whether or not the device can be adopted.
-	CanAdopt *bool `json:"canAdopt"`
-
-	// ConnectedSince Unix timestamp of when the device connected to the NVR.
-	ConnectedSince *float64 `json:"connectedSince"`
-
-	// ConnectionHost The ip or hostname the device uses to connect.
-	ConnectionHost *string `json:"connectionHost"`
-
-	// DisplayName The device display name.
-	DisplayName *string `json:"displayName"`
-
-	// FirmwareBuild The build # of the firmware that is installed.
-	FirmwareBuild *string `json:"firmwareBuild"`
-
-	// FirmwareVersion The version of firmware that is installed on the device.
-	FirmwareVersion *string `json:"firmwareVersion"`
-
-	// FwUpdateState The device FW update state.
-	FwUpdateState *LightFwUpdateState `json:"fwUpdateState"`
-
-	// GlobalAlarmManagerScopeNames The global alarm manager scope names for the device.
-	GlobalAlarmManagerScopeNames *[]interface{} `json:"globalAlarmManagerScopeNames"`
-
-	// Guid Unique id of the device
-	Guid *string `json:"guid"`
-
-	// HardwareRevision Hardware revision of the device
-	HardwareRevision *string `json:"hardwareRevision"`
-
-	// Host The primary IP address of the device.
-	Host *string `json:"host"`
-	Id   string  `json:"id"`
-
-	// IsAdopted Whether or not the device is adopted.
-	IsAdopted *bool `json:"isAdopted"`
-
-	// IsAdoptedByOther Whether or not the device is adopted by the other controller.
-	IsAdoptedByOther *bool `json:"isAdoptedByOther"`
-
-	// IsAdopting Whether or not the device is currently being adopted.
-	IsAdopting *bool `json:"isAdopting"`
-
-	// IsAttemptingToConnect Whether the device is attempting to connect to the controller
-	IsAttemptingToConnect *bool `json:"isAttemptingToConnect"`
-
-	// IsBlockedByArmMode Whether the device is blocked by arm mode
-	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
-
-	// IsCameraPaired Whether the floodlight is pairing to camera.
-	IsCameraPaired *bool `json:"isCameraPaired"`
-
-	// IsConnected Whether the device IPC is connected?
-	IsConnected *bool `json:"isConnected"`
-
-	// IsDark Whether the light is currently sensing that it's in a dark scene.
-	IsDark *bool `json:"isDark"`
-
-	// IsDownloadingFW Whether the device is currently downloading a FW for an upgrade
-	IsDownloadingFW *bool `json:"isDownloadingFW"`
-
-	// IsLightForceEnabled Whether the light has its main LED currently force-enabled.
-	IsLightForceEnabled *map[string]interface{} `json:"isLightForceEnabled"`
-
-	// IsLightOn Whether the light has its main LED currently enabled.
-	IsLightOn *bool `json:"isLightOn"`
-
-	// IsLocating Whether the floodlight is currently being located.
-	IsLocating *bool `json:"isLocating"`
-
-	// IsPirMotionDetected Whether the light PIR is currently detecting motion
-	IsPirMotionDetected *bool `json:"isPirMotionDetected"`
-
-	// IsProvisioned Whether or not the device is provisioned.
-	IsProvisioned *bool `json:"isProvisioned"`
-
-	// IsRebooting Whether the device is currently rebooting
-	IsRebooting *bool `json:"isRebooting"`
-
-	// IsRestoring Whether or not the device is currently being restored.
-	IsRestoring *bool `json:"isRestoring"`
-
-	// IsReverting Whether the device is currently reverting to a previous firmware version
-	IsReverting *bool `json:"isReverting"`
-
-	// IsSshEnabled Whether or not SSH is enabled
-	IsSshEnabled *bool `json:"isSshEnabled"`
-
-	// IsUpdating Whether the device is currently updating
-	IsUpdating *bool `json:"isUpdating"`
-
-	// LastDisconnect Unix timestamp of the last time the device disconnected.
-	LastDisconnect *float64 `json:"lastDisconnect"`
-
-	// LastMotion Unix timestamp of the last time the PIR motion-detection was triggered.
-	LastMotion *float64 `json:"lastMotion"`
-
-	// LastSeen Unix timestamp of when the device was last connected.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// LatestFirmwareSizeBytes The latest firmware size of the device in bytes.
-	LatestFirmwareSizeBytes *float64 `json:"latestFirmwareSizeBytes"`
-
-	// LatestFirmwareVersion The latest firmware version of the device.
-	LatestFirmwareVersion *string `json:"latestFirmwareVersion"`
-
-	// LightDeviceSettings Hardware settings for light device.
-	LightDeviceSettings LightDeviceSettings `json:"lightDeviceSettings"`
-
-	// LightModeSettings Settings for when and how your light gets activated
-	LightModeSettings LightModeSettings `json:"lightModeSettings"`
-
-	// LightOnSettings Force light on settings for light.
-	LightOnSettings LightOnSettings `json:"lightOnSettings"`
-
-	// Mac The primary MAC address of the device.
-	Mac string `json:"mac"`
-
-	// MarketName The marketing name for the floodlight.
-	MarketName *string `json:"marketName"`
-
-	// MinFirmwareVersion The minimum firmware version supported for this device with the current Protect version.
-	MinFirmwareVersion *string `json:"minFirmwareVersion"`
-	ModelKey           string  `json:"modelKey"`
-
-	// Name The name of the device.
-	Name *string `json:"name"`
-
-	// NvrMac The MAC address of the NVR managed this device.
-	NvrMac *string `json:"nvrMac"`
-
-	// Platform The light platform.
-	Platform *string `json:"platform"`
-
-	// PreviousFirmwareUrl The FUS download URL for the previous firmware version.
-	PreviousFirmwareUrl *string `json:"previousFirmwareUrl"`
-
-	// PreviousFirmwareVersion The previously installed firmware version before the last update.
-	PreviousFirmwareVersion *string `json:"previousFirmwareVersion"`
-
-	// ReleaseNotePath The release note path for constructing firmware release note URLs.
-	ReleaseNotePath *string `json:"releaseNotePath"`
-
-	// State Connection state of the device.
-	State *LightState `json:"state"`
-
-	// SupportFileCreatedAt The support file created at for the device.
-	SupportFileCreatedAt *float64 `json:"supportFileCreatedAt"`
-
-	// SupportFileName The support file name for the device.
-	SupportFileName *string `json:"supportFileName"`
-
-	// SupportFileState The support file state for the device.
-	SupportFileState *LightSupportFileState `json:"supportFileState"`
-
-	// Sysid The device sysid. (hex string)
-	Sysid *string `json:"sysid"`
-
-	// Type The device model name.
-	Type *string `json:"type"`
-
-	// UpSince Unix timestamp of when the device started up.
-	UpSince *float64 `json:"upSince"`
-
-	// UplinkDevice Which uplink device currently connected to.
-	UplinkDevice *map[string]interface{} `json:"uplinkDevice"`
-
-	// Uptime device uptime in second.
-	Uptime               *float64             `json:"uptime"`
-	WifiConnectionState  WifiConnectionState  `json:"wifiConnectionState"`
-	WiredConnectionState WiredConnectionState `json:"wiredConnectionState"`
+	AnonymousDeviceId            *string                 `json:"anonymousDeviceId"`
+	Camera                       *string                 `json:"camera"`
+	CanAdopt                     *bool                   `json:"canAdopt"`
+	ConnectedSince               *float64                `json:"connectedSince"`
+	ConnectionHost               *string                 `json:"connectionHost"`
+	DisplayName                  *string                 `json:"displayName"`
+	FirmwareBuild                *string                 `json:"firmwareBuild"`
+	FirmwareVersion              *string                 `json:"firmwareVersion"`
+	FwUpdateState                *LightFwUpdateState     `json:"fwUpdateState"`
+	GlobalAlarmManagerScopeNames *[]interface{}          `json:"globalAlarmManagerScopeNames"`
+	Guid                         *string                 `json:"guid"`
+	HardwareRevision             *string                 `json:"hardwareRevision"`
+	Host                         *string                 `json:"host"`
+	Id                           string                  `json:"id"`
+	IsAdopted                    *bool                   `json:"isAdopted"`
+	IsAdoptedByOther             *bool                   `json:"isAdoptedByOther"`
+	IsAdopting                   *bool                   `json:"isAdopting"`
+	IsAttemptingToConnect        *bool                   `json:"isAttemptingToConnect"`
+	IsBlockedByArmMode           bool                    `json:"isBlockedByArmMode"`
+	IsCameraPaired               *bool                   `json:"isCameraPaired"`
+	IsConnected                  *bool                   `json:"isConnected"`
+	IsDark                       *bool                   `json:"isDark"`
+	IsDownloadingFW              *bool                   `json:"isDownloadingFW"`
+	IsLightForceEnabled          *map[string]interface{} `json:"isLightForceEnabled"`
+	IsLightOn                    *bool                   `json:"isLightOn"`
+	IsLocating                   *bool                   `json:"isLocating"`
+	IsPirMotionDetected          *bool                   `json:"isPirMotionDetected"`
+	IsProvisioned                *bool                   `json:"isProvisioned"`
+	IsRebooting                  *bool                   `json:"isRebooting"`
+	IsRestoring                  *bool                   `json:"isRestoring"`
+	IsReverting                  *bool                   `json:"isReverting"`
+	IsSshEnabled                 *bool                   `json:"isSshEnabled"`
+	IsUpdating                   *bool                   `json:"isUpdating"`
+	LastDisconnect               *float64                `json:"lastDisconnect"`
+	LastMotion                   *float64                `json:"lastMotion"`
+	LastSeen                     *float64                `json:"lastSeen"`
+	LatestFirmwareSizeBytes      *float64                `json:"latestFirmwareSizeBytes"`
+	LatestFirmwareVersion        *string                 `json:"latestFirmwareVersion"`
+	LightDeviceSettings          LightDeviceSettings     `json:"lightDeviceSettings"`
+	LightModeSettings            LightModeSettings       `json:"lightModeSettings"`
+	LightOnSettings              LightOnSettings         `json:"lightOnSettings"`
+	Mac                          string                  `json:"mac"`
+	MarketName                   *string                 `json:"marketName"`
+	MinFirmwareVersion           *string                 `json:"minFirmwareVersion"`
+	ModelKey                     string                  `json:"modelKey"`
+	Name                         *string                 `json:"name"`
+	NvrMac                       *string                 `json:"nvrMac"`
+	Platform                     *string                 `json:"platform"`
+	PreviousFirmwareUrl          *string                 `json:"previousFirmwareUrl"`
+	PreviousFirmwareVersion      *string                 `json:"previousFirmwareVersion"`
+	ReleaseNotePath              *string                 `json:"releaseNotePath"`
+	State                        *LightState             `json:"state"`
+	SupportFileCreatedAt         *float64                `json:"supportFileCreatedAt"`
+	SupportFileName              *string                 `json:"supportFileName"`
+	SupportFileState             *LightSupportFileState  `json:"supportFileState"`
+	Sysid                        *string                 `json:"sysid"`
+	Type                         *string                 `json:"type"`
+	UpSince                      *float64                `json:"upSince"`
+	UplinkDevice                 *map[string]interface{} `json:"uplinkDevice"`
+	Uptime                       *float64                `json:"uptime"`
+	WifiConnectionState          WifiConnectionState     `json:"wifiConnectionState"`
+	WiredConnectionState         WiredConnectionState    `json:"wiredConnectionState"`
 }
 
 // LightDeviceSettings defines model for lightDeviceSettings.
 type LightDeviceSettings struct {
-	// IsIndicatorEnabled Turn on/off floodlight status LED indicator.
-	IsIndicatorEnabled *bool `json:"isIndicatorEnabled"`
-
-	// LedLevel Brightness level of the main LED (1-6).
-	LedLevel *float64 `json:"ledLevel"`
-
-	// LuxSensitivity The sensitivity of lux sensor.
-	LuxSensitivity *LightDeviceSettingsLuxSensitivity `json:"luxSensitivity"`
-
-	// PirDuration How long the light stays on after a motion event in milliseconds.
-	PirDuration *float64 `json:"pirDuration"`
-
-	// PirSensitivity How sensitive is the PIR to motion (0-100)%.
-	PirSensitivity *float64 `json:"pirSensitivity"`
+	IsIndicatorEnabled *bool                              `json:"isIndicatorEnabled"`
+	LedLevel           *float64                           `json:"ledLevel"`
+	LuxSensitivity     *LightDeviceSettingsLuxSensitivity `json:"luxSensitivity"`
+	PirDuration        *float64                           `json:"pirDuration"`
+	PirSensitivity     *float64                           `json:"pirSensitivity"`
 }
 
-// LightDeviceSettingsLuxSensitivity The sensitivity of lux sensor.
+// LightDeviceSettingsLuxSensitivity defines model for lightDeviceSettingsLuxSensitivity.
 type LightDeviceSettingsLuxSensitivity string
 
-// LightFwUpdateState The device FW update state.
+// LightFwUpdateState defines model for lightFwUpdateState.
 type LightFwUpdateState string
 
 // LightModeSettings defines model for lightModeSettings.
 type LightModeSettings struct {
-	// EnableAt At what time is the lighting mode relevant and acted upon (this has no effect when mode is off).
 	EnableAt *LightModeSettingsEnableAt `json:"enableAt"`
-
-	// Mode When will floodlight turn on.
-	Mode *LightModeSettingsMode `json:"mode"`
+	Mode     *LightModeSettingsMode     `json:"mode"`
 }
 
-// LightModeSettingsEnableAt At what time is the lighting mode relevant and acted upon (this has no effect when mode is off).
+// LightModeSettingsEnableAt defines model for lightModeSettingsEnableAt.
 type LightModeSettingsEnableAt string
 
-// LightModeSettingsMode When will floodlight turn on.
+// LightModeSettingsMode defines model for lightModeSettingsMode.
 type LightModeSettingsMode string
 
 // LightOnSettings defines model for lightOnSettings.
 type LightOnSettings struct {
-	// IsLedForceOn Force turn the light on/off.
 	IsLedForceOn *bool `json:"isLedForceOn"`
 }
 
 // LightSensor defines model for lightSensor.
 type LightSensor struct {
-	// Status What range does the measured metric fall into
 	Status *LightSensorStatus `json:"status"`
-
-	// Value Decimal value of the metric measured by the sensor
-	Value *float64 `json:"value"`
+	Value  *float64           `json:"value"`
 }
 
 // LightSensorSettings defines model for lightSensorSettings.
 type LightSensorSettings struct {
-	// HighThreshold Ambient light interrupt threshold high level from 1 to 503192 (Lux).
 	HighThreshold *float64 `json:"highThreshold"`
-
-	// IsEnabled Enable ambient light sensor.
-	IsEnabled *bool `json:"isEnabled"`
-
-	// LowThreshold Ambient light interrupt threshold low level from 1 to 503192 (Lux).
-	LowThreshold *float64 `json:"lowThreshold"`
-
-	// Margin Ambient light threshold detection hysteresis margin (Lux). Read-only value decided by sensor implementation.
-	Margin *float64 `json:"margin"`
+	IsEnabled     *bool    `json:"isEnabled"`
+	LowThreshold  *float64 `json:"lowThreshold"`
+	Margin        *float64 `json:"margin"`
 }
 
-// LightSensorStatus What range does the measured metric fall into
+// LightSensorStatus defines model for lightSensorStatus.
 type LightSensorStatus string
 
-// LightState Connection state of the device.
+// LightState defines model for lightState.
 type LightState string
 
-// LightSupportFileState The support file state for the device.
+// LightSupportFileState defines model for lightSupportFileState.
 type LightSupportFileState string
 
 // Liveview defines model for liveview.
 type Liveview struct {
-	Id string `json:"id"`
-
-	// IsDefault Whether this live view is the default one for all viewers.
-	IsDefault *bool `json:"isDefault"`
-
-	// IsGlobal Whether this live view is global and available system-wide to all users
-	IsGlobal *bool `json:"isGlobal"`
-
-	// Layout The number of slots this live view contains. Which as a consequence also affects the layout of the live view.
-	Layout   *float64 `json:"layout"`
-	ModelKey string   `json:"modelKey"`
-
-	// Name The name of this live view.
-	Name *string `json:"name"`
-
-	// Owner The user who created this live view.
-	Owner string `json:"owner"`
-
-	// Slots List of cameras visible in each given slot. And cycling settings for each slot if it has multiple cameras listed.
-	Slots *[]interface{} `json:"slots"`
+	Id        string         `json:"id"`
+	IsDefault *bool          `json:"isDefault"`
+	IsGlobal  *bool          `json:"isGlobal"`
+	Layout    *float64       `json:"layout"`
+	ModelKey  string         `json:"modelKey"`
+	Name      *string        `json:"name"`
+	Owner     string         `json:"owner"`
+	Slots     *[]interface{} `json:"slots"`
 }
 
 // LocationSettings defines model for locationSettings.
 type LocationSettings struct {
-	// IsAway If all users are away.
-	IsAway *bool `json:"isAway"`
-
-	// IsGeofencingEnabled Whether geofencing for this device is enabled.
-	IsGeofencingEnabled *bool `json:"isGeofencingEnabled"`
-
-	// Latitude Latitude where device is located.
-	Latitude *float64 `json:"latitude"`
-
-	// Longitude Longitude where device is located.
-	Longitude *float64 `json:"longitude"`
-
-	// Radius Radius of geofence area. This affects the sensitivity of home/away status.
-	Radius *float64 `json:"radius"`
+	IsAway              *bool    `json:"isAway"`
+	IsGeofencingEnabled *bool    `json:"isGeofencingEnabled"`
+	Latitude            *float64 `json:"latitude"`
+	Longitude           *float64 `json:"longitude"`
+	Radius              *float64 `json:"radius"`
 }
 
 // LocationSettingsUpdate defines model for locationSettingsUpdate.
 type LocationSettingsUpdate struct {
-	// IsAway If all users are away.
-	IsAway *bool `json:"isAway,omitempty"`
-
-	// IsGeofencingEnabled Whether geofencing for this device is enabled.
-	IsGeofencingEnabled *bool `json:"isGeofencingEnabled,omitempty"`
-
-	// Latitude Latitude where device is located.
-	Latitude *float64 `json:"latitude,omitempty"`
-
-	// Longitude Longitude where device is located.
-	Longitude *float64 `json:"longitude,omitempty"`
-
-	// Radius Radius of geofence area. This affects the sensitivity of home/away status.
-	Radius *float64 `json:"radius,omitempty"`
+	IsAway              *bool    `json:"isAway,omitempty"`
+	IsGeofencingEnabled *bool    `json:"isGeofencingEnabled,omitempty"`
+	Latitude            *float64 `json:"latitude,omitempty"`
+	Longitude           *float64 `json:"longitude,omitempty"`
+	Radius              *float64 `json:"radius,omitempty"`
 }
 
 // MotionSensorSettings defines model for motionSensorSettings.
 type MotionSensorSettings struct {
-	// IsEnabled Enable motion sensor.
-	IsEnabled *bool `json:"isEnabled"`
-
-	// Sensitivity Motion sensitivity (0-100).
+	IsEnabled   *bool    `json:"isEnabled"`
 	Sensitivity *float64 `json:"sensitivity"`
 }
 
 // MotionZone defines model for motionZone.
 type MotionZone struct {
-	// Color Color of the zone.
-	Color *string `json:"color"`
-
-	// Id ID of the zone. (start from 1)
-	Id *float64 `json:"id"`
-
-	// IsTriggerLightEnabled Whether the G5 IR extender is enabled.
-	IsTriggerLightEnabled *bool `json:"isTriggerLightEnabled"`
-
-	// MergeId For merging zones in FE
-	MergeId *string `json:"mergeId"`
-
-	// Name Name of the zone.
-	Name *string `json:"name"`
-
-	// Points An array of arrays of [x, y]
-	Points *[]interface{} `json:"points"`
-
-	// Sensitivity Motion sensitivity (0-100).
-	Sensitivity *float64 `json:"sensitivity"`
+	Color                 *string        `json:"color"`
+	Id                    *float64       `json:"id"`
+	IsTriggerLightEnabled *bool          `json:"isTriggerLightEnabled"`
+	MergeId               *string        `json:"mergeId"`
+	Name                  *string        `json:"name"`
+	Points                *[]interface{} `json:"points"`
+	Sensitivity           *float64       `json:"sensitivity"`
 }
 
 // NfcSettings defines model for nfcSettings.
 type NfcSettings struct {
-	// EnableNfc Whether nfc is enabled
-	EnableNfc *bool `json:"enableNfc"`
-
-	// SupportThirdPartyCard Whether support third party card
+	EnableNfc             *bool `json:"enableNfc"`
 	SupportThirdPartyCard *bool `json:"supportThirdPartyCard"`
 }
 
 // NfcState defines model for nfcState.
 type NfcState struct {
-	// CardId Card Id for the latest used card
-	CardId *string `json:"cardId"`
-
-	// IsUACard Whether a UA card
-	IsUACard *bool `json:"isUACard"`
-
-	// LastSeen Timestamp for the latest used card
-	LastSeen *float64 `json:"lastSeen"`
-
-	// Mode Percentage of enrolling progress
-	Mode *NfcStateMode `json:"mode"`
+	CardId   *string       `json:"cardId"`
+	IsUACard *bool         `json:"isUACard"`
+	LastSeen *float64      `json:"lastSeen"`
+	Mode     *NfcStateMode `json:"mode"`
 }
 
-// NfcStateMode Percentage of enrolling progress
+// NfcStateMode defines model for nfcStateMode.
 type NfcStateMode string
 
 // Nvr defines model for nvr.
 type Nvr struct {
-	// AccessVersion If access is installed then this field contains the version
-	AccessVersion *string `json:"accessVersion"`
-
-	// Agreements All user agreements
-	Agreements Agreements `json:"agreements"`
-
-	// AiFeatureSettings AI Feature Settings — source of truth for all AI Processor feature configurations.
-	AiFeatureSettings NvrAiFeatureSettings `json:"aiFeatureSettings"`
-
-	// AllowThirdPartyNfcCards Whether or not to allow third-party NFC cards.
-	AllowThirdPartyNfcCards bool `json:"allowThirdPartyNfcCards"`
-
-	// AnalyticsData What analytics data traces are sent to the Analytics service.
-	AnalyticsData *NvrAnalyticsData `json:"analyticsData"`
-
-	// AnonymousDeviceId Persistent unique host device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId"`
-
-	// ArmMode Arm mode settings.
-	ArmMode NvrArmMode `json:"armMode"`
-
-	// AutoBalanceStorageBytes Storage bytes available for auto-balanced cameras.
-	AutoBalanceStorageBytes *float64 `json:"autoBalanceStorageBytes"`
-
-	// AutoRetentionEnabled Whether auto-retention balancing is enabled. When disabled, cameras fall back to NVR-level retention.
-	AutoRetentionEnabled bool `json:"autoRetentionEnabled"`
-
-	// CameraCapacity Camera capacity details
-	CameraCapacity *map[string]interface{} `json:"cameraCapacity"`
-
-	// CameraUtilization Percentage of the current cameras capacity of the NVR.
-	CameraUtilization *float64 `json:"cameraUtilization"`
-
-	// CanAutoUpdate Whether or not the NVR can update software automatically.
-	CanAutoUpdate *bool `json:"canAutoUpdate"`
-
-	// CefSettings CEF settings.
-	CefSettings NvrCefSettings `json:"cefSettings"`
-
-	// ConsoleEnv Environment of the console
-	ConsoleEnv *string `json:"consoleEnv"`
-
-	// CorruptionState Protect corruption state.
-	CorruptionState *NvrCorruptionState `json:"corruptionState"`
-
-	// CountryCode Country code of console.
-	CountryCode       *string           `json:"countryCode"`
-	DbRecoveryOptions DbRecoveryOptions `json:"dbRecoveryOptions"`
-
-	// DeviceFirmwareSettings device firmware settings
-	DeviceFirmwareSettings DeviceFirmwareSettings `json:"deviceFirmwareSettings"`
-
-	// DisableAudio Whether audio recording is disabled globally
-	DisableAudio *bool `json:"disableAudio"`
-
-	// DisableAutoLink Disable AutoLink
-	DisableAutoLink *bool `json:"disableAutoLink"`
-
-	// DoorbellSettings Doorbell related settings.
-	DoorbellSettings DoorbellSettings `json:"doorbellSettings"`
-
-	// EnableAutomaticBackups Whether or not to enable automatic backups.
-	EnableAutomaticBackups *bool `json:"enableAutomaticBackups"`
-
-	// EnableBridgeAutoAdoption Enable auto-adoption of discovered bridges.
-	EnableBridgeAutoAdoption *bool `json:"enableBridgeAutoAdoption"`
-
-	// EnableCrashReporting Whether or not any data is sent to Error reporting service.
-	EnableCrashReporting *bool `json:"enableCrashReporting"`
-
-	// EnableThirdPartyCamerasDiscovery Whether NVR should run automatic third party cameras discovery
-	EnableThirdPartyCamerasDiscovery bool `json:"enableThirdPartyCamerasDiscovery"`
-
-	// ErrorCode current error code (can be null), used by LCD UI
-	ErrorCode *string `json:"errorCode"`
-
-	// EstimatedHqRetentionDays Estimated HQ retention days for auto-balanced cameras. Updated periodically by retention manager.
-	EstimatedHqRetentionDays *float64 `json:"estimatedHqRetentionDays"`
-
-	// EstimatedLqRetentionDays Estimated LQ retention days for auto-balanced cameras. Updated periodically by retention manager.
-	EstimatedLqRetentionDays *float64 `json:"estimatedLqRetentionDays"`
-
-	// ExpansionUnitRetention Per-expansion unit retention calculation stats. Populated by backend.
-	ExpansionUnitRetention []ExpansionUnitRetention `json:"expansionUnitRetention"`
-
-	// ExpansionUnits Expansion units connected to this NVR. Sourced from peripheral state via ustate middleware.
-	ExpansionUnits *[]ExpansionUnit `json:"expansionUnits"`
-
-	// FeatureFlags Feature flags.
-	FeatureFlags NvrFeatureFlags `json:"featureFlags"`
-
-	// FirmwareVersion Firmware Version of the device.
-	FirmwareVersion *string `json:"firmwareVersion"`
-
-	// ForeignPgDumpConsoleName Indicates whether the console name of the PostgreSQL dump file from another console
-	ForeignPgDumpConsoleName *string `json:"foreignPgDumpConsoleName"`
-
-	// ForeignPgDumpDetected Indicates whether a PostgreSQL dump file from another console has been detected.
-	ForeignPgDumpDetected bool `json:"foreignPgDumpDetected"`
-
-	// Guid GUID of the NVR
-	Guid *string `json:"guid"`
-
-	// HardDriveState State of hard drives
-	HardDriveState *string `json:"hardDriveState"`
-
-	// HardwareId hardware id
-	HardwareId *string `json:"hardwareId"`
-
-	// HardwareRevision human readable version of bom
-	HardwareRevision *string `json:"hardwareRevision"`
-
-	// HasBackportedRetentionSettings Whether old retention settings have been backported to new storage allocation mode. Set once on first upgrade.
-	HasBackportedRetentionSettings bool `json:"hasBackportedRetentionSettings"`
-
-	// HasGateway Define if console has gateway
-	HasGateway *bool `json:"hasGateway"`
-
-	// HomekitError Errors encountered by the unifi homekit service.
-	HomekitError *NvrHomekitError `json:"homekitError"`
-
-	// HomekitSetupCode Homekit service setup code for manually connecting controllers (iOS) to accessories/hub (unifi-homekit)
-	HomekitSetupCode *string `json:"homekitSetupCode"`
-
-	// HomekitSetupPayload Homekit service setup payload for automatically connecting controllers (iOS) to accessories/hub (unifi-homekit)
-	HomekitSetupPayload *string `json:"homekitSetupPayload"`
-
-	// HomekitShutdownReason Homekit service shutdown reason (unifi-homekit)
-	HomekitShutdownReason *string `json:"homekitShutdownReason"`
-
-	// HomekitStatus What's the state of the unifi homekit service.
-	HomekitStatus *NvrHomekitStatus `json:"homekitStatus"`
-
-	// Host The primary IP address of the device.
-	Host *string `json:"host"`
-
-	// HostShortname Device model that hosts the controller.
-	HostShortname *string `json:"hostShortname"`
-
-	// HostType host type
-	HostType *float64 `json:"hostType"`
-
-	// Hosts An array of hosts.
-	Hosts *[]interface{} `json:"hosts"`
-	Id    string         `json:"id"`
-
-	// IsAccessInstalled Define if access application is installed in the console and matches the minimum version required by Protect
-	IsAccessInstalled *bool `json:"isAccessInstalled"`
-
-	// IsAiReportingEnabled Whether AI reporting is enabled.
-	IsAiReportingEnabled bool `json:"isAiReportingEnabled"`
-
-	// IsAway Whether the NVR is configure locationSettings.isAway.
-	IsAway *bool `json:"isAway"`
-
-	// IsEdgeDevice Whether this is an EDGE NVR with a built-in camera.
-	IsEdgeDevice *bool `json:"isEdgeDevice"`
-
-	// IsFullBackupPreparing Indicates whether the console is currently preparing a full backup.
-	IsFullBackupPreparing bool `json:"isFullBackupPreparing"`
-
-	// IsFullBackupReady Indicates whether the console has completed full backup preparation and is ready for device replacement.
-	IsFullBackupReady bool `json:"isFullBackupReady"`
-
-	// IsHomekitEnabled Whether or not to enable Homekit service (unifi-homekit)
-	IsHomekitEnabled bool `json:"isHomekitEnabled"`
-
-	// IsInsightsEnabled Enable/Disable Insights
-	IsInsightsEnabled *bool `json:"isInsightsEnabled"`
-
-	// IsMigrationFailed Whether or not the DB migration script is failed
-	IsMigrationFailed *bool `json:"isMigrationFailed"`
-
-	// IsNetworkInstallable Define if network application can be installed or not
-	IsNetworkInstallable *bool `json:"isNetworkInstallable"`
-
-	// IsNetworkInstalled Define if network application is installed or not
-	IsNetworkInstalled *bool `json:"isNetworkInstalled"`
-
-	// IsPrimary Whether or not this NVR is primary in a stacked setup.
-	IsPrimary *bool `json:"isPrimary"`
-
-	// IsProtectUpdatable whether updatable from ucore
-	IsProtectUpdatable *bool `json:"isProtectUpdatable"`
-
-	// IsRecordingDisabled Recording is disabled.
-	IsRecordingDisabled *bool `json:"isRecordingDisabled"`
-
-	// IsRecordingMotionOnly Record motion only.
-	IsRecordingMotionOnly *bool `json:"isRecordingMotionOnly"`
-
-	// IsRecordingPauseAllowedDuringRaidSync Whether user has allowed pausing recordings during main chassis RAID sync. Null if no preference set, defaults to pausing not allowed.
-	IsRecordingPauseAllowedDuringRaidSync *bool `json:"isRecordingPauseAllowedDuringRaidSync"`
-
-	// IsRecycling If recording files are getting recycled due to the lack of free disk space.
-	IsRecycling *bool `json:"isRecycling"`
-
-	// IsRemoteAccessEnabled Whether Remote Access is enable.
-	IsRemoteAccessEnabled *bool `json:"isRemoteAccessEnabled"`
-
-	// IsSecondary Whether or not this NVR is secondary in a stacked setup.
-	IsSecondary *bool `json:"isSecondary"`
-
-	// IsSetup Whether the Protect is setup.
-	IsSetup *bool `json:"isSetup"`
-
-	// IsSshEnabled Whether or not to enable SSH
-	IsSshEnabled *bool `json:"isSshEnabled"`
-
-	// IsStacked Deprecated: Please use "isSecondary" property instead.
-	IsStacked *bool `json:"isStacked"`
-
-	// IsUCoreSetup Whether the UCore is setup.
-	IsUCoreSetup *bool `json:"isUCoreSetup"`
-
-	// IsUCoreStacked Whether or not the ucore is stacked. `null` means not initialized from the UCore yet.
-	IsUCoreStacked *bool `json:"isUCoreStacked"`
-
-	// IsUcoreUpdatable Define if console firmware is updatable or not
-	IsUcoreUpdatable *bool `json:"isUcoreUpdatable"`
-
-	// IsUpdating If the NVR is currently updating
-	IsUpdating *bool `json:"isUpdating"`
-
-	// IsWirelessUplinkEnabled is wireless uplink enabled for all devices?
-	IsWirelessUplinkEnabled *bool `json:"isWirelessUplinkEnabled"`
-
-	// LastDeviceFWUpdatesCheckedAt The last time the firmware was checked
-	LastDeviceFWUpdatesCheckedAt *float64 `json:"lastDeviceFWUpdatesCheckedAt"`
-
-	// LastSeen Unix timestamp of when the NVR was last seen.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// LastUpdateAt Unix timestamp of when the nvr was last updated.
-	LastUpdateAt *float64 `json:"lastUpdateAt"`
-
-	// Liveview Which liveview is configured to be pushed to this NVR (only for select NVRs)
-	Liveview *string `json:"liveview"`
-
-	// LocationSettings Location Settings.
-	LocationSettings LocationSettings `json:"locationSettings"`
-
-	// Mac The primary MAC address of the device.
-	Mac *string `json:"mac"`
-
-	// MarketName The market name of console
-	MarketName *string `json:"marketName"`
-
-	// MaxCameraCapacity The max camera capacity of NVR.
-	MaxCameraCapacity *map[string]interface{} `json:"maxCameraCapacity"`
-	ModelKey          string                  `json:"modelKey"`
-
-	// MsrServiceMeta MSR service state metadata
-	MsrServiceMeta *map[string]interface{} `json:"msrServiceMeta"`
-
-	// MsrServiceState MSR service state
-	MsrServiceState *NvrMsrServiceState `json:"msrServiceState"`
-
-	// Name The name of this nvr device.
-	Name *string `json:"name"`
-
-	// PinCodeSettings Global pin code settings, applied to all cameras.
-	PinCodeSettings NvrPinCodeSettings `json:"pinCodeSettings"`
-
-	// PortStatus Console port occupation status.
-	PortStatus *[]interface{} `json:"portStatus"`
-
-	// Ports key/value map of ports used.
-	Ports *map[string]interface{} `json:"ports"`
-
-	// PublicIp Public IP of console.
-	PublicIp *string `json:"publicIp"`
-
-	// RecordingRetentionDurationMs Duration in milliseconds to retain videos before staging them for recycling. camera recordingSettings.retentionDurationMs takes precedence over this value
-	RecordingRetentionDurationMs float64 `json:"recordingRetentionDurationMs"`
-
-	// ReleaseChannel The release channel this device is on (used for automatic updates).
-	ReleaseChannel *string `json:"releaseChannel"`
-
-	// SessionSettings Session settings for the NVR.
-	SessionSettings NvrSessionSettings `json:"sessionSettings"`
-
-	// SkipFirmwareUpdate Skip device firmware auto update
-	SkipFirmwareUpdate *bool `json:"skipFirmwareUpdate"`
-
-	// SmartDetectAgreement Legacy user agreement for smart detection feature.
-	SmartDetectAgreement SmartDetectAgreement `json:"smartDetectAgreement"`
-
-	// SmartDetection Smart detection related settings.
-	SmartDetection SmartDetection `json:"smartDetection"`
-
-	// StorageAllocationHqPercent Percentage of storage allocated to HQ when storageAllocationMode is custom.
-	StorageAllocationHqPercent float64 `json:"storageAllocationHqPercent"`
-
-	// StorageAllocationHqPercentBalanced Default HQ percentage for balanced storage allocation mode.
-	StorageAllocationHqPercentBalanced *float64 `json:"storageAllocationHqPercentBalanced"`
-
-	// StorageAllocationHqPercentMaxRetention Default HQ percentage for max retention storage allocation mode.
-	StorageAllocationHqPercentMaxRetention *float64 `json:"storageAllocationHqPercentMaxRetention"`
-
-	// StorageAllocationMode How to allocate storage between HQ and LQ recordings. balanced=50/50, maxRetention=10/90, custom=user specified.
-	StorageAllocationMode NvrStorageAllocationMode `json:"storageAllocationMode"`
-
-	// StorageConsoleCameraCounts Camera counts per storage console. Updated when cameras connect/disconnect or change recording path settings.
-	StorageConsoleCameraCounts *[]StorageConsoleCameraCount `json:"storageConsoleCameraCounts"`
-
-	// StorageConsoleFailoverSettings Per-console failover settings. Acts as defaults for cameras that defer to NVR-level configuration.
-	StorageConsoleFailoverSettings []StorageConsoleFailoverSettings `json:"storageConsoleFailoverSettings"`
-
-	// StorageStats Storage statistics for the nvr.
-	StorageStats NvrStatsStorage `json:"storageStats"`
-
-	// StreamEncryptionEnabled Whether or not to enable stream encryption
-	StreamEncryptionEnabled bool `json:"streamEncryptionEnabled"`
-
-	// StreamSharingAvailable Whether camera stream sharing feature is available.
-	StreamSharingAvailable *bool `json:"streamSharingAvailable"`
-
-	// SwitchPoeBudget Total POE budget for built-in switch in milliwatts (mW)
-	SwitchPoeBudget *float64 `json:"switchPoeBudget"`
-
-	// SwitchPorts List of NVRs built-in switch ports.
-	SwitchPorts *[]SwitchPort `json:"switchPorts"`
-
-	// SyncingEstimateMs Estimated milliseconds until RAID sync completes. Null if not syncing or unavailable.
-	SyncingEstimateMs *float64 `json:"syncingEstimateMs"`
-
-	// SyncingProgress RAID sync progress ratio (0 to 1). Null if not syncing.
-	SyncingProgress *float64 `json:"syncingProgress"`
-
-	// SyncingSince UNIX timestamp when main chassis RAID sync started. Null if not syncing.
-	SyncingSince *float64 `json:"syncingSince"`
-
-	// SystemInfo Device system telemetry (cpu/memory/storage/ustorage/tmpfs). Typed as any: it is runtime telemetry no resource models, and the vendor OpenAPI mistypes several of its leaves vs what firmware returns (HIL: storage.devices[].healthy is a string not boolean; ustorage.disks[].size is a number not string). Detaching the whole block from typed decode is both correct (unmodeled) and robust to firmware drift.
-	SystemInfo interface{} `json:"systemInfo"`
-
-	// TemperatureUnit Temperature unit: Fahrenheit or Celsius
-	TemperatureUnit *NvrTemperatureUnit `json:"temperatureUnit"`
-
-	// TimeFormat 12h (standard time) or 24h (army time)
-	TimeFormat *NvrTimeFormat `json:"timeFormat"`
-
-	// TimelapseEnabled Is time-lapse scrubbing enabled, timeline smoothening while scrolling
-	TimelapseEnabled *bool `json:"timelapseEnabled"`
-
-	// Timezone The timezone of the NVR (this also gets applied to any managed cameras).
-	Timezone *string `json:"timezone"`
-
-	// TotalHqBytesPerDay Total HQ bytes per day for all auto-balanced cameras.
-	TotalHqBytesPerDay *float64 `json:"totalHqBytesPerDay"`
-
-	// TotalLqBytesPerDay Total LQ bytes per day for all auto-balanced cameras.
-	TotalLqBytesPerDay *float64 `json:"totalLqBytesPerDay"`
-
-	// Type The NVR model name.
-	Type *string `json:"type"`
-
-	// UcoreVersion UCore version
-	UcoreVersion *string `json:"ucoreVersion"`
-
-	// UlpVersion ULP version.
-	UlpVersion *string `json:"ulpVersion"`
-
-	// UpSince The NVR upSince. [ms]
-	UpSince *float64 `json:"upSince"`
-
-	// Version Software version.
-	Version *string `json:"version"`
-
-	// VoipForbidden Whether VOIP functionality is forbidden based on the NVR country code.
-	VoipForbidden *bool `json:"voipForbidden"`
-
-	// WanIp WAN IP of console.
-	WanIp *string `json:"wanIp"`
-
-	// WanPorts Gateway WAN interfaces.
-	WanPorts *[]interface{} `json:"wanPorts"`
+	AccessVersion                          *string                          `json:"accessVersion"`
+	Agreements                             Agreements                       `json:"agreements"`
+	AiFeatureSettings                      NvrAiFeatureSettings             `json:"aiFeatureSettings"`
+	AllowThirdPartyNfcCards                bool                             `json:"allowThirdPartyNfcCards"`
+	AnalyticsData                          *NvrAnalyticsData                `json:"analyticsData"`
+	AnonymousDeviceId                      *string                          `json:"anonymousDeviceId"`
+	ArmMode                                NvrArmMode                       `json:"armMode"`
+	AutoBalanceStorageBytes                *float64                         `json:"autoBalanceStorageBytes"`
+	AutoRetentionEnabled                   bool                             `json:"autoRetentionEnabled"`
+	CameraCapacity                         *map[string]interface{}          `json:"cameraCapacity"`
+	CameraUtilization                      *float64                         `json:"cameraUtilization"`
+	CanAutoUpdate                          *bool                            `json:"canAutoUpdate"`
+	CefSettings                            NvrCefSettings                   `json:"cefSettings"`
+	ConsoleEnv                             *string                          `json:"consoleEnv"`
+	CorruptionState                        *NvrCorruptionState              `json:"corruptionState"`
+	CountryCode                            *string                          `json:"countryCode"`
+	DbRecoveryOptions                      DbRecoveryOptions                `json:"dbRecoveryOptions"`
+	DeviceFirmwareSettings                 DeviceFirmwareSettings           `json:"deviceFirmwareSettings"`
+	DisableAudio                           *bool                            `json:"disableAudio"`
+	DisableAutoLink                        *bool                            `json:"disableAutoLink"`
+	DoorbellSettings                       DoorbellSettings                 `json:"doorbellSettings"`
+	EnableAutomaticBackups                 *bool                            `json:"enableAutomaticBackups"`
+	EnableBridgeAutoAdoption               *bool                            `json:"enableBridgeAutoAdoption"`
+	EnableCrashReporting                   *bool                            `json:"enableCrashReporting"`
+	EnableThirdPartyCamerasDiscovery       bool                             `json:"enableThirdPartyCamerasDiscovery"`
+	ErrorCode                              *string                          `json:"errorCode"`
+	EstimatedHqRetentionDays               *float64                         `json:"estimatedHqRetentionDays"`
+	EstimatedLqRetentionDays               *float64                         `json:"estimatedLqRetentionDays"`
+	ExpansionUnitRetention                 []ExpansionUnitRetention         `json:"expansionUnitRetention"`
+	ExpansionUnits                         *[]ExpansionUnit                 `json:"expansionUnits"`
+	FeatureFlags                           NvrFeatureFlags                  `json:"featureFlags"`
+	FirmwareVersion                        *string                          `json:"firmwareVersion"`
+	ForeignPgDumpConsoleName               *string                          `json:"foreignPgDumpConsoleName"`
+	ForeignPgDumpDetected                  bool                             `json:"foreignPgDumpDetected"`
+	Guid                                   *string                          `json:"guid"`
+	HardDriveState                         *string                          `json:"hardDriveState"`
+	HardwareId                             *string                          `json:"hardwareId"`
+	HardwareRevision                       *string                          `json:"hardwareRevision"`
+	HasBackportedRetentionSettings         bool                             `json:"hasBackportedRetentionSettings"`
+	HasGateway                             *bool                            `json:"hasGateway"`
+	HomekitError                           *NvrHomekitError                 `json:"homekitError"`
+	HomekitSetupCode                       *string                          `json:"homekitSetupCode"`
+	HomekitSetupPayload                    *string                          `json:"homekitSetupPayload"`
+	HomekitShutdownReason                  *string                          `json:"homekitShutdownReason"`
+	HomekitStatus                          *NvrHomekitStatus                `json:"homekitStatus"`
+	Host                                   *string                          `json:"host"`
+	HostShortname                          *string                          `json:"hostShortname"`
+	HostType                               *float64                         `json:"hostType"`
+	Hosts                                  *[]interface{}                   `json:"hosts"`
+	Id                                     string                           `json:"id"`
+	IsAccessInstalled                      *bool                            `json:"isAccessInstalled"`
+	IsAiReportingEnabled                   bool                             `json:"isAiReportingEnabled"`
+	IsAway                                 *bool                            `json:"isAway"`
+	IsEdgeDevice                           *bool                            `json:"isEdgeDevice"`
+	IsFullBackupPreparing                  bool                             `json:"isFullBackupPreparing"`
+	IsFullBackupReady                      bool                             `json:"isFullBackupReady"`
+	IsHomekitEnabled                       bool                             `json:"isHomekitEnabled"`
+	IsInsightsEnabled                      *bool                            `json:"isInsightsEnabled"`
+	IsMigrationFailed                      *bool                            `json:"isMigrationFailed"`
+	IsNetworkInstallable                   *bool                            `json:"isNetworkInstallable"`
+	IsNetworkInstalled                     *bool                            `json:"isNetworkInstalled"`
+	IsPrimary                              *bool                            `json:"isPrimary"`
+	IsProtectUpdatable                     *bool                            `json:"isProtectUpdatable"`
+	IsRecordingDisabled                    *bool                            `json:"isRecordingDisabled"`
+	IsRecordingMotionOnly                  *bool                            `json:"isRecordingMotionOnly"`
+	IsRecordingPauseAllowedDuringRaidSync  *bool                            `json:"isRecordingPauseAllowedDuringRaidSync"`
+	IsRecycling                            *bool                            `json:"isRecycling"`
+	IsRemoteAccessEnabled                  *bool                            `json:"isRemoteAccessEnabled"`
+	IsSecondary                            *bool                            `json:"isSecondary"`
+	IsSetup                                *bool                            `json:"isSetup"`
+	IsSshEnabled                           *bool                            `json:"isSshEnabled"`
+	IsStacked                              *bool                            `json:"isStacked"`
+	IsUCoreSetup                           *bool                            `json:"isUCoreSetup"`
+	IsUCoreStacked                         *bool                            `json:"isUCoreStacked"`
+	IsUcoreUpdatable                       *bool                            `json:"isUcoreUpdatable"`
+	IsUpdating                             *bool                            `json:"isUpdating"`
+	IsWirelessUplinkEnabled                *bool                            `json:"isWirelessUplinkEnabled"`
+	LastDeviceFWUpdatesCheckedAt           *float64                         `json:"lastDeviceFWUpdatesCheckedAt"`
+	LastSeen                               *float64                         `json:"lastSeen"`
+	LastUpdateAt                           *float64                         `json:"lastUpdateAt"`
+	Liveview                               *string                          `json:"liveview"`
+	LocationSettings                       LocationSettings                 `json:"locationSettings"`
+	Mac                                    *string                          `json:"mac"`
+	MarketName                             *string                          `json:"marketName"`
+	MaxCameraCapacity                      *map[string]interface{}          `json:"maxCameraCapacity"`
+	ModelKey                               string                           `json:"modelKey"`
+	MsrServiceMeta                         *map[string]interface{}          `json:"msrServiceMeta"`
+	MsrServiceState                        *NvrMsrServiceState              `json:"msrServiceState"`
+	Name                                   *string                          `json:"name"`
+	PinCodeSettings                        NvrPinCodeSettings               `json:"pinCodeSettings"`
+	PortStatus                             *[]interface{}                   `json:"portStatus"`
+	Ports                                  *map[string]interface{}          `json:"ports"`
+	PublicIp                               *string                          `json:"publicIp"`
+	RecordingRetentionDurationMs           float64                          `json:"recordingRetentionDurationMs"`
+	ReleaseChannel                         *string                          `json:"releaseChannel"`
+	SessionSettings                        NvrSessionSettings               `json:"sessionSettings"`
+	SkipFirmwareUpdate                     *bool                            `json:"skipFirmwareUpdate"`
+	SmartDetectAgreement                   SmartDetectAgreement             `json:"smartDetectAgreement"`
+	SmartDetection                         SmartDetection                   `json:"smartDetection"`
+	StorageAllocationHqPercent             float64                          `json:"storageAllocationHqPercent"`
+	StorageAllocationHqPercentBalanced     *float64                         `json:"storageAllocationHqPercentBalanced"`
+	StorageAllocationHqPercentMaxRetention *float64                         `json:"storageAllocationHqPercentMaxRetention"`
+	StorageAllocationMode                  NvrStorageAllocationMode         `json:"storageAllocationMode"`
+	StorageConsoleCameraCounts             *[]StorageConsoleCameraCount     `json:"storageConsoleCameraCounts"`
+	StorageConsoleFailoverSettings         []StorageConsoleFailoverSettings `json:"storageConsoleFailoverSettings"`
+	StorageStats                           NvrStatsStorage                  `json:"storageStats"`
+	StreamEncryptionEnabled                bool                             `json:"streamEncryptionEnabled"`
+	StreamSharingAvailable                 *bool                            `json:"streamSharingAvailable"`
+	SwitchPoeBudget                        *float64                         `json:"switchPoeBudget"`
+	SwitchPorts                            *[]SwitchPort                    `json:"switchPorts"`
+	SyncingEstimateMs                      *float64                         `json:"syncingEstimateMs"`
+	SyncingProgress                        *float64                         `json:"syncingProgress"`
+	SyncingSince                           *float64                         `json:"syncingSince"`
+	SystemInfo                             interface{}                      `json:"systemInfo"`
+	TemperatureUnit                        *NvrTemperatureUnit              `json:"temperatureUnit"`
+	TimeFormat                             *NvrTimeFormat                   `json:"timeFormat"`
+	TimelapseEnabled                       *bool                            `json:"timelapseEnabled"`
+	Timezone                               *string                          `json:"timezone"`
+	TotalHqBytesPerDay                     *float64                         `json:"totalHqBytesPerDay"`
+	TotalLqBytesPerDay                     *float64                         `json:"totalLqBytesPerDay"`
+	Type                                   *string                          `json:"type"`
+	UcoreVersion                           *string                          `json:"ucoreVersion"`
+	UlpVersion                             *string                          `json:"ulpVersion"`
+	UpSince                                *float64                         `json:"upSince"`
+	Version                                *string                          `json:"version"`
+	VoipForbidden                          *bool                            `json:"voipForbidden"`
+	WanIp                                  *string                          `json:"wanIp"`
+	WanPorts                               *[]interface{}                   `json:"wanPorts"`
 }
 
 // NvrAiFeatureSettings defines model for nvrAiFeatureSettings.
@@ -6265,1101 +4361,512 @@ type NvrAiFeatureSettingsUpdate struct {
 	SpeechToTextSettings            *SpeechToTextSettingsUpdate            `json:"speechToTextSettings,omitempty"`
 }
 
-// NvrAnalyticsData What analytics data traces are sent to the Analytics service.
+// NvrAnalyticsData defines model for nvrAnalyticsData.
 type NvrAnalyticsData string
 
 // NvrArmMode defines model for nvrArmMode.
 type NvrArmMode struct {
-	// ArmProfileId Which arm profile is currently selected.
-	ArmProfileId *string `json:"armProfileId"`
-
-	// ArmedAt Timestamp when the arm was armed.
-	ArmedAt *FlexTime `json:"armedAt"`
-
-	// BreachDetectedAt Timestamp when a breach was detected.
-	BreachDetectedAt *FlexTime `json:"breachDetectedAt"`
-
-	// BreachEventCount Number of breach events detected.
-	BreachEventCount *float64 `json:"breachEventCount"`
-
-	// BreachEventId Event ID of the breach.
-	BreachEventId *string `json:"breachEventId"`
-
-	// BreachTriggerEventId Event ID of the breach trigger.
-	BreachTriggerEventId *string `json:"breachTriggerEventId"`
-
-	// Status Current arm status: armed, arming, breach, or disabled.
-	Status NvrArmModeStatus `json:"status"`
-
-	// WillBeArmedAt Timestamp when the arm will be armed.
-	WillBeArmedAt *FlexTime `json:"willBeArmedAt"`
+	ArmProfileId         *string          `json:"armProfileId"`
+	ArmedAt              *FlexTime        `json:"armedAt"`
+	BreachDetectedAt     *FlexTime        `json:"breachDetectedAt"`
+	BreachEventCount     *float64         `json:"breachEventCount"`
+	BreachEventId        *string          `json:"breachEventId"`
+	BreachTriggerEventId *string          `json:"breachTriggerEventId"`
+	Status               NvrArmModeStatus `json:"status"`
+	WillBeArmedAt        *FlexTime        `json:"willBeArmedAt"`
 }
 
-// NvrArmModeStatus Current arm status: armed, arming, breach, or disabled.
+// NvrArmModeStatus defines model for nvrArmModeStatus.
 type NvrArmModeStatus string
 
 // NvrArmModeUpdate defines model for nvrArmModeUpdate.
 type NvrArmModeUpdate struct {
-	// ArmProfileId Which arm profile is currently selected.
-	ArmProfileId *string `json:"armProfileId,omitempty"`
-
-	// ArmedAt Timestamp when the arm was armed.
-	ArmedAt *FlexTime `json:"armedAt,omitempty"`
-
-	// BreachDetectedAt Timestamp when a breach was detected.
-	BreachDetectedAt *FlexTime `json:"breachDetectedAt,omitempty"`
-
-	// BreachEventCount Number of breach events detected.
-	BreachEventCount *float64 `json:"breachEventCount,omitempty"`
-
-	// BreachEventId Event ID of the breach.
-	BreachEventId *string `json:"breachEventId,omitempty"`
-
-	// BreachTriggerEventId Event ID of the breach trigger.
-	BreachTriggerEventId *string `json:"breachTriggerEventId,omitempty"`
-
-	// Status Current arm status: armed, arming, breach, or disabled.
-	Status *NvrArmModeUpdateStatus `json:"status,omitempty"`
-
-	// WillBeArmedAt Timestamp when the arm will be armed.
-	WillBeArmedAt *FlexTime `json:"willBeArmedAt,omitempty"`
+	ArmProfileId         *string                 `json:"armProfileId,omitempty"`
+	ArmedAt              *FlexTime               `json:"armedAt,omitempty"`
+	BreachDetectedAt     *FlexTime               `json:"breachDetectedAt,omitempty"`
+	BreachEventCount     *float64                `json:"breachEventCount,omitempty"`
+	BreachEventId        *string                 `json:"breachEventId,omitempty"`
+	BreachTriggerEventId *string                 `json:"breachTriggerEventId,omitempty"`
+	Status               *NvrArmModeUpdateStatus `json:"status,omitempty"`
+	WillBeArmedAt        *FlexTime               `json:"willBeArmedAt,omitempty"`
 }
 
-// NvrArmModeUpdateStatus Current arm status: armed, arming, breach, or disabled.
+// NvrArmModeUpdateStatus defines model for nvrArmModeUpdateStatus.
 type NvrArmModeUpdateStatus string
 
 // NvrCefSettings defines model for nvrCefSettings.
 type NvrCefSettings struct {
-	// EnabledCategories System logs categories that are enabled for CEF.
-	EnabledCategories *[]interface{} `json:"enabledCategories"`
-
-	// Server CEF server settings.
-	Server *map[string]interface{} `json:"server"`
-
-	// SyslogMode Current syslog mode from server settings.
-	SyslogMode *float64 `json:"syslogMode"`
+	EnabledCategories *[]interface{}          `json:"enabledCategories"`
+	Server            *map[string]interface{} `json:"server"`
+	SyslogMode        *float64                `json:"syslogMode"`
 }
 
 // NvrCefSettingsUpdate defines model for nvrCefSettingsUpdate.
 type NvrCefSettingsUpdate struct {
-	// EnabledCategories System logs categories that are enabled for CEF.
-	EnabledCategories *[]interface{} `json:"enabledCategories,omitempty"`
-
-	// Server CEF server settings.
-	Server *map[string]interface{} `json:"server,omitempty"`
-
-	// SyslogMode Current syslog mode from server settings.
-	SyslogMode *float64 `json:"syslogMode,omitempty"`
+	EnabledCategories *[]interface{}          `json:"enabledCategories,omitempty"`
+	Server            *map[string]interface{} `json:"server,omitempty"`
+	SyslogMode        *float64                `json:"syslogMode,omitempty"`
 }
 
-// NvrCorruptionState Protect corruption state.
+// NvrCorruptionState defines model for nvrCorruptionState.
 type NvrCorruptionState string
 
 // NvrFeatureFlags defines model for nvrFeatureFlags.
 type NvrFeatureFlags struct {
-	AiFeatureFlag AiFeatureFlag `json:"aiFeatureFlag"`
-
-	// AutoRetentionSupported Config flag for auto-retention. False disables the feature, any other value uses NVR setting.
-	AutoRetentionSupported *bool `json:"autoRetentionSupported"`
-
-	// Beta Whether beta features are enabled.
-	Beta *bool `json:"beta"`
-
-	// DetectionLabels Whether detection label is finished
-	DetectionLabels *bool `json:"detectionLabels"`
-
-	// Dev Whether dev features are enabled.
-	Dev *bool `json:"dev"`
-
-	// ExternalAlarmManagerReady Whether external alarm manager is ready.
-	ExternalAlarmManagerReady *bool `json:"externalAlarmManagerReady"`
-
-	// HasSessionStats Whether active sessions feature is enabled.
-	HasSessionStats *bool `json:"hasSessionStats"`
-
-	// HasTwoWayAudioMediaStreams Whether two way audio over WebRTC media streams is supported.
-	HasTwoWayAudioMediaStreams *bool `json:"hasTwoWayAudioMediaStreams"`
-
-	// HomekitPaired Whether homekit controller is paired.
-	HomekitPaired *bool `json:"homekitPaired"`
-
-	// HomekitWhitelisted Is homekit feature supported
-	HomekitWhitelisted *bool `json:"homekitWhitelisted"`
-
-	// LastMigratedEventId The last migrated event id
-	LastMigratedEventId *string `json:"lastMigratedEventId"`
-
-	// MsIdSupport Whether WebRTC media stream id (msId) generation by FE/mobile app is supported.
-	MsIdSupport *bool `json:"msIdSupport"`
-
-	// NotificationsV2 Whether we are supporting V2 notifications.
-	NotificationsV2 *bool `json:"notificationsV2"`
-
-	// SmartDoorAccess Whether smart door access is enabled on Identity Service.
-	SmartDoorAccess *bool `json:"smartDoorAccess"`
-
-	// StackedMigration Indicates support for migrating stacked setups to Vantage Point.
-	StackedMigration *bool `json:"stackedMigration"`
-
-	// SupportAccessAppRingEvent Indicates support for Access App ring event.
-	SupportAccessAppRingEvent *bool `json:"supportAccessAppRingEvent"`
-
-	// SupportAccessPlayback Indication for Access to determine whether the playback capability is supported.
-	SupportAccessPlayback *bool `json:"supportAccessPlayback"`
-
-	// SupportsExpansionUnits Whether the NVR hardware supports expansion units (disk expansion chassis).
-	SupportsExpansionUnits *bool `json:"supportsExpansionUnits"`
-
-	// UlpRoleManagement Whether ULP role management is enabled.
-	UlpRoleManagement *bool `json:"ulpRoleManagement"`
-
-	// UseExternalAlarmManager Whether external alarm manager is enabled.
-	UseExternalAlarmManager *bool `json:"useExternalAlarmManager"`
+	AiFeatureFlag              AiFeatureFlag `json:"aiFeatureFlag"`
+	AutoRetentionSupported     *bool         `json:"autoRetentionSupported"`
+	Beta                       *bool         `json:"beta"`
+	DetectionLabels            *bool         `json:"detectionLabels"`
+	Dev                        *bool         `json:"dev"`
+	ExternalAlarmManagerReady  *bool         `json:"externalAlarmManagerReady"`
+	HasSessionStats            *bool         `json:"hasSessionStats"`
+	HasTwoWayAudioMediaStreams *bool         `json:"hasTwoWayAudioMediaStreams"`
+	HomekitPaired              *bool         `json:"homekitPaired"`
+	HomekitWhitelisted         *bool         `json:"homekitWhitelisted"`
+	LastMigratedEventId        *string       `json:"lastMigratedEventId"`
+	MsIdSupport                *bool         `json:"msIdSupport"`
+	NotificationsV2            *bool         `json:"notificationsV2"`
+	SmartDoorAccess            *bool         `json:"smartDoorAccess"`
+	StackedMigration           *bool         `json:"stackedMigration"`
+	SupportAccessAppRingEvent  *bool         `json:"supportAccessAppRingEvent"`
+	SupportAccessPlayback      *bool         `json:"supportAccessPlayback"`
+	SupportsExpansionUnits     *bool         `json:"supportsExpansionUnits"`
+	UlpRoleManagement          *bool         `json:"ulpRoleManagement"`
+	UseExternalAlarmManager    *bool         `json:"useExternalAlarmManager"`
 }
 
 // NvrFeatureFlagsUpdate defines model for nvrFeatureFlagsUpdate.
 type NvrFeatureFlagsUpdate struct {
-	// Beta Whether beta features are enabled.
-	Beta *bool `json:"beta,omitempty"`
-
-	// DetectionLabels Whether detection label is finished
-	DetectionLabels *bool `json:"detectionLabels,omitempty"`
-
-	// Dev Whether dev features are enabled.
-	Dev *bool `json:"dev,omitempty"`
-
-	// ExternalAlarmManagerReady Whether external alarm manager is ready.
-	ExternalAlarmManagerReady *bool `json:"externalAlarmManagerReady,omitempty"`
-
-	// HasSessionStats Whether active sessions feature is enabled.
-	HasSessionStats *bool `json:"hasSessionStats,omitempty"`
-
-	// HasTwoWayAudioMediaStreams Whether two way audio over WebRTC media streams is supported.
-	HasTwoWayAudioMediaStreams *bool `json:"hasTwoWayAudioMediaStreams,omitempty"`
-
-	// HomekitPaired Whether homekit controller is paired.
-	HomekitPaired *bool `json:"homekitPaired,omitempty"`
-
-	// HomekitWhitelisted Is homekit feature supported
-	HomekitWhitelisted *bool `json:"homekitWhitelisted,omitempty"`
-
-	// LastMigratedEventId The last migrated event id
-	LastMigratedEventId *string `json:"lastMigratedEventId,omitempty"`
-
-	// MsIdSupport Whether WebRTC media stream id (msId) generation by FE/mobile app is supported.
-	MsIdSupport *bool `json:"msIdSupport,omitempty"`
-
-	// NotificationsV2 Whether we are supporting V2 notifications.
-	NotificationsV2 *bool `json:"notificationsV2,omitempty"`
-
-	// SmartDoorAccess Whether smart door access is enabled on Identity Service.
-	SmartDoorAccess *bool `json:"smartDoorAccess,omitempty"`
-
-	// StackedMigration Indicates support for migrating stacked setups to Vantage Point.
-	StackedMigration *bool `json:"stackedMigration,omitempty"`
-
-	// SupportAccessAppRingEvent Indicates support for Access App ring event.
-	SupportAccessAppRingEvent *bool `json:"supportAccessAppRingEvent,omitempty"`
-
-	// SupportAccessPlayback Indication for Access to determine whether the playback capability is supported.
-	SupportAccessPlayback *bool `json:"supportAccessPlayback,omitempty"`
-
-	// UlpRoleManagement Whether ULP role management is enabled.
-	UlpRoleManagement *bool `json:"ulpRoleManagement,omitempty"`
-
-	// UseExternalAlarmManager Whether external alarm manager is enabled.
-	UseExternalAlarmManager *bool `json:"useExternalAlarmManager,omitempty"`
+	Beta                       *bool   `json:"beta,omitempty"`
+	DetectionLabels            *bool   `json:"detectionLabels,omitempty"`
+	Dev                        *bool   `json:"dev,omitempty"`
+	ExternalAlarmManagerReady  *bool   `json:"externalAlarmManagerReady,omitempty"`
+	HasSessionStats            *bool   `json:"hasSessionStats,omitempty"`
+	HasTwoWayAudioMediaStreams *bool   `json:"hasTwoWayAudioMediaStreams,omitempty"`
+	HomekitPaired              *bool   `json:"homekitPaired,omitempty"`
+	HomekitWhitelisted         *bool   `json:"homekitWhitelisted,omitempty"`
+	LastMigratedEventId        *string `json:"lastMigratedEventId,omitempty"`
+	MsIdSupport                *bool   `json:"msIdSupport,omitempty"`
+	NotificationsV2            *bool   `json:"notificationsV2,omitempty"`
+	SmartDoorAccess            *bool   `json:"smartDoorAccess,omitempty"`
+	StackedMigration           *bool   `json:"stackedMigration,omitempty"`
+	SupportAccessAppRingEvent  *bool   `json:"supportAccessAppRingEvent,omitempty"`
+	SupportAccessPlayback      *bool   `json:"supportAccessPlayback,omitempty"`
+	UlpRoleManagement          *bool   `json:"ulpRoleManagement,omitempty"`
+	UseExternalAlarmManager    *bool   `json:"useExternalAlarmManager,omitempty"`
 }
 
-// NvrHomekitError Errors encountered by the unifi homekit service.
+// NvrHomekitError defines model for nvrHomekitError.
 type NvrHomekitError string
 
-// NvrHomekitStatus What's the state of the unifi homekit service.
+// NvrHomekitStatus defines model for nvrHomekitStatus.
 type NvrHomekitStatus string
 
-// NvrMsrServiceState MSR service state
+// NvrMsrServiceState defines model for nvrMsrServiceState.
 type NvrMsrServiceState string
 
 // NvrPinCodeSettings defines model for nvrPinCodeSettings.
 type NvrPinCodeSettings struct {
-	// PinCodeLengthRange The length of the pin code
 	PinCodeLengthRange *NvrPinCodeSettingsPinCodeLengthRange `json:"pinCodeLengthRange"`
 }
 
-// NvrPinCodeSettingsPinCodeLengthRange The length of the pin code
+// NvrPinCodeSettingsPinCodeLengthRange defines model for nvrPinCodeSettingsPinCodeLengthRange.
 type NvrPinCodeSettingsPinCodeLengthRange string
 
 // NvrPinCodeSettingsUpdate defines model for nvrPinCodeSettingsUpdate.
 type NvrPinCodeSettingsUpdate struct {
-	// PinCodeLengthRange The length of the pin code
 	PinCodeLengthRange *NvrPinCodeSettingsUpdatePinCodeLengthRange `json:"pinCodeLengthRange,omitempty"`
 }
 
-// NvrPinCodeSettingsUpdatePinCodeLengthRange The length of the pin code
+// NvrPinCodeSettingsUpdatePinCodeLengthRange defines model for nvrPinCodeSettingsUpdatePinCodeLengthRange.
 type NvrPinCodeSettingsUpdatePinCodeLengthRange string
 
 // NvrSessionSettings defines model for nvrSessionSettings.
 type NvrSessionSettings struct {
-	// DoorbellTimeout The timeout for the doorbell session in seconds
-	DoorbellTimeout *float64 `json:"doorbellTimeout"`
-
-	// LiveviewTimeout The timeout for the liveview session in seconds
-	LiveviewTimeout *float64 `json:"liveviewTimeout"`
-
-	// SupportedClients The clients that are supported to view liveview
+	DoorbellTimeout  *float64       `json:"doorbellTimeout"`
+	LiveviewTimeout  *float64       `json:"liveviewTimeout"`
 	SupportedClients *[]interface{} `json:"supportedClients"`
 }
 
 // NvrSessionSettingsUpdate defines model for nvrSessionSettingsUpdate.
 type NvrSessionSettingsUpdate struct {
-	// DoorbellTimeout The timeout for the doorbell session in seconds
-	DoorbellTimeout *float64 `json:"doorbellTimeout,omitempty"`
-
-	// LiveviewTimeout The timeout for the liveview session in seconds
-	LiveviewTimeout *float64 `json:"liveviewTimeout,omitempty"`
-
-	// SupportedClients The clients that are supported to view liveview
+	DoorbellTimeout  *float64       `json:"doorbellTimeout,omitempty"`
+	LiveviewTimeout  *float64       `json:"liveviewTimeout,omitempty"`
 	SupportedClients *[]interface{} `json:"supportedClients,omitempty"`
 }
 
 // NvrStatsStorage defines model for nvrStatsStorage.
 type NvrStatsStorage struct {
-	// AverageCapacity Estimated duration the total recording space will last at the current recording rate in ms.
-	AverageCapacity *float64 `json:"averageCapacity"`
-
-	// Capacity Usable capacity, taking into account the current maximum recording duration, remaining capacity, and ensuring it does not exceed the average capacity in ms. Null if the recording rate is zero or utilization is too low
-	Capacity *float64 `json:"capacity"`
-
-	// RecordingDistribution Recording distribution in percentage per quality.
+	AverageCapacity       *float64                `json:"averageCapacity"`
+	Capacity              *float64                `json:"capacity"`
 	RecordingDistribution *map[string]interface{} `json:"recordingDistribution"`
-
-	// RecordingRate Total estimated recording byte rate in ms
-	RecordingRate *float64 `json:"recordingRate"`
-
-	// RecordingSpace Missing description
-	RecordingSpace *map[string]interface{} `json:"recordingSpace"`
-
-	// RemainingCapacity Remaining estimated time storage capacity in ms
-	RemainingCapacity *float64 `json:"remainingCapacity"`
-
-	// RetentionRatioLQ Retention ratio for low quality recordings compared to high quality recordings.
-	RetentionRatioLQ    *float64            `json:"retentionRatioLQ"`
-	StorageDistribution StorageDistribution `json:"storageDistribution"`
-
-	// Utilization Missing description
-	Utilization *float64 `json:"utilization"`
+	RecordingRate         *float64                `json:"recordingRate"`
+	RecordingSpace        *map[string]interface{} `json:"recordingSpace"`
+	RemainingCapacity     *float64                `json:"remainingCapacity"`
+	RetentionRatioLQ      *float64                `json:"retentionRatioLQ"`
+	StorageDistribution   StorageDistribution     `json:"storageDistribution"`
+	Utilization           *float64                `json:"utilization"`
 }
 
-// NvrStorageAllocationMode How to allocate storage between HQ and LQ recordings. balanced=50/50, maxRetention=10/90, custom=user specified.
+// NvrStorageAllocationMode defines model for nvrStorageAllocationMode.
 type NvrStorageAllocationMode string
 
-// NvrTemperatureUnit Temperature unit: Fahrenheit or Celsius
+// NvrTemperatureUnit defines model for nvrTemperatureUnit.
 type NvrTemperatureUnit string
 
-// NvrTimeFormat 12h (standard time) or 24h (army time)
+// NvrTimeFormat defines model for nvrTimeFormat.
 type NvrTimeFormat string
 
 // NvrUpdate defines model for nvrUpdate.
 type NvrUpdate struct {
-	// AccessVersion If access is installed then this field contains the version
-	AccessVersion *string `json:"accessVersion,omitempty"`
-
-	// Agreements All user agreements
-	Agreements *AgreementsUpdate `json:"agreements,omitempty"`
-
-	// AiFeatureSettings AI Feature Settings — source of truth for all AI Processor feature configurations.
-	AiFeatureSettings *NvrAiFeatureSettingsUpdate `json:"aiFeatureSettings,omitempty"`
-
-	// AllowThirdPartyNfcCards Whether or not to allow third-party NFC cards.
-	AllowThirdPartyNfcCards *bool `json:"allowThirdPartyNfcCards,omitempty"`
-
-	// AnalyticsData What analytics data traces are sent to the Analytics service.
-	AnalyticsData *NvrUpdateAnalyticsData `json:"analyticsData,omitempty"`
-
-	// AnonymousDeviceId Persistent unique host device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId,omitempty"`
-
-	// ArmMode Arm mode settings.
-	ArmMode *NvrArmModeUpdate `json:"armMode,omitempty"`
-
-	// AutoRetentionEnabled Whether auto-retention balancing is enabled. When disabled, cameras fall back to NVR-level retention.
-	AutoRetentionEnabled *bool `json:"autoRetentionEnabled,omitempty"`
-
-	// CameraCapacity Camera capacity details
-	CameraCapacity *map[string]interface{} `json:"cameraCapacity,omitempty"`
-
-	// CanAutoUpdate Whether or not the NVR can update software automatically.
-	CanAutoUpdate *bool `json:"canAutoUpdate,omitempty"`
-
-	// CefSettings CEF settings.
-	CefSettings *NvrCefSettingsUpdate `json:"cefSettings,omitempty"`
-
-	// CorruptionState Protect corruption state.
-	CorruptionState *NvrUpdateCorruptionState `json:"corruptionState,omitempty"`
-
-	// CountryCode Country code of console.
-	CountryCode       *string                  `json:"countryCode,omitempty"`
-	DbRecoveryOptions *DbRecoveryOptionsUpdate `json:"dbRecoveryOptions,omitempty"`
-
-	// DeviceFirmwareSettings device firmware settings
-	DeviceFirmwareSettings *DeviceFirmwareSettingsUpdate `json:"deviceFirmwareSettings,omitempty"`
-
-	// DisableAudio Whether audio recording is disabled globally
-	DisableAudio *bool `json:"disableAudio,omitempty"`
-
-	// DisableAutoLink Disable AutoLink
-	DisableAutoLink *bool `json:"disableAutoLink,omitempty"`
-
-	// DoorbellSettings Doorbell related settings.
-	DoorbellSettings *DoorbellSettingsUpdate `json:"doorbellSettings,omitempty"`
-
-	// EnableAutomaticBackups Whether or not to enable automatic backups.
-	EnableAutomaticBackups *bool `json:"enableAutomaticBackups,omitempty"`
-
-	// EnableBridgeAutoAdoption Enable auto-adoption of discovered bridges.
-	EnableBridgeAutoAdoption *bool `json:"enableBridgeAutoAdoption,omitempty"`
-
-	// EnableCrashReporting Whether or not any data is sent to Error reporting service.
-	EnableCrashReporting *bool `json:"enableCrashReporting,omitempty"`
-
-	// EnableThirdPartyCamerasDiscovery Whether NVR should run automatic third party cameras discovery
-	EnableThirdPartyCamerasDiscovery *bool `json:"enableThirdPartyCamerasDiscovery,omitempty"`
-
-	// FeatureFlags Feature flags.
-	FeatureFlags *NvrFeatureFlagsUpdate `json:"featureFlags,omitempty"`
-
-	// HardDriveState State of hard drives
-	HardDriveState *string `json:"hardDriveState,omitempty"`
-
-	// HardwareId hardware id
-	HardwareId *string `json:"hardwareId,omitempty"`
-
-	// HardwareRevision human readable version of bom
-	HardwareRevision *string `json:"hardwareRevision,omitempty"`
-
-	// HasGateway Define if console has gateway
-	HasGateway *bool `json:"hasGateway,omitempty"`
-
-	// HostType host type
-	HostType *float64 `json:"hostType,omitempty"`
-
-	// IsAccessInstalled Define if access application is installed in the console and matches the minimum version required by Protect
-	IsAccessInstalled *bool `json:"isAccessInstalled,omitempty"`
-
-	// IsAiReportingEnabled Whether AI reporting is enabled.
-	IsAiReportingEnabled *bool `json:"isAiReportingEnabled,omitempty"`
-
-	// IsHomekitEnabled Whether or not to enable Homekit service (unifi-homekit)
-	IsHomekitEnabled *bool `json:"isHomekitEnabled,omitempty"`
-
-	// IsInsightsEnabled Enable/Disable Insights
-	IsInsightsEnabled *bool `json:"isInsightsEnabled,omitempty"`
-
-	// IsMigrationFailed Whether or not the DB migration script is failed
-	IsMigrationFailed *bool `json:"isMigrationFailed,omitempty"`
-
-	// IsNetworkInstallable Define if network application can be installed or not
-	IsNetworkInstallable *bool `json:"isNetworkInstallable,omitempty"`
-
-	// IsNetworkInstalled Define if network application is installed or not
-	IsNetworkInstalled *bool `json:"isNetworkInstalled,omitempty"`
-
-	// IsProtectUpdatable whether updatable from ucore
-	IsProtectUpdatable *bool `json:"isProtectUpdatable,omitempty"`
-
-	// IsRecordingPauseAllowedDuringRaidSync Whether user has allowed pausing recordings during main chassis RAID sync. Null if no preference set, defaults to pausing not allowed.
-	IsRecordingPauseAllowedDuringRaidSync *bool `json:"isRecordingPauseAllowedDuringRaidSync,omitempty"`
-
-	// IsSshEnabled Whether or not to enable SSH
-	IsSshEnabled *bool `json:"isSshEnabled,omitempty"`
-
-	// IsUCoreSetup Whether the UCore is setup.
-	IsUCoreSetup *bool `json:"isUCoreSetup,omitempty"`
-
-	// IsUCoreStacked Whether or not the ucore is stacked. `null` means not initialized from the UCore yet.
-	IsUCoreStacked *bool `json:"isUCoreStacked,omitempty"`
-
-	// IsUcoreUpdatable Define if console firmware is updatable or not
-	IsUcoreUpdatable *bool `json:"isUcoreUpdatable,omitempty"`
-
-	// IsWirelessUplinkEnabled is wireless uplink enabled for all devices?
-	IsWirelessUplinkEnabled *bool `json:"isWirelessUplinkEnabled,omitempty"`
-
-	// LastDeviceFWUpdatesCheckedAt The last time the firmware was checked
-	LastDeviceFWUpdatesCheckedAt *float64 `json:"lastDeviceFWUpdatesCheckedAt,omitempty"`
-
-	// Liveview Which liveview is configured to be pushed to this NVR (only for select NVRs)
-	Liveview *string `json:"liveview,omitempty"`
-
-	// LocationSettings Location Settings.
-	LocationSettings *LocationSettingsUpdate `json:"locationSettings,omitempty"`
-
-	// MsrServiceMeta MSR service state metadata
-	MsrServiceMeta *map[string]interface{} `json:"msrServiceMeta,omitempty"`
-
-	// MsrServiceState MSR service state
-	MsrServiceState *NvrUpdateMsrServiceState `json:"msrServiceState,omitempty"`
-
-	// Name The name of this nvr device.
-	Name *string `json:"name,omitempty"`
-
-	// PinCodeSettings Global pin code settings, applied to all cameras.
-	PinCodeSettings *NvrPinCodeSettingsUpdate `json:"pinCodeSettings,omitempty"`
-
-	// PublicIp Public IP of console.
-	PublicIp *string `json:"publicIp,omitempty"`
-
-	// RecordingRetentionDurationMs Duration in milliseconds to retain videos before staging them for recycling. camera recordingSettings.retentionDurationMs takes precedence over this value
-	RecordingRetentionDurationMs *float64 `json:"recordingRetentionDurationMs,omitempty"`
-
-	// ReleaseChannel The release channel this device is on (used for automatic updates).
-	ReleaseChannel *string `json:"releaseChannel,omitempty"`
-
-	// SessionSettings Session settings for the NVR.
-	SessionSettings *NvrSessionSettingsUpdate `json:"sessionSettings,omitempty"`
-
-	// SkipFirmwareUpdate Skip device firmware auto update
-	SkipFirmwareUpdate *bool `json:"skipFirmwareUpdate,omitempty"`
-
-	// SmartDetectAgreement Legacy user agreement for smart detection feature.
-	SmartDetectAgreement *SmartDetectAgreementUpdate `json:"smartDetectAgreement,omitempty"`
-
-	// SmartDetection Smart detection related settings.
-	SmartDetection *SmartDetectionUpdate `json:"smartDetection,omitempty"`
-
-	// StorageAllocationHqPercent Percentage of storage allocated to HQ when storageAllocationMode is custom.
-	StorageAllocationHqPercent *float64 `json:"storageAllocationHqPercent,omitempty"`
-
-	// StorageAllocationMode How to allocate storage between HQ and LQ recordings. balanced=50/50, maxRetention=10/90, custom=user specified.
-	StorageAllocationMode *NvrUpdateStorageAllocationMode `json:"storageAllocationMode,omitempty"`
-
-	// StorageConsoleFailoverSettings Per-console failover settings. Acts as defaults for cameras that defer to NVR-level configuration.
-	StorageConsoleFailoverSettings *[]StorageConsoleFailoverSettingsUpdate `json:"storageConsoleFailoverSettings,omitempty"`
-
-	// StreamEncryptionEnabled Whether or not to enable stream encryption
-	StreamEncryptionEnabled *bool `json:"streamEncryptionEnabled,omitempty"`
-
-	// SwitchPoeBudget Total POE budget for built-in switch in milliwatts (mW)
-	SwitchPoeBudget *float64 `json:"switchPoeBudget,omitempty"`
-
-	// SystemInfo Device system telemetry (cpu/memory/storage/ustorage/tmpfs). Typed as any: it is runtime telemetry no resource models, and the vendor OpenAPI mistypes several of its leaves vs what firmware returns (HIL: storage.devices[].healthy is a string not boolean; ustorage.disks[].size is a number not string). Detaching the whole block from typed decode is both correct (unmodeled) and robust to firmware drift.
-	SystemInfo interface{} `json:"systemInfo,omitempty"`
-
-	// TemperatureUnit Temperature unit: Fahrenheit or Celsius
-	TemperatureUnit *NvrUpdateTemperatureUnit `json:"temperatureUnit,omitempty"`
-
-	// TimeFormat 12h (standard time) or 24h (army time)
-	TimeFormat *NvrUpdateTimeFormat `json:"timeFormat,omitempty"`
-
-	// TimelapseEnabled Is time-lapse scrubbing enabled, timeline smoothening while scrolling
-	TimelapseEnabled *bool `json:"timelapseEnabled,omitempty"`
-
-	// Timezone The timezone of the NVR (this also gets applied to any managed cameras).
-	Timezone *string `json:"timezone,omitempty"`
-
-	// UcoreVersion UCore version
-	UcoreVersion *string `json:"ucoreVersion,omitempty"`
+	AccessVersion                         *string                                 `json:"accessVersion,omitempty"`
+	Agreements                            *AgreementsUpdate                       `json:"agreements,omitempty"`
+	AiFeatureSettings                     *NvrAiFeatureSettingsUpdate             `json:"aiFeatureSettings,omitempty"`
+	AllowThirdPartyNfcCards               *bool                                   `json:"allowThirdPartyNfcCards,omitempty"`
+	AnalyticsData                         *NvrUpdateAnalyticsData                 `json:"analyticsData,omitempty"`
+	AnonymousDeviceId                     *string                                 `json:"anonymousDeviceId,omitempty"`
+	ArmMode                               *NvrArmModeUpdate                       `json:"armMode,omitempty"`
+	AutoRetentionEnabled                  *bool                                   `json:"autoRetentionEnabled,omitempty"`
+	CameraCapacity                        *map[string]interface{}                 `json:"cameraCapacity,omitempty"`
+	CanAutoUpdate                         *bool                                   `json:"canAutoUpdate,omitempty"`
+	CefSettings                           *NvrCefSettingsUpdate                   `json:"cefSettings,omitempty"`
+	CorruptionState                       *NvrUpdateCorruptionState               `json:"corruptionState,omitempty"`
+	CountryCode                           *string                                 `json:"countryCode,omitempty"`
+	DbRecoveryOptions                     *DbRecoveryOptionsUpdate                `json:"dbRecoveryOptions,omitempty"`
+	DeviceFirmwareSettings                *DeviceFirmwareSettingsUpdate           `json:"deviceFirmwareSettings,omitempty"`
+	DisableAudio                          *bool                                   `json:"disableAudio,omitempty"`
+	DisableAutoLink                       *bool                                   `json:"disableAutoLink,omitempty"`
+	DoorbellSettings                      *DoorbellSettingsUpdate                 `json:"doorbellSettings,omitempty"`
+	EnableAutomaticBackups                *bool                                   `json:"enableAutomaticBackups,omitempty"`
+	EnableBridgeAutoAdoption              *bool                                   `json:"enableBridgeAutoAdoption,omitempty"`
+	EnableCrashReporting                  *bool                                   `json:"enableCrashReporting,omitempty"`
+	EnableThirdPartyCamerasDiscovery      *bool                                   `json:"enableThirdPartyCamerasDiscovery,omitempty"`
+	FeatureFlags                          *NvrFeatureFlagsUpdate                  `json:"featureFlags,omitempty"`
+	HardDriveState                        *string                                 `json:"hardDriveState,omitempty"`
+	HardwareId                            *string                                 `json:"hardwareId,omitempty"`
+	HardwareRevision                      *string                                 `json:"hardwareRevision,omitempty"`
+	HasGateway                            *bool                                   `json:"hasGateway,omitempty"`
+	HostType                              *float64                                `json:"hostType,omitempty"`
+	IsAccessInstalled                     *bool                                   `json:"isAccessInstalled,omitempty"`
+	IsAiReportingEnabled                  *bool                                   `json:"isAiReportingEnabled,omitempty"`
+	IsHomekitEnabled                      *bool                                   `json:"isHomekitEnabled,omitempty"`
+	IsInsightsEnabled                     *bool                                   `json:"isInsightsEnabled,omitempty"`
+	IsMigrationFailed                     *bool                                   `json:"isMigrationFailed,omitempty"`
+	IsNetworkInstallable                  *bool                                   `json:"isNetworkInstallable,omitempty"`
+	IsNetworkInstalled                    *bool                                   `json:"isNetworkInstalled,omitempty"`
+	IsProtectUpdatable                    *bool                                   `json:"isProtectUpdatable,omitempty"`
+	IsRecordingPauseAllowedDuringRaidSync *bool                                   `json:"isRecordingPauseAllowedDuringRaidSync,omitempty"`
+	IsSshEnabled                          *bool                                   `json:"isSshEnabled,omitempty"`
+	IsUCoreSetup                          *bool                                   `json:"isUCoreSetup,omitempty"`
+	IsUCoreStacked                        *bool                                   `json:"isUCoreStacked,omitempty"`
+	IsUcoreUpdatable                      *bool                                   `json:"isUcoreUpdatable,omitempty"`
+	IsWirelessUplinkEnabled               *bool                                   `json:"isWirelessUplinkEnabled,omitempty"`
+	LastDeviceFWUpdatesCheckedAt          *float64                                `json:"lastDeviceFWUpdatesCheckedAt,omitempty"`
+	Liveview                              *string                                 `json:"liveview,omitempty"`
+	LocationSettings                      *LocationSettingsUpdate                 `json:"locationSettings,omitempty"`
+	MsrServiceMeta                        *map[string]interface{}                 `json:"msrServiceMeta,omitempty"`
+	MsrServiceState                       *NvrUpdateMsrServiceState               `json:"msrServiceState,omitempty"`
+	Name                                  *string                                 `json:"name,omitempty"`
+	PinCodeSettings                       *NvrPinCodeSettingsUpdate               `json:"pinCodeSettings,omitempty"`
+	PublicIp                              *string                                 `json:"publicIp,omitempty"`
+	RecordingRetentionDurationMs          *float64                                `json:"recordingRetentionDurationMs,omitempty"`
+	ReleaseChannel                        *string                                 `json:"releaseChannel,omitempty"`
+	SessionSettings                       *NvrSessionSettingsUpdate               `json:"sessionSettings,omitempty"`
+	SkipFirmwareUpdate                    *bool                                   `json:"skipFirmwareUpdate,omitempty"`
+	SmartDetectAgreement                  *SmartDetectAgreementUpdate             `json:"smartDetectAgreement,omitempty"`
+	SmartDetection                        *SmartDetectionUpdate                   `json:"smartDetection,omitempty"`
+	StorageAllocationHqPercent            *float64                                `json:"storageAllocationHqPercent,omitempty"`
+	StorageAllocationMode                 *NvrUpdateStorageAllocationMode         `json:"storageAllocationMode,omitempty"`
+	StorageConsoleFailoverSettings        *[]StorageConsoleFailoverSettingsUpdate `json:"storageConsoleFailoverSettings,omitempty"`
+	StreamEncryptionEnabled               *bool                                   `json:"streamEncryptionEnabled,omitempty"`
+	SwitchPoeBudget                       *float64                                `json:"switchPoeBudget,omitempty"`
+	SystemInfo                            interface{}                             `json:"systemInfo,omitempty"`
+	TemperatureUnit                       *NvrUpdateTemperatureUnit               `json:"temperatureUnit,omitempty"`
+	TimeFormat                            *NvrUpdateTimeFormat                    `json:"timeFormat,omitempty"`
+	TimelapseEnabled                      *bool                                   `json:"timelapseEnabled,omitempty"`
+	Timezone                              *string                                 `json:"timezone,omitempty"`
+	UcoreVersion                          *string                                 `json:"ucoreVersion,omitempty"`
 }
 
-// NvrUpdateAnalyticsData What analytics data traces are sent to the Analytics service.
+// NvrUpdateAnalyticsData defines model for nvrUpdateAnalyticsData.
 type NvrUpdateAnalyticsData string
 
-// NvrUpdateCorruptionState Protect corruption state.
+// NvrUpdateCorruptionState defines model for nvrUpdateCorruptionState.
 type NvrUpdateCorruptionState string
 
-// NvrUpdateMsrServiceState MSR service state
+// NvrUpdateMsrServiceState defines model for nvrUpdateMsrServiceState.
 type NvrUpdateMsrServiceState string
 
-// NvrUpdateStorageAllocationMode How to allocate storage between HQ and LQ recordings. balanced=50/50, maxRetention=10/90, custom=user specified.
+// NvrUpdateStorageAllocationMode defines model for nvrUpdateStorageAllocationMode.
 type NvrUpdateStorageAllocationMode string
 
-// NvrUpdateTemperatureUnit Temperature unit: Fahrenheit or Celsius
+// NvrUpdateTemperatureUnit defines model for nvrUpdateTemperatureUnit.
 type NvrUpdateTemperatureUnit string
 
-// NvrUpdateTimeFormat 12h (standard time) or 24h (army time)
+// NvrUpdateTimeFormat defines model for nvrUpdateTimeFormat.
 type NvrUpdateTimeFormat string
 
 // OptimizeIrSettings defines model for optimizeIrSettings.
 type OptimizeIrSettings struct {
-	// IrZones Ordered sequence of preset slots to be visited in the patrol.
-	IrZones *[]interface{} `json:"irZones"`
-
-	// Mode Optimized IR Mode
-	Mode *OptimizeIrSettingsMode `json:"mode"`
+	IrZones *[]interface{}          `json:"irZones"`
+	Mode    *OptimizeIrSettingsMode `json:"mode"`
 }
 
-// OptimizeIrSettingsMode Optimized IR Mode
+// OptimizeIrSettingsMode defines model for optimizeIrSettingsMode.
 type OptimizeIrSettingsMode string
 
 // OsdSettings defines model for osdSettings.
 type OsdSettings struct {
-	// IsDateEnabled Whether to show the date in the OSD.
-	IsDateEnabled *bool `json:"isDateEnabled"`
-
-	// IsDebugEnabled Whether debug info is enabled.
-	IsDebugEnabled *bool `json:"isDebugEnabled"`
-
-	// IsLogoEnabled Whether to show the logo in the bottom right corner.
-	IsLogoEnabled *bool `json:"isLogoEnabled"`
-
-	// IsNameEnabled Whether to show the name in the OSD.
-	IsNameEnabled *bool `json:"isNameEnabled"`
-
-	// OverlayLocation The location of the overlay on the screen.
+	IsDateEnabled   *bool   `json:"isDateEnabled"`
+	IsDebugEnabled  *bool   `json:"isDebugEnabled"`
+	IsLogoEnabled   *bool   `json:"isLogoEnabled"`
+	IsNameEnabled   *bool   `json:"isNameEnabled"`
 	OverlayLocation *string `json:"overlayLocation"`
 }
 
 // PanCapability defines model for panCapability.
 type PanCapability struct {
-	// Degrees The degree range of the capability.
 	Degrees DegreesRange `json:"degrees"`
-
-	// Steps The step range of the capability.
-	Steps StepsRange `json:"steps"`
+	Steps   StepsRange   `json:"steps"`
 }
 
 // Point defines model for point.
 type Point struct {
-	// X X coordinate of the point
 	X float64 `json:"x"`
-
-	// Y Y coordinate of the point
 	Y float64 `json:"y"`
 }
 
 // PrivacyMaskCapability defines model for privacyMaskCapability.
 type PrivacyMaskCapability struct {
-	// MaxMasks The maximal number of privacy masks.
-	MaxMasks *float64 `json:"maxMasks"`
-
-	// RectangleOnly Whether the camera is only supported for rectangular privacy masks.
-	RectangleOnly *bool `json:"rectangleOnly"`
+	MaxMasks      *float64 `json:"maxMasks"`
+	RectangleOnly *bool    `json:"rectangleOnly"`
 }
 
 // PrivacyZone defines model for privacyZone.
 type PrivacyZone struct {
-	// Color Color of the zone.
-	Color *string `json:"color"`
-
-	// Id ID of the zone. (start from 1)
-	Id *float64 `json:"id"`
-
-	// Name Name of the zone.
-	Name *string `json:"name"`
-
-	// Points An array of arrays of [x, y]
+	Color  *string        `json:"color"`
+	Id     *float64       `json:"id"`
+	Name   *string        `json:"name"`
 	Points *[]interface{} `json:"points"`
-
-	// Update Does this zone need to be updated on the camera
-	Update *bool `json:"update"`
+	Update *bool          `json:"update"`
 }
 
 // ReaderFeatureFlags defines model for readerFeatureFlags.
 type ReaderFeatureFlags struct {
-	// CanAdjustBrightness Whether the reader can adjust brightness.
-	CanAdjustBrightness *bool `json:"canAdjustBrightness"`
-
-	// Support2fa Whether the reader supports 2FA.
-	Support2fa *bool `json:"support2fa"`
-
-	// SupportAccessMethods The access methods supported by the reader.
-	SupportAccessMethods *[]interface{} `json:"supportAccessMethods"`
-
-	// SupportAdjustSpeakerVolume Whether the reader supports adjusting speaker volume.
-	SupportAdjustSpeakerVolume *bool `json:"supportAdjustSpeakerVolume"`
-
-	// SupportAudioCodecs The audio codecs supported by the reader for talkback
-	SupportAudioCodecs *[]interface{} `json:"supportAudioCodecs"`
-
-	// SupportAutoBrightness Whether the reader supports auto brightness adjustment.
-	SupportAutoBrightness *bool `json:"supportAutoBrightness"`
-
-	// SupportAutoTurnOffDisplay Whether the reader supports auto turn off display.
-	SupportAutoTurnOffDisplay *bool `json:"supportAutoTurnOffDisplay"`
-
-	// SupportCallerManager Whether the reader supports caller manager.
-	SupportCallerManager *bool `json:"supportCallerManager"`
-
-	// SupportDoorDirection Whether the reader supports door direction.
-	SupportDoorDirection *bool `json:"supportDoorDirection"`
-
-	// SupportDoorbellTriggerMethod Whether the reader supports the doorbell trigger method.
-	SupportDoorbellTriggerMethod *bool `json:"supportDoorbellTriggerMethod"`
-
-	// SupportFloodLed Whether the reader supports the flood LED.
-	SupportFloodLed *bool `json:"supportFloodLed"`
-
-	// SupportGateStop Whether the reader supports gate stop.
-	SupportGateStop *bool `json:"supportGateStop"`
-
-	// SupportGifInterfaceImage Whether the reader supports animated GIFs as the interface image on the doorbell/intercom display.
-	SupportGifInterfaceImage *bool `json:"supportGifInterfaceImage"`
-
-	// SupportGreetings Whether the reader supports greeting users via audio or display when they approach.
-	SupportGreetings *bool `json:"supportGreetings"`
-
-	// SupportInterfaceDesigner Whether the reader supports interface designer.
-	SupportInterfaceDesigner *bool `json:"supportInterfaceDesigner"`
-
-	// SupportInterfaceDirectory Whether the reader supports the interface directory.
-	SupportInterfaceDirectory *bool `json:"supportInterfaceDirectory"`
-
-	// SupportInterfaceLayout Whether the reader supports the interface layout.
-	SupportInterfaceLayout *bool `json:"supportInterfaceLayout"`
-
-	// SupportLocate Whether the reader supports locate.
-	SupportLocate *bool `json:"supportLocate"`
-
-	// SupportManualDownloadSupportFile Whether the reader supports manual download support file.
-	SupportManualDownloadSupportFile *bool `json:"supportManualDownloadSupportFile"`
-
-	// SupportManualFirmwareUpdate Whether the reader supports manual firmware update.
-	SupportManualFirmwareUpdate *bool `json:"supportManualFirmwareUpdate"`
-
-	// SupportMic Whether the reader supports a microphone.
-	SupportMic *bool `json:"supportMic"`
-
-	// SupportPinCodeShuffle Whether the reader supports PIN code shuffle (randomized keypad layout).
-	SupportPinCodeShuffle *bool `json:"supportPinCodeShuffle"`
-
-	// SupportShowHeading Whether the reader supports showing heading and subheading.
-	SupportShowHeading *bool `json:"supportShowHeading"`
-
-	// SupportShowInterfaceImage Whether the reader supports showing interface image.
-	SupportShowInterfaceImage *bool `json:"supportShowInterfaceImage"`
-
-	// SupportShowStatusBar Whether the reader supports showing status bar (Time / Weather).
-	SupportShowStatusBar *bool `json:"supportShowStatusBar"`
-
-	// SupportShowUnlockSchedule Whether the reader supports showing the unlock schedule.
-	SupportShowUnlockSchedule *bool `json:"supportShowUnlockSchedule"`
-
-	// SupportSpeaker Whether the reader supports a speaker.
-	SupportSpeaker *bool `json:"supportSpeaker"`
-
-	// SupportSsh Whether the reader supports SSH.
-	SupportSsh *bool `json:"supportSsh"`
-
-	// SupportStatusLed Whether the reader supports the status LED.
-	SupportStatusLed *bool `json:"supportStatusLed"`
-
-	// SupportStatusSound Whether the reader supports status sound (e.g., buzzer for access granted/denied beeps).
-	SupportStatusSound *bool `json:"supportStatusSound"`
-
-	// SupportStreamEncryption Whether the reader supports stream encryption.
-	SupportStreamEncryption *bool `json:"supportStreamEncryption"`
-
-	// SupportTwilioSip Whether the reader supports Twilio SIP.
-	SupportTwilioSip *bool `json:"supportTwilioSip"`
-
-	// SupportWelcomeLed Whether the reader supports the welcome LED.
-	SupportWelcomeLed *bool `json:"supportWelcomeLed"`
+	CanAdjustBrightness              *bool          `json:"canAdjustBrightness"`
+	Support2fa                       *bool          `json:"support2fa"`
+	SupportAccessMethods             *[]interface{} `json:"supportAccessMethods"`
+	SupportAdjustSpeakerVolume       *bool          `json:"supportAdjustSpeakerVolume"`
+	SupportAudioCodecs               *[]interface{} `json:"supportAudioCodecs"`
+	SupportAutoBrightness            *bool          `json:"supportAutoBrightness"`
+	SupportAutoTurnOffDisplay        *bool          `json:"supportAutoTurnOffDisplay"`
+	SupportCallerManager             *bool          `json:"supportCallerManager"`
+	SupportDoorDirection             *bool          `json:"supportDoorDirection"`
+	SupportDoorbellTriggerMethod     *bool          `json:"supportDoorbellTriggerMethod"`
+	SupportFloodLed                  *bool          `json:"supportFloodLed"`
+	SupportGateStop                  *bool          `json:"supportGateStop"`
+	SupportGifInterfaceImage         *bool          `json:"supportGifInterfaceImage"`
+	SupportGreetings                 *bool          `json:"supportGreetings"`
+	SupportInterfaceDesigner         *bool          `json:"supportInterfaceDesigner"`
+	SupportInterfaceDirectory        *bool          `json:"supportInterfaceDirectory"`
+	SupportInterfaceLayout           *bool          `json:"supportInterfaceLayout"`
+	SupportLocate                    *bool          `json:"supportLocate"`
+	SupportManualDownloadSupportFile *bool          `json:"supportManualDownloadSupportFile"`
+	SupportManualFirmwareUpdate      *bool          `json:"supportManualFirmwareUpdate"`
+	SupportMic                       *bool          `json:"supportMic"`
+	SupportPinCodeShuffle            *bool          `json:"supportPinCodeShuffle"`
+	SupportShowHeading               *bool          `json:"supportShowHeading"`
+	SupportShowInterfaceImage        *bool          `json:"supportShowInterfaceImage"`
+	SupportShowStatusBar             *bool          `json:"supportShowStatusBar"`
+	SupportShowUnlockSchedule        *bool          `json:"supportShowUnlockSchedule"`
+	SupportSpeaker                   *bool          `json:"supportSpeaker"`
+	SupportSsh                       *bool          `json:"supportSsh"`
+	SupportStatusLed                 *bool          `json:"supportStatusLed"`
+	SupportStatusSound               *bool          `json:"supportStatusSound"`
+	SupportStreamEncryption          *bool          `json:"supportStreamEncryption"`
+	SupportTwilioSip                 *bool          `json:"supportTwilioSip"`
+	SupportWelcomeLed                *bool          `json:"supportWelcomeLed"`
 }
 
 // ReceiverGroup defines model for receiverGroup.
 type ReceiverGroup struct {
-	// Viewers The viewer MACs that the receiver group is for
 	Viewers []interface{} `json:"viewers"`
 }
 
 // RecognizeAnythingSettings defines model for recognizeAnythingSettings.
 type RecognizeAnythingSettings struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras"`
-
-	// Enabled Whether or not the recognize anything feature is enabled (default: true)
-	Enabled *bool `json:"enabled"`
+	AllCameras *bool          `json:"allCameras"`
+	Cameras    *[]interface{} `json:"cameras"`
+	Enabled    *bool          `json:"enabled"`
 }
 
 // RecognizeAnythingSettingsUpdate defines model for recognizeAnythingSettingsUpdate.
 type RecognizeAnythingSettingsUpdate struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras,omitempty"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras,omitempty"`
-
-	// Enabled Whether or not the recognize anything feature is enabled (default: true)
-	Enabled *bool `json:"enabled,omitempty"`
+	AllCameras *bool          `json:"allCameras,omitempty"`
+	Cameras    *[]interface{} `json:"cameras,omitempty"`
+	Enabled    *bool          `json:"enabled,omitempty"`
 }
 
 // RecordingPathSettings defines model for recordingPathSettings.
 type RecordingPathSettings struct {
-	// FailoverTimeoutMs How long to wait (in ms) before triggering failover after storage failure is detected. Required when isAutoFailoverEnabled is true.
-	FailoverTimeoutMs *float64 `json:"failoverTimeoutMs"`
-
-	// IsAutoFailoverEnabled Whether to automatically switch to a different console when the current one fails. If false, recording continues on the selected console only.
-	IsAutoFailoverEnabled *bool `json:"isAutoFailoverEnabled"`
-
-	// StorageConsoleIndex Which console to use for recordings: 0=main chassis, 1=first expansion unit, 2=second expansion unit, null=auto-select.
-	StorageConsoleIndex *float64 `json:"storageConsoleIndex"`
+	FailoverTimeoutMs     *float64 `json:"failoverTimeoutMs"`
+	IsAutoFailoverEnabled *bool    `json:"isAutoFailoverEnabled"`
+	StorageConsoleIndex   *float64 `json:"storageConsoleIndex"`
 }
 
 // RecordingTypeDistribution defines model for recordingTypeDistribution.
 type RecordingTypeDistribution struct {
-	// Percentage Missing description
-	Percentage *float64 `json:"percentage"`
-
-	// RecordingType Recording type
+	Percentage    *float64                                `json:"percentage"`
 	RecordingType *RecordingTypeDistributionRecordingType `json:"recordingType"`
-
-	// Size Size in bytes
-	Size *float64 `json:"size"`
+	Size          *float64                                `json:"size"`
 }
 
-// RecordingTypeDistributionRecordingType Recording type
+// RecordingTypeDistributionRecordingType defines model for recordingTypeDistributionRecordingType.
 type RecordingTypeDistributionRecordingType string
 
 // ResolutionDistribution defines model for resolutionDistribution.
 type ResolutionDistribution struct {
-	// Percentage Missing description
-	Percentage *float64 `json:"percentage"`
-
-	// Resolution Resolution
+	Percentage *float64                          `json:"percentage"`
 	Resolution *ResolutionDistributionResolution `json:"resolution"`
-
-	// Size Size in bytes
-	Size *float64 `json:"size"`
+	Size       *float64                          `json:"size"`
 }
 
-// ResolutionDistributionResolution Resolution
+// ResolutionDistributionResolution defines model for resolutionDistributionResolution.
 type ResolutionDistributionResolution string
 
 // ReverificationSettings defines model for reverificationSettings.
 type ReverificationSettings struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras"`
-
-	// Enabled Whether or not the reverification feature is enabled (default: true)
-	Enabled *bool `json:"enabled"`
+	AllCameras *bool          `json:"allCameras"`
+	Cameras    *[]interface{} `json:"cameras"`
+	Enabled    *bool          `json:"enabled"`
 }
 
 // ReverificationSettingsUpdate defines model for reverificationSettingsUpdate.
 type ReverificationSettingsUpdate struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras,omitempty"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras,omitempty"`
-
-	// Enabled Whether or not the reverification feature is enabled (default: true)
-	Enabled *bool `json:"enabled,omitempty"`
+	AllCameras *bool          `json:"allCameras,omitempty"`
+	Cameras    *[]interface{} `json:"cameras,omitempty"`
+	Enabled    *bool          `json:"enabled,omitempty"`
 }
 
 // RingSettings defines model for ringSettings.
 type RingSettings struct {
-	// CameraId Which paired (doorbell-only) camera do these settings refer to.
-	CameraId *string `json:"cameraId"`
-
-	// RepeatTimes How many times should the ringtone be repeated
+	CameraId    *string  `json:"cameraId"`
 	RepeatTimes *float64 `json:"repeatTimes"`
-
-	// RingtoneId The ID of the ringtone that should be played when the (doorbell-only) camera is rung.
-	RingtoneId *string `json:"ringtoneId"`
-
-	// Volume How loud should the ringtone be played. 0 being silent and 100 the loudest.
-	Volume *float64 `json:"volume"`
+	RingtoneId  *string  `json:"ringtoneId"`
+	Volume      *float64 `json:"volume"`
 }
 
 // RingSettingsUpdate defines model for ringSettingsUpdate.
 type RingSettingsUpdate struct {
-	// CameraId Which paired (doorbell-only) camera do these settings refer to.
-	CameraId *string `json:"cameraId,omitempty"`
-
-	// RepeatTimes How many times should the ringtone be repeated
+	CameraId    *string  `json:"cameraId,omitempty"`
 	RepeatTimes *float64 `json:"repeatTimes,omitempty"`
-
-	// RingtoneId The ID of the ringtone that should be played when the (doorbell-only) camera is rung.
-	RingtoneId *string `json:"ringtoneId,omitempty"`
-
-	// Volume How loud should the ringtone be played. 0 being silent and 100 the loudest.
-	Volume *float64 `json:"volume,omitempty"`
+	RingtoneId  *string  `json:"ringtoneId,omitempty"`
+	Volume      *float64 `json:"volume,omitempty"`
 }
 
 // ScheduleRule defines model for scheduleRule.
 type ScheduleRule struct {
-	// Color The color of this schedule item.
-	Color *string `json:"color"`
-
-	// DurationMinutes Duration of minutes (1-10080) when this schedule item applies.
-	DurationMinutes *float64 `json:"durationMinutes"`
-
-	// Id The id of this schedule item.
-	Id *string `json:"id"`
-
-	// Name The name of this schedule item.
-	Name *string `json:"name"`
-
-	// RepeatType The repeating type of schedule item.
-	RepeatType *ScheduleRuleRepeatType `json:"repeatType"`
-
-	// StartDateOfMonth The day of month this schedule item applies.
-	StartDateOfMonth *float64 `json:"startDateOfMonth"`
-
-	// StartDaysOfWeek The weekday this schedule item applies.
-	StartDaysOfWeek *[]interface{} `json:"startDaysOfWeek"`
-
-	// StartHour Start hour of the day (0-24) when this schedule item applies.
-	StartHour *float64 `json:"startHour"`
-
-	// StartMinute Start minute of the hour (0-60) when this schedule item applies.
-	StartMinute *float64 `json:"startMinute"`
+	Color            *string                 `json:"color"`
+	DurationMinutes  *float64                `json:"durationMinutes"`
+	Id               *string                 `json:"id"`
+	Name             *string                 `json:"name"`
+	RepeatType       *ScheduleRuleRepeatType `json:"repeatType"`
+	StartDateOfMonth *float64                `json:"startDateOfMonth"`
+	StartDaysOfWeek  *[]interface{}          `json:"startDaysOfWeek"`
+	StartHour        *float64                `json:"startHour"`
+	StartMinute      *float64                `json:"startMinute"`
 }
 
-// ScheduleRuleRepeatType The repeating type of schedule item.
+// ScheduleRuleRepeatType defines model for scheduleRuleRepeatType.
 type ScheduleRuleRepeatType string
 
 // Sensor defines model for sensor.
 type Sensor struct {
-	AirQuality SensorAirQuality `json:"airQuality"`
-
-	// AirQualitySettings Air quality alert configuration settings.
-	AirQualitySettings AirQualitySettings `json:"airQualitySettings"`
-
-	// AlarmSettings Smoke and carbon monoxide alarm sensor settings.
-	AlarmSettings AlarmSensorSettings `json:"alarmSettings"`
-
-	// AlarmSilencedAt Unix timestamp when the smoke/CO alarm was silenced, nullable.
-	AlarmSilencedAt *float64 `json:"alarmSilencedAt"`
-
-	// AlarmTriggeredAt Unix timestamp when the smoke or carbon monoxide alarm was triggered, nullable.
-	AlarmTriggeredAt *float64 `json:"alarmTriggeredAt"`
-
-	// AnonymousDeviceId Persistent unique device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId"`
-
-	// BatteryStatus [DEPRECATED] Use wirelessConnectionState.batteryStatus instead. Battery status.
-	BatteryStatus *map[string]interface{} `json:"batteryStatus"`
-
-	// BluetoothConnectionState [DEPRECATED] Use wirelessConnectionState.signalState instead. Signal state.
-	BluetoothConnectionState *map[string]interface{} `json:"bluetoothConnectionState"`
-
-	// Bridge [DEPRECATED] Use wirelessConnectionState.bridge instead. Which bridge is connected to the device.
-	Bridge *string `json:"bridge"`
-
-	// BridgeCandidates [DEPRECATED] Use wirelessConnectionState.bridgeCandidates instead. A list of bridge candidates for adoption and reconnection.
-	BridgeCandidates *[]interface{} `json:"bridgeCandidates"`
-
-	// Camera Which camera is configured to be paired to the sensor.
-	Camera *string `json:"camera"`
-
-	// CanAdopt Whether or not the device can be adopted.
-	CanAdopt *bool `json:"canAdopt"`
-
-	// ChosenBridge [DEPRECATED] Use wirelessConnectionSettings.chosenBridge instead. Which bridge is chosen by user to connect to the device.
-	ChosenBridge *map[string]interface{} `json:"chosenBridge"`
-
-	// ConnectedSince Unix timestamp of when the device connected to the NVR.
-	ConnectedSince *float64 `json:"connectedSince"`
-
-	// ConnectionHost The ip or hostname the device uses to connect.
-	ConnectionHost *string `json:"connectionHost"`
-
-	// DisplayName The device display name.
-	DisplayName *string `json:"displayName"`
-
-	// ExternalLeakDetectedAt Unix timestamp when the sensor detected an external water leak, nullable.
-	ExternalLeakDetectedAt *float64 `json:"externalLeakDetectedAt"`
-
-	// FeatureFlags Sensor feature flags.
-	FeatureFlags *map[string]interface{} `json:"featureFlags"`
-
-	// FirmwareBuild The build # of the firmware that is installed.
-	FirmwareBuild *string `json:"firmwareBuild"`
-
-	// FirmwareVersion The version of firmware that is installed on the device.
-	FirmwareVersion *string `json:"firmwareVersion"`
-
-	// FunctionButtonPressedAt [DEPRECATED] Use wirelessConnectionState.functionButtonPressedAt instead. Unix timestamp when the function button was pressed.
-	FunctionButtonPressedAt *float64 `json:"functionButtonPressedAt"`
-
-	// FwUpdateState The device FW update state.
-	FwUpdateState *SensorFwUpdateState `json:"fwUpdateState"`
-
-	// GlassBreakSettings Glass break sensor settings.
-	GlassBreakSettings GlassBreakSensorSettings `json:"glassBreakSettings"`
-
-	// GlobalAlarmManagerScopeNames The global alarm manager scope names for the device.
-	GlobalAlarmManagerScopeNames *[]interface{} `json:"globalAlarmManagerScopeNames"`
-
-	// Guid Unique id of the device
-	Guid *string `json:"guid"`
-
-	// HardwareRevision Hardware revision of the device
-	HardwareRevision *string `json:"hardwareRevision"`
-
-	// Host The primary IP address of the device.
-	Host *string `json:"host"`
-
-	// HumiditySettings Relative humidity sensor settings.
-	HumiditySettings HumiditySensorSettings `json:"humiditySettings"`
-	Id               string                 `json:"id"`
-
-	// IsAdopted Whether or not the device is adopted.
-	IsAdopted *bool `json:"isAdopted"`
-
-	// IsAdoptedByOther Whether or not the device is adopted by the other controller.
-	IsAdoptedByOther *bool `json:"isAdoptedByOther"`
-
-	// IsAdopting Whether or not the device is currently being adopted.
-	IsAdopting *bool `json:"isAdopting"`
-
-	// IsAttemptingToConnect Whether the device is attempting to connect to the controller
-	IsAttemptingToConnect *bool `json:"isAttemptingToConnect"`
-
-	// IsBlockedByArmMode Whether the device is blocked by arm mode
-	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
-
-	// IsConnected Whether the device IPC is connected?
-	IsConnected *bool `json:"isConnected"`
-
-	// IsDownloadingFW Whether the device is currently downloading a FW for an upgrade
-	IsDownloadingFW *bool `json:"isDownloadingFW"`
-
-	// IsMotionDetected Whether sensor is currently detecting the motion.
-	IsMotionDetected *bool `json:"isMotionDetected"`
-
-	// IsOpened Whether the door/window/garage is opened.
-	IsOpened *bool `json:"isOpened"`
-
-	// IsProvisioned Whether or not the device is provisioned.
-	IsProvisioned *bool `json:"isProvisioned"`
-
-	// IsRebooting Whether the device is currently rebooting
-	IsRebooting *bool `json:"isRebooting"`
-
-	// IsRestoring Whether or not the device is currently being restored.
-	IsRestoring *bool `json:"isRestoring"`
-
-	// IsReverting Whether the device is currently reverting to a previous firmware version
-	IsReverting *bool `json:"isReverting"`
-
-	// IsSshEnabled Whether or not SSH is enabled
-	IsSshEnabled *bool `json:"isSshEnabled"`
-
-	// IsUpdating Whether the device is currently updating
-	IsUpdating *bool `json:"isUpdating"`
-
-	// LastDisconnect Unix timestamp of the last time the device disconnected.
-	LastDisconnect *float64 `json:"lastDisconnect"`
-
-	// LastSeen Unix timestamp of when the device was last connected.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// LatestFirmwareSizeBytes The latest firmware size of the device in bytes.
-	LatestFirmwareSizeBytes *float64 `json:"latestFirmwareSizeBytes"`
-
-	// LatestFirmwareVersion The latest firmware version of the device.
-	LatestFirmwareVersion *string `json:"latestFirmwareVersion"`
-
-	// LeakDetectedAt Unix timestamp when the sensor detected a water leak, nullable.
-	LeakDetectedAt *float64 `json:"leakDetectedAt"`
-
-	// LeakSettings Leak sensor settings.
-	LeakSettings LeakSensorSettings `json:"leakSettings"`
-
-	// LedSettings Status LED settings.
-	LedSettings SensorLedSettings `json:"ledSettings"`
-
-	// LightSettings Ambient light sensor settings.
-	LightSettings LightSensorSettings `json:"lightSettings"`
-
-	// Mac The primary MAC address of the device.
-	Mac string `json:"mac"`
-
-	// MarketName The marketing name for the sensor.
-	MarketName *string `json:"marketName"`
-
-	// MinFirmwareVersion The minimum firmware version supported for this device with the current Protect version.
-	MinFirmwareVersion *string `json:"minFirmwareVersion"`
-	ModelKey           string  `json:"modelKey"`
-
-	// MotionDetectedAt Unix timestamp when the last motion was detected.
-	MotionDetectedAt *float64 `json:"motionDetectedAt"`
-
-	// MotionSettings Motion sensor settings.
-	MotionSettings MotionSensorSettings `json:"motionSettings"`
-
-	// MountType Mounting type of the sensor.
-	MountType *SensorMountType `json:"mountType"`
-
-	// Name The name of the device.
-	Name *string `json:"name"`
-
-	// NvrMac The MAC address of the NVR managed this device.
-	NvrMac *string `json:"nvrMac"`
-
-	// OpenStatusChangedAt Unix timestamp when the door/window/garage was last opened or closed, nullable.
-	OpenStatusChangedAt *float64 `json:"openStatusChangedAt"`
-
-	// Platform The sensor platform.
-	Platform *string `json:"platform"`
-
-	// PreviousFirmwareUrl The FUS download URL for the previous firmware version.
-	PreviousFirmwareUrl *string `json:"previousFirmwareUrl"`
-
-	// PreviousFirmwareVersion The previously installed firmware version before the last update.
-	PreviousFirmwareVersion *string `json:"previousFirmwareVersion"`
-
-	// ReleaseNotePath The release note path for constructing firmware release note URLs.
-	ReleaseNotePath *string           `json:"releaseNotePath"`
-	SmokeStatus     SensorSmokeStatus `json:"smokeStatus"`
-
-	// State Connection state of the device.
-	State *SensorState `json:"state"`
-
-	// Stats Sensor statistics.
-	Stats SensorStats `json:"stats"`
-
-	// SupportFileCreatedAt The support file created at for the device.
-	SupportFileCreatedAt *float64 `json:"supportFileCreatedAt"`
-
-	// SupportFileName The support file name for the device.
-	SupportFileName *string `json:"supportFileName"`
-
-	// SupportFileState The support file state for the device.
-	SupportFileState *SensorSupportFileState `json:"supportFileState"`
-
-	// Sysid The device sysid. (hex string)
-	Sysid *string `json:"sysid"`
-
-	// TamperingDetectedAt Unix timestamp when the sensor detected tampering, nullable.
-	TamperingDetectedAt *float64 `json:"tamperingDetectedAt"`
-
-	// TemperatureSettings Temperature sensor settings.
-	TemperatureSettings TemperatureSensorSettings `json:"temperatureSettings"`
-
-	// TroubleSilencedAt Unix timestamp when the trouble alerts were silenced, nullable.
-	TroubleSilencedAt *float64 `json:"troubleSilencedAt"`
-
-	// Type The device model name.
-	Type *string `json:"type"`
-
-	// UpSince Unix timestamp of when the device started up.
-	UpSince *float64 `json:"upSince"`
-
-	// UpdateInterval [DEPRECATED] Use wirelessConnectionSettings.updateInterval instead. Device periodic property update interval (seconds).
-	UpdateInterval *float64 `json:"updateInterval"`
-
-	// UplinkDevice Which uplink device currently connected to.
-	UplinkDevice *map[string]interface{} `json:"uplinkDevice"`
-
-	// Uptime device uptime in second.
-	Uptime               *float64             `json:"uptime"`
-	WifiConnectionState  WifiConnectionState  `json:"wifiConnectionState"`
-	WiredConnectionState WiredConnectionState `json:"wiredConnectionState"`
-
-	// WirelessConnectionSettings Wireless connection settings.
-	WirelessConnectionSettings WirelessConnectionSettings `json:"wirelessConnectionSettings"`
-
-	// WirelessConnectionState Wireless connection state.
-	WirelessConnectionState WirelessConnectionState `json:"wirelessConnectionState"`
+	AirQuality                   SensorAirQuality           `json:"airQuality"`
+	AirQualitySettings           AirQualitySettings         `json:"airQualitySettings"`
+	AlarmSettings                AlarmSensorSettings        `json:"alarmSettings"`
+	AlarmSilencedAt              *float64                   `json:"alarmSilencedAt"`
+	AlarmTriggeredAt             *float64                   `json:"alarmTriggeredAt"`
+	AnonymousDeviceId            *string                    `json:"anonymousDeviceId"`
+	BatteryStatus                *map[string]interface{}    `json:"batteryStatus"`
+	BluetoothConnectionState     *map[string]interface{}    `json:"bluetoothConnectionState"`
+	Bridge                       *string                    `json:"bridge"`
+	BridgeCandidates             *[]interface{}             `json:"bridgeCandidates"`
+	Camera                       *string                    `json:"camera"`
+	CanAdopt                     *bool                      `json:"canAdopt"`
+	ChosenBridge                 *map[string]interface{}    `json:"chosenBridge"`
+	ConnectedSince               *float64                   `json:"connectedSince"`
+	ConnectionHost               *string                    `json:"connectionHost"`
+	DisplayName                  *string                    `json:"displayName"`
+	ExternalLeakDetectedAt       *float64                   `json:"externalLeakDetectedAt"`
+	FeatureFlags                 *map[string]interface{}    `json:"featureFlags"`
+	FirmwareBuild                *string                    `json:"firmwareBuild"`
+	FirmwareVersion              *string                    `json:"firmwareVersion"`
+	FunctionButtonPressedAt      *float64                   `json:"functionButtonPressedAt"`
+	FwUpdateState                *SensorFwUpdateState       `json:"fwUpdateState"`
+	GlassBreakSettings           GlassBreakSensorSettings   `json:"glassBreakSettings"`
+	GlobalAlarmManagerScopeNames *[]interface{}             `json:"globalAlarmManagerScopeNames"`
+	Guid                         *string                    `json:"guid"`
+	HardwareRevision             *string                    `json:"hardwareRevision"`
+	Host                         *string                    `json:"host"`
+	HumiditySettings             HumiditySensorSettings     `json:"humiditySettings"`
+	Id                           string                     `json:"id"`
+	IsAdopted                    *bool                      `json:"isAdopted"`
+	IsAdoptedByOther             *bool                      `json:"isAdoptedByOther"`
+	IsAdopting                   *bool                      `json:"isAdopting"`
+	IsAttemptingToConnect        *bool                      `json:"isAttemptingToConnect"`
+	IsBlockedByArmMode           bool                       `json:"isBlockedByArmMode"`
+	IsConnected                  *bool                      `json:"isConnected"`
+	IsDownloadingFW              *bool                      `json:"isDownloadingFW"`
+	IsMotionDetected             *bool                      `json:"isMotionDetected"`
+	IsOpened                     *bool                      `json:"isOpened"`
+	IsProvisioned                *bool                      `json:"isProvisioned"`
+	IsRebooting                  *bool                      `json:"isRebooting"`
+	IsRestoring                  *bool                      `json:"isRestoring"`
+	IsReverting                  *bool                      `json:"isReverting"`
+	IsSshEnabled                 *bool                      `json:"isSshEnabled"`
+	IsUpdating                   *bool                      `json:"isUpdating"`
+	LastDisconnect               *float64                   `json:"lastDisconnect"`
+	LastSeen                     *float64                   `json:"lastSeen"`
+	LatestFirmwareSizeBytes      *float64                   `json:"latestFirmwareSizeBytes"`
+	LatestFirmwareVersion        *string                    `json:"latestFirmwareVersion"`
+	LeakDetectedAt               *float64                   `json:"leakDetectedAt"`
+	LeakSettings                 LeakSensorSettings         `json:"leakSettings"`
+	LedSettings                  SensorLedSettings          `json:"ledSettings"`
+	LightSettings                LightSensorSettings        `json:"lightSettings"`
+	Mac                          string                     `json:"mac"`
+	MarketName                   *string                    `json:"marketName"`
+	MinFirmwareVersion           *string                    `json:"minFirmwareVersion"`
+	ModelKey                     string                     `json:"modelKey"`
+	MotionDetectedAt             *float64                   `json:"motionDetectedAt"`
+	MotionSettings               MotionSensorSettings       `json:"motionSettings"`
+	MountType                    *SensorMountType           `json:"mountType"`
+	Name                         *string                    `json:"name"`
+	NvrMac                       *string                    `json:"nvrMac"`
+	OpenStatusChangedAt          *float64                   `json:"openStatusChangedAt"`
+	Platform                     *string                    `json:"platform"`
+	PreviousFirmwareUrl          *string                    `json:"previousFirmwareUrl"`
+	PreviousFirmwareVersion      *string                    `json:"previousFirmwareVersion"`
+	ReleaseNotePath              *string                    `json:"releaseNotePath"`
+	SmokeStatus                  SensorSmokeStatus          `json:"smokeStatus"`
+	State                        *SensorState               `json:"state"`
+	Stats                        SensorStats                `json:"stats"`
+	SupportFileCreatedAt         *float64                   `json:"supportFileCreatedAt"`
+	SupportFileName              *string                    `json:"supportFileName"`
+	SupportFileState             *SensorSupportFileState    `json:"supportFileState"`
+	Sysid                        *string                    `json:"sysid"`
+	TamperingDetectedAt          *float64                   `json:"tamperingDetectedAt"`
+	TemperatureSettings          TemperatureSensorSettings  `json:"temperatureSettings"`
+	TroubleSilencedAt            *float64                   `json:"troubleSilencedAt"`
+	Type                         *string                    `json:"type"`
+	UpSince                      *float64                   `json:"upSince"`
+	UpdateInterval               *float64                   `json:"updateInterval"`
+	UplinkDevice                 *map[string]interface{}    `json:"uplinkDevice"`
+	Uptime                       *float64                   `json:"uptime"`
+	WifiConnectionState          WifiConnectionState        `json:"wifiConnectionState"`
+	WiredConnectionState         WiredConnectionState       `json:"wiredConnectionState"`
+	WirelessConnectionSettings   WirelessConnectionSettings `json:"wirelessConnectionSettings"`
+	WirelessConnectionState      WirelessConnectionState    `json:"wirelessConnectionState"`
 }
 
 // SensorAirQuality defines model for sensorAirQuality.
@@ -7379,1395 +4886,689 @@ type SensorAirQuality struct {
 
 // SensorBatteryStatus defines model for sensorBatteryStatus.
 type SensorBatteryStatus struct {
-	// IsLow Low battery charge level flag.
-	IsLow *bool `json:"isLow"`
-
-	// Percentage Battery charge level from 0 to 100 (%).
+	IsLow      *bool    `json:"isLow"`
 	Percentage *float64 `json:"percentage"`
 }
 
-// SensorFwUpdateState The device FW update state.
+// SensorFwUpdateState defines model for sensorFwUpdateState.
 type SensorFwUpdateState string
 
 // SensorLedSettings defines model for sensorLedSettings.
 type SensorLedSettings struct {
-	// ActivityFeedback Enable LED activity feedback (on motion, entry, etc)
 	ActivityFeedback *bool `json:"activityFeedback"`
-
-	// IsEnabled Enable status LED.
-	IsEnabled *bool `json:"isEnabled"`
+	IsEnabled        *bool `json:"isEnabled"`
 }
 
-// SensorMountType Mounting type of the sensor.
+// SensorMountType defines model for sensorMountType.
 type SensorMountType string
 
 // SensorSmokeStatus defines model for sensorSmokeStatus.
 type SensorSmokeStatus struct {
-	// AlarmSilenced Alarm has been silenced.
-	AlarmSilenced *bool `json:"alarmSilenced"`
-
-	// BatteryLow Battery level is low.
-	BatteryLow *bool `json:"batteryLow"`
-
-	// BatteryVoltage Battery voltage in millivolts.
-	BatteryVoltage *float64 `json:"batteryVoltage"`
-
-	// CleanSmokeSensor Smoke sensor needs cleaning.
-	CleanSmokeSensor *bool `json:"cleanSmokeSensor"`
-
-	// CoAlarm Carbon monoxide alarm is active.
-	CoAlarm *bool `json:"coAlarm"`
-
-	// CoSensorFault Carbon monoxide sensor fault detected.
-	CoSensorFault *bool `json:"coSensorFault"`
-
-	// CoValue Current carbon monoxide sensor value.
-	CoValue *float64 `json:"coValue"`
-
-	// Enabled Smoke detector is enabled.
-	Enabled *bool `json:"enabled"`
-
-	// EndOfLife Sensor has reached end of life.
-	EndOfLife *bool `json:"endOfLife"`
-
-	// Ready Smoke detector is ready.
-	Ready *bool `json:"ready"`
-
-	// SmokeAlarm Smoke alarm is active.
-	SmokeAlarm *bool `json:"smokeAlarm"`
-
-	// SmokeSensorFault Smoke sensor fault detected.
-	SmokeSensorFault *bool `json:"smokeSensorFault"`
-
-	// SmokeValue Current smoke sensor value.
-	SmokeValue *float64 `json:"smokeValue"`
-
-	// Testing Smoke detector is in test mode.
-	Testing *bool `json:"testing"`
-
-	// TroubleHushed Trouble alerts have been hushed.
-	TroubleHushed *bool `json:"troubleHushed"`
-
-	// WasMounted Whether smoke detector was ever mounted (ready and enabled).
-	WasMounted *bool `json:"wasMounted"`
+	AlarmSilenced    *bool    `json:"alarmSilenced"`
+	BatteryLow       *bool    `json:"batteryLow"`
+	BatteryVoltage   *float64 `json:"batteryVoltage"`
+	CleanSmokeSensor *bool    `json:"cleanSmokeSensor"`
+	CoAlarm          *bool    `json:"coAlarm"`
+	CoSensorFault    *bool    `json:"coSensorFault"`
+	CoValue          *float64 `json:"coValue"`
+	Enabled          *bool    `json:"enabled"`
+	EndOfLife        *bool    `json:"endOfLife"`
+	Ready            *bool    `json:"ready"`
+	SmokeAlarm       *bool    `json:"smokeAlarm"`
+	SmokeSensorFault *bool    `json:"smokeSensorFault"`
+	SmokeValue       *float64 `json:"smokeValue"`
+	Testing          *bool    `json:"testing"`
+	TroubleHushed    *bool    `json:"troubleHushed"`
+	WasMounted       *bool    `json:"wasMounted"`
 }
 
-// SensorState Connection state of the device.
+// SensorState defines model for sensorState.
 type SensorState string
 
 // SensorStats defines model for sensorStats.
 type SensorStats struct {
-	// Humidity Relative humidity value (%).
-	Humidity HumiditySensor `json:"humidity"`
-
-	// Light Ambient light value (Lux).
-	Light LightSensor `json:"light"`
-
-	// Temperature Temperature value (Celsius).
+	Humidity    HumiditySensor    `json:"humidity"`
+	Light       LightSensor       `json:"light"`
 	Temperature TemperatureSensor `json:"temperature"`
 }
 
-// SensorSupportFileState The support file state for the device.
+// SensorSupportFileState defines model for sensorSupportFileState.
 type SensorSupportFileState string
 
 // Shortcut defines model for shortcut.
 type Shortcut struct {
-	// Id Unique ientifier for the shortcut
-	Id string `json:"id"`
-
-	// Placement The placement of the shortcut on the frontend camera UI.
-	Placement Point `json:"placement"`
-
-	// Shortcut A specific type of shortcut.
-	Shortcut TypedShortcut `json:"shortcut"`
+	Id        string        `json:"id"`
+	Placement Point         `json:"placement"`
+	Shortcut  TypedShortcut `json:"shortcut"`
 }
 
 // SmartDetectAgreement defines model for smartDetectAgreement.
 type SmartDetectAgreement struct {
-	// LastUpdateAt Unix timestamp of when the status was last updated.
-	LastUpdateAt *float64 `json:"lastUpdateAt"`
-
-	// Status User agreement status.
-	Status *SmartDetectAgreementStatus `json:"status"`
+	LastUpdateAt *float64                    `json:"lastUpdateAt"`
+	Status       *SmartDetectAgreementStatus `json:"status"`
 }
 
-// SmartDetectAgreementStatus User agreement status.
+// SmartDetectAgreementStatus defines model for smartDetectAgreementStatus.
 type SmartDetectAgreementStatus string
 
 // SmartDetectAgreementUpdate defines model for smartDetectAgreementUpdate.
 type SmartDetectAgreementUpdate struct {
-	// Status User agreement status.
 	Status *SmartDetectAgreementUpdateStatus `json:"status,omitempty"`
 }
 
-// SmartDetectAgreementUpdateStatus User agreement status.
+// SmartDetectAgreementUpdateStatus defines model for smartDetectAgreementUpdateStatus.
 type SmartDetectAgreementUpdateStatus string
 
 // SmartDetectLine defines model for smartDetectLine.
 type SmartDetectLine struct {
-	// Color Color of the zone.
-	Color *string `json:"color"`
-
-	// Direction Line counting direction
-	Direction *SmartDetectLineDirection `json:"direction"`
-
-	// Id ID of the zone. (start from 1)
-	Id *float64 `json:"id"`
-
-	// IsTargetCounting Whether target counting
-	IsTargetCounting *bool `json:"isTargetCounting"`
-
-	// IsTriggerLightEnabled Whether the G5 IR extender is enabled.
-	IsTriggerLightEnabled *bool `json:"isTriggerLightEnabled"`
-
-	// Name Name of the zone.
-	Name *string `json:"name"`
-
-	// ObjectTypes A list of object types to detect.
-	ObjectTypes *[]interface{}      `json:"objectTypes"`
-	Plan        SmartDetectLinePlan `json:"plan"`
-
-	// Points An array of arrays of [x, y]
-	Points *[]interface{} `json:"points"`
-
-	// Sensitivity Smart detection sensitivity (0-100).
-	Sensitivity *float64 `json:"sensitivity"`
+	Color                 *string                   `json:"color"`
+	Direction             *SmartDetectLineDirection `json:"direction"`
+	Id                    *float64                  `json:"id"`
+	IsTargetCounting      *bool                     `json:"isTargetCounting"`
+	IsTriggerLightEnabled *bool                     `json:"isTriggerLightEnabled"`
+	Name                  *string                   `json:"name"`
+	ObjectTypes           *[]interface{}            `json:"objectTypes"`
+	Plan                  SmartDetectLinePlan       `json:"plan"`
+	Points                *[]interface{}            `json:"points"`
+	Sensitivity           *float64                  `json:"sensitivity"`
 }
 
-// SmartDetectLineDirection Line counting direction
+// SmartDetectLineDirection defines model for smartDetectLineDirection.
 type SmartDetectLineDirection string
 
 // SmartDetectLinePlan defines model for smartDetectLinePlan.
 type SmartDetectLinePlan struct {
-	// AutoReset how long will line count be reset
 	AutoReset *SmartDetectLinePlanAutoReset `json:"autoReset"`
-
-	// Date date for monthly reset
-	Date *float64 `json:"date"`
-
-	// Time milliseconds for daily and weekly reset
-	Time *float64 `json:"time"`
-
-	// WeekDay day for weekly reset
-	WeekDay *SmartDetectLinePlanWeekDay `json:"weekDay"`
+	Date      *float64                      `json:"date"`
+	Time      *float64                      `json:"time"`
+	WeekDay   *SmartDetectLinePlanWeekDay   `json:"weekDay"`
 }
 
-// SmartDetectLinePlanAutoReset how long will line count be reset
+// SmartDetectLinePlanAutoReset defines model for smartDetectLinePlanAutoReset.
 type SmartDetectLinePlanAutoReset string
 
-// SmartDetectLinePlanWeekDay day for weekly reset
+// SmartDetectLinePlanWeekDay defines model for smartDetectLinePlanWeekDay.
 type SmartDetectLinePlanWeekDay string
 
 // SmartDetectLoiterZone defines model for smartDetectLoiterZone.
 type SmartDetectLoiterZone struct {
-	// Color Color of the zone.
-	Color *string `json:"color"`
-
-	// Id ID of the zone. (start from 1)
-	Id *float64 `json:"id"`
-
-	// IsTriggerLightEnabled Whether the G5 IR extender is enabled.
-	IsTriggerLightEnabled *bool `json:"isTriggerLightEnabled"`
-
-	// LoiterTriggers Triggers
-	LoiterTriggers *[]SmartDetectLoiterZoneTrigger `json:"loiterTriggers"`
-
-	// MergeId For merging zones in FE
-	MergeId *string `json:"mergeId"`
-
-	// Name Name of the zone.
-	Name *string `json:"name"`
-
-	// Points An array of arrays of [x, y]
-	Points *[]interface{} `json:"points"`
-
-	// Sensitivity Smart detection sensitivity (0-100).
-	Sensitivity *float64 `json:"sensitivity"`
-
-	// TriggerAccessTypes A list of object types to unlock door.
-	TriggerAccessTypes *[]interface{} `json:"triggerAccessTypes"`
+	Color                 *string                         `json:"color"`
+	Id                    *float64                        `json:"id"`
+	IsTriggerLightEnabled *bool                           `json:"isTriggerLightEnabled"`
+	LoiterTriggers        *[]SmartDetectLoiterZoneTrigger `json:"loiterTriggers"`
+	MergeId               *string                         `json:"mergeId"`
+	Name                  *string                         `json:"name"`
+	Points                *[]interface{}                  `json:"points"`
+	Sensitivity           *float64                        `json:"sensitivity"`
+	TriggerAccessTypes    *[]interface{}                  `json:"triggerAccessTypes"`
 }
 
 // SmartDetectLoiterZoneTrigger defines model for smartDetectLoiterZoneTrigger.
 type SmartDetectLoiterZoneTrigger struct {
-	// LoiterTriggerTime How long does the loitering detection trigger.
-	LoiterTriggerTime *float64 `json:"loiterTriggerTime"`
-
-	// ObjectType object type to trigger
-	ObjectType *SmartDetectLoiterZoneTriggerObjectType `json:"objectType"`
+	LoiterTriggerTime *float64                                `json:"loiterTriggerTime"`
+	ObjectType        *SmartDetectLoiterZoneTriggerObjectType `json:"objectType"`
 }
 
-// SmartDetectLoiterZoneTriggerObjectType object type to trigger
+// SmartDetectLoiterZoneTriggerObjectType defines model for smartDetectLoiterZoneTriggerObjectType.
 type SmartDetectLoiterZoneTriggerObjectType string
 
 // SmartDetectSettings defines model for smartDetectSettings.
 type SmartDetectSettings struct {
-	// AudioTypes What audio types do the cameras needs to detect
-	AudioTypes *[]interface{} `json:"audioTypes"`
-
-	// AutoTrackingObjectTypes What object types do the camera needs to track.
+	AudioTypes              *[]interface{} `json:"audioTypes"`
 	AutoTrackingObjectTypes *[]interface{} `json:"autoTrackingObjectTypes"`
-
-	// AutoTrackingTimeoutSec How many seconds to track a single object
-	AutoTrackingTimeoutSec *float64 `json:"autoTrackingTimeoutSec"`
-
-	// AutoTrackingWithZoom Auto tracking with zoom or not
-	AutoTrackingWithZoom *bool `json:"autoTrackingWithZoom"`
-
-	// DetectionRange Detection range for enhancer
-	DetectionRange DetectionRange `json:"detectionRange"`
-
-	// EnableTamperDetection Enable tamper detection
-	EnableTamperDetection *bool `json:"enableTamperDetection"`
-
-	// ObjectTypes What object types do the camera needs to detect.
-	ObjectTypes *[]interface{} `json:"objectTypes"`
+	AutoTrackingTimeoutSec  *float64       `json:"autoTrackingTimeoutSec"`
+	AutoTrackingWithZoom    *bool          `json:"autoTrackingWithZoom"`
+	DetectionRange          DetectionRange `json:"detectionRange"`
+	EnableTamperDetection   *bool          `json:"enableTamperDetection"`
+	ObjectTypes             *[]interface{} `json:"objectTypes"`
 }
 
 // SmartDetectZone defines model for smartDetectZone.
 type SmartDetectZone struct {
-	// Color Color of the zone.
-	Color *string `json:"color"`
-
-	// EnableAccessLPOnlyMode Whether trigger LPR unlock without vehicle detection
-	EnableAccessLPOnlyMode *bool `json:"enableAccessLPOnlyMode"`
-
-	// Id ID of the zone. (start from 1)
-	Id *float64 `json:"id"`
-
-	// IsTriggerLightEnabled Whether the G5 IR extender is enabled.
-	IsTriggerLightEnabled *bool `json:"isTriggerLightEnabled"`
-
-	// MergeId For merging zones in FE
-	MergeId *string `json:"mergeId"`
-
-	// Name Name of the zone.
-	Name *string `json:"name"`
-
-	// ObjectTypes A list of object types to detect.
-	ObjectTypes *[]interface{} `json:"objectTypes"`
-
-	// Points An array of arrays of [x, y]
-	Points *[]interface{} `json:"points"`
-
-	// Sensitivity Smart detection sensitivity (0-100).
-	Sensitivity *float64 `json:"sensitivity"`
-
-	// Source Origin of zone creator
-	Source *string `json:"source"`
-
-	// TriggerAccessTypes A list of object types to unlock door.
-	TriggerAccessTypes *[]interface{} `json:"triggerAccessTypes"`
+	Color                  *string        `json:"color"`
+	EnableAccessLPOnlyMode *bool          `json:"enableAccessLPOnlyMode"`
+	Id                     *float64       `json:"id"`
+	IsTriggerLightEnabled  *bool          `json:"isTriggerLightEnabled"`
+	MergeId                *string        `json:"mergeId"`
+	Name                   *string        `json:"name"`
+	ObjectTypes            *[]interface{} `json:"objectTypes"`
+	Points                 *[]interface{} `json:"points"`
+	Sensitivity            *float64       `json:"sensitivity"`
+	Source                 *string        `json:"source"`
+	TriggerAccessTypes     *[]interface{} `json:"triggerAccessTypes"`
 }
 
 // SmartDetection defines model for smartDetection.
 type SmartDetection struct {
-	// Enable Whether smart detection is enabled.
-	Enable *bool `json:"enable"`
-
-	// FaceRecognition Whether face recognition is enabled.
-	FaceRecognition *bool `json:"faceRecognition"`
-
-	// LicensePlateRecognition Whether license plate recognition is enabled.
-	LicensePlateRecognition *bool `json:"licensePlateRecognition"`
-
-	// Precision Deprecated. Always auto.
-	Precision *SmartDetectionPrecision `json:"precision"`
+	Enable                  *bool                    `json:"enable"`
+	FaceRecognition         *bool                    `json:"faceRecognition"`
+	LicensePlateRecognition *bool                    `json:"licensePlateRecognition"`
+	Precision               *SmartDetectionPrecision `json:"precision"`
 }
 
-// SmartDetectionPrecision Deprecated. Always auto.
+// SmartDetectionPrecision defines model for smartDetectionPrecision.
 type SmartDetectionPrecision string
 
 // SmartDetectionUpdate defines model for smartDetectionUpdate.
 type SmartDetectionUpdate struct {
-	// Enable Whether smart detection is enabled.
-	Enable *bool `json:"enable,omitempty"`
-
-	// FaceRecognition Whether face recognition is enabled.
-	FaceRecognition *bool `json:"faceRecognition,omitempty"`
-
-	// LicensePlateRecognition Whether license plate recognition is enabled.
+	Enable                  *bool `json:"enable,omitempty"`
+	FaceRecognition         *bool `json:"faceRecognition,omitempty"`
 	LicensePlateRecognition *bool `json:"licensePlateRecognition,omitempty"`
 }
 
 // Speaker defines model for speaker.
 type Speaker struct {
-	// AnonymousDeviceId Persistent unique device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId"`
-
-	// AudioList A list of audios assigned to speaker
-	AudioList []interface{} `json:"audioList"`
-
-	// CanAdopt Whether or not the device can be adopted.
-	CanAdopt *bool `json:"canAdopt"`
-
-	// ConnectedSince Unix timestamp of when the device connected to the NVR.
-	ConnectedSince *float64 `json:"connectedSince"`
-
-	// ConnectionHost The ip or hostname the device uses to connect.
-	ConnectionHost *string `json:"connectionHost"`
-
-	// DisplayName The device display name.
-	DisplayName *string `json:"displayName"`
-
-	// FeatureFlags Feature flags of the speaker
-	FeatureFlags SpeakerFeatureFlags `json:"featureFlags"`
-
-	// FirmwareBuild The build # of the firmware that is installed.
-	FirmwareBuild *string `json:"firmwareBuild"`
-
-	// FirmwareVersion The version of firmware that is installed on the device.
-	FirmwareVersion *string `json:"firmwareVersion"`
-
-	// FwUpdateState The device FW update state.
-	FwUpdateState *SpeakerFwUpdateState `json:"fwUpdateState"`
-
-	// GlobalAlarmManagerScopeNames The global alarm manager scope names for the device.
-	GlobalAlarmManagerScopeNames *[]interface{} `json:"globalAlarmManagerScopeNames"`
-
-	// Guid Unique id of the device
-	Guid *string `json:"guid"`
-
-	// HardwareRevision Hardware revision of the device
-	HardwareRevision *string `json:"hardwareRevision"`
-
-	// HasSpeaker Speaker always has speaker.
-	HasSpeaker *bool `json:"hasSpeaker"`
-
-	// Host The primary IP address of the device.
-	Host *string `json:"host"`
-	Id   string  `json:"id"`
-
-	// IsAdopted Whether or not the device is adopted.
-	IsAdopted *bool `json:"isAdopted"`
-
-	// IsAdoptedByOther Whether or not the device is adopted by the other controller.
-	IsAdoptedByOther *bool `json:"isAdoptedByOther"`
-
-	// IsAdopting Whether or not the device is currently being adopted.
-	IsAdopting *bool `json:"isAdopting"`
-
-	// IsAttemptingToConnect Whether the device is attempting to connect to the controller
-	IsAttemptingToConnect *bool `json:"isAttemptingToConnect"`
-
-	// IsBlockedByArmMode Whether the device is blocked by arm mode
-	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
-
-	// IsDownloadingFW Whether the device is currently downloading a FW for an upgrade
-	IsDownloadingFW *bool `json:"isDownloadingFW"`
-
-	// IsMicEnabled Whether or not the microphone on the speaker is enabled.
-	IsMicEnabled *bool `json:"isMicEnabled"`
-
-	// IsProvisioned Whether or not the device is provisioned.
-	IsProvisioned *bool `json:"isProvisioned"`
-
-	// IsRebooting Whether the device is currently rebooting
-	IsRebooting *bool `json:"isRebooting"`
-
-	// IsRestoring Whether or not the device is currently being restored.
-	IsRestoring *bool `json:"isRestoring"`
-
-	// IsReverting Whether the device is currently reverting to a previous firmware version
-	IsReverting *bool `json:"isReverting"`
-
-	// IsSshEnabled Whether or not SSH is enabled
-	IsSshEnabled *bool `json:"isSshEnabled"`
-
-	// IsUpdating Whether the device is currently updating
-	IsUpdating *bool `json:"isUpdating"`
-
-	// LastDisconnect Unix timestamp of the last time the device disconnected.
-	LastDisconnect *float64 `json:"lastDisconnect"`
-
-	// LastSeen Unix timestamp of when the device was last connected.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// LatestFirmwareSizeBytes The latest firmware size of the device in bytes.
-	LatestFirmwareSizeBytes *float64 `json:"latestFirmwareSizeBytes"`
-
-	// LatestFirmwareVersion The latest firmware version of the device.
-	LatestFirmwareVersion *string `json:"latestFirmwareVersion"`
-
-	// Mac The primary MAC address of the device.
-	Mac string `json:"mac"`
-
-	// MarketName The device marketing name.
-	MarketName *string `json:"marketName"`
-
-	// MicVolume Mic volume: a number from 0-100.
-	MicVolume *float64 `json:"micVolume"`
-
-	// MinFirmwareVersion The minimum firmware version supported for this device with the current Protect version.
-	MinFirmwareVersion *string `json:"minFirmwareVersion"`
-	ModelKey           string  `json:"modelKey"`
-
-	// Name The name of the device.
-	Name *string `json:"name"`
-
-	// NvrMac The MAC address of the NVR managed this device.
-	NvrMac *string `json:"nvrMac"`
-
-	// PairedCameras paired cameras
-	PairedCameras *[]interface{}    `json:"pairedCameras"`
-	PowerSupply   DevicePowerSupply `json:"powerSupply"`
-
-	// PreviousFirmwareUrl The FUS download URL for the previous firmware version.
-	PreviousFirmwareUrl *string `json:"previousFirmwareUrl"`
-
-	// PreviousFirmwareVersion The previously installed firmware version before the last update.
-	PreviousFirmwareVersion *string `json:"previousFirmwareVersion"`
-
-	// ReleaseNotePath The release note path for constructing firmware release note URLs.
-	ReleaseNotePath *string      `json:"releaseNotePath"`
-	SpeakerState    SpeakerState `json:"speakerState"`
-
-	// State Connection state of the device.
-	State *SpeakerState2 `json:"state"`
-
-	// SupportFileCreatedAt The support file created at for the device.
-	SupportFileCreatedAt *float64 `json:"supportFileCreatedAt"`
-
-	// SupportFileName The support file name for the device.
-	SupportFileName *string `json:"supportFileName"`
-
-	// SupportFileState The support file state for the device.
-	SupportFileState *SpeakerSupportFileState `json:"supportFileState"`
-
-	// Sysid The device sysid. (hex string)
-	Sysid *string `json:"sysid"`
-
-	// TalkbackSettings Talkback settings.
-	TalkbackSettings SpeakerTalkbackSettings `json:"talkbackSettings"`
-
-	// Type The device model name.
-	Type *string `json:"type"`
-
-	// UpSince Unix timestamp of when the device started up.
-	UpSince *float64 `json:"upSince"`
-
-	// UplinkDevice Which uplink device currently connected to.
-	UplinkDevice *map[string]interface{} `json:"uplinkDevice"`
-
-	// Uptime device uptime in second.
-	Uptime *float64 `json:"uptime"`
-
-	// Volume Speaker volume: a number from 0-100.
-	Volume               *float64             `json:"volume"`
-	WifiConnectionState  WifiConnectionState  `json:"wifiConnectionState"`
-	WiredConnectionState WiredConnectionState `json:"wiredConnectionState"`
+	AnonymousDeviceId            *string                  `json:"anonymousDeviceId"`
+	AudioList                    []interface{}            `json:"audioList"`
+	CanAdopt                     *bool                    `json:"canAdopt"`
+	ConnectedSince               *float64                 `json:"connectedSince"`
+	ConnectionHost               *string                  `json:"connectionHost"`
+	DisplayName                  *string                  `json:"displayName"`
+	FeatureFlags                 SpeakerFeatureFlags      `json:"featureFlags"`
+	FirmwareBuild                *string                  `json:"firmwareBuild"`
+	FirmwareVersion              *string                  `json:"firmwareVersion"`
+	FwUpdateState                *SpeakerFwUpdateState    `json:"fwUpdateState"`
+	GlobalAlarmManagerScopeNames *[]interface{}           `json:"globalAlarmManagerScopeNames"`
+	Guid                         *string                  `json:"guid"`
+	HardwareRevision             *string                  `json:"hardwareRevision"`
+	HasSpeaker                   *bool                    `json:"hasSpeaker"`
+	Host                         *string                  `json:"host"`
+	Id                           string                   `json:"id"`
+	IsAdopted                    *bool                    `json:"isAdopted"`
+	IsAdoptedByOther             *bool                    `json:"isAdoptedByOther"`
+	IsAdopting                   *bool                    `json:"isAdopting"`
+	IsAttemptingToConnect        *bool                    `json:"isAttemptingToConnect"`
+	IsBlockedByArmMode           bool                     `json:"isBlockedByArmMode"`
+	IsDownloadingFW              *bool                    `json:"isDownloadingFW"`
+	IsMicEnabled                 *bool                    `json:"isMicEnabled"`
+	IsProvisioned                *bool                    `json:"isProvisioned"`
+	IsRebooting                  *bool                    `json:"isRebooting"`
+	IsRestoring                  *bool                    `json:"isRestoring"`
+	IsReverting                  *bool                    `json:"isReverting"`
+	IsSshEnabled                 *bool                    `json:"isSshEnabled"`
+	IsUpdating                   *bool                    `json:"isUpdating"`
+	LastDisconnect               *float64                 `json:"lastDisconnect"`
+	LastSeen                     *float64                 `json:"lastSeen"`
+	LatestFirmwareSizeBytes      *float64                 `json:"latestFirmwareSizeBytes"`
+	LatestFirmwareVersion        *string                  `json:"latestFirmwareVersion"`
+	Mac                          string                   `json:"mac"`
+	MarketName                   *string                  `json:"marketName"`
+	MicVolume                    *float64                 `json:"micVolume"`
+	MinFirmwareVersion           *string                  `json:"minFirmwareVersion"`
+	ModelKey                     string                   `json:"modelKey"`
+	Name                         *string                  `json:"name"`
+	NvrMac                       *string                  `json:"nvrMac"`
+	PairedCameras                *[]interface{}           `json:"pairedCameras"`
+	PowerSupply                  DevicePowerSupply        `json:"powerSupply"`
+	PreviousFirmwareUrl          *string                  `json:"previousFirmwareUrl"`
+	PreviousFirmwareVersion      *string                  `json:"previousFirmwareVersion"`
+	ReleaseNotePath              *string                  `json:"releaseNotePath"`
+	SpeakerState                 SpeakerState             `json:"speakerState"`
+	State                        *SpeakerState2           `json:"state"`
+	SupportFileCreatedAt         *float64                 `json:"supportFileCreatedAt"`
+	SupportFileName              *string                  `json:"supportFileName"`
+	SupportFileState             *SpeakerSupportFileState `json:"supportFileState"`
+	Sysid                        *string                  `json:"sysid"`
+	TalkbackSettings             SpeakerTalkbackSettings  `json:"talkbackSettings"`
+	Type                         *string                  `json:"type"`
+	UpSince                      *float64                 `json:"upSince"`
+	UplinkDevice                 *map[string]interface{}  `json:"uplinkDevice"`
+	Uptime                       *float64                 `json:"uptime"`
+	Volume                       *float64                 `json:"volume"`
+	WifiConnectionState          WifiConnectionState      `json:"wifiConnectionState"`
+	WiredConnectionState         WiredConnectionState     `json:"wiredConnectionState"`
 }
 
 // SpeakerFeatureFlags defines model for speakerFeatureFlags.
 type SpeakerFeatureFlags struct {
-	// HasHttpsClientOTA Whether the device supports HTTPS client for OTA firmware updates.
-	HasHttpsClientOTA *bool `json:"hasHttpsClientOTA"`
-
-	// HasMic Whether the device has a microphone.
-	HasMic *bool `json:"hasMic"`
-
-	// HasWifi Whether the device has the wifi.
-	HasWifi *bool `json:"hasWifi"`
-
-	// SupportCustomRingtone Whether the device supports custom ringtone feature.
+	HasHttpsClientOTA     *bool `json:"hasHttpsClientOTA"`
+	HasMic                *bool `json:"hasMic"`
+	HasWifi               *bool `json:"hasWifi"`
 	SupportCustomRingtone *bool `json:"supportCustomRingtone"`
 }
 
 // SpeakerFile defines model for speakerFile.
 type SpeakerFile struct {
-	// Filename Name of the file
-	Filename *string `json:"filename"`
-
-	// Md5 md5 sum
-	Md5 *string `json:"md5"`
-
-	// Size Size of the file
-	Size *float64 `json:"size"`
+	Filename *string  `json:"filename"`
+	Md5      *string  `json:"md5"`
+	Size     *float64 `json:"size"`
 }
 
-// SpeakerFwUpdateState The device FW update state.
+// SpeakerFwUpdateState defines model for speakerFwUpdateState.
 type SpeakerFwUpdateState string
 
 // SpeakerSettings defines model for speakerSettings.
 type SpeakerSettings struct {
-	// AreSystemSoundsEnabled Whether or not system sounds on camera are enabled.
-	AreSystemSoundsEnabled *bool `json:"areSystemSoundsEnabled"`
-
-	// IsEnabled Whether or not the speaker on camera is enabled.
-	IsEnabled *bool `json:"isEnabled"`
-
-	// RepeatTimes Ringtone repeated times
-	RepeatTimes *float64 `json:"repeatTimes"`
-
-	// RingVolume Ring volume: a number from 0-100.
-	RingVolume *float64 `json:"ringVolume"`
-
-	// RingtoneId Uploaded Ringtone id
-	RingtoneId *string `json:"ringtoneId"`
-
-	// SpeakerVolume Speaker volume: a number from 0-100.
-	SpeakerVolume *float64 `json:"speakerVolume"`
-
-	// Volume DEPRECATED! Use speakerVolume instead.
-	Volume *float64 `json:"volume"`
+	AreSystemSoundsEnabled *bool    `json:"areSystemSoundsEnabled"`
+	IsEnabled              *bool    `json:"isEnabled"`
+	RepeatTimes            *float64 `json:"repeatTimes"`
+	RingVolume             *float64 `json:"ringVolume"`
+	RingtoneId             *string  `json:"ringtoneId"`
+	SpeakerVolume          *float64 `json:"speakerVolume"`
+	Volume                 *float64 `json:"volume"`
 }
 
 // SpeakerState defines model for speakerState.
 type SpeakerState struct {
-	// Files An array of uploaded files.
-	Files *[]SpeakerFile `json:"files"`
-
-	// Mode Current mode of the speaker
-	Mode *SpeakerStateMode `json:"mode"`
-
-	// Status Current status of the speaker
+	Files   *[]SpeakerFile      `json:"files"`
+	Mode    *SpeakerStateMode   `json:"mode"`
 	Status  *SpeakerStateStatus `json:"status"`
 	Storage SpeakerStorage      `json:"storage"`
 }
 
-// SpeakerState2 Connection state of the device.
+// SpeakerState2 defines model for speakerState2.
 type SpeakerState2 string
 
-// SpeakerStateMode Current mode of the speaker
+// SpeakerStateMode defines model for speakerStateMode.
 type SpeakerStateMode string
 
-// SpeakerStateStatus Current status of the speaker
+// SpeakerStateStatus defines model for speakerStateStatus.
 type SpeakerStateStatus string
 
 // SpeakerStorage defines model for speakerStorage.
 type SpeakerStorage struct {
-	// Available Available size in bytes
 	Available *float64 `json:"available"`
-
-	// Total Total size in bytes
-	Total *float64 `json:"total"`
-
-	// Used Used size in bytes
-	Used *float64 `json:"used"`
+	Total     *float64 `json:"total"`
+	Used      *float64 `json:"used"`
 }
 
-// SpeakerSupportFileState The support file state for the device.
+// SpeakerSupportFileState defines model for speakerSupportFileState.
 type SpeakerSupportFileState string
 
 // SpeakerTalkbackSettings defines model for speakerTalkbackSettings.
 type SpeakerTalkbackSettings struct {
-	// BindAddr What address to bind to.
-	BindAddr *string `json:"bindAddr"`
-
-	// BindPort What port to bind to.
-	BindPort *float64 `json:"bindPort"`
-
-	// BitsPerSample Bits per sample.
-	BitsPerSample *float64 `json:"bitsPerSample"`
-
-	// Channels Mono (1) or Stereo (2).
-	Channels *float64 `json:"channels"`
-
-	// FilterAddr Can be used to restrict sender address.
-	FilterAddr *string `json:"filterAddr"`
-
-	// FilterPort Can be used to restrict sender port.
-	FilterPort *float64 `json:"filterPort"`
-
-	// Quality Quality level. Only applicable if using Vorbis. Must match encoder value.
-	Quality *float64 `json:"quality"`
-
-	// SamplingRate Sampling Rate.
-	SamplingRate *float64 `json:"samplingRate"`
-
-	// TypeFmt Audio format to use.
-	TypeFmt *SpeakerTalkbackSettingsTypeFmt `json:"typeFmt"`
-
-	// TypeIn Protocol to use.
-	TypeIn *SpeakerTalkbackSettingsTypeIn `json:"typeIn"`
-
-	// Url READ ONLY. URL to use with EMS.
-	Url *string `json:"url"`
+	BindAddr      *string                         `json:"bindAddr"`
+	BindPort      *float64                        `json:"bindPort"`
+	BitsPerSample *float64                        `json:"bitsPerSample"`
+	Channels      *float64                        `json:"channels"`
+	FilterAddr    *string                         `json:"filterAddr"`
+	FilterPort    *float64                        `json:"filterPort"`
+	Quality       *float64                        `json:"quality"`
+	SamplingRate  *float64                        `json:"samplingRate"`
+	TypeFmt       *SpeakerTalkbackSettingsTypeFmt `json:"typeFmt"`
+	TypeIn        *SpeakerTalkbackSettingsTypeIn  `json:"typeIn"`
+	Url           *string                         `json:"url"`
 }
 
-// SpeakerTalkbackSettingsTypeFmt Audio format to use.
+// SpeakerTalkbackSettingsTypeFmt defines model for speakerTalkbackSettingsTypeFmt.
 type SpeakerTalkbackSettingsTypeFmt string
 
-// SpeakerTalkbackSettingsTypeIn Protocol to use.
+// SpeakerTalkbackSettingsTypeIn defines model for speakerTalkbackSettingsTypeIn.
 type SpeakerTalkbackSettingsTypeIn string
 
 // SpeechToTextSettings defines model for speechToTextSettings.
 type SpeechToTextSettings struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras"`
-
-	// Enabled Whether or not the ai feature is enabled (default: false)
-	Enabled *bool `json:"enabled"`
+	AllCameras *bool          `json:"allCameras"`
+	Cameras    *[]interface{} `json:"cameras"`
+	Enabled    *bool          `json:"enabled"`
 }
 
 // SpeechToTextSettingsUpdate defines model for speechToTextSettingsUpdate.
 type SpeechToTextSettingsUpdate struct {
-	// AllCameras Whether to dispatch to all cameras (default: true). When true, cameras array is ignored.
-	AllCameras *bool `json:"allCameras,omitempty"`
-
-	// Cameras The array of camera ids where this ai task dispatches to. Empty array when allCameras is true.
-	Cameras *[]interface{} `json:"cameras,omitempty"`
-
-	// Enabled Whether or not the ai feature is enabled (default: false)
-	Enabled *bool `json:"enabled,omitempty"`
+	AllCameras *bool          `json:"allCameras,omitempty"`
+	Cameras    *[]interface{} `json:"cameras,omitempty"`
+	Enabled    *bool          `json:"enabled,omitempty"`
 }
 
 // StepsRange defines model for stepsRange.
 type StepsRange struct {
-	// Max The maximum allowed range.
-	Max *float64 `json:"max"`
-
-	// Min The minimum allowed range.
-	Min *float64 `json:"min"`
-
-	// Step The minimum step.
+	Max  *float64 `json:"max"`
+	Min  *float64 `json:"min"`
 	Step *float64 `json:"step"`
 }
 
 // StorageConsoleCameraCount defines model for storageConsoleCameraCount.
 type StorageConsoleCameraCount struct {
-	// ConsoleIndex Console index: 0 = main chassis, 1-2 = expansion units.
-	ConsoleIndex *float64 `json:"consoleIndex"`
-
-	// OfflineCameraCount Number of adopted cameras assigned to this console that are currently offline.
+	ConsoleIndex       *float64 `json:"consoleIndex"`
 	OfflineCameraCount *float64 `json:"offlineCameraCount"`
-
-	// OnlineCameraCount Number of adopted cameras assigned to this console that are currently online.
-	OnlineCameraCount *float64 `json:"onlineCameraCount"`
+	OnlineCameraCount  *float64 `json:"onlineCameraCount"`
 }
 
 // StorageConsoleFailoverSettings defines model for storageConsoleFailoverSettings.
 type StorageConsoleFailoverSettings struct {
-	// ConsoleIndex Console index: 0 = main chassis, 1-2 = expansion units.
-	ConsoleIndex *float64 `json:"consoleIndex"`
-
-	// FailoverTimeoutMs Failover timeout in milliseconds. Required when isAutoFailoverEnabled is true, must be null otherwise.
-	FailoverTimeoutMs *float64 `json:"failoverTimeoutMs"`
-
-	// IsAutoFailoverEnabled Whether automatic failover is enabled for cameras on this console that defer to NVR settings.
-	IsAutoFailoverEnabled *bool `json:"isAutoFailoverEnabled"`
+	ConsoleIndex          *float64 `json:"consoleIndex"`
+	FailoverTimeoutMs     *float64 `json:"failoverTimeoutMs"`
+	IsAutoFailoverEnabled *bool    `json:"isAutoFailoverEnabled"`
 }
 
 // StorageConsoleFailoverSettingsUpdate defines model for storageConsoleFailoverSettingsUpdate.
 type StorageConsoleFailoverSettingsUpdate struct {
-	// ConsoleIndex Console index: 0 = main chassis, 1-2 = expansion units.
-	ConsoleIndex *float64 `json:"consoleIndex,omitempty"`
-
-	// FailoverTimeoutMs Failover timeout in milliseconds. Required when isAutoFailoverEnabled is true, must be null otherwise.
-	FailoverTimeoutMs *float64 `json:"failoverTimeoutMs,omitempty"`
-
-	// IsAutoFailoverEnabled Whether automatic failover is enabled for cameras on this console that defer to NVR settings.
-	IsAutoFailoverEnabled *bool `json:"isAutoFailoverEnabled,omitempty"`
+	ConsoleIndex          *float64 `json:"consoleIndex,omitempty"`
+	FailoverTimeoutMs     *float64 `json:"failoverTimeoutMs,omitempty"`
+	IsAutoFailoverEnabled *bool    `json:"isAutoFailoverEnabled,omitempty"`
 }
 
 // StorageDistribution defines model for storageDistribution.
 type StorageDistribution struct {
-	// RecordingTypeDistributions Distribution by recording type.
 	RecordingTypeDistributions *[]RecordingTypeDistribution `json:"recordingTypeDistributions"`
-
-	// ResolutionDistributions Distribution by resolution.
-	ResolutionDistributions *[]ResolutionDistribution `json:"resolutionDistributions"`
+	ResolutionDistributions    *[]ResolutionDistribution    `json:"resolutionDistributions"`
 }
 
 // StreamSharing defines model for streamSharing.
 type StreamSharing struct {
-	// Enabled Whether the camera sharing is enabled.
-	Enabled *bool `json:"enabled"`
-
-	// Expires Unix timestamp of shared link expiry.
-	Expires *float64 `json:"expires"`
-
-	// MaxStreams Maximum allowed simultaneous streams.
-	MaxStreams *float64 `json:"maxStreams"`
-
-	// ShareLink External link to view the shared stream.
-	ShareLink *string `json:"shareLink"`
-
-	// SharedByUser User who shared the camera stream.
-	SharedByUser *string `json:"sharedByUser"`
-
-	// SharedByUserId Id of user who shared the camera stream.
-	SharedByUserId *string `json:"sharedByUserId"`
-
-	// Token Connection token.
-	Token *string `json:"token"`
+	Enabled        *bool    `json:"enabled"`
+	Expires        *float64 `json:"expires"`
+	MaxStreams     *float64 `json:"maxStreams"`
+	ShareLink      *string  `json:"shareLink"`
+	SharedByUser   *string  `json:"sharedByUser"`
+	SharedByUserId *string  `json:"sharedByUserId"`
+	Token          *string  `json:"token"`
 }
 
 // SwitchPort defines model for switchPort.
 type SwitchPort struct {
-	// ConnectedDeviceMacs Connected device MAC addresses
-	ConnectedDeviceMacs *[]interface{} `json:"connectedDeviceMacs"`
-
-	// Enabled Port enabled
-	Enabled *bool `json:"enabled"`
-
-	// LinkUp Link up (port is connected to a device)
-	LinkUp *bool `json:"linkUp"`
-
-	// PhyRate Maximum physical link rate in Mbps
-	PhyRate *float64 `json:"phyRate"`
-
-	// PoeAvailable Is PoE available on the port
-	PoeAvailable *bool `json:"poeAvailable"`
-
-	// PoeConsumption Poe consumption (mW)
-	PoeConsumption *float64 `json:"poeConsumption"`
-
-	// PoeMode PoE mode
-	PoeMode *SwitchPortPoeMode `json:"poeMode"`
-
-	// PortNumber Port number
-	PortNumber *float64 `json:"portNumber"`
-
-	// RxBytes Received (RX) bytes
-	RxBytes *float64 `json:"rxBytes"`
-
-	// TxBytes Transmitted (TX) bytes
-	TxBytes *float64 `json:"txBytes"`
+	ConnectedDeviceMacs *[]interface{}     `json:"connectedDeviceMacs"`
+	Enabled             *bool              `json:"enabled"`
+	LinkUp              *bool              `json:"linkUp"`
+	PhyRate             *float64           `json:"phyRate"`
+	PoeAvailable        *bool              `json:"poeAvailable"`
+	PoeConsumption      *float64           `json:"poeConsumption"`
+	PoeMode             *SwitchPortPoeMode `json:"poeMode"`
+	PortNumber          *float64           `json:"portNumber"`
+	RxBytes             *float64           `json:"rxBytes"`
+	TxBytes             *float64           `json:"txBytes"`
 }
 
-// SwitchPortPoeMode PoE mode
+// SwitchPortPoeMode defines model for switchPortPoeMode.
 type SwitchPortPoeMode string
 
 // TalkbackSettings defines model for talkbackSettings.
 type TalkbackSettings struct {
-	// BindAddr What address to bind to.
-	BindAddr *string `json:"bindAddr"`
-
-	// BindPort What port to bind to.
-	BindPort *float64 `json:"bindPort"`
-
-	// BitsPerSample Bits per sample.
-	BitsPerSample *float64 `json:"bitsPerSample"`
-
-	// Channels Mono (1) or Stereo (2).
-	Channels *float64 `json:"channels"`
-
-	// FilterAddr Can be used to restrict sender address.
-	FilterAddr *string `json:"filterAddr"`
-
-	// FilterPort Can be used to restrict sender port.
-	FilterPort *float64 `json:"filterPort"`
-
-	// Quality Quality level. Only applicable if using Vorbis. Must match encoder value.
-	Quality *float64 `json:"quality"`
-
-	// SamplingRate Sampling Rate.
-	SamplingRate *float64 `json:"samplingRate"`
-
-	// TypeFmt Audio format to use.
-	TypeFmt *TalkbackSettingsTypeFmt `json:"typeFmt"`
-
-	// TypeIn Protocol to use.
-	TypeIn *TalkbackSettingsTypeIn `json:"typeIn"`
-
-	// Url READ ONLY. URL to use with EMS.
-	Url *string `json:"url"`
+	BindAddr      *string                  `json:"bindAddr"`
+	BindPort      *float64                 `json:"bindPort"`
+	BitsPerSample *float64                 `json:"bitsPerSample"`
+	Channels      *float64                 `json:"channels"`
+	FilterAddr    *string                  `json:"filterAddr"`
+	FilterPort    *float64                 `json:"filterPort"`
+	Quality       *float64                 `json:"quality"`
+	SamplingRate  *float64                 `json:"samplingRate"`
+	TypeFmt       *TalkbackSettingsTypeFmt `json:"typeFmt"`
+	TypeIn        *TalkbackSettingsTypeIn  `json:"typeIn"`
+	Url           *string                  `json:"url"`
 }
 
-// TalkbackSettingsTypeFmt Audio format to use.
+// TalkbackSettingsTypeFmt defines model for talkbackSettingsTypeFmt.
 type TalkbackSettingsTypeFmt string
 
-// TalkbackSettingsTypeIn Protocol to use.
+// TalkbackSettingsTypeIn defines model for talkbackSettingsTypeIn.
 type TalkbackSettingsTypeIn string
 
 // TalkbackSettingsUpdate defines model for talkbackSettingsUpdate.
 type TalkbackSettingsUpdate struct {
-	// BindAddr What address to bind to.
-	BindAddr *string `json:"bindAddr,omitempty"`
-
-	// BindPort What port to bind to.
-	BindPort *float64 `json:"bindPort,omitempty"`
-
-	// BitsPerSample Bits per sample.
-	BitsPerSample *float64 `json:"bitsPerSample,omitempty"`
-
-	// Channels Mono (1) or Stereo (2).
-	Channels *float64 `json:"channels,omitempty"`
-
-	// FilterAddr Can be used to restrict sender address.
-	FilterAddr *string `json:"filterAddr,omitempty"`
-
-	// FilterPort Can be used to restrict sender port.
-	FilterPort *float64 `json:"filterPort,omitempty"`
-
-	// Quality Quality level. Only applicable if using Vorbis. Must match encoder value.
-	Quality *float64 `json:"quality,omitempty"`
-
-	// SamplingRate Sampling Rate.
-	SamplingRate *float64 `json:"samplingRate,omitempty"`
-
-	// TypeFmt Audio format to use.
-	TypeFmt *TalkbackSettingsUpdateTypeFmt `json:"typeFmt,omitempty"`
-
-	// TypeIn Protocol to use.
-	TypeIn *TalkbackSettingsUpdateTypeIn `json:"typeIn,omitempty"`
-
-	// Url READ ONLY. URL to use with EMS.
-	Url *string `json:"url,omitempty"`
+	BindAddr      *string                        `json:"bindAddr,omitempty"`
+	BindPort      *float64                       `json:"bindPort,omitempty"`
+	BitsPerSample *float64                       `json:"bitsPerSample,omitempty"`
+	Channels      *float64                       `json:"channels,omitempty"`
+	FilterAddr    *string                        `json:"filterAddr,omitempty"`
+	FilterPort    *float64                       `json:"filterPort,omitempty"`
+	Quality       *float64                       `json:"quality,omitempty"`
+	SamplingRate  *float64                       `json:"samplingRate,omitempty"`
+	TypeFmt       *TalkbackSettingsUpdateTypeFmt `json:"typeFmt,omitempty"`
+	TypeIn        *TalkbackSettingsUpdateTypeIn  `json:"typeIn,omitempty"`
+	Url           *string                        `json:"url,omitempty"`
 }
 
-// TalkbackSettingsUpdateTypeFmt Audio format to use.
+// TalkbackSettingsUpdateTypeFmt defines model for talkbackSettingsUpdateTypeFmt.
 type TalkbackSettingsUpdateTypeFmt string
 
-// TalkbackSettingsUpdateTypeIn Protocol to use.
+// TalkbackSettingsUpdateTypeIn defines model for talkbackSettingsUpdateTypeIn.
 type TalkbackSettingsUpdateTypeIn string
 
 // TemperatureSensor defines model for temperatureSensor.
 type TemperatureSensor struct {
-	// Status What range does the measured metric fall into
 	Status *TemperatureSensorStatus `json:"status"`
-
-	// Value Decimal value of the metric measured by the sensor
-	Value *float64 `json:"value"`
+	Value  *float64                 `json:"value"`
 }
 
 // TemperatureSensorSettings defines model for temperatureSensorSettings.
 type TemperatureSensorSettings struct {
-	// HighThreshold Temperature high level threshold from -39 to 124 (C).
 	HighThreshold *float64 `json:"highThreshold"`
-
-	// IsEnabled Enable temperature sensor.
-	IsEnabled *bool `json:"isEnabled"`
-
-	// LowThreshold Temperature low level threshold from -39 to 124 (C).
-	LowThreshold *float64 `json:"lowThreshold"`
-
-	// Margin Temperature threshold detection hysteresis margin (C). Read-only value decided by sensor implementation.
-	Margin *float64 `json:"margin"`
+	IsEnabled     *bool    `json:"isEnabled"`
+	LowThreshold  *float64 `json:"lowThreshold"`
+	Margin        *float64 `json:"margin"`
 }
 
-// TemperatureSensorStatus What range does the measured metric fall into
+// TemperatureSensorStatus defines model for temperatureSensorStatus.
 type TemperatureSensorStatus string
 
 // ThirdPartyCamera defines model for thirdPartyCamera.
 type ThirdPartyCamera struct {
-	// EnableRtspAudio Whether to enable audio for RTSP streams
-	EnableRtspAudio *bool `json:"enableRtspAudio"`
-
-	// Errors The errors of the third party camera
-	Errors *[]interface{} `json:"errors"`
-
-	// ForceTcp Whether to force TCP transport for RTSP streams
-	ForceTcp *bool `json:"forceTcp"`
-
-	// HasAudio Whether the third party camera has audio
-	HasAudio *bool `json:"hasAudio"`
-
-	// MotionDetection Motion detection capability of the third party camera, as observed by the ONVIF events reconciler. null means "not yet probed" (transient on first adopt or shortly after restart, converges within ~60s). "available" means motion events are flowing. "misconfigured" means the camera supports motion but has it disabled (operator can fix in camera UI). "unsupported" means the camera does not expose ONVIF motion.
+	EnableRtspAudio *bool                            `json:"enableRtspAudio"`
+	Errors          *[]interface{}                   `json:"errors"`
+	ForceTcp        *bool                            `json:"forceTcp"`
+	HasAudio        *bool                            `json:"hasAudio"`
 	MotionDetection *ThirdPartyCameraMotionDetection `json:"motionDetection"`
-
-	// Port The connect port of third party camera (ONVIF)
-	Port *float64 `json:"port"`
-
-	// RtspUrl The HQ RTSP URL of the third party camera
-	RtspUrl *string `json:"rtspUrl"`
-
-	// RtspUrlLQ The LQ RTSP URL of the third party camera
-	RtspUrlLQ *string `json:"rtspUrlLQ"`
-
-	// SnapshotUrl The snapshot URL of the third party camera
-	SnapshotUrl *string `json:"snapshotUrl"`
+	Port            *float64                         `json:"port"`
+	RtspUrl         *string                          `json:"rtspUrl"`
+	RtspUrlLQ       *string                          `json:"rtspUrlLQ"`
+	SnapshotUrl     *string                          `json:"snapshotUrl"`
 }
 
-// ThirdPartyCameraMotionDetection Motion detection capability of the third party camera, as observed by the ONVIF events reconciler. null means "not yet probed" (transient on first adopt or shortly after restart, converges within ~60s). "available" means motion events are flowing. "misconfigured" means the camera supports motion but has it disabled (operator can fix in camera UI). "unsupported" means the camera does not expose ONVIF motion.
+// ThirdPartyCameraMotionDetection defines model for thirdPartyCameraMotionDetection.
 type ThirdPartyCameraMotionDetection string
 
 // TiltCapability defines model for tiltCapability.
 type TiltCapability struct {
-	// Degrees The degree range of the capability.
 	Degrees DegreesRange `json:"degrees"`
-
-	// Steps The step range of the capability.
-	Steps StepsRange `json:"steps"`
+	Steps   StepsRange   `json:"steps"`
 }
 
 // TiltLimitsOfPrivacyZones defines model for tiltLimitsOfPrivacyZones.
 type TiltLimitsOfPrivacyZones struct {
-	// Limit Tilt limits of privacy zones
-	Limit *float64 `json:"limit"`
-
-	// Side Side of tilt limits
-	Side *TiltLimitsOfPrivacyZonesSide `json:"side"`
+	Limit *float64                      `json:"limit"`
+	Side  *TiltLimitsOfPrivacyZonesSide `json:"side"`
 }
 
-// TiltLimitsOfPrivacyZonesSide Side of tilt limits
+// TiltLimitsOfPrivacyZonesSide defines model for tiltLimitsOfPrivacyZonesSide.
 type TiltLimitsOfPrivacyZonesSide string
 
 // TypedShortcut defines model for typedShortcut.
 type TypedShortcut struct {
-	// Auth Authentication configuration for the webhook request. (Only for 'webhook' shortcuts)
-	Auth *map[string]interface{} `json:"auth,omitempty"`
-
-	// Body The request body for POST requests. (Only for 'webhook' shortcuts)
-	Body *string `json:"body"`
-
-	// Headers Custom headers to include in the webhook request as [key, value] pairs. (Only for 'webhook' shortcuts)
-	Headers *[]interface{} `json:"headers"`
-
-	// LinkedCameraId Which camera does this shortcut link to? (Only for 'linkedCamera' shortcuts)
-	LinkedCameraId *string `json:"linkedCameraId"`
-
-	// LinkedDoorId Which door does this shortcut link to? (Only for 'linkedDoor' shortcuts)
-	LinkedDoorId *string `json:"linkedDoorId"`
-
-	// Method The HTTP method to use for the webhook request. (Only for 'webhook' shortcuts)
-	Method *TypedShortcutMethod `json:"method"`
-
-	// Name A user-defined name for the webhook shortcut. (Only for 'webhook' shortcuts)
-	Name *string `json:"name"`
-
-	// Timeout Request timeout in milliseconds. Defaults to 30000. (Only for 'webhook' shortcuts)
-	Timeout *float64 `json:"timeout"`
-
-	// Type What type of shortcut this is.
-	Type *TypedShortcutType `json:"type"`
-
-	// Url The URL to send the webhook request to. (Only for 'webhook' shortcuts)
-	Url *string `json:"url"`
+	Auth           *map[string]interface{} `json:"auth,omitempty"`
+	Body           *string                 `json:"body"`
+	Headers        *[]interface{}          `json:"headers"`
+	LinkedCameraId *string                 `json:"linkedCameraId"`
+	LinkedDoorId   *string                 `json:"linkedDoorId"`
+	Method         *TypedShortcutMethod    `json:"method"`
+	Name           *string                 `json:"name"`
+	Timeout        *float64                `json:"timeout"`
+	Type           *TypedShortcutType      `json:"type"`
+	Url            *string                 `json:"url"`
 }
 
-// TypedShortcutMethod The HTTP method to use for the webhook request. (Only for 'webhook' shortcuts)
+// TypedShortcutMethod defines model for typedShortcutMethod.
 type TypedShortcutMethod string
 
-// TypedShortcutType What type of shortcut this is.
+// TypedShortcutType defines model for typedShortcutType.
 type TypedShortcutType string
 
 // UstorageDisk defines model for ustorageDisk.
 type UstorageDisk struct {
-	// Action Disk status as a member of storage (none, faulty, spare, repairing, initializing, expanding).
-	Action *string `json:"action"`
-
-	// Ata Ata version.
-	Ata *string `json:"ata"`
-
-	// BadSector Number of bad sector for HDD, which is meaningless for SSD.
-	BadSector *float64 `json:"bad_sector"`
-
-	// Estimate Estimate second(s) to complete repairing action, null if not in repairing state.
-	Estimate *float64 `json:"estimate"`
-
-	// Firmware Disk firmware reported by itself.
-	Firmware *string `json:"firmware"`
-
-	// Healthy Disk healthy status reported by S.M.A.R.T. (good, risk).
-	Healthy *string `json:"healthy"`
-
-	// LifeSpan Remain life span (%) for SSD, null when SSD do not report lifespan, which is meaningless for HDD.
-	LifeSpan *float64 `json:"life_span"`
-
-	// Model Disk model reported by itself.
-	Model *string `json:"model"`
-
-	// Poweronhrs Power on hours.
-	Poweronhrs *float64 `json:"poweronhrs"`
-
-	// Progress Percentage of action progress, from 0.0 to 100.0, null if not in repairing state.
-	Progress *float64 `json:"progress"`
-
-	// Reason Reasons not supported, null when state is not "not_support" (type, limit).
-	Reason *map[string]interface{} `json:"reason"`
-
-	// Rpm Rotation rate for HDD, null for SSD.
-	Rpm *float64 `json:"rpm"`
-
-	// Sata Sata version.
-	Sata *string `json:"sata"`
-
-	// Serial Disk serial number reported by itself.
-	Serial *string `json:"serial"`
-
-	// Size Disk size reported by itself.
-	Size *string `json:"size"`
-
-	// Slot Slot number, started from 1.
-	Slot *float64 `json:"slot"`
-
-	// State Disk state, which combine "action" and "healthy" fields (nodisk, broken, risk, faulty, repairing, initializing, expanding, foreign, spare, not_support, normal).
-	State *string `json:"state"`
-
-	// Temperature Disk temperature in celsius.
-	Temperature *float64 `json:"temperature"`
-
-	// Threshold Threshold that suggest customer to replace disk, upperbound for bad_sector, lowerbound for lifespan.
-	Threshold *float64 `json:"threshold"`
-
-	// Type Disk type, HDD or SSD.
-	Type *string `json:"type"`
+	Action      *string                 `json:"action"`
+	Ata         *string                 `json:"ata"`
+	BadSector   *float64                `json:"bad_sector"`
+	Estimate    *float64                `json:"estimate"`
+	Firmware    *string                 `json:"firmware"`
+	Healthy     *string                 `json:"healthy"`
+	LifeSpan    *float64                `json:"life_span"`
+	Model       *string                 `json:"model"`
+	Poweronhrs  *float64                `json:"poweronhrs"`
+	Progress    *float64                `json:"progress"`
+	Reason      *map[string]interface{} `json:"reason"`
+	Rpm         *float64                `json:"rpm"`
+	Sata        *string                 `json:"sata"`
+	Serial      *string                 `json:"serial"`
+	Size        *string                 `json:"size"`
+	Slot        *float64                `json:"slot"`
+	State       *string                 `json:"state"`
+	Temperature *float64                `json:"temperature"`
+	Threshold   *float64                `json:"threshold"`
+	Type        *string                 `json:"type"`
 }
 
 // VideoStats defines model for videoStats.
 type VideoStats struct {
-	// RecordingEnd Timestamp of latest recorded video content.
-	RecordingEnd *float64 `json:"recordingEnd"`
-
-	// RecordingEndLQ Timestamp of latest recorded video content (low quality)..
-	RecordingEndLQ *float64 `json:"recordingEndLQ"`
-
-	// RecordingStart Timestamp of earliest recorded video content.
-	RecordingStart *float64 `json:"recordingStart"`
-
-	// RecordingStartLQ Timestamp of earliest recorded video content (low quality)..
+	RecordingEnd     *float64 `json:"recordingEnd"`
+	RecordingEndLQ   *float64 `json:"recordingEndLQ"`
+	RecordingStart   *float64 `json:"recordingStart"`
 	RecordingStartLQ *float64 `json:"recordingStartLQ"`
-
-	// TimelapseEnd Timestamp of latest transcoded video content.
-	TimelapseEnd *float64 `json:"timelapseEnd"`
-
-	// TimelapseEndLQ Timestamp of latest transcoded video content (low quality).
-	TimelapseEndLQ *float64 `json:"timelapseEndLQ"`
-
-	// TimelapseStart Timestamp of earliest transcoded video content.
-	TimelapseStart *float64 `json:"timelapseStart"`
-
-	// TimelapseStartLQ Timestamp of earliest transcoded video content (low quality).
+	TimelapseEnd     *float64 `json:"timelapseEnd"`
+	TimelapseEndLQ   *float64 `json:"timelapseEndLQ"`
+	TimelapseStart   *float64 `json:"timelapseStart"`
 	TimelapseStartLQ *float64 `json:"timelapseStartLQ"`
 }
 
 // Viewer defines model for viewer.
 type Viewer struct {
-	// AnonymousDeviceId Persistent unique device identifier.
-	AnonymousDeviceId *string `json:"anonymousDeviceId"`
-
-	// CanAdopt Whether or not the device can be adopted.
-	CanAdopt *bool `json:"canAdopt"`
-
-	// ConnectedSince Unix timestamp of when the device connected to the NVR.
-	ConnectedSince *float64 `json:"connectedSince"`
-
-	// ConnectionHost The ip or hostname the device uses to connect.
-	ConnectionHost *string `json:"connectionHost"`
-
-	// DisplayName The device display name.
-	DisplayName *string `json:"displayName"`
-
-	// EnableContinuousMonitoring Whether or not the viewer is enabled for continuous monitoring via pull liveview
-	EnableContinuousMonitoring bool `json:"enableContinuousMonitoring"`
-
-	// FeatureFlags Feature flags
-	FeatureFlags ViewerFeatureFlags `json:"featureFlags"`
-
-	// FirmwareBuild The build # of the firmware that is installed.
-	FirmwareBuild *string `json:"firmwareBuild"`
-
-	// FirmwareVersion The version of firmware that is installed on the device.
-	FirmwareVersion *string `json:"firmwareVersion"`
-
-	// FwUpdateState The device FW update state.
-	FwUpdateState *ViewerFwUpdateState `json:"fwUpdateState"`
-
-	// GlobalAlarmManagerScopeNames The global alarm manager scope names for the device.
-	GlobalAlarmManagerScopeNames *[]interface{} `json:"globalAlarmManagerScopeNames"`
-
-	// Guid Unique id of the device
-	Guid *string `json:"guid"`
-
-	// HardwareRevision Hardware revision of the device
-	HardwareRevision *string `json:"hardwareRevision"`
-
-	// Host The primary IP address of the device.
-	Host *string `json:"host"`
-	Id   string  `json:"id"`
-
-	// IsAccessDevice Whether or not the device is an Access Device after migration
-	IsAccessDevice *bool `json:"isAccessDevice"`
-
-	// IsAdopted Whether or not the device is adopted.
-	IsAdopted *bool `json:"isAdopted"`
-
-	// IsAdoptedByOther Whether or not the device is adopted by the other controller.
-	IsAdoptedByOther *bool `json:"isAdoptedByOther"`
-
-	// IsAdopting Whether or not the device is currently being adopted.
-	IsAdopting *bool `json:"isAdopting"`
-
-	// IsAttemptingToConnect Whether the device is attempting to connect to the controller
-	IsAttemptingToConnect *bool `json:"isAttemptingToConnect"`
-
-	// IsBlockedByArmMode Whether the device is blocked by arm mode
-	IsBlockedByArmMode bool `json:"isBlockedByArmMode"`
-
-	// IsConnected Whether the device IPC is connected?
-	IsConnected *bool `json:"isConnected"`
-
-	// IsDownloadingFW Whether the device is currently downloading a FW for an upgrade
-	IsDownloadingFW *bool `json:"isDownloadingFW"`
-
-	// IsProvisioned Whether or not the device is provisioned.
-	IsProvisioned *bool `json:"isProvisioned"`
-
-	// IsRebooting Whether the device is currently rebooting
-	IsRebooting *bool `json:"isRebooting"`
-
-	// IsRestoring Whether or not the device is currently being restored.
-	IsRestoring *bool `json:"isRestoring"`
-
-	// IsReverting Whether the device is currently reverting to a previous firmware version
-	IsReverting *bool `json:"isReverting"`
-
-	// IsSshEnabled Whether or not SSH is enabled
-	IsSshEnabled *bool `json:"isSshEnabled"`
-
-	// IsUpdating Whether the device is currently updating
-	IsUpdating *bool `json:"isUpdating"`
-
-	// LastDisconnect Unix timestamp of the last time the device disconnected.
-	LastDisconnect *float64 `json:"lastDisconnect"`
-
-	// LastSeen Unix timestamp of when the device was last connected.
-	LastSeen *float64 `json:"lastSeen"`
-
-	// LatestFirmwareSizeBytes The latest firmware size of the device in bytes.
-	LatestFirmwareSizeBytes *float64 `json:"latestFirmwareSizeBytes"`
-
-	// LatestFirmwareVersion The latest firmware version of the device.
-	LatestFirmwareVersion *string `json:"latestFirmwareVersion"`
-
-	// Liveview Which liveview is configured to be pushed to this viewer
-	Liveview *string `json:"liveview"`
-
-	// Mac The primary MAC address of the device.
-	Mac string `json:"mac"`
-
-	// MarketName The marketing name for the viewer.
-	MarketName *string `json:"marketName"`
-
-	// MinFirmwareVersion The minimum firmware version supported for this device with the current Protect version.
-	MinFirmwareVersion *string `json:"minFirmwareVersion"`
-	ModelKey           string  `json:"modelKey"`
-
-	// Name The name of the device.
-	Name *string `json:"name"`
-
-	// NeedUpdateBeforeAdoption Whether or not the viewer needs to be firmware updated before adoption
-	NeedUpdateBeforeAdoption *bool `json:"needUpdateBeforeAdoption"`
-
-	// NvrMac The MAC address of the NVR managed this device.
-	NvrMac *string `json:"nvrMac"`
-
-	// PreviousFirmwareUrl The FUS download URL for the previous firmware version.
-	PreviousFirmwareUrl *string `json:"previousFirmwareUrl"`
-
-	// PreviousFirmwareVersion The previously installed firmware version before the last update.
-	PreviousFirmwareVersion *string `json:"previousFirmwareVersion"`
-
-	// ReleaseNotePath The release note path for constructing firmware release note URLs.
-	ReleaseNotePath *string `json:"releaseNotePath"`
-
-	// SoftwareVersion Software version.
-	SoftwareVersion *string `json:"softwareVersion"`
-
-	// State Connection state of the device.
-	State *ViewerState `json:"state"`
-
-	// StreamLimit Count of maximum supported parallel live streams.
-	StreamLimit *float64 `json:"streamLimit"`
-
-	// SupportFileCreatedAt The support file created at for the device.
-	SupportFileCreatedAt *float64 `json:"supportFileCreatedAt"`
-
-	// SupportFileName The support file name for the device.
-	SupportFileName *string `json:"supportFileName"`
-
-	// SupportFileState The support file state for the device.
-	SupportFileState *ViewerSupportFileState `json:"supportFileState"`
-
-	// SupportUcp4 Whether or not the viewer supports UCP4 protocol
-	SupportUcp4 bool `json:"supportUcp4"`
-
-	// Sysid The device sysid. (hex string)
-	Sysid *string `json:"sysid"`
-
-	// Type The device model name.
-	Type *string `json:"type"`
-
-	// UpSince Unix timestamp of when the device started up.
-	UpSince *float64 `json:"upSince"`
-
-	// UplinkDevice Which uplink device currently connected to.
-	UplinkDevice *map[string]interface{} `json:"uplinkDevice"`
-
-	// Uptime device uptime in second.
-	Uptime               *float64             `json:"uptime"`
-	WifiConnectionState  WifiConnectionState  `json:"wifiConnectionState"`
-	WiredConnectionState WiredConnectionState `json:"wiredConnectionState"`
+	AnonymousDeviceId            *string                 `json:"anonymousDeviceId"`
+	CanAdopt                     *bool                   `json:"canAdopt"`
+	ConnectedSince               *float64                `json:"connectedSince"`
+	ConnectionHost               *string                 `json:"connectionHost"`
+	DisplayName                  *string                 `json:"displayName"`
+	EnableContinuousMonitoring   bool                    `json:"enableContinuousMonitoring"`
+	FeatureFlags                 ViewerFeatureFlags      `json:"featureFlags"`
+	FirmwareBuild                *string                 `json:"firmwareBuild"`
+	FirmwareVersion              *string                 `json:"firmwareVersion"`
+	FwUpdateState                *ViewerFwUpdateState    `json:"fwUpdateState"`
+	GlobalAlarmManagerScopeNames *[]interface{}          `json:"globalAlarmManagerScopeNames"`
+	Guid                         *string                 `json:"guid"`
+	HardwareRevision             *string                 `json:"hardwareRevision"`
+	Host                         *string                 `json:"host"`
+	Id                           string                  `json:"id"`
+	IsAccessDevice               *bool                   `json:"isAccessDevice"`
+	IsAdopted                    *bool                   `json:"isAdopted"`
+	IsAdoptedByOther             *bool                   `json:"isAdoptedByOther"`
+	IsAdopting                   *bool                   `json:"isAdopting"`
+	IsAttemptingToConnect        *bool                   `json:"isAttemptingToConnect"`
+	IsBlockedByArmMode           bool                    `json:"isBlockedByArmMode"`
+	IsConnected                  *bool                   `json:"isConnected"`
+	IsDownloadingFW              *bool                   `json:"isDownloadingFW"`
+	IsProvisioned                *bool                   `json:"isProvisioned"`
+	IsRebooting                  *bool                   `json:"isRebooting"`
+	IsRestoring                  *bool                   `json:"isRestoring"`
+	IsReverting                  *bool                   `json:"isReverting"`
+	IsSshEnabled                 *bool                   `json:"isSshEnabled"`
+	IsUpdating                   *bool                   `json:"isUpdating"`
+	LastDisconnect               *float64                `json:"lastDisconnect"`
+	LastSeen                     *float64                `json:"lastSeen"`
+	LatestFirmwareSizeBytes      *float64                `json:"latestFirmwareSizeBytes"`
+	LatestFirmwareVersion        *string                 `json:"latestFirmwareVersion"`
+	Liveview                     *string                 `json:"liveview"`
+	Mac                          string                  `json:"mac"`
+	MarketName                   *string                 `json:"marketName"`
+	MinFirmwareVersion           *string                 `json:"minFirmwareVersion"`
+	ModelKey                     string                  `json:"modelKey"`
+	Name                         *string                 `json:"name"`
+	NeedUpdateBeforeAdoption     *bool                   `json:"needUpdateBeforeAdoption"`
+	NvrMac                       *string                 `json:"nvrMac"`
+	PreviousFirmwareUrl          *string                 `json:"previousFirmwareUrl"`
+	PreviousFirmwareVersion      *string                 `json:"previousFirmwareVersion"`
+	ReleaseNotePath              *string                 `json:"releaseNotePath"`
+	SoftwareVersion              *string                 `json:"softwareVersion"`
+	State                        *ViewerState            `json:"state"`
+	StreamLimit                  *float64                `json:"streamLimit"`
+	SupportFileCreatedAt         *float64                `json:"supportFileCreatedAt"`
+	SupportFileName              *string                 `json:"supportFileName"`
+	SupportFileState             *ViewerSupportFileState `json:"supportFileState"`
+	SupportUcp4                  bool                    `json:"supportUcp4"`
+	Sysid                        *string                 `json:"sysid"`
+	Type                         *string                 `json:"type"`
+	UpSince                      *float64                `json:"upSince"`
+	UplinkDevice                 *map[string]interface{} `json:"uplinkDevice"`
+	Uptime                       *float64                `json:"uptime"`
+	WifiConnectionState          WifiConnectionState     `json:"wifiConnectionState"`
+	WiredConnectionState         WiredConnectionState    `json:"wiredConnectionState"`
 }
 
 // ViewerFeatureFlags defines model for viewerFeatureFlags.
 type ViewerFeatureFlags struct {
-	// SupportAdjustBrightness Whether the viewer supports adjust brightness.
-	SupportAdjustBrightness *bool `json:"supportAdjustBrightness"`
-
-	// SupportLiveview Whether the viewer supports a liveview.
-	SupportLiveview *bool `json:"supportLiveview"`
-
-	// SupportLocate Whether the viewer supports locate.
-	SupportLocate *bool `json:"supportLocate"`
-
-	// SupportManualDownloadSupportFile Whether the viewer supports manual download support file.
+	SupportAdjustBrightness          *bool `json:"supportAdjustBrightness"`
+	SupportLiveview                  *bool `json:"supportLiveview"`
+	SupportLocate                    *bool `json:"supportLocate"`
 	SupportManualDownloadSupportFile *bool `json:"supportManualDownloadSupportFile"`
-
-	// SupportManualFirmwareUpdate Whether the viewer supports manual firmware update.
-	SupportManualFirmwareUpdate *bool `json:"supportManualFirmwareUpdate"`
-
-	// SupportMic Whether the viewer supports a microphone.
-	SupportMic *bool `json:"supportMic"`
-
-	// SupportSsh Whether the viewer supports SSH.
-	SupportSsh *bool `json:"supportSsh"`
+	SupportManualFirmwareUpdate      *bool `json:"supportManualFirmwareUpdate"`
+	SupportMic                       *bool `json:"supportMic"`
+	SupportSsh                       *bool `json:"supportSsh"`
 }
 
-// ViewerFwUpdateState The device FW update state.
+// ViewerFwUpdateState defines model for viewerFwUpdateState.
 type ViewerFwUpdateState string
 
-// ViewerState Connection state of the device.
+// ViewerState defines model for viewerState.
 type ViewerState string
 
-// ViewerSupportFileState The support file state for the device.
+// ViewerSupportFileState defines model for viewerSupportFileState.
 type ViewerSupportFileState string
 
 // WifiConnectionState defines model for wifiConnectionState.
 type WifiConnectionState struct {
-	// ApName AP name
-	ApName *string `json:"apName"`
-
-	// Bssid WLAN bssid
-	Bssid *string `json:"bssid"`
-
-	// Channel WLAN frequency channel.
-	Channel *float64 `json:"channel"`
-
-	// Connectivity Connectivity of wireless device.
-	Connectivity *string `json:"connectivity"`
-
-	// Experience Connection experience as seen from AP and Network APP.
-	Experience *float64 `json:"experience"`
-
-	// Frequency Center frequency of WLAN channel.
-	Frequency *float64 `json:"frequency"`
-
-	// PhyRate DEPRECATED! Use txRate instead.
-	PhyRate *float64 `json:"phyRate"`
-
-	// SignalQuality Percent representation of Wi-Fi signal strength.
-	SignalQuality *float64 `json:"signalQuality"`
-
-	// SignalStrength dBm value of Wi-Fi signal strength.
+	ApName         *string  `json:"apName"`
+	Bssid          *string  `json:"bssid"`
+	Channel        *float64 `json:"channel"`
+	Connectivity   *string  `json:"connectivity"`
+	Experience     *float64 `json:"experience"`
+	Frequency      *float64 `json:"frequency"`
+	PhyRate        *float64 `json:"phyRate"`
+	SignalQuality  *float64 `json:"signalQuality"`
 	SignalStrength *float64 `json:"signalStrength"`
-
-	// Ssid WLAN ssid
-	Ssid *string `json:"ssid"`
-
-	// TxRate Maximum physical link rate in Mbps.
-	TxRate *float64 `json:"txRate"`
+	Ssid           *string  `json:"ssid"`
+	TxRate         *float64 `json:"txRate"`
 }
 
 // WifiConnectionStateUpdate defines model for wifiConnectionStateUpdate.
 type WifiConnectionStateUpdate struct {
-	// ApName AP name
-	ApName *string `json:"apName,omitempty"`
-
-	// Bssid WLAN bssid
-	Bssid *string `json:"bssid,omitempty"`
-
-	// Channel WLAN frequency channel.
-	Channel *float64 `json:"channel,omitempty"`
-
-	// Experience Connection experience as seen from AP and Network APP.
-	Experience *float64 `json:"experience,omitempty"`
-
-	// Frequency Center frequency of WLAN channel.
-	Frequency *float64 `json:"frequency,omitempty"`
-
-	// PhyRate DEPRECATED! Use txRate instead.
-	PhyRate *float64 `json:"phyRate,omitempty"`
-
-	// SignalQuality Percent representation of Wi-Fi signal strength.
+	ApName        *string  `json:"apName,omitempty"`
+	Bssid         *string  `json:"bssid,omitempty"`
+	Channel       *float64 `json:"channel,omitempty"`
+	Experience    *float64 `json:"experience,omitempty"`
+	Frequency     *float64 `json:"frequency,omitempty"`
+	PhyRate       *float64 `json:"phyRate,omitempty"`
 	SignalQuality *float64 `json:"signalQuality,omitempty"`
-
-	// Ssid WLAN ssid
-	Ssid *string `json:"ssid,omitempty"`
-
-	// TxRate Maximum physical link rate in Mbps.
-	TxRate *float64 `json:"txRate,omitempty"`
+	Ssid          *string  `json:"ssid,omitempty"`
+	TxRate        *float64 `json:"txRate,omitempty"`
 }
 
 // WifiStatus defines model for wifiStatus.
 type WifiStatus struct {
-	// Channel wlan frequency channel.
-	Channel *float64 `json:"channel"`
-
-	// Frequency center frequency of wlan channel.
-	Frequency *float64 `json:"frequency"`
-
-	// LinkSpeedMbps Physical link rate of the camera in Mbps.
-	LinkSpeedMbps *float64 `json:"linkSpeedMbps"`
-
-	// SignalQuality 0-100 for signal strength.
-	SignalQuality *float64 `json:"signalQuality"`
-
-	// SignalStrength dbm value of wifi signal strength.
+	Channel        *float64 `json:"channel"`
+	Frequency      *float64 `json:"frequency"`
+	LinkSpeedMbps  *float64 `json:"linkSpeedMbps"`
+	SignalQuality  *float64 `json:"signalQuality"`
 	SignalStrength *float64 `json:"signalStrength"`
 }
 
 // WiredConnectionState defines model for wiredConnectionState.
 type WiredConnectionState struct {
-	// PhyRate Maximum physical link rate in Mbps.
 	PhyRate *float64 `json:"phyRate"`
 }
 
 // WiredConnectionStateUpdate defines model for wiredConnectionStateUpdate.
 type WiredConnectionStateUpdate struct {
-	// PhyRate Maximum physical link rate in Mbps.
 	PhyRate *float64 `json:"phyRate,omitempty"`
 }
 
 // WirelessConnectionSettings defines model for wirelessConnectionSettings.
 type WirelessConnectionSettings struct {
-	// ChosenBridge Which bridge is chosen by user to connect to the device.
-	ChosenBridge *string `json:"chosenBridge"`
-
-	// LoraPropertyChannelCount Map of property IDs to their channel count for LoRa devices.
-	LoraPropertyChannelCount *map[string]interface{} `json:"loraPropertyChannelCount"`
-
-	// LoraPropertySizes Map of property IDs to their value sizes for LoRa devices.
-	LoraPropertySizes *map[string]interface{} `json:"loraPropertySizes"`
-
-	// LoraSpreadingFactor Currently active LoRa spreading factor (5..12), or null if unknown.
-	LoraSpreadingFactor *float64 `json:"loraSpreadingFactor"`
-
-	// SupportedLoraSpreadingFactors List of LoRa spreading factor values (5..12) supported by the device for the current region.
-	SupportedLoraSpreadingFactors *[]interface{} `json:"supportedLoraSpreadingFactors"`
-
-	// UpdateInterval Device periodic property update interval (seconds)
-	UpdateInterval *float64 `json:"updateInterval"`
+	ChosenBridge                  *string                 `json:"chosenBridge"`
+	LoraPropertyChannelCount      *map[string]interface{} `json:"loraPropertyChannelCount"`
+	LoraPropertySizes             *map[string]interface{} `json:"loraPropertySizes"`
+	LoraSpreadingFactor           *float64                `json:"loraSpreadingFactor"`
+	SupportedLoraSpreadingFactors *[]interface{}          `json:"supportedLoraSpreadingFactors"`
+	UpdateInterval                *float64                `json:"updateInterval"`
 }
 
 // WirelessConnectionState defines model for wirelessConnectionState.
 type WirelessConnectionState struct {
-	BatteryStatus SensorBatteryStatus `json:"batteryStatus"`
-
-	// Bridge Which bridge is connected to the device.
-	Bridge *string `json:"bridge"`
-
-	// BridgeCandidates A list of bridge candidates for adoption and reconnection.
-	BridgeCandidates *[]BridgeCandidate `json:"bridgeCandidates"`
-
-	// FunctionButtonPressedAt Unix timestamp when the function button was pressed, nullable.
+	BatteryStatus           SensorBatteryStatus      `json:"batteryStatus"`
+	Bridge                  *string                  `json:"bridge"`
+	BridgeCandidates        *[]BridgeCandidate       `json:"bridgeCandidates"`
 	FunctionButtonPressedAt *float64                 `json:"functionButtonPressedAt"`
 	SignalState             BluetoothConnectionState `json:"signalState"`
 }
 
 // ZoomCapability defines model for zoomCapability.
 type ZoomCapability struct {
-	// Degrees The degree range of the capability.
 	Degrees DegreesRange `json:"degrees"`
-
-	// Ratio Max ratio of zoom
-	Ratio *float64 `json:"ratio"`
-
-	// Steps The step range of the capability.
-	Steps StepsRange `json:"steps"`
+	Ratio   *float64     `json:"ratio"`
+	Steps   StepsRange   `json:"steps"`
 }

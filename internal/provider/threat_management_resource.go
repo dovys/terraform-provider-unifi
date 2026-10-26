@@ -48,7 +48,7 @@ var ipsModes = []string{"disabled", "ids", "ips", "ipsInline"}
 var advancedFilteringPreferences = []string{"manual", "disabled"}
 
 // ipsCategories is the controller's validated `enabled_categories` member set
-// (../unifi-specs objects/setting.json, ips section). It gates the Set so an
+// (the API spec's setting object, ips section). It gates the Set so an
 // unknown category fails at plan time rather than as a raw controller 4xx.
 var ipsCategories = []string{
 	"emerging-activex", "emerging-attackresponse", "botcc", "emerging-chat",
@@ -138,8 +138,8 @@ func (r *threatManagementResource) Schema(_ context.Context, _ resource.SchemaRe
 			"`disabled`; the provider detects that and fails with a clear error rather than looping on " +
 			"drift. A console with no gateway is rejected at plan time. `mode = \"disabled\"` (and the " +
 			"non-engine flags) work everywhere.\n\n" +
-			"**The enabled (non-`disabled`) write path is modeled from the reverse-engineered controller " +
-			"spec and has NOT been verified against live IDS/IPS hardware — no CyberSecure-licensed " +
+			"**The enabled (non-`disabled`) write path is modeled from the controller's undocumented " +
+			"API and has NOT been verified against live IDS/IPS hardware — no CyberSecure-licensed " +
 			"console was available. See the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

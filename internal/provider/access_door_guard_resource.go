@@ -56,7 +56,7 @@ func (r *accessDoorGuardResource) Schema(_ context.Context, _ resource.SchemaReq
 			"A door guard is the set of users authorized to act as guards for one door. This is an update/import-only sub-resource " +
 			"keyed by `door_id`: it replaces the door's guard set and destroying it stops managing the set without changing it " +
 			"(set `user_ids = []` to clear). The `user_ids` are opaque references to existing Access users — the provider does not " +
-			"model users. **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the " +
+			"model users. **Modeled from the undocumented Access API and not yet verified against a live console — see the " +
 			"provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

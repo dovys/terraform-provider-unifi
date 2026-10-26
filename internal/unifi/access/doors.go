@@ -12,7 +12,7 @@ import (
 // (adopted hardware lives under them), not created through the API: the surface
 // exposes a list and a per-door update, but no create/delete. There is no
 // per-door GET, so Get lists and filters by Location.unique_id. These paths are
-// modeled from the reverse-engineered location controller and are provisional
+// modeled from the undocumented location controller and are provisional
 // pending a live/HIL capture (see TODO.md).
 const (
 	doorsPath = "api/v2/locations/doors"

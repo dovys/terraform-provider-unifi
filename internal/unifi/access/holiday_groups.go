@@ -12,7 +12,7 @@ import (
 // create/item endpoints are singular with the unique_id in the path. List
 // returns the thin "simple" view (with a holiday count); Get returns the detail
 // view (with the embedded holidays). These paths are modeled from the
-// reverse-engineered holiday controller and are provisional pending a live/HIL
+// undocumented holiday controller and are provisional pending a live/HIL
 // capture (see TODO.md).
 const (
 	holidayGroupsPath = "api/v2/holiday_groups"

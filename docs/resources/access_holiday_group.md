@@ -3,12 +3,12 @@
 page_title: "unifi_access_holiday_group Resource - unifi"
 subcategory: ""
 description: |-
-  A UniFi Access holiday group — a named set of holidays used to scope unlock schedules. Managed over the private Access API (/proxy/access/api/v2/holiday_group). Membership is the set of holiday unique_ids in holiday_ids; the holidays themselves are not modeled by this resource. Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.
+  A UniFi Access holiday group — a named set of holidays used to scope unlock schedules. Managed over the private Access API (/proxy/access/api/v2/holiday_group). Membership is the set of holiday unique_ids in holiday_ids; the holidays themselves are not modeled by this resource. Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.
 ---
 
 # unifi_access_holiday_group (Resource)
 
-A UniFi Access holiday group — a named set of holidays used to scope unlock schedules. Managed over the private Access API (`/proxy/access/api/v2/holiday_group`). Membership is the set of holiday `unique_id`s in `holiday_ids`; the holidays themselves are not modeled by this resource. **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**
+A UniFi Access holiday group — a named set of holidays used to scope unlock schedules. Managed over the private Access API (`/proxy/access/api/v2/holiday_group`). Membership is the set of holiday `unique_id`s in `holiday_ids`; the holidays themselves are not modeled by this resource. **Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**
 
 
 

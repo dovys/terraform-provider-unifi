@@ -5,7 +5,7 @@ subcategory: ""
 description: |-
   UniFi Threat Management (IDS/IPS) — the site ips settings singleton. mode toggles the engine off (disabled), detection-only (ids), or prevention (ips/ipsInline); enabled_categories selects the threat signature categories. Writes shallow-merge the configured fields over the controller's stored section, so unmodeled fields (per-network honeypot entries) are preserved. There is one document per site; destroy removes the resource from state without disabling Threat Management.
   Enabling IDS/IPS requires a UniFi gateway (UDM/UCG/USG) with an active CyberSecure subscription. Without it the controller accepts the write but silently keeps the engine disabled; the provider detects that and fails with a clear error rather than looping on drift. A console with no gateway is rejected at plan time. mode = "disabled" (and the non-engine flags) work everywhere.
-  The enabled (non-disabled) write path is modeled from the reverse-engineered controller spec and has NOT been verified against live IDS/IPS hardware — no CyberSecure-licensed console was available. See the provider TODO.
+  The enabled (non-disabled) write path is modeled from the controller's undocumented API and has NOT been verified against live IDS/IPS hardware — no CyberSecure-licensed console was available. See the provider TODO.
 ---
 
 # unifi_network_threat_management (Resource)
@@ -14,7 +14,7 @@ UniFi **Threat Management** (IDS/IPS) — the site `ips` settings singleton. `mo
 
 **Enabling IDS/IPS requires a UniFi gateway (UDM/UCG/USG) with an active CyberSecure subscription.** Without it the controller accepts the write but silently keeps the engine `disabled`; the provider detects that and fails with a clear error rather than looping on drift. A console with no gateway is rejected at plan time. `mode = "disabled"` (and the non-engine flags) work everywhere.
 
-**The enabled (non-`disabled`) write path is modeled from the reverse-engineered controller spec and has NOT been verified against live IDS/IPS hardware — no CyberSecure-licensed console was available. See the provider TODO.**
+**The enabled (non-`disabled`) write path is modeled from the controller's undocumented API and has NOT been verified against live IDS/IPS hardware — no CyberSecure-licensed console was available. See the provider TODO.**
 
 
 

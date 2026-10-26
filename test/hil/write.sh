@@ -29,7 +29,7 @@ run_re="TestHILWrite"
 
 # Operator-specific config (live console address, local-admin credentials) lives
 # in test/hil/secrets.env — gitignored, so the maintainer's network topology and
-# password-manager layout never land in this (eventually public) repo.
+# password-manager layout never land in the repo.
 if [ -f "$here/secrets.env" ]; then
   # shellcheck source=/dev/null
   . "$here/secrets.env"

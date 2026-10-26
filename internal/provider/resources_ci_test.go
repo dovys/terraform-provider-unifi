@@ -851,7 +851,7 @@ func TestLowercaseModifier(t *testing.T) {
 		in   types.String
 		want types.String
 	}{
-		{"uppercase", types.StringValue("00:00:5e:00:53:aa"), types.StringValue("00:00:5e:00:53:aa")},
+		{"uppercase", types.StringValue("00:00:5E:00:53:0A"), types.StringValue("00:00:5e:00:53:0a")},
 		{"mixed", types.StringValue("Aa:Bb:Cc:Dd:Ee:Ff"), types.StringValue("aa:bb:cc:dd:ee:ff")},
 		{"already-lower", types.StringValue("aa:bb:cc:dd:ee:ff"), types.StringValue("aa:bb:cc:dd:ee:ff")},
 		{"null-untouched", types.StringNull(), types.StringNull()},

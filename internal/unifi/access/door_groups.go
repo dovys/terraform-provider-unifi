@@ -10,7 +10,7 @@ import (
 
 // Door-group API routes on the Access v2 surface. The list is plural; the item
 // endpoints are singular with the unique_id in the path. These paths are modeled
-// from the reverse-engineered door_group_controller surface and are provisional
+// from the undocumented door_group_controller surface and are provisional
 // pending a live/HIL capture (see TODO.md).
 const (
 	doorGroupsPath = "api/v2/access/door_groups"

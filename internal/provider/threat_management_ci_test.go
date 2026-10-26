@@ -279,8 +279,8 @@ func mustJSON(t *testing.T, v any) []byte {
 }
 
 // TestThreatManagementCategoriesComplete guards the validator member set against
-// the controller's documented `enabled_categories` enum (../unifi-specs
-// objects/setting.json, ips section: 59 categories).
+// the controller's `enabled_categories` enum (the API spec's setting object, ips
+// section: 59 categories).
 func TestThreatManagementCategoriesComplete(t *testing.T) {
 	if len(ipsCategories) != 59 {
 		t.Errorf("ipsCategories has %d entries, want 59 (the controller's documented enum)", len(ipsCategories))

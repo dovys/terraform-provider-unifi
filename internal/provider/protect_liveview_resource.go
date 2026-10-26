@@ -54,7 +54,7 @@ func (r *protectLiveviewResource) Schema(_ context.Context, _ resource.SchemaReq
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A UniFi Protect live view — a saved multi-camera grid layout, managed over the private Protect API " +
 			"(`/proxy/protect/api/liveviews`). A full CRUD object (created, not configure-existing). Each `slots` entry lists the " +
-			"cameras shown in one grid cell and optional cycling. **The slot shape is reverse-engineered (untyped in the spec) and " +
+			"cameras shown in one grid cell and optional cycling. **The slot shape is inferred (untyped in the spec) and " +
 			"HIL-unverified — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

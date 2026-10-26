@@ -13,7 +13,7 @@ import (
 
 // regression test for #101 — renaming a port via port_overrides.<n>.name failed
 // with "Provider produced inconsistent result after apply: .port_overrides["1"].name:
-// was "uplink-port", but now "lan1-port"". The /rest/device PUT lands the
+// was "uplink-trunk", but now "desk-port"". The /rest/device PUT lands the
 // rename, but the /stat/device list the read maps from can lag a refresh and echo
 // the *pre-rename* name. Trusting that stale read for a known, configured value
 // contradicts the plan, so the apply errors and every later plan re-proposes the
@@ -21,10 +21,10 @@ import (
 // apply-time state regardless of what the lagging read echoes.
 
 // renameLaggedDeviceJSON is a /stat/device list where port 1 is echoed with the
-// OLD name ("lan1-port") — the eventual-consistency lag from #101. The rename
+// OLD name ("desk-port") — the eventual-consistency lag from #101. The rename
 // to "trunk-rename" was accepted by /rest/device but the read hasn't caught up.
 const renameLaggedDeviceJSON = `{"meta":{"rc":"ok"},"data":[{"_id":"d1","mac":"aa:bb:cc:00:00:01","model":"UCGMAX","type":"udm","adopted":true,"port_overrides":[
-	{"port_idx":1,"forward":"customize","name":"lan1-port","native_networkconf_id":"netA"}
+	{"port_idx":1,"forward":"customize","name":"desk-port","native_networkconf_id":"netA"}
 ]}]}`
 
 // renamePlan builds a plan that renames port 1 to want (a known value). Every
@@ -110,7 +110,7 @@ func TestDevicePortOverrideRename_UpdateRoundTripsWhenReadLags(t *testing.T) {
 	r := bindDeviceResourceServing(t, renameLaggedDeviceJSON)
 	sch := deviceResourceSchema(t)
 
-	prior := renameStateOldName(t, sch, "lan1-port")
+	prior := renameStateOldName(t, sch, "desk-port")
 	plan := renamePlan(t, sch, "d1", "trunk-rename")
 
 	resp := &resource.UpdateResponse{State: tfsdk.State{Schema: sch}}
@@ -171,7 +171,7 @@ func renameStateOldName(t *testing.T, sch rschema.Schema, name string) tfsdk.Sta
 // genuine controller-side drift still reconciles.
 //
 // Prior state deliberately diverges from what the controller serves: state holds
-// "stale-prior-name" while renameLaggedDeviceJSON serves "lan1-port". Asserting
+// "stale-prior-name" while renameLaggedDeviceJSON serves "desk-port". Asserting
 // the controller's value survives proves Read reflects the controller — not the
 // prior state, and not a fallback restore. If the two matched, the assertion
 // couldn't tell "kept controller value" from "kept prior state".
@@ -192,7 +192,7 @@ func TestDevicePortOverrideRead_KeepsControllerName(t *testing.T) {
 	resp.Diagnostics.Append(resp.State.Get(ctx, &m)...)
 
 	got := portOverrideName(t, m, "1")
-	if got.ValueString() != "lan1-port" {
-		t.Errorf("Read port_overrides[1].name = %q, want controller value \"lan1-port\" — Read must reflect the controller, not prior state %q or a fallback", got.ValueString(), "stale-prior-name")
+	if got.ValueString() != "desk-port" {
+		t.Errorf("Read port_overrides[1].name = %q, want controller value \"desk-port\" — Read must reflect the controller, not prior state %q or a fallback", got.ValueString(), "stale-prior-name")
 	}
 }

@@ -3,12 +3,12 @@
 page_title: "unifi_access_policy Data Source - unifi"
 subcategory: ""
 description: |-
-  Look up a UniFi Access policy by id (unique_id) or name (read-only). Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.
+  Look up a UniFi Access policy by id (unique_id) or name (read-only). Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.
 ---
 
 # unifi_access_policy (Data Source)
 
-Look up a UniFi Access policy by `id` (`unique_id`) or `name` (read-only). **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**
+Look up a UniFi Access policy by `id` (`unique_id`) or `name` (read-only). **Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**
 
 
 

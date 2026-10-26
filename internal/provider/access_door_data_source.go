@@ -43,7 +43,7 @@ func (d *accessDoorDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Look up a UniFi Access door by `id` (`unique_id`) or `name` (read-only). Use it to obtain a door's id " +
 			"for `unifi_access_door_group` / `unifi_access_door` / `unifi_access_door_guard`. **Modeled from the " +
-			"reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**",
+			"undocumented Access API and not yet verified against a live console — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,

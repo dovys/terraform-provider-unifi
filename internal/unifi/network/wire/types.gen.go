@@ -19870,10 +19870,8 @@ type Apgroups struct {
 	AttrNoDelete *bool    `json:"attr_no_delete,omitempty"`
 	DeviceMacs   []string `json:"device_macs"`
 	ExternalId   *string  `json:"external_id,omitempty"`
-
-	// ForWlanconf Mark AP Group as dedicated for a single WLAN Conf (Devices view). It will be hidden from list results by default for backward compatibility, but possible to enable optionally
-	ForWlanconf *bool  `json:"for_wlanconf,omitempty"`
-	Name        string `json:"name"`
+	ForWlanconf  *bool    `json:"for_wlanconf,omitempty"`
+	Name         string   `json:"name"`
 }
 
 // ApiAlarmManagerActionPduDevices defines model for api_alarm_manager_action_pdu_devices.
@@ -21723,39 +21721,35 @@ type DeviceFwRevertOptions struct {
 
 // DeviceNetworkDevice defines model for device_network_device.
 type DeviceNetworkDevice struct {
-	UnderscoreId          *string                         `json:"_id,omitempty"`
-	ConnectionNetworkId   *string                         `json:"connection_network_id,omitempty"`
-	ConnectionNetworkName *string                         `json:"connection_network_name,omitempty"`
-	Default               *bool                           `json:"default,omitempty"`
-	DeviceTags            *[]DeviceNetworkDeviceDeviceTag `json:"device_tags,omitempty"`
-
-	// DeviceType Information whether the device is considered a client or device from the NET point of view
-	DeviceType                          *DeviceNetworkDeviceDeviceType `json:"device_type,omitempty"`
-	DisplayableVersion                  *string                        `json:"displayable_version,omitempty"`
-	DownloadSpeedBytesPerSecond         *int                           `json:"download_speed_bytes_per_second,omitempty"`
-	GracefulShutdownTriggeredAt         *int                           `json:"graceful_shutdown_triggered_at,omitempty"`
-	Ip                                  *string                        `json:"ip,omitempty"`
-	Ipv4LeaseExpirationTimestampSeconds *int                           `json:"ipv4_lease_expiration_timestamp_seconds,omitempty"`
-	LastConnectionNetworkId             *string                        `json:"last_connection_network_id,omitempty"`
-	LastConnectionNetworkName           *string                        `json:"last_connection_network_name,omitempty"`
-
-	// LastSeen Information about when the device was seen for the last time in unix timestamp in seconds
-	LastSeen                  *int                            `json:"last_seen,omitempty"`
-	Mac                       *string                         `json:"mac,omitempty"`
-	Model                     *string                         `json:"model,omitempty"`
-	Name                      *string                         `json:"name,omitempty"`
-	ProductLine               *DeviceNetworkDeviceProductLine `json:"product_line,omitempty"`
-	Satisfaction              *int                            `json:"satisfaction,omitempty"`
-	StackingGroupId           *string                         `json:"stacking_group_id,omitempty"`
-	State                     *int                            `json:"state,omitempty"`
-	UploadSpeedBytesPerSecond *int                            `json:"upload_speed_bytes_per_second,omitempty"`
-	UpsDevice                 *DeviceNetworkDeviceUpsDevice   `json:"ups_device,omitempty"`
-	Uptime                    *int                            `json:"uptime,omitempty"`
-	UsageBytes                *float32                        `json:"usage_bytes,omitempty"`
-	Version                   *string                         `json:"version,omitempty"`
+	UnderscoreId                        *string                         `json:"_id,omitempty"`
+	ConnectionNetworkId                 *string                         `json:"connection_network_id,omitempty"`
+	ConnectionNetworkName               *string                         `json:"connection_network_name,omitempty"`
+	Default                             *bool                           `json:"default,omitempty"`
+	DeviceTags                          *[]DeviceNetworkDeviceDeviceTag `json:"device_tags,omitempty"`
+	DeviceType                          *DeviceNetworkDeviceDeviceType  `json:"device_type,omitempty"`
+	DisplayableVersion                  *string                         `json:"displayable_version,omitempty"`
+	DownloadSpeedBytesPerSecond         *int                            `json:"download_speed_bytes_per_second,omitempty"`
+	GracefulShutdownTriggeredAt         *int                            `json:"graceful_shutdown_triggered_at,omitempty"`
+	Ip                                  *string                         `json:"ip,omitempty"`
+	Ipv4LeaseExpirationTimestampSeconds *int                            `json:"ipv4_lease_expiration_timestamp_seconds,omitempty"`
+	LastConnectionNetworkId             *string                         `json:"last_connection_network_id,omitempty"`
+	LastConnectionNetworkName           *string                         `json:"last_connection_network_name,omitempty"`
+	LastSeen                            *int                            `json:"last_seen,omitempty"`
+	Mac                                 *string                         `json:"mac,omitempty"`
+	Model                               *string                         `json:"model,omitempty"`
+	Name                                *string                         `json:"name,omitempty"`
+	ProductLine                         *DeviceNetworkDeviceProductLine `json:"product_line,omitempty"`
+	Satisfaction                        *int                            `json:"satisfaction,omitempty"`
+	StackingGroupId                     *string                         `json:"stacking_group_id,omitempty"`
+	State                               *int                            `json:"state,omitempty"`
+	UploadSpeedBytesPerSecond           *int                            `json:"upload_speed_bytes_per_second,omitempty"`
+	UpsDevice                           *DeviceNetworkDeviceUpsDevice   `json:"ups_device,omitempty"`
+	Uptime                              *int                            `json:"uptime,omitempty"`
+	UsageBytes                          *float32                        `json:"usage_bytes,omitempty"`
+	Version                             *string                         `json:"version,omitempty"`
 }
 
-// DeviceNetworkDeviceDeviceType Information whether the device is considered a client or device from the NET point of view
+// DeviceNetworkDeviceDeviceType defines model for DeviceNetworkDevice.DeviceType.
 type DeviceNetworkDeviceDeviceType string
 
 // DeviceNetworkDeviceProductLine defines model for DeviceNetworkDevice.ProductLine.
@@ -21860,7 +21854,6 @@ type DevicesStpEdgeBatchEnable struct {
 
 // DevicesStpEdgeBatchEnableResult defines model for devices_stp_edge_batch_enable_result.
 type DevicesStpEdgeBatchEnableResult struct {
-	// ConfigPushScheduled True iff at least one port was actually mutated on this device and a system.cfg push was scheduled.
 	ConfigPushScheduled *bool                                  `json:"config_push_scheduled,omitempty"`
 	Mac                 *string                                `json:"mac,omitempty"`
 	Outcomes            *map[string]interface{}                `json:"outcomes,omitempty"`
@@ -21869,18 +21862,14 @@ type DevicesStpEdgeBatchEnableResult struct {
 
 // DevicesStpEdgeBatchEnableResultPort defines model for devices_stp_edge_batch_enable_result_port.
 type DevicesStpEdgeBatchEnableResultPort struct {
-	Enabled *map[string]interface{} `json:"enabled,omitempty"`
-
-	// ErrorCode Present iff status=failed.
-	ErrorCode *DevicesStpEdgeBatchEnableResultPortErrorCode `json:"error_code,omitempty"`
-
-	// ErrorMessage Present iff status=failed. Safe to display to end users.
-	ErrorMessage *string                                    `json:"error_message,omitempty"`
-	PortIdx      *int                                       `json:"portIdx,omitempty"`
-	Status       *DevicesStpEdgeBatchEnableResultPortStatus `json:"status,omitempty"`
+	Enabled      *map[string]interface{}                       `json:"enabled,omitempty"`
+	ErrorCode    *DevicesStpEdgeBatchEnableResultPortErrorCode `json:"error_code,omitempty"`
+	ErrorMessage *string                                       `json:"error_message,omitempty"`
+	PortIdx      *int                                          `json:"portIdx,omitempty"`
+	Status       *DevicesStpEdgeBatchEnableResultPortStatus    `json:"status,omitempty"`
 }
 
-// DevicesStpEdgeBatchEnableResultPortErrorCode Present iff status=failed.
+// DevicesStpEdgeBatchEnableResultPortErrorCode defines model for DevicesStpEdgeBatchEnableResultPort.ErrorCode.
 type DevicesStpEdgeBatchEnableResultPortErrorCode string
 
 // DevicesStpEdgeBatchEnableResultPortStatus defines model for DevicesStpEdgeBatchEnableResultPort.Status.
@@ -26223,14 +26212,12 @@ type SystemLogApLogs2 = map[string]interface{}
 
 // SystemLogByExternalId defines model for system_log_by_external_id.
 type SystemLogByExternalId struct {
-	Category   *map[string]interface{} `json:"category,omitempty"`
-	Event      *map[string]interface{} `json:"event,omitempty"`
-	ExternalId *string                 `json:"external_id,omitempty"`
-	Id         *string                 `json:"id,omitempty"`
-	Key        *map[string]interface{} `json:"key,omitempty"`
-	Message    *string                 `json:"message,omitempty"`
-
-	// MessageRaw Already translated message but with no parameters replaces. Present only if applicable
+	Category        *map[string]interface{}                    `json:"category,omitempty"`
+	Event           *map[string]interface{}                    `json:"event,omitempty"`
+	ExternalId      *string                                    `json:"external_id,omitempty"`
+	Id              *string                                    `json:"id,omitempty"`
+	Key             *map[string]interface{}                    `json:"key,omitempty"`
+	Message         *string                                    `json:"message,omitempty"`
 	MessageRaw      *string                                    `json:"message_raw,omitempty"`
 	Parameters      *map[string]SystemLogByExternalIdParameter `json:"parameters,omitempty"`
 	ReplaceAlerts   *[]string                                  `json:"replace_alerts,omitempty"`
@@ -26241,10 +26228,8 @@ type SystemLogByExternalId struct {
 	Target          *map[string]interface{}                    `json:"target,omitempty"`
 	Timestamp       *int                                       `json:"timestamp,omitempty"`
 	Title           *string                                    `json:"title,omitempty"`
-
-	// TitleRaw Alert title with no parameters replaces. Present only if applicable
-	TitleRaw *string                 `json:"title_raw,omitempty"`
-	Type     *map[string]interface{} `json:"type,omitempty"`
+	TitleRaw        *string                                    `json:"title_raw,omitempty"`
+	Type            *map[string]interface{}                    `json:"type,omitempty"`
 }
 
 // SystemLogByExternalIdParameter defines model for system_log_by_external_id_parameter.
@@ -27036,21 +27021,14 @@ type TrafficruleBandwidthLimit struct {
 
 // TrafficruleSchedule defines model for trafficrule_schedule.
 type TrafficruleSchedule struct {
-	// Date Start date. Applicable to: ONE_TIME_ONLY
-	Date         *openapi_types.Date                `json:"date,omitempty"`
-	DateEnd      *openapi_types.Date                `json:"date_end,omitempty"`
-	DateStart    *openapi_types.Date                `json:"date_start,omitempty"`
-	Mode         TrafficruleScheduleMode            `json:"mode"`
-	RepeatOnDays *[]TrafficruleScheduleRepeatOnDays `json:"repeat_on_days,omitempty"`
-
-	// TimeAllDay Rule will be running for all day. Time range start/end are ignored. Applicable to: EVERY_WEEK, CUSTOM
-	TimeAllDay *bool `json:"time_all_day,omitempty"`
-
-	// TimeRangeEnd End time in 24 hours format. It accepts 24:00 as end of the day. Applicable to: EVERY_DAY, EVERY_WEEK, ONE_TIME_ONLY, CUSTOM
-	TimeRangeEnd *string `json:"time_range_end,omitempty"`
-
-	// TimeRangeStart Start time in 24 hours format. Applicable to: EVERY_DAY, EVERY_WEEK, ONE_TIME_ONLY, CUSTOM
-	TimeRangeStart *string `json:"time_range_start,omitempty"`
+	Date           *openapi_types.Date                `json:"date,omitempty"`
+	DateEnd        *openapi_types.Date                `json:"date_end,omitempty"`
+	DateStart      *openapi_types.Date                `json:"date_start,omitempty"`
+	Mode           TrafficruleScheduleMode            `json:"mode"`
+	RepeatOnDays   *[]TrafficruleScheduleRepeatOnDays `json:"repeat_on_days,omitempty"`
+	TimeAllDay     *bool                              `json:"time_all_day,omitempty"`
+	TimeRangeEnd   *string                            `json:"time_range_end,omitempty"`
+	TimeRangeStart *string                            `json:"time_range_start,omitempty"`
 }
 
 // TrafficruleScheduleMode defines model for TrafficruleSchedule.Mode.
@@ -27130,22 +27108,18 @@ type UidVpnServer struct {
 	Name                     string                `json:"name"`
 	NetworkconfId            *string               `json:"networkconf_id,omitempty"`
 	Protocol                 *UidVpnServerProtocol `json:"protocol,omitempty"`
-
-	// PublicGatewayPort If VPN is behind NAT, user can set a port forward on a 3rd party gateway. In this case, the UID App may use this port to connect to the VPN
-	PublicGatewayPort    *int                `json:"public_gateway_port,omitempty"`
-	Radius               *UidVpnServerRadius `json:"radius,omitempty"`
-	RenegotiationTimeout *int                `json:"renegotiation_timeout,omitempty"`
-	ServerCrt            *string             `json:"server_crt,omitempty"`
-	ServerKey            *string             `json:"server_key,omitempty"`
-	ServerPort           *int                `json:"server_port,omitempty"`
-
-	// StrictClientCommonName If true, then client certificate's common name must match client's username. Effective for the server mode only (OpenVPN only)
-	StrictClientCommonName *bool                `json:"strict_client_common_name,omitempty"`
-	SyncPublicIp           *bool                `json:"sync_public_ip,omitempty"`
-	UidPolicyEnabled       *bool                `json:"uid_policy_enabled,omitempty"`
-	UidPolicyName          *string              `json:"uid_policy_name,omitempty"`
-	UidWorkspaceUrl        *string              `json:"uid_workspace_url,omitempty"`
-	VpnType                *UidVpnServerVpnType `json:"vpn_type,omitempty"`
+	PublicGatewayPort        *int                  `json:"public_gateway_port,omitempty"`
+	Radius                   *UidVpnServerRadius   `json:"radius,omitempty"`
+	RenegotiationTimeout     *int                  `json:"renegotiation_timeout,omitempty"`
+	ServerCrt                *string               `json:"server_crt,omitempty"`
+	ServerKey                *string               `json:"server_key,omitempty"`
+	ServerPort               *int                  `json:"server_port,omitempty"`
+	StrictClientCommonName   *bool                 `json:"strict_client_common_name,omitempty"`
+	SyncPublicIp             *bool                 `json:"sync_public_ip,omitempty"`
+	UidPolicyEnabled         *bool                 `json:"uid_policy_enabled,omitempty"`
+	UidPolicyName            *string               `json:"uid_policy_name,omitempty"`
+	UidWorkspaceUrl          *string               `json:"uid_workspace_url,omitempty"`
+	VpnType                  *UidVpnServerVpnType  `json:"vpn_type,omitempty"`
 }
 
 // UidVpnServerProtocol defines model for UidVpnServer.Protocol.
@@ -28304,109 +28278,101 @@ type WireguardUsersExistingSubnets struct {
 
 // Wlan defines model for wlan.
 type Wlan struct {
-	UnderscoreId        *string              `json:"_id,omitempty"`
-	ApGroupIds          []string             `json:"ap_group_ids"`
-	ApGroupMode         *WlanApGroupMode     `json:"ap_group_mode,omitempty"`
-	AttrHiddenId        string               `json:"attr_hidden_id"`
-	AuthCache           *bool                `json:"auth_cache,omitempty"`
-	BcFilterEnabled     *bool                `json:"bc_filter_enabled,omitempty"`
-	BcFilterList        *[]string            `json:"bc_filter_list,omitempty"`
-	BssTransition       *bool                `json:"bss_transition,omitempty"`
-	CountryBeacon       *bool                `json:"country_beacon,omitempty"`
-	DpiEnabled          *bool                `json:"dpi_enabled,omitempty"`
-	DpigroupId          *string              `json:"dpigroup_id,omitempty"`
-	Dtim6e              *int                 `json:"dtim_6e,omitempty"`
-	DtimMode            *WlanDtimMode        `json:"dtim_mode,omitempty"`
-	DtimNa              *int                 `json:"dtim_na,omitempty"`
-	DtimNg              *int                 `json:"dtim_ng,omitempty"`
-	ElementAdopt        *bool                `json:"element_adopt,omitempty"`
-	Enabled             *bool                `json:"enabled,omitempty"`
-	EnhancedIot         *bool                `json:"enhanced_iot,omitempty"`
-	FastRoamingEnabled  *bool                `json:"fast_roaming_enabled,omitempty"`
-	GroupRekey          *int                 `json:"group_rekey,omitempty"`
-	HideSsid            *bool                `json:"hide_ssid,omitempty"`
-	Hotspot2            *WlanHotspot2        `json:"hotspot2,omitempty"`
-	Hotspot2confEnabled *bool                `json:"hotspot2conf_enabled,omitempty"`
-	Hotspot2confId      *string              `json:"hotspot2conf_id,omitempty"`
-	IappEnabled         *bool                `json:"iapp_enabled,omitempty"`
-	IotChannelLock      *bool                `json:"iot_channel_lock,omitempty"`
-	IotDtimLock         *bool                `json:"iot_dtim_lock,omitempty"`
-	IsGuest             *bool                `json:"is_guest,omitempty"`
-	L2Isolation         *bool                `json:"l2_isolation,omitempty"`
-	LogLevel            *int                 `json:"log_level,omitempty"`
-	MacFilterEnabled    *bool                `json:"mac_filter_enabled,omitempty"`
-	MacFilterList       *[]string            `json:"mac_filter_list,omitempty"`
-	MacFilterPolicy     *WlanMacFilterPolicy `json:"mac_filter_policy,omitempty"`
-	McastenhanceEnabled *bool                `json:"mcastenhance_enabled,omitempty"`
-
-	// MinrateNaAdvertisingRates By setting this to true, the AP will only advertise rates greater or equal to given data_rate_kbps
-	MinrateNaAdvertisingRates *bool `json:"minrate_na_advertising_rates,omitempty"`
-	MinrateNaDataRateKbps     *int  `json:"minrate_na_data_rate_kbps,omitempty"`
-	MinrateNaEnabled          *bool `json:"minrate_na_enabled,omitempty"`
-
-	// MinrateNgAdvertisingRates By setting this to true, the AP will only advertise rates greater or equal to given data_rate_kbps
-	MinrateNgAdvertisingRates   *bool                      `json:"minrate_ng_advertising_rates,omitempty"`
-	MinrateNgDataRateKbps       *int                       `json:"minrate_ng_data_rate_kbps,omitempty"`
-	MinrateNgEnabled            *bool                      `json:"minrate_ng_enabled,omitempty"`
-	MinrateSettingPreference    *WlanSettingPreference     `json:"minrate_setting_preference,omitempty"`
-	Name                        string                     `json:"name"`
-	NasIdentifier               *string                    `json:"nas_identifier,omitempty"`
-	NasIdentifierType           *WlanNasIdentifierType     `json:"nas_identifier_type,omitempty"`
-	NetworkconfId               *string                    `json:"networkconf_id,omitempty"`
-	No2ghzOui                   *bool                      `json:"no2ghz_oui,omitempty"`
-	OptimizeIotWifiConnectivity *bool                      `json:"optimize_iot_wifi_connectivity,omitempty"`
-	P2p                         *bool                      `json:"p2p,omitempty"`
-	P2pCrossConnect             *bool                      `json:"p2p_cross_connect,omitempty"`
-	PmfCipher                   *WlanPmfCipher             `json:"pmf_cipher,omitempty"`
-	PmfMode                     *WlanPmfMode               `json:"pmf_mode,omitempty"`
-	Priority                    *WlanPriority              `json:"priority,omitempty"`
-	PrivatePresharedKeys        *[]WlanPrivatePresharedKey `json:"private_preshared_keys,omitempty"`
-	PrivatePresharedKeysEnabled *bool                      `json:"private_preshared_keys_enabled,omitempty"`
-	ProxyArp                    *bool                      `json:"proxy_arp,omitempty"`
-	RadiusDasEnabled            *bool                      `json:"radius_das_enabled,omitempty"`
-	RadiusMacAuthEnabled        *bool                      `json:"radius_mac_auth_enabled,omitempty"`
-	RadiusMacaclEmptyPassword   *bool                      `json:"radius_macacl_empty_password,omitempty"`
-	RadiusMacaclFormat          *WlanRadiusMacaclFormat    `json:"radius_macacl_format,omitempty"`
-	RadiusprofileId             *string                    `json:"radiusprofile_id,omitempty"`
-	RoamClusterId               *int                       `json:"roam_cluster_id,omitempty"`
-	RoamingAssistant6eEnabled   *bool                      `json:"roaming_assistant_6e_enabled,omitempty"`
-	RoamingAssistant6eRssi      *int                       `json:"roaming_assistant_6e_rssi,omitempty"`
-	RoamingAssistantNaEnabled   *bool                      `json:"roaming_assistant_na_enabled,omitempty"`
-	RoamingAssistantNaRssi      *int                       `json:"roaming_assistant_na_rssi,omitempty"`
-	RrmEnabled                  *bool                      `json:"rrm_enabled,omitempty"`
-
-	// SaeAntiClogging SAE anti-clogging threshold in seconds, typically 5?
-	SaeAntiClogging    *int          `json:"sae_anti_clogging,omitempty"`
-	SaeGroups          *[]int        `json:"sae_groups,omitempty"`
-	SaePsk             *[]WlanSaePsk `json:"sae_psk,omitempty"`
-	SaePskVlanRequired *bool         `json:"sae_psk_vlan_required,omitempty"`
-
-	// SaeSync SAE sync error threshold - how many sync errors a station can have before being disconnected; typically 5
-	SaeSync              *int                        `json:"sae_sync,omitempty"`
-	Schedule             *[]string                   `json:"schedule,omitempty"`
-	ScheduleEnabled      *bool                       `json:"schedule_enabled,omitempty"`
-	ScheduleReversed     *bool                       `json:"schedule_reversed,omitempty"`
-	ScheduleWithDuration *[]WlanScheduleWithDuration `json:"schedule_with_duration,omitempty"`
-	Security             WlanSecurity                `json:"security"`
-	SettingPreference    *WlanSettingPreference      `json:"setting_preference,omitempty"`
-	TdlsProhibit         *bool                       `json:"tdls_prohibit,omitempty"`
-	UapsdEnabled         *bool                       `json:"uapsd_enabled,omitempty"`
-	UidWorkspaceUrl      *string                     `json:"uid_workspace_url,omitempty"`
-	UsergroupId          *string                     `json:"usergroup_id,omitempty"`
-	VlanEnabled          *bool                       `json:"vlan_enabled,omitempty"`
-	WepIdx               *int                        `json:"wep_idx,omitempty"`
-	WlanBand             WlanWlanBand                `json:"wlan_band"`
-	WlanBands            *[]WlanWlanBand             `json:"wlan_bands,omitempty"`
-	Wpa3Enhanced192      *bool                       `json:"wpa3_enhanced_192,omitempty"`
-	Wpa3FastRoaming      *bool                       `json:"wpa3_fast_roaming,omitempty"`
-	Wpa3Support          *bool                       `json:"wpa3_support,omitempty"`
-	Wpa3Transition       *bool                       `json:"wpa3_transition,omitempty"`
-	WpaEnc               *WlanWpaEnc                 `json:"wpa_enc,omitempty"`
-	WpaMode              *WlanWpaMode                `json:"wpa_mode,omitempty"`
-	WpaPskRadius         *WlanWpaPskRadius           `json:"wpa_psk_radius,omitempty"`
-	XIappKey             *string                     `json:"x_iapp_key,omitempty"`
-	XPassphrase          *string                     `json:"x_passphrase,omitempty"`
-	XWep                 *string                     `json:"x_wep,omitempty"`
+	UnderscoreId                *string                     `json:"_id,omitempty"`
+	ApGroupIds                  []string                    `json:"ap_group_ids"`
+	ApGroupMode                 *WlanApGroupMode            `json:"ap_group_mode,omitempty"`
+	AttrHiddenId                string                      `json:"attr_hidden_id"`
+	AuthCache                   *bool                       `json:"auth_cache,omitempty"`
+	BcFilterEnabled             *bool                       `json:"bc_filter_enabled,omitempty"`
+	BcFilterList                *[]string                   `json:"bc_filter_list,omitempty"`
+	BssTransition               *bool                       `json:"bss_transition,omitempty"`
+	CountryBeacon               *bool                       `json:"country_beacon,omitempty"`
+	DpiEnabled                  *bool                       `json:"dpi_enabled,omitempty"`
+	DpigroupId                  *string                     `json:"dpigroup_id,omitempty"`
+	Dtim6e                      *int                        `json:"dtim_6e,omitempty"`
+	DtimMode                    *WlanDtimMode               `json:"dtim_mode,omitempty"`
+	DtimNa                      *int                        `json:"dtim_na,omitempty"`
+	DtimNg                      *int                        `json:"dtim_ng,omitempty"`
+	ElementAdopt                *bool                       `json:"element_adopt,omitempty"`
+	Enabled                     *bool                       `json:"enabled,omitempty"`
+	EnhancedIot                 *bool                       `json:"enhanced_iot,omitempty"`
+	FastRoamingEnabled          *bool                       `json:"fast_roaming_enabled,omitempty"`
+	GroupRekey                  *int                        `json:"group_rekey,omitempty"`
+	HideSsid                    *bool                       `json:"hide_ssid,omitempty"`
+	Hotspot2                    *WlanHotspot2               `json:"hotspot2,omitempty"`
+	Hotspot2confEnabled         *bool                       `json:"hotspot2conf_enabled,omitempty"`
+	Hotspot2confId              *string                     `json:"hotspot2conf_id,omitempty"`
+	IappEnabled                 *bool                       `json:"iapp_enabled,omitempty"`
+	IotChannelLock              *bool                       `json:"iot_channel_lock,omitempty"`
+	IotDtimLock                 *bool                       `json:"iot_dtim_lock,omitempty"`
+	IsGuest                     *bool                       `json:"is_guest,omitempty"`
+	L2Isolation                 *bool                       `json:"l2_isolation,omitempty"`
+	LogLevel                    *int                        `json:"log_level,omitempty"`
+	MacFilterEnabled            *bool                       `json:"mac_filter_enabled,omitempty"`
+	MacFilterList               *[]string                   `json:"mac_filter_list,omitempty"`
+	MacFilterPolicy             *WlanMacFilterPolicy        `json:"mac_filter_policy,omitempty"`
+	McastenhanceEnabled         *bool                       `json:"mcastenhance_enabled,omitempty"`
+	MinrateNaAdvertisingRates   *bool                       `json:"minrate_na_advertising_rates,omitempty"`
+	MinrateNaDataRateKbps       *int                        `json:"minrate_na_data_rate_kbps,omitempty"`
+	MinrateNaEnabled            *bool                       `json:"minrate_na_enabled,omitempty"`
+	MinrateNgAdvertisingRates   *bool                       `json:"minrate_ng_advertising_rates,omitempty"`
+	MinrateNgDataRateKbps       *int                        `json:"minrate_ng_data_rate_kbps,omitempty"`
+	MinrateNgEnabled            *bool                       `json:"minrate_ng_enabled,omitempty"`
+	MinrateSettingPreference    *WlanSettingPreference      `json:"minrate_setting_preference,omitempty"`
+	Name                        string                      `json:"name"`
+	NasIdentifier               *string                     `json:"nas_identifier,omitempty"`
+	NasIdentifierType           *WlanNasIdentifierType      `json:"nas_identifier_type,omitempty"`
+	NetworkconfId               *string                     `json:"networkconf_id,omitempty"`
+	No2ghzOui                   *bool                       `json:"no2ghz_oui,omitempty"`
+	OptimizeIotWifiConnectivity *bool                       `json:"optimize_iot_wifi_connectivity,omitempty"`
+	P2p                         *bool                       `json:"p2p,omitempty"`
+	P2pCrossConnect             *bool                       `json:"p2p_cross_connect,omitempty"`
+	PmfCipher                   *WlanPmfCipher              `json:"pmf_cipher,omitempty"`
+	PmfMode                     *WlanPmfMode                `json:"pmf_mode,omitempty"`
+	Priority                    *WlanPriority               `json:"priority,omitempty"`
+	PrivatePresharedKeys        *[]WlanPrivatePresharedKey  `json:"private_preshared_keys,omitempty"`
+	PrivatePresharedKeysEnabled *bool                       `json:"private_preshared_keys_enabled,omitempty"`
+	ProxyArp                    *bool                       `json:"proxy_arp,omitempty"`
+	RadiusDasEnabled            *bool                       `json:"radius_das_enabled,omitempty"`
+	RadiusMacAuthEnabled        *bool                       `json:"radius_mac_auth_enabled,omitempty"`
+	RadiusMacaclEmptyPassword   *bool                       `json:"radius_macacl_empty_password,omitempty"`
+	RadiusMacaclFormat          *WlanRadiusMacaclFormat     `json:"radius_macacl_format,omitempty"`
+	RadiusprofileId             *string                     `json:"radiusprofile_id,omitempty"`
+	RoamClusterId               *int                        `json:"roam_cluster_id,omitempty"`
+	RoamingAssistant6eEnabled   *bool                       `json:"roaming_assistant_6e_enabled,omitempty"`
+	RoamingAssistant6eRssi      *int                        `json:"roaming_assistant_6e_rssi,omitempty"`
+	RoamingAssistantNaEnabled   *bool                       `json:"roaming_assistant_na_enabled,omitempty"`
+	RoamingAssistantNaRssi      *int                        `json:"roaming_assistant_na_rssi,omitempty"`
+	RrmEnabled                  *bool                       `json:"rrm_enabled,omitempty"`
+	SaeAntiClogging             *int                        `json:"sae_anti_clogging,omitempty"`
+	SaeGroups                   *[]int                      `json:"sae_groups,omitempty"`
+	SaePsk                      *[]WlanSaePsk               `json:"sae_psk,omitempty"`
+	SaePskVlanRequired          *bool                       `json:"sae_psk_vlan_required,omitempty"`
+	SaeSync                     *int                        `json:"sae_sync,omitempty"`
+	Schedule                    *[]string                   `json:"schedule,omitempty"`
+	ScheduleEnabled             *bool                       `json:"schedule_enabled,omitempty"`
+	ScheduleReversed            *bool                       `json:"schedule_reversed,omitempty"`
+	ScheduleWithDuration        *[]WlanScheduleWithDuration `json:"schedule_with_duration,omitempty"`
+	Security                    WlanSecurity                `json:"security"`
+	SettingPreference           *WlanSettingPreference      `json:"setting_preference,omitempty"`
+	TdlsProhibit                *bool                       `json:"tdls_prohibit,omitempty"`
+	UapsdEnabled                *bool                       `json:"uapsd_enabled,omitempty"`
+	UidWorkspaceUrl             *string                     `json:"uid_workspace_url,omitempty"`
+	UsergroupId                 *string                     `json:"usergroup_id,omitempty"`
+	VlanEnabled                 *bool                       `json:"vlan_enabled,omitempty"`
+	WepIdx                      *int                        `json:"wep_idx,omitempty"`
+	WlanBand                    WlanWlanBand                `json:"wlan_band"`
+	WlanBands                   *[]WlanWlanBand             `json:"wlan_bands,omitempty"`
+	Wpa3Enhanced192             *bool                       `json:"wpa3_enhanced_192,omitempty"`
+	Wpa3FastRoaming             *bool                       `json:"wpa3_fast_roaming,omitempty"`
+	Wpa3Support                 *bool                       `json:"wpa3_support,omitempty"`
+	Wpa3Transition              *bool                       `json:"wpa3_transition,omitempty"`
+	WpaEnc                      *WlanWpaEnc                 `json:"wpa_enc,omitempty"`
+	WpaMode                     *WlanWpaMode                `json:"wpa_mode,omitempty"`
+	WpaPskRadius                *WlanWpaPskRadius           `json:"wpa_psk_radius,omitempty"`
+	XIappKey                    *string                     `json:"x_iapp_key,omitempty"`
+	XPassphrase                 *string                     `json:"x_passphrase,omitempty"`
+	XWep                        *string                     `json:"x_wep,omitempty"`
 }
 
 // WlanApGroupMode defines model for Wlan.ApGroupMode.

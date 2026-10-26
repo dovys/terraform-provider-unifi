@@ -77,7 +77,7 @@ func (r *accessPolicyResource) Schema(_ context.Context, _ resource.SchemaReques
 		MarkdownDescription: "A UniFi Access policy — grants a set of resources (doors / door groups) on an optional schedule. " +
 			"Managed over the private Access API (`/proxy/access/api/v2/access_policy`). The policy's subject/rule graph is " +
 			"controller-managed and not modeled here; this resource manages the policy identity, schedule, enabled state, and " +
-			"resource grants. **Modeled from the reverse-engineered Access API and not yet verified against a live console — see " +
+			"resource grants. **Modeled from the undocumented Access API and not yet verified against a live console — see " +
 			"the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{

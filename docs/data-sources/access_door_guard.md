@@ -3,12 +3,12 @@
 page_title: "unifi_access_door_guard Data Source - unifi"
 subcategory: ""
 description: |-
-  Look up the guard user set of a UniFi Access door by door_id (read-only). Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.
+  Look up the guard user set of a UniFi Access door by door_id (read-only). Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.
 ---
 
 # unifi_access_door_guard (Data Source)
 
-Look up the guard user set of a UniFi Access door by `door_id` (read-only). **Modeled from the reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**
+Look up the guard user set of a UniFi Access door by `door_id` (read-only). **Modeled from the undocumented Access API and not yet verified against a live console — see the provider TODO.**
 
 
 

@@ -46,7 +46,7 @@ func (d *accessPolicyDataSource) Metadata(_ context.Context, req datasource.Meta
 func (d *accessPolicyDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Look up a UniFi Access policy by `id` (`unique_id`) or `name` (read-only). **Modeled from the " +
-			"reverse-engineered Access API and not yet verified against a live console — see the provider TODO.**",
+			"undocumented Access API and not yet verified against a live console — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Optional:            true,
