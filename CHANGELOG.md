@@ -4,6 +4,9 @@ Dated entries, newest first. Add yours under today's date in the PR that makes t
 
 ## 2026-10-26
 
+### Added
+- `CODE_OF_CONDUCT.md` and a pull request template.
+
 ### Changed
 - Published on the Terraform Registry as [`dovys/unifi`](https://registry.terraform.io/providers/dovys/unifi/latest). `terraform init` now installs it directly; the README's offline install from a GitHub Release still works.
 
