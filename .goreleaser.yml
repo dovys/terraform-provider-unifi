@@ -18,8 +18,7 @@ builds:
     # Only the platforms real Terraform users run: linux, macOS, and Windows on
     # amd64 (x86-64) and arm64. We deliberately drop freebsd, 386, and 32-bit arm
     # — no meaningful Terraform audience, and dropping them roughly halves the
-    # release matrix (and build time). The repo isn't on the Terraform Registry,
-    # so there's no platform-coverage requirement to satisfy.
+    # release matrix (and build time). The Registry requires no particular set.
     goos:
       - darwin
       - linux

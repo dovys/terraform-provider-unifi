@@ -2,6 +2,11 @@
 
 Dated entries, newest first. Add yours under today's date in the PR that makes the change. Versions come from git, not this file: every push to `main` releases a patch, and a `next → main` merge commit releases a minor ([`docs/releasing.md`](docs/releasing.md)). Each GitHub Release lists its commits. Sections tagged `[vX.Y.Z]` predate the date-based convention.
 
+## 2026-10-26
+
+### Changed
+- Published on the Terraform Registry as [`dovys/unifi`](https://registry.terraform.io/providers/dovys/unifi/latest). `terraform init` now installs it directly; the README's offline install from a GitHub Release still works.
+
 ## 2026-10-25
 
 ### Security
