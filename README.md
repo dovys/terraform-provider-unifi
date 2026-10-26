@@ -29,9 +29,9 @@ Out of scope: end-user clients, except two client records keyed by MAC (`unifi_n
 
 ## Install
 
-The provider is not on the Terraform Registry yet, so `source = "dovys/unifi"` resolves only through a local mirror or a dev override.
+The provider is on the [Terraform Registry](https://registry.terraform.io/providers/dovys/unifi/latest) as `dovys/unifi`. With the `required_providers` block under [Configure](#configure), `terraform init` downloads it and checks its signature.
 
-### From a release
+### From a release, offline
 
 Each [GitHub Release](https://github.com/dovys/terraform-provider-unifi/releases) ships zips for Linux, macOS, and Windows on amd64 and arm64, plus a `SHA256SUMS` file with a detached GPG signature. Drop the zip, unextracted, into Terraform's local plugin directory:
 
@@ -72,7 +72,8 @@ With an override active, skip `terraform init` and run `plan` or `apply` directl
 terraform {
   required_providers {
     unifi = {
-      source = "dovys/unifi"
+      source  = "dovys/unifi"
+      version = "~> 0.8"
     }
   }
 }

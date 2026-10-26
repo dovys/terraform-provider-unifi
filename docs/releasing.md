@@ -193,8 +193,10 @@ Back up `private.asc` and the fingerprint in your secret manager, then delete th
 
 The provider's address is `registry.terraform.io/dovys/unifi` (`main.go`): namespace `dovys`, type `unifi` from the repo name `terraform-provider-unifi`.
 
-1. Sign in to registry.terraform.io with the GitHub account that owns the `dovys` namespace.
-2. Add `public.asc` under the namespace's signing keys before publishing.
+It is published from HCP Terraform: organization `dovys` → Registry → Public namespaces → `dovys`, linked to the GitHub account through the HCP Terraform GitHub App. The namespace's GPG key is the release key. To set it up again:
+
+1. Claim the `dovys` namespace with the GitHub account that owns the repo.
+2. Under the namespace's Settings, add `public.asc` as a GPG key.
 3. Make sure `GPG_PRIVATE_KEY` is set.
 4. Choose **Publish → Provider** and select `terraform-provider-unifi`.
 

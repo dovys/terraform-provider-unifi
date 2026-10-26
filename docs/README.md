@@ -43,7 +43,7 @@ The Network app and console certificate issuance are shipped and verified on a l
 - Devices: `unifi_network_device` adopts if needed and configures. Destroy always reverts the device's config. It also forgets the device only when `forget_on_destroy = true`.
 - Stack: Go and `terraform-plugin-framework` (protocol v6). The client facade is hand-written over Go types generated from a version-pinned API spec that isn't public. `make generate` needs `UNIFI_SPECS` pointing at it.
 - Clean-room: no reused third-party provider or client code.
-- Distribution: Registry address `dovys/unifi` (not yet published). MIT license.
+- Distribution: Terraform Registry address `dovys/unifi`. MIT license.
 
 ## Non-goals
 

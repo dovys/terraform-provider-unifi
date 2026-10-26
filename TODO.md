@@ -2,10 +2,6 @@
 
 Open work that isn't a roadmap phase. Phases, deferred resources and design questions live in [`docs/roadmap.md`](docs/roadmap.md). Test tiers are described in [`docs/testing.md`](docs/testing.md). Below, "live write run" means the W0–W2 rungs of `./test-hil.sh write` against a live console, and "W3 rig" means a disposable controller and devices.
 
-## Registry
-
-- Once the provider is on the Terraform Registry, update the `.goreleaser.yml` comment that says it isn't.
-
 ## Known bugs
 
 - `unifi_network_wan_sla`: the provider sends the monitor `type` in lowercase (`icmp`), but the API accepts only `ICMP`, `DNS` and `SPEED_LIMIT`. Fix the validator and wire value, then un-skip `test/acc/wan_sla_acc_test.go`.

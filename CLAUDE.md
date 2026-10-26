@@ -4,7 +4,7 @@ Operating rules for agents and maintainers in this repo. This is the short form 
 
 ## What this is
 
-A clean-room Terraform provider for UniFi OS, Registry address `dovys/unifi` (not yet published to the Registry). Go, `terraform-plugin-framework`, protocol v6.
+A clean-room Terraform provider for UniFi OS, published on the Terraform Registry as `dovys/unifi`. Go, `terraform-plugin-framework`, protocol v6.
 
 - Apps: Network, Protect, Access, Console. Status and next work: [docs/roadmap.md](docs/roadmap.md). Hardware-unverified write surfaces: [TODO.md](TODO.md).
 - Resources are app-namespaced: `unifi_network_*`, `unifi_protect_*`, `unifi_access_*`, `unifi_console_*`.
