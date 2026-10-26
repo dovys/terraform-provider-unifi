@@ -1,103 +1,103 @@
-# Reverse-engineering the UniFi private APIs
+# API discovery
 
-**Why this exists.** Official surfaces (the Protect Integration API, the bits of the Network API
-Ubiquiti documents) plus the hardware we can physically obtain will never cover the full UniFi feature
-surface. To reach genuine **feature-completeness**, we reverse-engineer the **private APIs the web UI
-itself uses** — `/proxy/network/...` (already the basis of the Network app) and `/proxy/protect/api/...`
-(the Protect pivot) — to learn their real endpoints, data structures, and behavior. This is the same
-posture the Network app already takes toward legacy REST, made explicit and systematic.
+The provider talks to the private APIs the UniFi web UI uses, and most of them have no public documentation. This page covers how to work out one of these surfaces without copying vendor code: watch what the UI and the provider send, read your own console, and use the OpenAPI documents UniFi ships.
 
-## Clean-room boundary (read first)
+## Surfaces
 
-The provider is **clean-room** ([invariants in CLAUDE.md], [[../docs/README.md]]): we model the
-**observable interface and behavior**, never a vendor's (or another provider's) implementation. RE does
-**not** relax this — it sharpens where the line is:
+The surfaces, their base paths, and their write contracts are in [architecture.md](architecture.md#1-api-surfaces). UniFi's official APIs, the Integration API (`X-API-KEY`) and the documented parts of the Network API, miss much of the feature set, so the provider models the private APIs instead and leaves the Integration API out of scope.
 
-| Allowed (interface facts) | Not allowed (implementation) |
+## Clean-room rules
+
+Model the interface you can observe. Never model a vendor's implementation.
+
+| Allowed | Not allowed |
 |---|---|
-| Endpoint paths, HTTP verbs, query/body **field names**, **enum values**, validation **rules** (min/max, required, formats) | Copying source code, logic, comments, structure, or variable naming |
-| Request/response **shapes** observed on the wire | Lifting a vendor's data model verbatim because it's "easier" |
-| Documented/observed **behavior** (merge-vs-replace, defaults, side effects) | Reproducing proprietary algorithms |
+| Paths, verbs, query and body field names, enum values, validation rules (required, min/max, formats) | Copying vendor code, logic, comments, or naming |
+| Request and response shapes seen on the wire | Lifting a vendor data model verbatim |
+| Observed behavior: merge or replace, defaults, computed fields, side effects | Reproducing proprietary algorithms |
 
-**The rule:** on-box source/config is used **only to discover interface facts** (what endpoints exist,
-what fields/enums they take). **Every discovered fact is then confirmed by observing the live API**, and
-the provider is modeled **from that observed contract** — not from the source. If a fact can't be
-confirmed by observation, it's marked provisional/HIL, never shipped as certain. When in doubt, prefer
-observation over reading source.
+Also never copy code from other Terraform providers or UniFi client libraries.
 
-**Captures are real network data → never committed.** Redact secrets, passwords/PSKs, API keys, MACs,
-public IPs, and PII before anything leaves the box. Pipe every capture through
-[`scripts/redact-capture.py`](../scripts/redact-capture.py) (stdlib-only, `uv run`): it nulls
-secret-named values and masks MAC/IP/email patterns while **keeping field names, enum values, and
-structure** — exactly the shape we model from. Stage raw dumps under the gitignored `re-captures/`
-directory (same rule as `unifi-inventory.json`); the repo holds *modeled types + tests against redacted
-fixtures*, never raw dumps. The redactor is a floor, not a guarantee — eyeball the output before sharing.
+## Methods
 
-## Access & method order
+### Vendor OpenAPI documents
 
-The user has **SSH** into the console / UniFi OS Server. Method order:
+- Protect ships a full OpenAPI document for its private API. Start there.
+- Access ships only an Integration API document. It describes a different surface, so use it only as a hint for field names.
+- The console OS surface has none.
 
-1. **Source discovery (on-box, facts only).** Locate each app's HTTP route definitions, request
-   validators, and stored schemas to **enumerate** the endpoint surface (paths, verbs, params, enums,
-   constraints). Read for *what the interface is*, never to copy *how it's implemented*.
-2. **Live-API observation (the source of truth).** From the console, authenticate to the local API and
-   call the endpoints discovered in (1), capturing request/response **shapes** and **behavior** (do a
-   GET, mutate, GET again to learn merge-vs-replace, defaults, computed fields). This is what we model
-   from.
-3. **Web-UI session recording (fallback / cross-check).** When source is obfuscated/compiled or a flow
-   is unclear, record the browser's traffic to the private API (HAR / devtools) to see exactly what the
-   UI sends and gets back. Co-equal observation method; promote it to primary for any surface where (1)
-   is a dead end.
+These are interface documents. They list fields and enums, not how the controller behaves on write, and a fact found only in one stays unconfirmed until you observe it.
 
-## Targets & priority
+### Browser devtools
 
-1. **Protect private API** (`/proxy/protect/api/...`) — unblocks the Protect pivot to private REST
-   (one cookie session, no `api_key` — see [apps/protect.md](apps/protect.md)). Capture the bootstrap
-   document + per-device-type shapes (camera, light, sensor, chime, viewer), the NVR doc, liveviews,
-   and the **write verbs** (PATCH/PUT/POST) + their accepted fields. Establishes the typed shapes the
-   Protect resources need.
-2. **Network long-tail** deferred for lack of a verifiable surface:
-   - **settings** — the ~39 `setting/<key>` singletons to type ([TODO.md]).
-   - **zone-firewall** — `firewall/zone` + `firewall-policies` and the classic-vs-zone capability gate
-     ([[zone-firewall-deferred]]).
-   - **VPN / BGP** — the `networkconf` VPN purposes vs. the `openvpn`/`ipsec`/`teleport`/
-     `magic_site_to_site_vpn` settings, and however BGP is actually stored ([[phase4-vpn-bgp-deferred]]).
+This is the fastest way to see what a UI feature sends.
 
-## Workflow (per surface)
+1. Open the UniFi web UI on your console and open the browser's devtools Network tab.
+2. Filter on `/proxy/` (or `/api/` for console OS settings).
+3. Do the action in the UI.
+4. Record the method, URL, request body, and response body.
 
-1. **Discover** (SSH, source) → an endpoint/field/enum inventory for the target.
-2. **Observe** (SSH curl of the local API, and/or web-UI recording) → real request/response shapes +
-   behavior, redacted.
-3. **Stage** the redacted capture as a gitignored fixture; note provenance (discovered vs. observed).
-4. **Model** typed structs + validators in `internal/unifi` + the resource, **from the observed
-   contract**. Mark anything unconfirmed as provisional/HIL.
-5. **Test** unit round-trips against the redacted fixtures; HIL where hardware allows; live-import
-   against the operator's console for read-confirmable resources.
-6. **Document** the surface in the relevant `docs/apps/*.md` + the per-resource recipe.
+You can export the session as a HAR file, but a HAR carries your session cookie and CSRF token. Extract the bodies you need and run them through [`scripts/redact-capture.py`](#redacting-captures); never share the HAR itself.
 
-## Kickoff (Protect private API)
+### Read-only GETs
 
-First capture, to rework the Protect base onto the private REST surface. Run over SSH on the console;
-**redact** before sharing. (Exact service names/paths vary by firmware — step 1 is to find them.)
+Read your own console from your workstation over the cookie session. Keep credentials in environment variables and the cookie in a jar file, so neither ends up in shell history or a paste:
 
 ```sh
-# 1) Discover: locate the Protect service + its API routes (facts only — enumerate, don't copy code).
-#    Find the running Protect process, its install dir, and where it defines HTTP routes/validators.
-ps aux | grep -i protect
-#   then explore the install dir's route/handler/schema files to list endpoints, verbs, fields, enums.
+curl -sk -c jar.txt -H 'Content-Type: application/json' \
+  -d "{\"username\":\"$UNIFI_USERNAME\",\"password\":\"$UNIFI_PASSWORD\"}" \
+  "https://$UNIFI_HOST/api/auth/login" -o /dev/null
 
-# 2) Observe: from the console, log in to the local API and capture the private Protect shapes.
-#    (Use your local admin creds; keep the cookie out of anything you paste.)
-#    GET /proxy/protect/api/bootstrap        -> the big doc (nvr, cameras[], lights[], ... + version)
-#    GET /proxy/protect/api/cameras          -> camera list (private shape, cf. the Integration shape)
-#    GET /proxy/protect/api/nvr              -> NVR/console settings
-
-# 3) Redact + stage: run each response through the redactor, into the gitignored re-captures/ dir.
-#    (Masks secrets/MAC/IP/email; keeps field names, enums, structure.)
 mkdir -p re-captures
-uv run scripts/redact-capture.py raw-bootstrap.json > re-captures/protect-bootstrap.json
-#    ...or pipe straight from curl:  <curl …> | uv run scripts/redact-capture.py > re-captures/protect-cameras.json
+curl -sk -b jar.txt "https://$UNIFI_HOST/proxy/protect/api/bootstrap" \
+  | uv run scripts/redact-capture.py > re-captures/protect-bootstrap.json
+rm jar.txt
 ```
 
-Share the **redacted** shapes (types, enums, structure — not values) and I'll model the typed Protect
-client + resources from the observed contract. See [[reverse-engineering-workstream]].
+GETs need no CSRF token. Useful starting points are `/proxy/protect/api/bootstrap`, `/proxy/protect/api/cameras`, and `/proxy/protect/api/nvr`.
+
+### The provider's wire log
+
+Run Terraform with `TF_LOG_PROVIDER=debug` and grep for `wire HTTP` to see every request and response the provider sends ([Wire logs](development.md#wire-logs)). Use it to see which fields a write accepts: `api.err.InvalidValue` and `api.err.InvalidPayload` mean the surface rejected a field. It masks secret-named fields but not MACs, IPs, or names, so redact it like any other capture.
+
+### Write behavior
+
+GET an object, send a sparse write, then GET it again. The diff tells you whether the surface merges or replaces, which fields it defaults, and which it computes. Do this only on a disposable object you created (name it with the `tfacc-` prefix), never on a production network. Follow the test tiers in [testing.md](testing.md).
+
+If you can't confirm a behavior by observation, mark it provisional in the issue or PR, or list it in [TODO.md](../TODO.md) as needing [hardware-in-the-loop (HIL)](testing.md#tier-3-hardware-in-the-loop) verification. Don't ship it as certain.
+
+## Record shapes, not values
+
+A useful capture records:
+
+- field names, types, and nullability;
+- enum values;
+- which fields round-trip on write and which the controller ignores or rejects;
+- merge or replace semantics (the legacy `/rest` PUT merges, so the provider sends only the fields it owns);
+- defaults and computed fields.
+
+It never records real values from your network.
+
+## Redacting captures
+
+[`scripts/redact-capture.py`](../scripts/redact-capture.py) reads JSON from a file or stdin:
+
+```sh
+uv run scripts/redact-capture.py raw.json > re-captures/redacted.json
+```
+
+It replaces the values of secret-named keys (password, psk, token, cookie, any `x_` key, and so on) with `"<REDACTED>"`, and masks MACs, IPv4, IPv6, and emails anywhere they appear. It keeps field names, enums, and structure.
+
+It does not touch names, hostnames, SSIDs, site names, descriptions, 24-hex object ids, or other free text. Redact those by hand and read the output before you share it.
+
+Keep raw and redacted captures in `re-captures/`, which is gitignored. Never commit a capture. Record each capture's provenance next to it: the app and firmware version, the UI action or request, and the method (devtools, wire log, GET, or vendor OpenAPI). Test fixtures use fictional values: IPs from 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24, or 2001:db8::/32, and MACs from 00:00:5e:00:53:00/24.
+
+## From capture to code
+
+To contribute a surface, open an issue or PR with the redacted request and response, the UniFi app and firmware version, and the UI action. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+The maintainer then regenerates the wire types ([Wire types](development.md#wire-types)), and the resource follows the recipe in [development.md](development.md), and the surface is documented in the matching `docs/apps/*.md`. Test it with unit round-trips against fictional-value fixtures (`*_ci_test.go`, `make test`), add a HIL test where hardware is involved (`make testhil`), and confirm that importing objects from your own console reaches a clean plan. See [testing.md](testing.md).
+
+## Open surfaces
+
+Deferred surfaces are tracked in [roadmap.md](roadmap.md), and open capture work in [TODO.md](../TODO.md).

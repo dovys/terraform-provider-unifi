@@ -2,6 +2,10 @@
 
 Open work that isn't a roadmap phase. Phases, deferred resources and design questions live in [`docs/roadmap.md`](docs/roadmap.md). Test tiers are described in [`docs/testing.md`](docs/testing.md). Below, "live write run" means the W0–W2 rungs of `./test-hil.sh write` against a live console, and "W3 rig" means a disposable controller and devices.
 
+## Registry
+
+- Once the provider is on the Terraform Registry, update the `.goreleaser.yml` comment that says it isn't.
+
 ## Known bugs
 
 - `unifi_network_wan_sla`: the provider sends the monitor `type` in lowercase (`icmp`), but the API accepts only `ICMP`, `DNS` and `SPEED_LIMIT`. Fix the validator and wire value, then un-skip `test/acc/wan_sla_acc_test.go`.
@@ -41,11 +45,16 @@ These writes ship but have not been confirmed on real hardware. Their schemas sh
 `unifi_access_door_group`, `unifi_access_policy`, `unifi_access_holiday_group`, `unifi_access_door` and `unifi_access_door_guard` are built from the API spec and have never run against a live console. Needs: live Access console. Confirm:
 
 - the CRUD paths, the success codes in the `{code, msg, data}` envelope, and the `/door_ids` response shape;
-- `unifi_access_door` `floor_name` and `unifi_access_policy` `schedule_id` and `resources`, which the read view doesn't echo, so refresh can't detect drift on them.
+- `unifi_access_door` `floor_name` and `unifi_access_policy` `schedule_id` and `resources`, which the read view doesn't echo, so refresh can't detect drift on them;
+- an Access capability probe, so a console without Access gets a plan-time diagnostic (invariant 3) instead of a raw error at apply or a 404 that drops resources from state.
+
+### Console
+
+- `unifi_console_certificate`. Needs: live write run. The Docker controller has no unifi-core surface, so no automated test covers the create, update, import and destroy lifecycle; Tier 3 only lists and decodes certificates.
 
 ### W3 rig
 
-These mutate shared state or have an outward effect, so they wait for a W3 rig (see the W3 row in [`docs/testing.md`](docs/testing.md)).
+These mutate shared state or have an outward effect, so they wait for a W3 rig (see the W3 row in [`test/hil/README.md`](test/hil/README.md#rungs)).
 
 - `unifi_network_device`: adopt and forget via `/cmd/devmgr`, the config PUT, the `device.state` enum, and `port_overrides` writes, including the accepted `poe_mode` values.
 - `unifi_network_network`: create and update a real, non-inert network.

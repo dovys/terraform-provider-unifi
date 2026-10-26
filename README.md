@@ -119,7 +119,7 @@ Destroying resources is designed not to break a running network.
 - A feature the console doesn't support fails at plan time with a diagnostic, not mid-apply with a raw HTTP error.
 - Secrets are marked `Sensitive`.
 
-Details are in [docs/architecture.md](docs/architecture.md#6-safety--footgun-prevention).
+Details are in [docs/architecture.md](docs/architecture.md#6-safety-defaults).
 
 ## How it's built
 

@@ -1,73 +1,89 @@
-# UniFi Access (the `unifi_access_*` app)
+# UniFi Access
 
-Access is another UniFi OS app on the same console. Resources are namespaced `unifi_access_*`
-(see [../README.md](../README.md) app-namespacing). We model **infrastructure** — door groups, doors,
-access policies, holidays/schedules — never per-swipe events or runtime activity.
+UniFi Access is the door-access app on a UniFi OS console. The provider manages its infrastructure objects (door groups, policies, holiday groups, doors and door guards) as `unifi_access_*` resources. It does not model users, credentials, NFC cards or door events.
 
-## Surface: the private web-UI API over the one cookie session
+None of the Access resources has run against a live console. They are built from the API spec and covered by unit tests only; see [Verification status](#verification-status).
 
-Access uses the **private web-UI API the Access app itself calls** — `/proxy/access/api/v1/...` and
-`/proxy/access/api/v2/...` — over the **same cookie+CSRF session** as the Network and Protect apps. **No
-new credential**: `username`/`password` reach everything, so the "**one console session serves every
-app**" principle holds ([../README.md](../README.md), [architecture.md §3](../architecture.md)). This is
-the reverse-engineered surface, treated clean-room — modeled from the **observed contract**, never from
-reading the vendor's implementation (see [../reverse-engineering.md](../reverse-engineering.md)).
+## Surface
 
-Every Access response is wrapped in a `{code, msg, data}` **envelope**: `code` is the status, `msg` a
-human string, `data` the typed payload. The client unwraps it centrally in `internal/unifi/access`
-(`do[T]`) and hands groups the bare typed object — callers never see the envelope. A not-found maps to
-`access.ErrNotFound` (→ remove-on-404).
+Access resources call the private API the Access web UI uses, under `/proxy/access/api/v2/...`. Requests go over the same cookie and CSRF session as Network and Protect, so the provider's `username` and `password` are the only credentials (see [architecture.md](../architecture.md)).
 
-**Why not the official Integration API** (`X-API-KEY`)? Access ships **only** an Integration-API
-OpenAPI in its package — that's the supported, documented *subset*, and it's the **wrong surface** for
-infrastructure modeling (it can't reach the full door-group/policy/door config). Per the
-**either-or-per-resource** rule a resource commits to **one** surface and never mixes; the Access
-resources commit to the private web-UI API. The Integration API stays a reference cross-check only;
-invariant 2 ("one cookie+CSRF session; Integration/X-API-KEY out of scope") **stands** — no `api_key`.
+UniFi also publishes an Integration API (`X-API-KEY`) OpenAPI document for Access. The provider doesn't call it, because it can't reach the full door group, policy and door settings. It serves only as a reference to cross-check field names and shapes.
 
-**Lower spec fidelity than Protect, and not live-verifiable yet.** Protect ships a full vendor OpenAPI;
-Access does not, so the private-API spec (`../unifi-specs/access/v4.2.27`) is reverse-engineered from the
-Access controller **Go binary** (typed structs recovered via redress). The provider's `wire` types are a
-deterministic projection of that spec (`access_codegen_spec.py`, reusing the Protect
-closure-trim/hoist/widen transforms). Because there is **no live/HIL Access console** this phase
-(X-API-KEY is Network-only), the write surface — CRUD paths, the envelope success-code set, the
-`/door_ids` shape — is **unconfirmed**; see [`../../TODO.md`](../../TODO.md).
+Access is console-global, not site-scoped, so the provider's `site` setting doesn't apply.
 
-> **Status: P7 complete (P7a–P7c shipped).** The `c.Access()` substruct client is built on the cookie
-> session (`internal/unifi/access`, private web-UI API `/proxy/access/api`, `{code,msg,data}` envelope,
-> console-global, no `api_key`); generated `wire` types are projected from the RE'd spec. Ships the
-> managed resources `unifi_access_door_group`, `unifi_access_policy`, `unifi_access_holiday_group`,
-> `unifi_access_door`, and `unifi_access_door_guard`, each with a read-only data source. Every Access
-> write surface — CRUD paths, the envelope success-code set, the `/door_ids` shape — is
-> **HIL-unverified** (no live Access console; X-API-KEY is Network-only — see
-> [`../../TODO.md`](../../TODO.md)).
+Access has no capability probe and no field on `unifi.Capabilities`. This is a known gap against capability gating (invariant 3), tracked in [`TODO.md`](../../TODO.md#access). On a console without Access installed, apply and data-source reads fail with a raw API error instead of a plan-time diagnostic, and a 404 on refresh drops existing resources from state.
+
+## Response envelope
+
+Every Access response wraps its payload in `{code, msg, data}`. `do[T]` in `internal/unifi/access/core.go` unwraps it, so service methods return the bare typed object.
+
+- Success: `code` is `""`, `0`, `200`, `"SUCCESS"` or `null`. The spec types `code` as an integer; string codes such as `"SUCCESS"` are accepted too, pending a live capture (see [`TODO.md`](../../TODO.md#access)).
+- An empty body or a `null` `data` counts as success with nothing to decode.
+- Not found: an HTTP 404, an HTTP 400 whose message reads as not-found, or a non-success envelope whose `msg` reads as not-found. All three return `access.ErrNotFound`, and `Read` removes the resource from state.
+- Any other non-success code returns an error carrying `msg` and `code`.
+
+## Client layout
+
+`unifi.Client.Access()` returns the `access.Client`. Each group lives in its own file in `internal/unifi/access`:
+
+| Accessor | File |
+|----------|------|
+| `c.Access().DoorGroups()` | `door_groups.go` |
+| `c.Access().AccessPolicies()` | `access_policies.go` |
+| `c.Access().HolidayGroups()` | `holiday_groups.go` |
+| `c.Access().Doors()` | `doors.go` |
+| `c.Access().DoorGuards()` | `door_guards.go` |
+
+The `wire` types in `internal/unifi/access/wire` are generated from a version-pinned API spec (Access 4.2.27) that isn't public. `make generate` needs `UNIFI_SPECS` pointing at it. The generated code is checked in; don't hand-edit it. If a field is missing or mistyped, open an issue.
 
 ## Resources
 
-Two shapes appear. **Logical objects** (door groups, policies, holiday groups) are plain CRUD resources
-keyed by the controller `unique_id` — Terraform owns their lifecycle. **Discovered hardware** (doors, and
-the per-door guard set) has no create/delete API, so those resources are **update/import-only**: they adopt
-an existing door by `door_id`, configure it, and on destroy do a **no-op state removal** — the door keeps
-its last-applied config (the safe-by-default, never-forget posture; `RequiresReplace` on `door_id`).
+- Logical objects (door groups, policies, holiday groups) have full CRUD. Terraform owns their lifecycle, and they import by the controller's `unique_id`.
+- Discovered hardware (doors and their guard sets) has no create or delete API. These resources adopt an existing door by `door_id`, configure it, and import by `door_id`. Changing `door_id` forces replacement. Destroy only removes the resource from state; the door keeps its last-applied config.
 
-Where a resource's write shape and its read shape diverge (the policy and door write DTOs carry fields the
-read view omits, e.g. `schedule_id`/`resources` on a policy, `floor_name` on a door), `Read` reconciles the
-fields the read view returns and **preserves** the write-only fields from the prior model — no phantom diff.
+Every path below is relative to `/proxy/access/api/v2/`.
 
-| Resource | Backs | Notes |
-|----------|------|-------|
-| `unifi_access_door_group` | `POST/GET/PUT/DELETE /api/v2/access/door_group[/{id}]`, members via `/door_ids` | Logical object keyed by `unique_id`. Manages `name`, `group_type` (controller-assigned), door membership (`door_ids`). |
-| `unifi_access_policy` | `POST/GET/PUT/DELETE /api/v2/access_policy[/{id}]`, list `/access_policies` | Logical object. Manages `name`, `enabled`, `schedule_id`, and `resources` (typed door/door-group references); reads back computed subject/resource counts. |
-| `unifi_access_holiday_group` | `POST/GET/PUT/DELETE /api/v2/holiday_group[/{id}]` | Logical object. Manages `name`, `description`, `is_private`, `template_name`, and member `holiday_ids` (existing holiday `unique_id`s). |
-| `unifi_access_door` | `GET/PUT /api/v2/locations/door[/{id}]`, list `/locations/doors` | Discovered hardware — **update/import-only**. Manages `name`, `floor_name` (write-time association), `extra_type`; exposes live `is_open`/`dps_connected`. Destroy = no-op. |
-| `unifi_access_door_guard` | `GET/PUT /api/v2/locations/door/{id}/door_guard` | Discovered hardware — **update/import-only**. Manages the guard `user_ids` of a door (opaque user references; users not modeled). Set `user_ids = []` to clear; destroy = no-op. |
-| `data.unifi_access_door_group` | `GET /api/v2/access/door_groups` (+ `/door_ids`) | Read-only lookup by `id`/`name`: name, group_type, type, member/floor/policy counts, member `door_ids`. |
-| `data.unifi_access_policy` | `GET /api/v2/access_policies` | Read-only lookup by `id`/`name`: name, enabled, creator, subject/resource counts, validity window. |
-| `data.unifi_access_holiday_group` | `GET /api/v2/holiday_groups` | Read-only lookup by `id`/`name`: name, description, member `holiday_ids`, counts. |
-| `data.unifi_access_door` | `GET /api/v2/locations/doors` | Read-only lookup by `id`/`name`: full name, floor, location type, live `is_open`/`dps_connected`. |
-| `data.unifi_access_door_guard` | `GET /api/v2/locations/door/{id}/door_guard` | Read-only lookup by `door_id`: the guard `user_ids`. |
+| Resource | API paths | Manages | Read-only |
+|----------|-----------|---------|-----------|
+| `unifi_access_door_group` | `POST/GET/PUT/DELETE access/door_group[/{id}]`, list `access/door_groups`, members `GET access/door_group/{id}/door_ids` | `name`, `group_type` (optional; the controller assigns one if unset), `door_ids` | |
+| `unifi_access_policy` | `POST/GET/PUT/DELETE access_policy[/{id}]`, list `access_policies` | `name`, `enabled`, `schedule_id`, `resources` (typed door and door group references) | `description`, `creator_name`, `user_count`, `door_count`, `group_count`, `elevator_count`, `valid_start_time`, `valid_end_time` |
+| `unifi_access_holiday_group` | `POST/GET/PUT/DELETE holiday_group[/{id}]`, list `holiday_groups` | `name`, `description`, `is_private`, `template_name`, `holiday_ids` | `create_time`, `holiday_count`, `is_default` |
+| `unifi_access_door` | list `GET locations/doors`, update `PUT locations/door/{id}` | `name`, `floor_name`, `extra_type` | `full_name`, `location_type`, `timezone`, `is_open`, `dps_connected` |
+| `unifi_access_door_guard` | `GET/PUT locations/door/{id}/door_guard` | `user_ids` (set `[]` to clear) | |
 
-Floor groups (member floors) remain out of scope until a read path for floor membership is found — door
-groups model **door-only** membership. The provider models **infrastructure**, so Access users, credentials,
-and NFC cards are out of scope; `user_ids` on a policy/door guard are opaque references the operator supplies.
-Every write surface above is **HIL-unverified** — see [`../../TODO.md`](../../TODO.md).
+Per-resource notes:
+
+- Door group: membership is written in the create and update body but read back from `access/door_group/{id}/door_ids`. Groups hold doors only; floor groups are out of scope until there is a way to read floor membership.
+- Door: there is no per-door GET, so Read lists all doors and filters by `location.unique_id`.
+- Door guard: `user_ids` are opaque references to Access users, which the provider doesn't model.
+- Write-only fields: `schedule_id` and `resources` on a policy and `floor_name` on a door are sent on write but absent from the read view. Read keeps them from prior state, so they show no diff, but a refresh can't detect drift on them.
+
+## Data sources
+
+Each resource has a read-only data source. Paths are relative to `/proxy/access/api/v2/`.
+
+| Data source | Reads | Lookup | Returns |
+|-------------|-------|--------|---------|
+| `data.unifi_access_door_group` | `access/door_groups`, `access/door_group/{id}/door_ids` | `id` or `name` | `name`, `group_type`, `type`, `door_count`, `floor_count`, `policy_count`, `door_ids` |
+| `data.unifi_access_policy` | `access_policies` | `id` or `name` | `name`, `enabled`, `description`, `creator_name`, `user_count`, `door_count`, `group_count`, `elevator_count`, `valid_start_time`, `valid_end_time` |
+| `data.unifi_access_holiday_group` | `holiday_groups` | `id` or `name` | `name`, `description`, `is_private`, `is_default`, `template_name`, `holiday_count`, `create_time`, `holiday_ids` |
+| `data.unifi_access_door` | `locations/doors` | `id` or `name` | `name`, `full_name`, `floor_id`, `location_type`, `extra_type`, `timezone`, `is_open`, `dps_connected` |
+| `data.unifi_access_door_guard` | `locations/door/{id}/door_guard` | `door_id` | `user_ids` |
+
+The policy data source doesn't return `schedule_id` or `resources`, and the door data source returns `floor_id`, not `floor_name`.
+
+The generated reference pages are in [`docs/resources`](../resources/) and [`docs/data-sources`](../data-sources/) (`access_*.md`). A worked example is in [`examples/access/access.tf`](../../examples/access/access.tf).
+
+## Verification status
+
+Tests cover the client paths and envelope handling (`internal/unifi/access/*_ci_test.go`) and the provider resources (`internal/provider/access_*_ci_test.go`). Nothing has confirmed the write surface on a live console: the CRUD paths, the envelope success codes, the `door_ids` response shape, and the preserved write-only fields. The open checks are listed under Access in [`TODO.md`](../../TODO.md).
+
+If you have an Access console, capture real traffic and report differences from the tables above in an issue. Log the wire requests with `TF_LOG_PROVIDER=DEBUG terraform apply 2>&1 | grep 'wire HTTP'` (see [Wire logs](../development.md#wire-logs)), watch the Access web UI in browser devtools, or issue read-only GETs.
+
+## Adding an Access resource
+
+Follow the resource recipe in [development.md](../development.md). For Access:
+
+1. Add the path constants and a service type in `internal/unifi/access`, calling `do[T]` so the envelope and not-found handling stay central.
+2. Add the group accessor on `access.Client` in `client.go`.

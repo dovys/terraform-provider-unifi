@@ -1,124 +1,111 @@
-# UniFi Protect (the `unifi_protect_*` app)
+# UniFi Protect
 
-Protect is a second UniFi OS app on the same console. Resources are namespaced `unifi_protect_*`
-(see [../README.md](../README.md) app-namespacing). It ships as **0.2.0**, after the Network app's
-`0.1.0`. We model **infrastructure** (the cameras/lights/sensors/chimes/viewers, the NVR config, and
-liveview layouts) — never runtime media or events.
+Protect is the video app on a UniFi OS console, next to Network. Its resources are named `unifi_protect_*` ([design decisions](../README.md#design-decisions)). The provider models Protect infrastructure: cameras, lights, sensors, chimes, viewers, NVR settings, live view layouts, and automation webhook headers. It never models media or events.
 
-## Surface: the private REST API over the one cookie session
+## Surface
 
-Protect uses the **private REST API the web UI itself calls** — `/proxy/protect/api/...` (bootstrap,
-`/cameras/<id>`, `/lights/<id>`, …) — over the **same cookie+CSRF session** as the Network app. **No new
-credential**: `username`/`password` reach everything, so the "**one console session serves every app**"
-principle holds ([../README.md](../README.md), [architecture.md §3](../architecture.md)). This is the
-reverse-engineered surface, treated clean-room — modeled from the **observed contract**, never from
-reading the vendor's implementation (see [../reverse-engineering.md](../reverse-engineering.md)). It's
-the same posture the Network app already takes toward legacy REST.
+Resources call the private REST API that the Protect web UI uses, under `/proxy/protect/api/`. It runs over the same cookie and CSRF session as Network, so the provider's `username` and `password` cover Protect with no extra credential (see [architecture.md](../architecture.md)). The provider does not use the Protect Integration API (`/proxy/protect/integration/v1`, `X-API-KEY`) and has no `api_key` setting.
 
-**Why not the official Integration API** (`/proxy/protect/integration/v1`, `X-API-KEY`)? It's the
-supported, documented *subset*, but a subset — it can't reach the full device/config surface, and
-feature-completeness is the goal. Per the **either-or-per-resource** rule a resource commits to **one**
-surface and never mixes; the Protect resources commit to the private REST API. The Integration API
-remains a *permitted* option for some future resource, but is **currently unused**, so invariant 2
-("one cookie+CSRF session; Integration/X-API-KEY out of scope") **stands unchanged** — no `api_key`.
+Responses are bare JSON with no `{meta, data}` envelope. The client maps a 404, or a 400 whose message says the object was not found, to `ErrNotFound`, and Read then removes the resource from state.
 
-**Shapes are captured by reverse-engineering, not yet modeled.** The exact `/proxy/protect/api` request/
-response structures, write verbs, enums, and behavior come from the RE workstream
-([../reverse-engineering.md](../reverse-engineering.md)) — SSH source-discovery confirmed by live
-observation. The resource set and intent below are stable; the **field-level schemas land once RE
-captures them** (this doc is updated then, with the per-resource field tables).
+Shapes come from the OpenAPI document Protect ships and from observing the live API: browser devtools on the Protect web UI, the provider's `TF_LOG=DEBUG` wire logs, and read-only GETs. The provider is clean-room: it models only this observed contract, never the vendor's implementation (see [reverse-engineering.md](../reverse-engineering.md)).
 
-> **Status: P5a + P5b shipped.** The `c.Protect()` substruct client is built on the cookie session
-> (`internal/unifi/protect`, private REST `/proxy/protect/api`, generated `wire` types projected from the
-> shipped Protect OpenAPI). Resources: `unifi_protect_camera` (+ `data.unifi_protect_camera`) and
-> `unifi_protect_nvr_settings` (P5a); `unifi_protect_light`, `unifi_protect_sensor`,
-> `unifi_protect_chime`, `unifi_protect_viewer` (configure-existing, keyed by MAC), and
-> `unifi_protect_liveview` (full CRUD; `slots` as a nested block) (P5b);
-> `unifi_protect_automation` (manage a webhook header on an existing automation; write-only token).
-> **No `api_key`, one session.**
-> **Config writes are HIL-unverified** (recon is read-only — see [`../../TODO.md`](../../TODO.md)); the
-> liveview `slots` shape and chime `ringSettings` (deferred) await a live/HIL capture.
+## Client
+
+`c.Protect()` returns the client in `internal/unifi/protect`. It groups collections by object type:
+
+| Accessor | Path | Extras |
+|---|---|---|
+| `Cameras()` | `/cameras` | `GetByMAC`, `Forget` (POST `/cameras/<id>/unadopt`) |
+| `Lights()`, `Sensors()`, `Chimes()`, `Viewers()` | `/lights`, `/sensors`, `/chimes`, `/viewers` | `GetByMAC`; Delete unadopts |
+| `Liveviews()` | `/liveviews` | `GetByName` |
+| `NVR()` | `/nvr` | Singleton get and update |
+| `Automations()` | `/automations` | Batch PATCH |
+
+Most groups wrap the generic `Collection[T]`: List, Get, Create, Update, and Delete, where Update is a PATCH.
+
+Types in `internal/unifi/protect/wire` are generated with oapi-codegen (types only) from a version-pinned API spec that isn't public. The spec is projected from the OpenAPI Protect ships, trimmed to an explicit list of root objects. `make generate` needs `UNIFI_SPECS` pointing at the spec. A new resource's type needs its root added to the list in `wire/gen.go`, or regen drops it. Never hand-edit the generated file.
+
+## Write contract
+
+Updates PATCH only the fields the provider owns, never the whole document. The controller merges a PATCH at the top level but replaces nested sub-objects wholesale.
+
+To add a writable resource:
+
+1. Use the generated `*Update` write DTO if the object has one (`omitempty`-tagged, e.g. `wire.NvrUpdate`). Otherwise define an overlay struct of the owned fields with `omitempty`. The generated read types have no `omitempty`, so sending them would write zeros over every unowned field.
+2. Build the overlay from the plan over the current object with the `merge*` helpers in `protect_common.go` (`mergeStr`, `mergeBool`, `mergeStrSet`, `mergeFloat` for an Int64 attribute onto a float wire field, `mergeF64` for a Float64 attribute). A null or unknown plan value keeps the current value.
+3. For a nested sub-object, read the current object, change the owned keys, and send the whole sub-object back.
+
+Because an omitted field keeps its value, a field can't be cleared by sending its zero value. Network's sparse PUT has the same limit ([roadmap.md](../roadmap.md#open-questions)).
+
+Automations use a batch PATCH. The client sends `PATCH /automations` with a one-element `[{id, body}]` array and reads a 207 response with a status per item. The controller replaces `actions[]` wholesale, so the client echoes every action back and changes only the owned header.
 
 ## Resources
 
-A camera is adopted hardware with mutable config, so — like `unifi_network_device` — it's a single
-**configure-existing (+ adopt-if-needed, HIL-gated)** resource plus a read-only data source.
-Lights/sensors/chimes/viewers are configure-existing resources; liveview is a pure CRUD config object;
-nvr_settings is a singleton. All over `/proxy/protect/api/...`; field schemas per RE.
+All device resources configure objects that are already adopted. Create looks up the device by `mac` and fails if no adopted device has that MAC. The provider can't adopt devices.
 
-| Resource | Backs | Notes (fields confirmed via RE) |
-|----------|------|-------|
-| `unifi_protect_camera` | `/proxy/protect/api/cameras/<id>` | Keyed by `mac`. Configures name, status-LED, on-screen-display overlays, mic enable/volume, video mode, HDR, smart-detect object/audio types, and **doorbell-gated** LCD message. Computed telemetry: state, model, capability flags. Destroy reverts managed config; **never forgets** unless `forget_on_destroy=true`. |
-| `data.unifi_protect_camera` | `/proxy/protect/api/cameras` | Read-only lookup by `mac`/`id`: state, model, capability flags. |
-| `unifi_protect_liveview` | `/proxy/protect/api/liveviews` | Multi-camera layout: layout + slots (cameras, cycle mode/interval), default/global. Full **CRUD** config object. Import by `id` or `name`. |
-| `unifi_protect_nvr_settings` | `/proxy/protect/api/nvr` | **Singleton** — import/update-only, no create, **destroy is state removal** (the shipped `attr_no_delete` no-op-destroy pattern, e.g. `user_group_resource.go`). Always present, so **Read never 404s**. Recording/retention defaults, arm mode, doorbell default messages. |
-| `unifi_protect_light` | `/proxy/protect/api/lights/<id>` | Floodlight: brightness, PIR sensitivity, light-on-motion. **No live instance → HIL.** |
-| `unifi_protect_sensor` | `/proxy/protect/api/sensors/<id>` | UP-Sense: motion/temp/humidity/leak thresholds, mount type. **HIL.** |
-| `unifi_protect_chime` | `/proxy/protect/api/chimes/<id>` | Chime: volume, paired-doorbell associations, ringtones. **HIL.** |
-| `unifi_protect_viewer` | `/proxy/protect/api/viewers/<id>` | Viewport: the liveview it displays. **HIL.** |
-| `unifi_protect_automation` | `/proxy/protect/api/automations` | Manages one webhook header on an existing automation's sole `HTTP_REQUEST` action. Import/update-only (created in-app); `destroy` is state-removal (no per-id delete — `DELETE` wipes all automations); `header_value` write-only. **HIL.** |
+| Resource | Path | Configures |
+|---|---|---|
+| `unifi_protect_camera` | `/cameras/<id>` | `name`, `mic_enabled`, `mic_volume`, `status_light_enabled`, `hdr_type`, `video_mode`, `recording_mode`, `osd_*_enabled`, `smart_detect_object_types`, `smart_detect_audio_types`, `lcd_message_type`, `lcd_message_text`. Computed: `model`, `type`, `state`, `host`, `is_adopted`, `has_speaker`. |
+| `unifi_protect_light` | `/lights/<id>` | `name`, `camera`, `mode` (off, motion, always, schedule), `enable_at`, `led_level`, `indicator_enabled`, `pir_duration`, `pir_sensitivity`, `lux_sensitivity`, `force_led_on`. |
+| `unifi_protect_sensor` | `/sensors/<id>` | `name`, `mount_type`, `camera`, `motion_enabled`, `motion_sensitivity`, `{temperature,humidity,light}_{enabled,low,high,margin}`, `leak_internal_enabled`, `leak_external_enabled`, `alarm_enabled`, `led_enabled`. Thresholds are floats in °C, % relative humidity, or lux. |
+| `unifi_protect_chime` | `/chimes/<id>` | `name`, `volume`, `repeat_times`, `camera_ids`. Ringtones (`ringSettings`) are not modeled. |
+| `unifi_protect_viewer` | `/viewers/<id>` | `name`, `liveview`. Computed: `stream_limit`. |
+| `unifi_protect_liveview` | `/liveviews/<id>` | `name`, `layout`, `is_default`, `is_global`, and a `slots` list of `cameras`, `cycle_mode`, `cycle_interval`. Full create, update, and delete. |
+| `unifi_protect_nvr_settings` | `/nvr` | `name`, `timezone`, `time_format`, `temperature_unit`, `ssh_enabled`, `enable_automatic_backups`, `auto_retention_enabled`, `recording_retention_duration_ms`, `disable_audio`. Computed: `version`, `host`. |
+| `unifi_protect_automation` | `/automations` | One webhook header (`header_name`, write-only `header_value`) on the sole `HTTP_REQUEST` action of an automation created in the Protect app. |
 
-**Data sources.** Only `data.unifi_protect_camera` ships initially (the object most likely referenced
-without being managed). Add `liveview`/`nvr` data sources later if asked.
+`data.unifi_protect_camera` looks up a camera by `id` or `mac` and returns its attributes. It is the only Protect data source.
 
-**Write path.** PATCH of the **owned fields only** (the exact verb per RE), never a
-whole-document write — the Protect analogue of the Network sparse PUT (the controller partial-merges
-at the top level; nested sub-objects it replaces wholesale are merged client-side). Read reconciles
-Computed-vs-configured and removes-on-404 for the device resources; the singleton `nvr_settings` never
-404s. The known `structToRawMap` set-but-not-clear limitation ([roadmap.md open question 6](../roadmap.md))
-applies here too; same mitigations (Optional+Computed for the common path; an explicit-empty allow-list
-per confirmed-clearable field).
+The example is [examples/protect/protect.tf](../../examples/protect/protect.tf). Reference docs are generated under `docs/resources/protect_*.md` and `docs/data-sources/protect_camera.md`.
 
-## Capability & version gating
+## Lifecycle and import
 
-Two gates (invariant 3 — diagnose, don't emit a raw 4xx):
+Destroy on a device resource removes it from state and leaves the device with its last-applied config. With `forget_on_destroy = true`, destroy also unadopts it: a camera through `POST /cameras/<id>/unadopt`, other devices through `DELETE` on the device.
 
-1. **Protect version — Configure-time.** The capability probe reads the Protect application version
-   from the private API (the bootstrap/NVR doc, over the cookie session — endpoint per RE; live console
-   runs **7.1.69**). Config-only, so it gates like the existing Network version check. Floor confirmed
-   on 7.1.69, provisional below (no older build to test).
-2. **Per-camera capability flags — apply-time / `ModifyPlan`-with-read.** A camera advertises its
-   capabilities (HDR / mic / status-LED / speaker / supported smart-detect + video modes). Refusing a
-   write to an unsupported field needs the camera's **live flags**, which the provider only has *after a
-   read* — so this gate **can't be pure `ValidateConfig`**; it runs in `ModifyPlan` (which reads the
-   camera) or as an apply-time diagnostic. **Doorbells are cameras** — no separate type; the doorbell
-   fields (LCD message, chime) are gated by the same capability check. (Both are **new patterns** for
-   this codebase — today gating lives only in `Configure`.)
+Neither `nvr_settings` nor `automation` can be created on the controller. Create configures the existing NVR, and an automation needs `id` set in config or an `import {}` block. Destroy removes them from state. The NVR always exists, so its Read never returns not-found. Automations have no per-id delete, and `DELETE /automations` removes all of them.
 
-## Safety, IDs, lifecycle
+| Resource | Import key |
+|---|---|
+| Devices | MAC with colons, or the 24-hex object id |
+| `liveview` | 24-hex id, or the name |
+| `nvr_settings` | Any value; import reads `/nvr` |
+| `automation` | `<id>/<header_name>`. A bare id works, but `header_name` is unset until the first apply. |
 
-- **Safe by default** (invariant 4). `terraform destroy` on a camera **reverts the managed config** and
-  does **not** unadopt the (physical, expensive) camera unless `forget_on_destroy=true` — same posture
-  as `unifi_network_device`. Lights/sensors/chimes/viewers follow suit. `nvr_settings` and a device's
-  adoption are never "deleted" by destroy.
-- **Adoption.** Whether the private API exposes an adopt verb is **HIL-unverified** (the live camera is
-  already adopted); until confirmed, `protect_camera` is **configure-existing + import**, adopt-if-needed
-  HIL-gated (mirrors `unifi_network_device`).
-- **Import keys.** Devices import by **`mac`** (friendly) or the 24-hex `id`; `liveview` by `id`/`name`;
-  `nvr_settings` is the singleton NVR `id`. A `mac`/`name` import **resolves by list-and-filter** (GET
-  the collection, match, take its `id`) — the same friendliness `unifi_network_device` provides over the
-  id-keyed `/stat/device`. State `id` is always the Protect object id.
+A MAC or name import lists the collection and filters it. The state `id` is always the Protect object id.
+
+The API returns MACs without colons. The provider stores them in canonical colon form, and a `normalizeMAC` plan modifier runs before `RequiresReplace` so a format change doesn't force replacement. Import treats a key as a MAC only if it contains a colon, so a dash or bare-hex MAC is read as an id.
+
+## Gating
+
+Two gates turn unsupported config into a diagnostic instead of a raw 4xx.
+
+At Configure, the provider probes `/proxy/protect/api/nvr`. If the probe fails, `requireProtect` reports "UniFi Protect is not available" on any Protect resource. The gate checks only that Protect is installed. It records the version but enforces no minimum. The tested version is 7.1.69.
+
+At plan time, `unifi_protect_camera` checks config against the camera's feature flags in `ModifyPlan`. The flags live on the controller, so the check reads the camera, which `ValidateConfig` can't do. Doorbells are cameras, so the LCD fields use the same check.
+
+| Attribute | Flag |
+|---|---|
+| `hdr_type` | `HasHdr` |
+| `mic_enabled`, `mic_volume` | `HasMic` |
+| `status_light_enabled` | `HasLedStatus` |
+| `smart_detect_object_types`, `smart_detect_audio_types` | `HasSmartDetect` |
+| `lcd_message_type`, `lcd_message_text` | `HasLcdScreen` |
+
+The check reads config, not plan, so values carried from state by `UseStateForUnknown` don't trigger it. It reads the camera only when a gated attribute is set, and skips the check if the camera can't be read.
 
 ## Not modeled
 
-Runtime media and ephemeral actions are not configuration:
-
-- Live RTSP/RTSPS streams, snapshots, recorded-clip export, talkback audio.
-- PTZ **movements** (a command, not state); PTZ **presets** may become config later.
-- The event/detection WebSocket feed — events aren't Terraform state.
-- Per-user view permissions and cloud account linkage — later, only if cleanly modelable.
-- Detection **zones** (per-camera regions) — deferred until RE shows a clean shape.
+- RTSP and RTSPS streams, snapshots, clip export, talkback.
+- PTZ movement and presets.
+- The event and detection WebSocket feed.
+- Per-user view permissions and cloud account linkage.
+- Detection zones.
 
 ## Testing
 
-**HIL-only for writes (Tier 3).** The Docker `unifi-network-application` controller has **no Protect**
-and there's no Protect simulator, so there is no Tier-2 acceptance for Protect (see
-[../testing.md](../testing.md)). Coverage:
+The Docker Network controller used for Tier 2 has no Protect, and no Protect simulator exists, so Protect has no Tier 2 acceptance tests. Writes can only be verified on hardware (Tier 3). See [testing.md](../testing.md).
 
-- **Unit** (no hardware): client CRUD over `httptest` incl. the owned-field overlay mask, model (de)serialization,
-  schema validation, the capability/version gating, and conversion round-trips — against **redacted RE
-  fixtures**.
-- **Live read** (this console, read-only): `camera`, `liveview`, and `nvr_settings` **import clean** once
-  their RE shapes are modeled (instances exist live).
-- **HIL** (real hardware): all **writes**, adoption/forget, and the four zero-instance resources
-  (`light`/`sensor`/`chime`/`viewer`).
+Client unit tests inject a fake session (`fakeDoer`) and cover paths, the owned-field overlay, not-found mapping, and the automation batch envelope (`internal/unifi/protect/protect_ci_test.go`). Provider unit tests cover wire conversion, merge helpers, capability violations, and schemas (`internal/provider/protect_*_ci_test.go`). The client tests cover the Protect presence probe.
+
+Verified on a live console: every Protect surface decodes through its wire type, cameras, liveviews and NVR settings import to a clean plan, and a liveview with no slots round-trips create, update and destroy. Unverified writes are tracked in [TODO.md](../../TODO.md).

@@ -35,9 +35,7 @@ fmt:
 tffmt:
 	terraform fmt -check -recursive examples/
 
-# Scan for known vulnerabilities reachable from our call graph — deps and the Go
-# standard library (mirrors the CI govulncheck gate). The stdlib scanned is the
-# go.mod toolchain's; pinned tool version; advisory DB fetched from vuln.go.dev.
+# Mirrors the CI govulncheck gate: scans deps and the stdlib of the go.mod toolchain.
 vulncheck:
 	go run golang.org/x/vuln/cmd/govulncheck@v1.3.0 ./...
 

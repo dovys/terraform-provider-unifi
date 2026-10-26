@@ -16,7 +16,7 @@ A clean-room Terraform provider for UniFi OS, Registry address `dovys/unifi` (no
 - Transport (`internal/unifi/transport`): classic cookie + CSRF, re-auth driven by the `TOKEN` JWT's own expiry, login throttle (`UNIFI_LOGIN_MIN_INTERVAL`).
 - Network (`internal/unifi/network`, [docs/apps/network.md](docs/apps/network.md)) has two surfaces on that session:
   - legacy `/api/s/<site>/rest`, `/stat`, `/cmd`: most writes, widest and most stable.
-  - v2 `/v2/api/site/...`: zone firewall, traffic, static DNS, AP groups. See the v2 write contract in architecture.md §4.
+  - v2 `/v2/api/site/...`: zone firewall, traffic, static DNS, AP groups. See the write contract in architecture.md §4.
   - Accessors are groups (`c.Network().WAN().SLAs()`, `WiFi()`, `Firewall()`, `Traffic()`, `DNS()`, `Devices()`, …) or top-level collections (`PortForwards()`, `Networks()`, `StaticRoutes()`, `Settings()`, `PortProfiles()`).
 - Protect (`internal/unifi/protect`, [docs/apps/protect.md](docs/apps/protect.md)): `/proxy/protect/api/...`; writes are a PATCH of owned fields.
 - Access (`internal/unifi/access`, [docs/apps/access.md](docs/apps/access.md)).

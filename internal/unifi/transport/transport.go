@@ -114,7 +114,7 @@ func extractMessage(body []byte) string {
 }
 
 // retryAfter computes the wait before a 429 retry: the Retry-After header when
-// present (architecture.md §6), else a capped exponential backoff.
+// present (architecture.md §3), else a capped exponential backoff.
 func retryAfter(h http.Header, attempt int) time.Duration {
 	if v := h.Get("Retry-After"); v != "" {
 		if secs, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && secs >= 0 {

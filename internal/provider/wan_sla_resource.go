@@ -196,7 +196,7 @@ func (r *wanSLAResource) Read(ctx context.Context, req resource.ReadRequest, res
 			return
 		}
 	}
-	resp.State.RemoveResource(ctx) // remove-on-404 (invariant 5)
+	resp.State.RemoveResource(ctx) // remove-on-404 (invariant 6)
 }
 
 func (r *wanSLAResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

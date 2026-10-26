@@ -19,7 +19,7 @@ import (
 )
 
 // isNotFoundErr reports whether err is a client not-found sentinel, so Read can
-// remove the resource from state (invariant 5: remove-on-404). It matches the
+// remove the resource from state (invariant 6: remove-on-404). It matches the
 // console client and every substruct client (Network, Protect, Access) — each
 // exposes its own distinct ErrNotFound, so all must be listed here.
 func isNotFoundErr(err error) bool {

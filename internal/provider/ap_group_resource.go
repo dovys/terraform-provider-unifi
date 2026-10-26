@@ -99,7 +99,7 @@ func (r *apGroupResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 	// The v2 surface has no GET-by-id (the old GetAPGroup itself listed and
 	// filtered) — list and find the group by _id, removing the resource if it's
-	// gone (invariant 5: remove-on-404).
+	// gone (invariant 6: remove-on-404).
 	groups, err := r.net.WiFi().APGroups().List(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read AP group", err.Error())

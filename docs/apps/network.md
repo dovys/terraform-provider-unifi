@@ -1,101 +1,137 @@
 # UniFi Network app (`unifi_network_*`)
 
-The Network application's resources and data sources. Goal: comprehensive coverage of the UniFi
-Network feature surface, plus first-class per-port config. Resources are app-namespaced
-`unifi_<app>_<resource>`; the parallel Protect app is in [protect.md](protect.md). Singular resources;
-plural for collection data sources.
+This page lists the Network app's resources and data sources, the API surface each one calls, and the contracts and footguns to know before changing one. The provider is tested against Network application 10.4.57. The aim is to cover the Network app's full configurable surface, with per-switch-port config modeled inline on `unifi_network_device`.
 
-Client, auth, and the per-resource surface map live in [../architecture.md](../architecture.md);
-device/port internals in [../devices-and-ports.md](../devices-and-ports.md); operator runbooks in
-[../flows.md](../flows.md).
+Related pages:
 
-**Surface:** `L`=legacy `/rest`, `V2`=`/v2/api/site` — both over the same cookie+CSRF session.
+- [../architecture.md](../architecture.md): client, auth, capability gating, and the [per-resource surface map](../architecture.md#per-resource-surface-network).
+- [../devices-and-ports.md](../devices-and-ports.md): device lifecycle and `port_overrides`.
+- [../flows.md](../flows.md): operator runbooks.
+- [protect.md](protect.md), [access.md](access.md), [console.md](console.md): the other apps.
+- Generated schema reference: [../resources/](../resources/) and [../data-sources/](../data-sources/). Use-case examples: [../../examples/network/](../../examples/network/).
+
+## Naming
+
+Resources are singular and namespaced by app. Newer resources add a group: `unifi_network_wan_sla` is app `network`, group `wan`, resource `sla`. Only collection data sources are plural (`unifi_network_networks`).
+
+## Surfaces
+
+Both surfaces share one cookie+CSRF session.
+
+| Code | Surface | Path prefix |
+|------|---------|-------------|
+| L | Legacy | `/proxy/network/api/s/<site>/`, mostly `rest/<type>`, plus `stat/device`, `cmd/devmgr` and `get\|set/setting/<key>` |
+| V2 | v2 | `/proxy/network/v2/api/site/<site>/` |
+
+Their write contracts differ: a legacy `rest` PUT shallow-merges at the top level, and a v2 PUT carries `_id` in both URL and body. Both are in [architecture.md §4](../architecture.md#4-write-contract-per-surface).
 
 ## Resources
 
+Import takes the controller `_id` unless noted. Objects the controller flags `attr_no_delete` (the default WLAN group, AP group, user group and RADIUS profile) are only removed from state on destroy.
+
 ### Networking
-| Resource | Backend | Notes |
+
+| Resource | Surface | Notes |
 |----------|:------:|-------|
-| `unifi_network_network` | L | LAN/VLAN/guest/vlan-only; exposes the full **`purpose`** set + DHCP/DNS/IPv6/IGMP/mDNS + rogue-DHCP guard (`dhcp_guard_enabled` + the trusted-server list `dhcp_guard_servers` → `dhcpd_ip_1..3`; guard-on with no server is rejected `api.err.MissingIPAddress`, surfaced as a plan-time error). Rejects `purpose=wan`; omitting `purpose` lets the controller default it (to `corporate`) rather than the provider hardcoding it. |
-| `unifi_network_wan` | L | WAN uplink (pppoe/dhcp/static), load-balance, bandwidth. Same `networkconf` object, `purpose=wan` only. |
-| `unifi_network_static_route` | L | Static route. |
-| `unifi_network_port_forward` | L | DNAT. |
-| `unifi_network_dns_record` | V2 | Local DNS via v2 `/static-dns`. |
-| `unifi_network_dynamic_dns` | L | DDNS client. |
+| `unifi_network_network` | L `rest/networkconf` | LAN networks: `purpose` is `corporate`, `guest` or `vlan-only`, and changing it forces replacement. `purpose = "wan"` is rejected; use `unifi_network_wan`. Omit it and the controller defaults to `corporate`. Covers DHCP, DNS, IPv6, IGMP and mDNS. The DHCP guard maps `dhcp_guard_servers` to `dhcpd_ip_1..3`; guard on with no server fails at plan time instead of returning `api.err.MissingIPAddress`. Import also accepts `name=<name>`. |
+| `unifi_network_wan` | L `rest/networkconf` | Same object with `purpose=wan`. PPPoE, DHCP or static, plus load balancing and bandwidth. `pppoe_password` is sensitive and not read back. Import also accepts `name=<name>`. |
+| `unifi_network_wan_sla` | V2 `wan-slas` | WAN failover health monitor: probe targets, interval, down threshold. Import also accepts `name=<name>`. |
+| `unifi_network_static_route` | L `rest/routing` | |
+| `unifi_network_port_forward` | L `rest/portforward` | DNAT. |
+| `unifi_network_dns_record` | V2 `static-dns` | Local DNS records. |
+| `unifi_network_dynamic_dns` | L `rest/dynamicdns` | DDNS client. Password is sensitive. |
 
 ### Wireless
-| Resource | Backend | Notes |
+
+| Resource | Surface | Notes |
 |----------|:------:|-------|
-| `unifi_network_wlan` | L | SSID: WPA2/WPA3, PMF, network + AP-group binding, MAC filter, fast-roaming, guest. |
-| `unifi_network_wlan_group` | L | Mostly system-managed; import/update only. |
-| `unifi_network_ap_group` | V2 | AP grouping by device MAC. |
+| `unifi_network_wlan` | L `rest/wlanconf` | SSIDs: WPA2/WPA3, PMF, bands, MLO, minimum rates, network and AP-group binding, MAC filter, RADIUS MAC auth, Hotspot 2.0, fast roaming, guest, user group. `passphrase` is sensitive. |
+| `unifi_network_wlan_group` | L `rest/wlangroup` | |
+| `unifi_network_ap_group` | V2 `apgroups` | Groups APs by device MAC. |
 
-### Devices & ports (see [../devices-and-ports.md](../devices-and-ports.md))
-| Resource | Backend | Notes |
+### Devices and ports
+
+| Resource | Surface | Notes |
 |----------|:------:|-------|
-| `unifi_network_device` | L (sparse PUT; `port_overrides` array merged) + I adopt | One resource per device, keyed by MAC: adopts if pending, manages config (`name`, `led_override`, `mgmt_network_id`, `port_overrides` — **Map keyed by port number**; owned-field allowlist), exposes computed telemetry. Import captures the switch's live `port_overrides` (so `plan -generate-config-out` mirrors it). Destroy reverts config; `forget_on_destroy` opts into forget. |
-| `unifi_network_port_profile` | L | Reusable `portconf`, referenced by `port_overrides[*].port_profile_id`. |
+| `unifi_network_device` | L: read `stat/device`, write `rest/device/<id>`, adopt/forget `cmd/devmgr` | One resource per device, keyed by MAC. Adopts a pending device, then manages `name`, `led_override` (+ color and brightness), `mgmt_network_id` and `port_overrides`. Exposes `model`, `type`, `version`, `ip`, `state`, `adopted`. No other device field is written. Import by MAC or `_id`. |
+| `unifi_network_port_profile` | L `rest/portconf` | Reusable port config, bound through `port_overrides[*].port_profile_id`. |
 
-There's also a read-only `data.unifi_network_device` for referencing a device you don't manage. No
-standalone per-port resource (the device-doc write would race); ports are managed inline as a map.
+The device lifecycle, the `port_overrides` merge, and the per-port VLAN rules are in [../devices-and-ports.md](../devices-and-ports.md).
 
-### Firewall & traffic
-| Resource | Backend | Notes |
+### Firewall and traffic
+
+| Resource | Surface | Notes |
 |----------|:------:|-------|
-| `unifi_network_firewall_rule` | L | Classic rule. `rule_index` validated `>= 0` (permissive) + apply-time uniqueness guard within a ruleset. Source/dest by address, port, network, or firewall group; connection-state match. Don't normalize controller-authored names. |
-| `unifi_network_firewall_group` | L | Address/port groups (`address-group`/`port-group`/`ipv6-address-group`); immutable `type`; sends explicit empty `group_members`. |
-| `unifi_network_firewall_zone` / `unifi_network_firewall_policy` | V2 | Zone-based model (with ordering). |
-| `unifi_network_traffic_rule` / `unifi_network_traffic_route` | V2 | App/category rules; policy routing. |
+| `unifi_network_firewall_rule` | L `rest/firewallrule` | Classic rules. `rule_index` accepts any value `>= 0`; apply checks it is unique within the ruleset. Match on address, port, network or firewall group, and connection state. |
+| `unifi_network_firewall_group` | L `rest/firewallgroup` | `address-group`, `port-group` or `ipv6-address-group`. `type` forces replacement. `members` is always sent, as an explicit empty list when unset. |
+| `unifi_network_traffic_rule` | V2 `trafficrules` | App and category rules. |
+| `unifi_network_traffic_route` | V2 `trafficroutes` | Policy-based routing. |
 
-The controller runs **either** classic **or** zone-based firewall; the provider detects which and
-refuses to mix.
+The provider doesn't detect whether a console runs zone-based firewall; classic rules only.
 
-### Identity, RADIUS, QoS
-| Resource | Backend | Notes |
+### Identity, RADIUS and clients
+
+| Resource | Surface | Notes |
 |----------|:------:|-------|
-| `unifi_network_user_group` | L | Bandwidth/QoS group. |
-| `unifi_network_radius_profile` / `unifi_network_radius_account` | L | RADIUS profile; account (`/rest/account`). |
-| `unifi_network_dhcp_reservation` | L | Fixed-IP reservation, keyed by MAC (`/rest/user`, `use_fixedip`). **Find-or-create by MAC** (controller auto-creates a user per seen MAC); destroy clears the reservation, doesn't delete the user. Only client-object touchpoint. |
-| `unifi_network_client_ap_lock` | L | Pins a client to one AP, keyed by MAC (`/rest/user`, `fixed_ap_enabled` + `fixed_ap_mac`). **Find-or-create by MAC**; destroy clears the lock, doesn't delete the user. Coexists with a reservation on the same record (sparse PUT merge). |
+| `unifi_network_user_group` | L `rest/usergroup` | Bandwidth group. |
+| `unifi_network_radius_profile` | L `rest/radiusprofile` | Secrets are sensitive. |
+| `unifi_network_radius_account` | L `rest/account` | Password is sensitive. |
+| `unifi_network_dhcp_reservation` | L `rest/user` | Fixed IP (`use_fixedip`) for a client MAC. |
+| `unifi_network_client_ap_lock` | L `rest/user` | Pins a client to one AP (`fixed_ap_enabled`, `fixed_ap_mac`). |
 
-### Site & settings
-| Resource | Backend | Notes |
+The two client resources are the only ones that touch client records. Both find or create the record by MAC, since the controller creates one for every MAC it sees. Destroy clears only the resource's own fields and never deletes the client. Because both send sparse PUTs, a reservation and an AP lock can share a record. Import by MAC or `_id`.
+
+### Site settings
+
+| Resource | Surface | Notes |
 |----------|:------:|-------|
-| `unifi_network_site` | L | Site CRUD (`/cmd/sitemgr`). *Deferred past P1 — the sitemgr write shapes need a multi-site controller to verify; the read-only `data.unifi_network_site` ships in P1.* |
-| `unifi_network_settings` | L (`get`/`set/setting/<key>`) | One resource, one **optional nested block per `setting/<key>`** — sections managed à la carte. Shipped keys: `ntp`, `country`, `locale`; grown over time (see TODO). A generic JSON-blob `unifi_network_setting` was rejected as a smell. |
-| `unifi_network_mdns` | V2 (`global/config/network`) | mDNS reflector **scope** singleton: `mode` (`all`/`none`/`some`) + `network_ids` (used when `mode = "some"`). Owns only the two mDNS fields of the global network-config document. The v2 surface is **replace-style** (not the legacy shallow merge), so the resource GET-merges the doc and PUTs it back, leaving the required IGMP/multicast fields untouched. Destroy = state removal only (the singleton always exists). |
-| `unifi_network_threat_management` | L (`get`/`set/setting/ips`) | **Threat Management (IDS/IPS)** — the `ips` settings singleton as a dedicated resource: `mode` (`disabled`/`ids`/`ips`/`ipsInline`), `enabled_categories` (signature category Set), and the engine flags (`restrict_torrents`, `honeypot_enabled`, `memory_optimized`, …). Sparse-merge write; destroy is state removal only. Per-network `honeypot` entries are left to the controller. |
+| `unifi_network_settings` | L `get\|set/setting/<key>` | One optional nested block per setting key. Shipped keys: `ntp`, `country`, `locale`. |
+| `unifi_network_mdns` | V2 `global/config/network` | mDNS reflector scope: `mode` (`all`, `none`, `some`) and `network_ids` for `some`. |
+| `unifi_network_threat_management` | L `get\|set/setting/ips` | IDS/IPS: `mode` (`disabled`, `ids`, `ips`, `ipsInline`), `enabled_categories`, `enabled_networks`, `advanced_filtering_preference`, `restrict_torrents`, `honeypot_enabled`, `memory_optimized`, `content_filtering_blocking_page_enabled`. Per-network honeypot entries stay with the controller. Enabling it fails at plan time on a console whose feature list lacks `IPS`. |
 
-Settings are **one doc per key, always present**, read via `get/setting/<key>` and written via
-`set/setting/<key>` (a shallow merge — send only changed fields; *not* `/rest`). The single resource keeps
-**typed, per-key blocks** rather than a JSON blob: a **null block is unmanaged** (Read/apply touch only
-declared blocks), removing a block stops managing that section without reverting it, and Delete is state
-removal only (the singleton always exists).
+Each setting key is one document that always exists. All three resources are singletons with a fixed state `id`, and destroy only removes them from state.
 
-### Parity tail (later phases)
-`unifi_network_vpn_server`, `unifi_network_vpn_client`, `unifi_network_bgp` — round out the feature surface.
+- `set/setting/<key>` shallow-merges like `rest`, so `unifi_network_settings` and `unifi_network_threat_management` send only changed fields.
+- In `unifi_network_settings`, a null block is unmanaged. Removing a block stops managing that key and leaves its values in place. Settings are typed blocks, not a generic JSON map.
+- The v2 `global/config/network` PUT replaces the whole document. `unifi_network_mdns` reads it, changes the two mDNS fields and writes it back, so the required IGMP fields survive.
+
+To add a settings key, see [Settings keys in TODO.md](../../TODO.md#settings-keys).
 
 ## Data sources
 
-`unifi_network_site`, `unifi_network_network` + `unifi_network_networks`, `unifi_network_wlan`,
-`unifi_network_ap_group`, `unifi_network_device`, `unifi_network_port_profile`,
-`unifi_network_firewall_group`, `unifi_network_user_group`, `unifi_network_radius_profile`,
-`unifi_network_radius_account`, `unifi_network_dns_record`, `unifi_network_application_info`. (Also ships
-`device`, `wlan`, `firewall_group`, and `user_group` data sources.)
+| Data source | Looks up |
+|-------------|----------|
+| `unifi_network_site` | A site by slug. Defaults to the provider's `site`. |
+| `unifi_network_network` | One network by name or id. |
+| `unifi_network_networks` | All networks on the site, WANs included. |
+| `unifi_network_device` | A device you don't manage, read-only. |
+| `unifi_network_wan_network_group` | A WAN network group (`WAN`, `WAN2`) via v2 `wan/networkgroups`. |
+| `unifi_network_application_info` | The Network application version detected at configure time. |
+
+## Verification status
+
+Three tiers, described in [../testing.md](../testing.md): Tier 2 runs create, update, import and destroy against a Docker controller; Tier 3 (HIL) imports from a live console and runs a subset of writes with temporary objects.
+
+Gaps:
+
+| Resource | Gap |
+|----------|-----|
+| `unifi_network_device` | No Tier-2 test. Adopt, forget, config PUT and `port_overrides` writes are unverified on hardware. |
+| `unifi_network_client_ap_lock` | No Tier-2 test (the Docker controller has no AP). Live write pending. |
+| `unifi_network_wlan_group` | No Tier-2 test. |
+| `unifi_network_traffic_route` | Tier-2 test skipped: needs a VPN or WAN egress network the Docker controller lacks. |
+| `unifi_network_wan_sla` | Tier-2 test skipped: the monitor `type` is sent lowercase (`icmp`), but the API accepts only `ICMP`, `DNS` and `SPEED_LIMIT`. |
+| `unifi_network_wan` | Tier-2 update step skipped: update PUTs return `api.err.InvalidPayload`. |
+| `unifi_network_threat_management` | Only `mode = "disabled"` verified; other modes need a CyberSecure license. |
+| `unifi_network_mdns` | Live write pending. |
+| `unifi_network_network`, `unifi_network_wlan`, `unifi_network_settings`, `unifi_network_dynamic_dns` | Writes covered by Tier 2 but not on hardware. |
+
+Open question: it's unconfirmed whether `unifi_network_wan` `wan_type` and `network_group` can change in place or need `RequiresReplace`.
+
+[TODO.md](../../TODO.md#verify-against-hardware) has the checklist for each item.
 
 ## Not modeled
 
-- **Client/end-user devices** (inventory, presence, blocking, per-client QoS) — ephemeral runtime
-  state, not config. **Exception:** fixed-IP reservations → `unifi_network_dhcp_reservation`
-  (per-client rate could become a reservation attribute later).
-- Schedule tasks → via the `mgmt` block of `unifi_network_settings` (when that key lands).
-- Cloud **Site Manager API** (read-only); other UniFi OS apps (Access, Talk, …) — later. **UniFi
-  Protect is in scope** under `unifi_protect_*` — see [protect.md](protect.md).
-
-## Coverage & deliberate design choices
-
-Built for the full feature surface, with intentional shapes: `device` → one adopt-and-configure
-resource + read-only data source (inline port map); per-client config → `unifi_network_dhcp_reservation`; `dns_record` → v2;
-`setting` → typed + generic; `rule_index` allows the controller's full range. Also modeled:
-`user_group`, `ap_group`, `wlan_group`, `firewall_zone`, `firewall_policy`, `traffic_rule`, and richer
-data sources. `bgp`/`vpn_*` are later-phase.
+- Client devices: inventory, presence, blocking and per-client QoS are runtime state. The exceptions are DHCP reservations and AP locks.
+- Zone-based firewall (`firewall_zone`, `firewall_policy`), VPN server and client, BGP, and site create/delete. See [../roadmap.md](../roadmap.md).
+- DPI apps and groups, QoS rules, and the remaining setting keys, including `mgmt` (schedule tasks).

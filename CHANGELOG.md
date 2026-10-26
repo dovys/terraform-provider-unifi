@@ -1,13 +1,6 @@
 # Changelog
 
-All notable changes are documented here as **dated** entries (newest first); add
-yours under today's date in the PR that makes the change. Versioning is decoupled
-from this file: every push to `main` auto-releases — a fix/docs/dep merge cuts the
-next patch (`vX.Y.Z`), a `next → main` merge commit cuts a minor (`vX.Y.0`). Both
-attach binaries, and each GitHub Release carries the per-version commit list (see
-[`docs/releasing.md`](docs/releasing.md)). Releases ship as GoReleaser
-artifacts on GitHub Releases; the Terraform Registry listing is pending.
-Sections tagged `[vX.Y.Z]` below predate the date-based convention.
+Dated entries, newest first. Add yours under today's date in the PR that makes the change. Versions come from git, not this file: every push to `main` releases a patch, and a `next → main` merge commit releases a minor ([`docs/releasing.md`](docs/releasing.md)). Each GitHub Release lists its commits. Sections tagged `[vX.Y.Z]` predate the date-based convention.
 
 ## 2026-10-25
 

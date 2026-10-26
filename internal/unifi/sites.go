@@ -15,7 +15,7 @@ import (
 
 // Site is a legacy site object (GET /api/self/sites). Name is the slug (the
 // legacy/v2 site key, e.g. "default"); Desc is the human label ("Default"); ID
-// is the controller `_id`. The provider matches on the slug (architecture.md §5).
+// is the controller `_id`. The provider matches on the slug (architecture.md §3).
 type Site struct {
 	ID   string `json:"_id"`
 	Name string `json:"name"` // slug

@@ -120,7 +120,7 @@ func (r *trafficRouteResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 	// The v2 collection has no GET-by-id; list and find by _id, removing the
-	// resource if it's gone (invariant 5: remove-on-404).
+	// resource if it's gone (invariant 6: remove-on-404).
 	routes, err := r.net.Traffic().Routes().List(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read traffic route", err.Error())

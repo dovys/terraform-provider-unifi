@@ -29,7 +29,7 @@ type LegacyMeta struct {
 func (m LegacyMeta) OK() bool { return m.RC == "ok" }
 
 // ErrNotFound is returned by typed Get/Update/Delete methods when the object is
-// absent. Resources translate it into remove-from-state on Read (invariant 5).
+// absent. Resources translate it into remove-from-state on Read (invariant 6).
 var ErrNotFound = errors.New("object not found")
 
 // isNotFound reports whether a transport error denotes a missing object. The

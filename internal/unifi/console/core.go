@@ -9,11 +9,9 @@
 //	c.Console().Certificates().List(ctx)
 //	c.Console().Certificates().StartChallenge(ctx, req)
 //
-// Wire types (types.go) are HAND-WRITTEN — a documented exception to invariant 2
-// (generated wire types). This OS surface is in no OpenAPI spec, so there is
-// nothing to codegen from; it is modeled from the requests the console's own UI
-// makes. The surface is tiny (one resource family), and hand-authoring a
-// synthetic spec for it would be disproportionate.
+// Types (types.go) are hand-written, the documented exception in
+// docs/development.md#wire-types: this OS surface ships no OpenAPI, so there
+// is nothing to generate from.
 package console
 
 import (
@@ -50,7 +48,7 @@ func (c *core) apiPath(suffix string) string {
 
 // ErrNotFound is returned by Get/Renew/Revoke when the certificate is absent
 // (HTTP 404 or the API's NOT_FOUND code). Resources translate it into
-// remove-from-state on Read (invariant 7).
+// remove-from-state on Read (invariant 6).
 var ErrNotFound = errors.New("certificate not found")
 
 // ConsoleError is a typed unifi-core error carrying the API's machine-readable
