@@ -123,11 +123,10 @@ Gaps:
 | `unifi_network_client_ap_lock` | No Tier-2 test (the Docker controller has no AP). Live write pending. |
 | `unifi_network_wlan_group` | No Tier-2 test. |
 | `unifi_network_traffic_route` | Tier-2 test skipped: needs a VPN or WAN egress network the Docker controller lacks. |
-| `unifi_network_wan_sla` | Tier-2 test skipped: the monitor `type` is sent lowercase (`icmp`), but the API accepts only `ICMP`, `DNS` and `SPEED_LIMIT`. |
 | `unifi_network_wan` | Tier-2 update step skipped: update PUTs return `api.err.InvalidPayload`. |
 | `unifi_network_threat_management` | Only `mode = "disabled"` verified; other modes need a CyberSecure license. |
 | `unifi_network_mdns` | Live write pending. |
-| `unifi_network_network`, `unifi_network_wlan`, `unifi_network_settings`, `unifi_network_dynamic_dns` | Writes covered by Tier 2 but not on hardware. |
+| `unifi_network_network`, `unifi_network_wlan`, `unifi_network_settings`, `unifi_network_dynamic_dns`, `unifi_network_wan_sla` | Writes covered by Tier 2 but not on hardware. |
 
 Open question: it's unconfirmed whether `unifi_network_wan` `wan_type` and `network_group` can change in place or need `RequiresReplace`.
 
