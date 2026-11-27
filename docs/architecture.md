@@ -57,7 +57,7 @@ App clients are cheap and stateless: each accessor call builds a new one around 
 
 ### Wire types
 
-Object types are generated Go structs in each app's `wire/types.gen.go`, except Console's hand-written `console/types.go`. The hand-written layer is the groups and collections, never per-object structs. Generation and the no-hand-edit rule are in [development.md](development.md#wire-types).
+Object types are generated Go structs in each app's `wire/types.gen.go`, except Console's hand-written `console/types.go`. The hand-written layer is the groups and collections. Per-object structs are the exception, only where the generated type can't carry the live shape: device `PortOverride`, and firewall `PolicyEndpoint` and `FirewallPolicy`, whose generated endpoint types lack the polymorphic subtype fields ([#7](https://github.com/dovys/terraform-provider-unifi/issues/7)). Generation and the no-hand-edit rule are in [development.md](development.md#wire-types).
 
 ### Collections
 
@@ -77,7 +77,7 @@ Write a custom collection only when the surface needs it:
 | `_id` enforced in the v2 PUT body | `RecordCollection.Update`, `SLACollection.Update` |
 | Id taken from the object | `RoutingCollection` |
 | Non-REST verbs | `SettingCollection` (`get/setting`, `set/setting`) |
-| Replace-style document | `GlobalNetworkService` (mDNS) |
+| Replace-style document | `GlobalNetworkService` (mDNS), `PolicyCollection` (firewall policies) |
 | Array the controller replaces wholesale | device `port_overrides` in `devices.go` |
 
 Protect uses one `Collection[T]` over PATCH. Access and Console each have their own small core (see §4).
@@ -169,7 +169,11 @@ The merge is top-level only. The controller replaces a nested object or array wh
 
 Optional generated fields are `omitempty` pointers, so an unset field and an explicit `false` or `0` stay distinct. A null or unknown attribute becomes `nil` and is omitted (`internal/provider/common.go`); a set value, including `false` or `0`, is sent. Required fields are plain values and are always sent.
 
-Two writes are exceptions to sparse PUTs. v2 `global/config/network` (used by `unifi_network_mdns`) validates the whole document on PUT, so `GlobalNetworkService` GETs the live document, overlays the owned fields, and PUTs it back. Device `port_overrides` is an array the controller replaces wholesale, so the device collection GETs the live array, overlays the owned entries, and PUTs it back.
+Three writes are exceptions to sparse PUTs. Each GETs the live value, overlays the owned part, and PUTs it back:
+
+- v2 `global/config/network` (`unifi_network_mdns`) validates the whole document on PUT; `GlobalNetworkService` overlays the owned fields.
+- v2 `firewall-policies` (`unifi_network_firewall_policy`) replaces the whole DTO; `PolicyCollection` overlays the owned fields. An endpoint's match operands (`ips`, `network_ids`, `ip_group_id`, `port`, `port_group_id`) are owned outright, so an omitted operand is removed. `index` and the schedule are never written.
+- Device `port_overrides` is an array the controller replaces wholesale; the device collection overlays the owned entries.
 
 ### Network v2
 

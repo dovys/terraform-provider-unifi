@@ -3,22 +3,19 @@
 page_title: "unifi_network_firewall_policy Resource - unifi"
 subcategory: ""
 description: |-
-  A zone-based firewall policy (v2 firewall-policies). Needs a site on the zone-based firewall.
-  Ordering is not managed: the controller places a new policy, and index reflects its position. Updates never change index; reorder in the UniFi UI. The schedule and every unmodeled field keep their live value (updates GET the policy, overlay the configured fields, and PUT it back); a new policy is scheduled ALWAYS.
-  Predefined (system) policies can't be managed. An Optional+Computed attribute left out of the config keeps its last-read value, so removing it doesn't reset it.
-  Import by _id, or by name=<policy name> when the name is unique.
+  A zone-based firewall policy. Needs a site on the zone-based firewall.
+  Ordering isn't managed: the controller places a new policy, index shows where, and updates never move it. Updates also leave the schedule and settings this resource doesn't model as they are; a new policy runs ALWAYS. An endpoint's match operands (ips, network_ids, ip_group_id, port, port_group_id) are exactly what the config says, so removing one clears it. Other optional settings keep their current value when removed from the config.
+  Predefined (system) policies can't be managed. Import by _id, or by name=<policy name> when the name is unique.
   HIL-unverified: writes have not been confirmed on a live controller.
 ---
 
 # unifi_network_firewall_policy (Resource)
 
-A zone-based firewall policy (v2 `firewall-policies`). Needs a site on the zone-based firewall.
+A zone-based firewall policy. Needs a site on the zone-based firewall.
 
-Ordering is not managed: the controller places a new policy, and `index` reflects its position. Updates never change `index`; reorder in the UniFi UI. The schedule and every unmodeled field keep their live value (updates GET the policy, overlay the configured fields, and PUT it back); a new policy is scheduled `ALWAYS`.
+Ordering isn't managed: the controller places a new policy, `index` shows where, and updates never move it. Updates also leave the schedule and settings this resource doesn't model as they are; a new policy runs `ALWAYS`. An endpoint's match operands (`ips`, `network_ids`, `ip_group_id`, `port`, `port_group_id`) are exactly what the config says, so removing one clears it. Other optional settings keep their current value when removed from the config.
 
-Predefined (system) policies can't be managed. An Optional+Computed attribute left out of the config keeps its last-read value, so removing it doesn't reset it.
-
-Import by `_id`, or by `name=<policy name>` when the name is unique.
+Predefined (system) policies can't be managed. Import by `_id`, or by `name=<policy name>` when the name is unique.
 
 **HIL-unverified:** writes have not been confirmed on a live controller.
 
@@ -64,15 +61,15 @@ Required:
 Optional:
 
 - `ip_group_id` (String) Firewall group `_id`, for `matching_target = "IP"` with `OBJECT`.
-- `ips` (Set of String) Addresses, CIDRs or ranges, for `matching_target = "IP"` with `SPECIFIC`.
+- `ips` (Set of String) Addresses, CIDRs or ranges, for `matching_target = "IP"`.
 - `match_opposite_ips` (Boolean) Invert the address match.
 - `match_opposite_networks` (Boolean) Invert the network match.
 - `match_opposite_ports` (Boolean) Invert the port match.
-- `matching_target_type` (String) `SPECIFIC` (inline `ips`/`network_ids`) or `OBJECT` (`ip_group_id`). Inferred on create when unset.
+- `matching_target_type` (String) `SPECIFIC` (inline `ips`/`network_ids`) or `OBJECT` (`ip_group_id`). When unset, inferred from the operands whenever they change.
 - `network_ids` (Set of String) Network `_id`s, for `matching_target = "NETWORK"`.
 - `port` (String) Port, list or range, e.g. `443` or `22,53,80`.
 - `port_group_id` (String) Port group `_id`, for `port_matching_type = "OBJECT"`.
-- `port_matching_type` (String) `ANY`, `SPECIFIC` (`port`) or `OBJECT` (`port_group_id`). Inferred on create when unset.
+- `port_matching_type` (String) `ANY`, `SPECIFIC` (`port`) or `OBJECT` (`port_group_id`). When unset, inferred from `port`/`port_group_id` whenever they change.
 
 
 <a id="nestedatt--source"></a>
@@ -86,13 +83,13 @@ Required:
 Optional:
 
 - `ip_group_id` (String) Firewall group `_id`, for `matching_target = "IP"` with `OBJECT`.
-- `ips` (Set of String) Addresses, CIDRs or ranges, for `matching_target = "IP"` with `SPECIFIC`.
+- `ips` (Set of String) Addresses, CIDRs or ranges, for `matching_target = "IP"`.
 - `match_mac` (Boolean) Match the client by MAC address.
 - `match_opposite_ips` (Boolean) Invert the address match.
 - `match_opposite_networks` (Boolean) Invert the network match.
 - `match_opposite_ports` (Boolean) Invert the port match.
-- `matching_target_type` (String) `SPECIFIC` (inline `ips`/`network_ids`) or `OBJECT` (`ip_group_id`). Inferred on create when unset.
+- `matching_target_type` (String) `SPECIFIC` (inline `ips`/`network_ids`) or `OBJECT` (`ip_group_id`). When unset, inferred from the operands whenever they change.
 - `network_ids` (Set of String) Network `_id`s, for `matching_target = "NETWORK"`.
 - `port` (String) Port, list or range, e.g. `443` or `22,53,80`.
 - `port_group_id` (String) Port group `_id`, for `port_matching_type = "OBJECT"`.
-- `port_matching_type` (String) `ANY`, `SPECIFIC` (`port`) or `OBJECT` (`port_group_id`). Inferred on create when unset.
+- `port_matching_type` (String) `ANY`, `SPECIFIC` (`port`) or `OBJECT` (`port_group_id`). When unset, inferred from `port`/`port_group_id` whenever they change.

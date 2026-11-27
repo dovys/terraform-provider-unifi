@@ -102,8 +102,8 @@ func (r *firewallRuleResource) Schema(_ context.Context, _ resource.SchemaReques
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A UniFi classic firewall rule (`firewallrule`, legacy `/rest`). Matches on protocol, " +
 			"addresses/ports, networks, firewall groups, and connection state within a ruleset (chain).\n\n" +
-			"On a site migrated to the zone-based firewall, the controller lists no classic rules and creating one fails at plan " +
-			"time; use `unifi_network_firewall_policy` there. Rules already in state still refresh, where a migrated rule drops out of state, and destroy.",
+			"A site on the zone-based firewall has no classic rules: creating one fails at plan time, so use " +
+			"`unifi_network_firewall_policy` there. After a migration, rules already in state drop out on refresh.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -357,12 +357,13 @@ func (m *firewallRuleResourceModel) fromFirewallRule(r *wire.Firewallrule) {
 func refuseOnZoneFirewall(ctx context.Context, net *network.Client, diags *diag.Diagnostics) {
 	zbf, err := net.ZoneBasedFirewall(ctx)
 	if err != nil {
-		diags.AddError("Failed to check the site's firewall mode", err.Error())
+		// An older or unexpected controller reply mustn't block classic planning.
+		diags.AddWarning("Couldn't confirm the site's firewall mode", err.Error())
 		return
 	}
 	if zbf {
 		diags.AddError("Site uses the zone-based firewall",
-			"This site has migrated to the zone-based firewall, so a classic firewall rule would have no effect. "+
+			"This site runs the zone-based firewall, so a classic firewall rule would have no effect. "+
 				"Use unifi_network_firewall_policy instead.")
 	}
 }

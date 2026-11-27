@@ -21,8 +21,9 @@ import (
 )
 
 // fakeController serves canned bodies keyed by "METHOD /path/suffix" (longest
-// matching suffix wins) behind the provider handshake. Unrouted v2 paths 404;
-// unrouted legacy paths return an empty list.
+// matching suffix wins) behind the provider handshake. A body of "<echo>"
+// returns the request body; "<400>" fails with HTTP 400. Unrouted v2 paths
+// 404; unrouted legacy paths return an empty list.
 type fakeController struct {
 	URL string
 
@@ -71,6 +72,11 @@ func (fc *fakeController) serve(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	switch {
+	case fc.routes[best] == "<echo>":
+		_, _ = w.Write(body)
+	case fc.routes[best] == "<400>":
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte(`{"code":"api.err.Invalid","message":"bad request"}`))
 	case best != "":
 		_, _ = w.Write([]byte(fc.routes[best]))
 	case strings.Contains(r.URL.Path, "/v2/"):

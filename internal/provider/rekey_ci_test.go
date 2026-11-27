@@ -182,3 +182,48 @@ func TestFirewallZoneDataSource(t *testing.T) {
 		t.Error("absent zone: want an error")
 	}
 }
+
+// A UUID-keyed record that vanished was deleted (or recreated in the UI), not
+// re-keyed by the migration: a same-named record must not be adopted.
+func TestNameFallbacks_SkipNonLegacyIDs(t *testing.T) {
+	fc := newFakeController(t, map[string]string{
+		"GET /static-dns": `[{"_id":"` + newUUID + `","key":"nas.example.com","record_type":"A","value":"198.51.100.20"}]`,
+		"GET /wan-slas":   `[{"_id":"` + newUUID + `","name":"primary uplink"}]`,
+	})
+	gone := "7d3e9a10-4444-4444-8444-0000000000ff"
+
+	dns := &dnsRecordResource{net: fc.network(t)}
+	if _, removed := readResource(t, dns, stateWith(resourceSchema(t, dns), map[string]tftypes.Value{
+		"id": strVal(gone), "name": strVal("nas.example.com"), "type": strVal("A"), "value": strVal("198.51.100.20"),
+	})); !removed {
+		t.Error("dns: adopted a same-named record for a non-legacy id")
+	}
+	sla := &wanSLAResource{net: fc.network(t)}
+	if _, removed := readResource(t, sla, stateWith(resourceSchema(t, sla), map[string]tftypes.Value{
+		"id": strVal(gone), "name": strVal("primary uplink"),
+	})); !removed {
+		t.Error("wan_sla: adopted a same-named SLA for a non-legacy id")
+	}
+}
+
+func TestFirewallRulePlan_ZoneProbe(t *testing.T) {
+	for name, tc := range map[string]struct {
+		routes          map[string]string
+		wantErr, wantWa bool
+	}{
+		"created zone-based": {routes: map[string]string{"GET /site-feature-migration": `[]`, "GET /firewall/zone": `[{"_id":"z1","zone_key":"internal"}]`}, wantErr: true},
+		"probe errors":       {routes: map[string]string{"GET /site-feature-migration": "<400>", "GET /firewall/zone": "<400>"}, wantWa: true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			fc := newFakeController(t, tc.routes)
+			r := &firewallRuleResource{net: fc.network(t)}
+			sch := resourceSchema(t, r)
+			plan := tfsdk.Plan{Schema: sch, Raw: stateWith(sch, map[string]tftypes.Value{"name": strVal("drop iot")}).Raw}
+			mp := &resource.ModifyPlanResponse{Plan: plan}
+			r.ModifyPlan(context.Background(), resource.ModifyPlanRequest{Plan: plan, State: tfsdk.State{Schema: sch, Raw: tftypes.NewValue(sch.Type().TerraformType(context.Background()), nil)}}, mp)
+			if mp.Diagnostics.HasError() != tc.wantErr || (mp.Diagnostics.WarningsCount() > 0) != tc.wantWa {
+				t.Errorf("diagnostics = %v", mp.Diagnostics)
+			}
+		})
+	}
+}

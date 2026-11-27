@@ -88,6 +88,11 @@ const policyType = "unifi_network_firewall_policy"
 // policyServer configures a provider server against a fake that serves the
 // given policies by id.
 func policyServer(t *testing.T, routes map[string]string) (tfprotov6.ProviderServer, tftypes.Object, *fakeController) {
+	srv, ty, fc, _ := policyServerSchema(t, routes)
+	return srv, ty, fc
+}
+
+func policyServerSchema(t *testing.T, routes map[string]string) (tfprotov6.ProviderServer, tftypes.Object, *fakeController, *tfprotov6.Schema) {
 	t.Helper()
 	t.Setenv("UNIFI_DISABLE_CLIENT_CACHE", "1")
 	fc := newFakeController(t, routes)
@@ -97,13 +102,50 @@ func policyServer(t *testing.T, routes map[string]string) (tfprotov6.ProviderSer
 		t.Fatal(err)
 	}
 	configureBindProvider(t, srv, gpr, fc.URL)
-	return srv, gpr.ResourceSchemas[policyType].ValueType().(tftypes.Object), fc
+	sch := gpr.ResourceSchemas[policyType]
+	return srv, sch.ValueType().(tftypes.Object), fc, sch
+}
+
+// importAndRead imports the policy with the given id and refreshes it, as
+// `terraform import` does.
+func importAndRead(t *testing.T, srv tfprotov6.ProviderServer, id string) *tfprotov6.DynamicValue {
+	t.Helper()
+	ctx := context.Background()
+	imp, err := srv.ImportResourceState(ctx, &tfprotov6.ImportResourceStateRequest{TypeName: policyType, ID: id})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertNoErrorDiags(t, "import", imp.Diagnostics)
+	read, err := srv.ReadResource(ctx, &tfprotov6.ReadResourceRequest{TypeName: policyType, CurrentState: imp.ImportedResources[0].State})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertNoErrorDiags(t, "read", read.Diagnostics)
+	return read.NewState
+}
+
+// planChange plans config against prior the way Terraform core does.
+func planChange(t *testing.T, srv tfprotov6.ProviderServer, sch *tfprotov6.Schema, prior *tfprotov6.DynamicValue, config tftypes.Value) (*tfprotov6.PlanResourceChangeResponse, tftypes.Value, *tfprotov6.DynamicValue) {
+	t.Helper()
+	ty := sch.ValueType().(tftypes.Object)
+	priorV, err := prior.Unmarshal(ty)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfgDV, _ := tfprotov6.NewDynamicValue(ty, config)
+	propDV, _ := tfprotov6.NewDynamicValue(ty, proposedNewState(config, priorV, sch.Block.Attributes))
+	plan, err := srv.PlanResourceChange(context.Background(), &tfprotov6.PlanResourceChangeRequest{
+		TypeName: policyType, PriorState: prior, Config: &cfgDV, ProposedNewState: &propDV,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return plan, priorV, &cfgDV
 }
 
 // TestFirewallPolicy_ImportPlansClean is the import property: import a live
 // policy, refresh it, and plan its intent-only config — the plan must be empty.
 func TestFirewallPolicy_ImportPlansClean(t *testing.T) {
-	ctx := context.Background()
 	for name, live := range livePolicies {
 		t.Run(name, func(t *testing.T) {
 			var doc struct {
@@ -112,33 +154,8 @@ func TestFirewallPolicy_ImportPlansClean(t *testing.T) {
 			if err := json.Unmarshal([]byte(live), &doc); err != nil {
 				t.Fatal(err)
 			}
-			srv, ty, _ := policyServer(t, map[string]string{"GET /firewall-policies/" + doc.ID: live})
-
-			imp, err := srv.ImportResourceState(ctx, &tfprotov6.ImportResourceStateRequest{TypeName: policyType, ID: doc.ID})
-			if err != nil {
-				t.Fatal(err)
-			}
-			assertNoErrorDiags(t, "import", imp.Diagnostics)
-			read, err := srv.ReadResource(ctx, &tfprotov6.ReadResourceRequest{TypeName: policyType, CurrentState: imp.ImportedResources[0].State})
-			if err != nil {
-				t.Fatal(err)
-			}
-			assertNoErrorDiags(t, "read", read.Diagnostics)
-			prior, err := read.NewState.Unmarshal(ty)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			config := tfValue(ty, intents[name])
-			proposed := proposedNewState(config, prior)
-			cfgDV, _ := tfprotov6.NewDynamicValue(ty, config)
-			propDV, _ := tfprotov6.NewDynamicValue(ty, proposed)
-			plan, err := srv.PlanResourceChange(ctx, &tfprotov6.PlanResourceChangeRequest{
-				TypeName: policyType, PriorState: read.NewState, Config: &cfgDV, ProposedNewState: &propDV,
-			})
-			if err != nil {
-				t.Fatal(err)
-			}
+			srv, ty, _, sch := policyServerSchema(t, map[string]string{"GET /firewall-policies/" + doc.ID: live})
+			plan, prior, _ := planChange(t, srv, sch, importAndRead(t, srv, doc.ID), tfValue(ty, intents[name]))
 			assertNoErrorDiags(t, "plan", plan.Diagnostics)
 			planned, _ := plan.PlannedState.Unmarshal(ty)
 			if diffs, _ := prior.Diff(planned); len(diffs) > 0 {
@@ -148,6 +165,177 @@ func TestFirewallPolicy_ImportPlansClean(t *testing.T) {
 			}
 			if len(plan.RequiresReplace) > 0 {
 				t.Errorf("requires replace: %v", plan.RequiresReplace)
+			}
+		})
+	}
+}
+
+// applyUpdate imports a live policy, plans config against it and applies,
+// returning the PUT body. The fake echoes the PUT, so apply also runs the
+// framework's plan-vs-result consistency check against what was sent.
+func applyUpdate(t *testing.T, live string, id string, config map[string]any) map[string]any {
+	t.Helper()
+	srv, ty, fc, sch := policyServerSchema(t, map[string]string{
+		"GET /firewall-policies/" + id: live,
+		"PUT /firewall-policies/" + id: "<echo>",
+	})
+	prior := importAndRead(t, srv, id)
+	plan, _, cfgDV := planChange(t, srv, sch, prior, tfValue(ty, config))
+	assertNoErrorDiags(t, "plan", plan.Diagnostics)
+	apply, err := srv.ApplyResourceChange(context.Background(), &tfprotov6.ApplyResourceChangeRequest{
+		TypeName: policyType, PriorState: prior, Config: cfgDV, PlannedState: plan.PlannedState,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertNoErrorDiags(t, "apply", apply.Diagnostics)
+	call, ok := fc.lastCall(http.MethodPut, "/firewall-policies/"+id)
+	if !ok {
+		t.Fatal("no PUT")
+	}
+	var body map[string]any
+	if err := json.Unmarshal([]byte(call.Body), &body); err != nil {
+		t.Fatal(err)
+	}
+	return body
+}
+
+func assertEndpoint(t *testing.T, body map[string]any, side string, want map[string]any, absent ...string) {
+	t.Helper()
+	e, _ := body[side].(map[string]any)
+	for k, v := range want {
+		got, _ := json.Marshal(e[k])
+		exp, _ := json.Marshal(v)
+		if string(got) != string(exp) {
+			t.Errorf("%s.%s = %s, want %s", side, k, got, exp)
+		}
+	}
+	for _, k := range absent {
+		if _, ok := e[k]; ok {
+			t.Errorf("%s.%s = %v, want it removed", side, k, e[k])
+		}
+	}
+}
+
+// httpsIntent is the to-host-https policy's config with destination swapped.
+func httpsIntent(dest map[string]any) map[string]any {
+	return map[string]any{
+		"name": "allow https to host", "action": "ALLOW", "protocol": "tcp", "create_allow_respond": true,
+		"source":      map[string]any{"zone_id": zoneExternal, "matching_target": "ANY"},
+		"destination": dest,
+	}
+}
+
+func TestFirewallPolicyUpdate_IPSpecificToAny(t *testing.T) {
+	body := applyUpdate(t, livePolicies["to-host-https"], "p-https",
+		httpsIntent(map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"}))
+	assertEndpoint(t, body, "destination", map[string]any{"matching_target": "ANY", "port_matching_type": "ANY"},
+		"ips", "port", "matching_target_type")
+	if body["index"] != float64(10002) {
+		t.Errorf("index = %v, want the live 10002", body["index"])
+	}
+}
+
+func TestFirewallPolicyUpdate_IPsToGroup(t *testing.T) {
+	body := applyUpdate(t, livePolicies["to-host-https"], "p-https", httpsIntent(map[string]any{
+		"zone_id": zoneInternal, "matching_target": "IP", "ip_group_id": ipGroup, "port": "443",
+	}))
+	assertEndpoint(t, body, "destination", map[string]any{
+		"matching_target_type": "OBJECT", "ip_group_id": ipGroup, "port": "443", "port_matching_type": "SPECIFIC",
+	}, "ips")
+}
+
+func TestFirewallPolicyUpdate_PortSpecificToGroup(t *testing.T) {
+	body := applyUpdate(t, livePolicies["to-host-https"], "p-https", httpsIntent(map[string]any{
+		"zone_id": zoneInternal, "matching_target": "IP", "ips": []string{"203.0.113.10"}, "port_group_id": "pg-web",
+	}))
+	assertEndpoint(t, body, "destination", map[string]any{
+		"port_matching_type": "OBJECT", "port_group_id": "pg-web", "matching_target_type": "SPECIFIC",
+	}, "port")
+}
+
+// Removing port (and the inverted-port flag) from the config clears both.
+func TestFirewallPolicyUpdate_RemovingPortClearsIt(t *testing.T) {
+	cfg := intents["multi-port"]
+	cfg = map[string]any{
+		"name": cfg["name"], "action": cfg["action"], "enabled": false, "ip_version": "BOTH", "protocol": "tcp_udp",
+		"source":      cfg["source"],
+		"destination": map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"},
+	}
+	body := applyUpdate(t, livePolicies["multi-port"], "p-ports", cfg)
+	assertEndpoint(t, body, "destination", map[string]any{"port_matching_type": "ANY", "match_opposite_ports": false}, "port")
+}
+
+func TestFirewallPolicyRead_404RemovesFromState(t *testing.T) {
+	srv, ty, _ := policyServer(t, nil) // every v2 path 404s
+	state := tfValue(ty, map[string]any{"id": "p-gone", "name": "x", "action": "BLOCK",
+		"source":      map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"},
+		"destination": map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"}})
+	dv, _ := tfprotov6.NewDynamicValue(ty, state)
+	read, err := srv.ReadResource(context.Background(), &tfprotov6.ReadResourceRequest{TypeName: policyType, CurrentState: &dv})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertNoErrorDiags(t, "read", read.Diagnostics)
+	if v, _ := read.NewState.Unmarshal(ty); !v.IsNull() {
+		t.Errorf("state = %v, want removed", v)
+	}
+}
+
+func TestFirewallPolicy_ValidateConfigRejectsContradictions(t *testing.T) {
+	srv, ty, _ := policyServer(t, nil)
+	cases := map[string]map[string]any{
+		"port and port group": {"zone_id": zoneInternal, "matching_target": "ANY", "port": "443", "port_group_id": "pg"},
+		"specific with group": {"zone_id": zoneInternal, "matching_target": "ANY", "port_matching_type": "SPECIFIC", "port_group_id": "pg"},
+		"any target with ips": {"zone_id": zoneInternal, "matching_target": "ANY", "ips": []string{"203.0.113.1"}},
+		"ips and ip group":    {"zone_id": zoneInternal, "matching_target": "IP", "ips": []string{"203.0.113.1"}, "ip_group_id": ipGroup},
+	}
+	for name, dest := range cases {
+		cfg := tfValue(ty, map[string]any{"name": "x", "action": "BLOCK",
+			"source": map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"}, "destination": dest})
+		dv, _ := tfprotov6.NewDynamicValue(ty, cfg)
+		resp, err := srv.ValidateResourceConfig(context.Background(), &tfprotov6.ValidateResourceConfigRequest{TypeName: policyType, Config: &dv})
+		if err != nil {
+			t.Fatal(err)
+		}
+		hasErr := false
+		for _, d := range resp.Diagnostics {
+			hasErr = hasErr || d.Severity == tfprotov6.DiagnosticSeverityError
+		}
+		if !hasErr {
+			t.Errorf("%s: want a validation error", name)
+		}
+	}
+}
+
+func TestFirewallPolicy_CreateGatedOnClassicSite(t *testing.T) {
+	for name, tc := range map[string]struct {
+		routes  map[string]string
+		wantErr bool
+	}{
+		"classic":     {routes: map[string]string{"GET /site-feature-migration": `[]`, "GET /firewall/zone": `[]`}, wantErr: true},
+		"probe fails": {routes: map[string]string{"GET /site-feature-migration": "<400>", "GET /firewall/zone": "<400>"}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			srv, ty, _ := policyServer(t, tc.routes)
+			cfg := tfValue(ty, map[string]any{"name": "x", "action": "BLOCK",
+				"source":      map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"},
+				"destination": map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"}})
+			cfgDV, _ := tfprotov6.NewDynamicValue(ty, cfg)
+			priorDV, _ := tfprotov6.NewDynamicValue(ty, tftypes.NewValue(ty, nil))
+			plan, err := srv.PlanResourceChange(context.Background(), &tfprotov6.PlanResourceChangeRequest{
+				TypeName: policyType, PriorState: &priorDV, Config: &cfgDV, ProposedNewState: &cfgDV,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			hasErr, hasWarn := false, false
+			for _, d := range plan.Diagnostics {
+				hasErr = hasErr || d.Severity == tfprotov6.DiagnosticSeverityError
+				hasWarn = hasWarn || d.Severity == tfprotov6.DiagnosticSeverityWarning
+			}
+			if hasErr != tc.wantErr || (!tc.wantErr && !hasWarn) {
+				t.Errorf("error=%v warning=%v, want error=%v (else a warning)", hasErr, hasWarn, tc.wantErr)
 			}
 		})
 	}
@@ -166,7 +354,10 @@ func TestFirewallPolicy_CreateSendsFullDTO(t *testing.T) {
 		"destination":{"zone_id":"` + zoneInternal + `","matching_target":"NETWORK","matching_target_type":"SPECIFIC",
 			"network_ids":["` + netTrusted + `"],"port_matching_type":"ANY","match_opposite_ips":false,
 			"match_opposite_networks":false,"match_opposite_ports":false}}`
-	srv, ty, fc := policyServer(t, map[string]string{"POST /firewall-policies": created})
+	srv, ty, fc := policyServer(t, map[string]string{
+		"POST /firewall-policies": created,
+		"GET /firewall/zone":      `[{"_id":"` + zoneInternal + `","zone_key":"internal"}]`,
+	})
 
 	config := tfValue(ty, map[string]any{
 		"name": "block iot to trusted", "action": "BLOCK",
@@ -276,28 +467,29 @@ func tfValue(ty tftypes.Type, v any) tftypes.Value {
 	}
 }
 
-// proposedNewState mimics Terraform core for this schema: a null config
-// attribute takes the prior value (every Optional attribute is also Computed).
-func proposedNewState(config, prior tftypes.Value) tftypes.Value {
-	if config.IsNull() {
-		return prior
-	}
-	obj, ok := config.Type().(tftypes.Object)
-	if !ok {
-		return config
-	}
+// proposedNewState mimics Terraform core: a null config attribute takes the
+// prior value when it is Computed, and stays null otherwise.
+func proposedNewState(config, prior tftypes.Value, attrs []*tfprotov6.SchemaAttribute) tftypes.Value {
 	var cfg, pri map[string]tftypes.Value
 	_ = config.As(&cfg)
 	if !prior.IsNull() {
 		_ = prior.As(&pri)
 	}
 	out := map[string]tftypes.Value{}
-	for name, at := range obj.AttributeTypes {
-		p, ok := pri[name]
+	for _, a := range attrs {
+		c := cfg[a.Name]
+		p, ok := pri[a.Name]
 		if !ok {
-			p = tftypes.NewValue(at, nil)
+			p = tftypes.NewValue(c.Type(), nil)
 		}
-		out[name] = proposedNewState(cfg[name], p)
+		switch {
+		case a.NestedType != nil && !c.IsNull():
+			out[a.Name] = proposedNewState(c, p, a.NestedType.Attributes)
+		case c.IsNull() && a.Computed:
+			out[a.Name] = p
+		default:
+			out[a.Name] = c
+		}
 	}
-	return tftypes.NewValue(obj, out)
+	return tftypes.NewValue(config.Type(), out)
 }

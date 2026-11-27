@@ -190,11 +190,17 @@ func (r *wanSLAResource) Read(ctx context.Context, req resource.ReadRequest, res
 		resp.Diagnostics.AddError("Reading WAN SLA failed", err.Error())
 		return
 	}
-	found := uniqueMatch(slas, func(s *wire.WanSlas) bool { return deref(s.UnderscoreId) == id })
-	if found == nil && configuredString(state.Name) {
-		// Re-keyed by the zone-based firewall migration; SLA names are unique.
-		found = uniqueMatch(slas, func(s *wire.WanSlas) bool { return deref(s.Name) == state.Name.ValueString() })
-		if found != nil {
+	var found *wire.WanSlas
+	for i := range slas {
+		if deref(slas[i].UnderscoreId) == id {
+			found = &slas[i]
+			break
+		}
+	}
+	if found == nil && configuredString(state.Name) && isLegacyObjectID(id) {
+		// The zone-based firewall migration replaced the ObjectID with a UUID.
+		if sla, err := r.net.WAN().SLAs().GetByName(ctx, state.Name.ValueString()); err == nil {
+			found = sla
 			tflog.Warn(ctx, "WAN SLA id changed on the controller; adopting the new id", map[string]any{
 				"name": state.Name.ValueString(), "old_id": id, "new_id": deref(found.UnderscoreId),
 			})

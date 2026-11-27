@@ -6,9 +6,17 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi"
@@ -288,4 +296,66 @@ func sliceToIntSet(items []int) types.Set {
 	}
 	s, _ := types.SetValue(types.Int64Type, elems)
 	return s
+}
+
+// oc* are Optional+Computed knobs. UseStateForUnknown keeps an unconfigured
+// knob at its read value, so an import plans clean against an intent-only
+// config (invariant 6).
+func ocString(desc string, v ...validator.String) schema.StringAttribute {
+	return schema.StringAttribute{
+		Optional: true, Computed: true, MarkdownDescription: desc, Validators: v,
+		PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+	}
+}
+
+func ocBool(desc string) schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Optional: true, Computed: true, MarkdownDescription: desc,
+		PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
+	}
+}
+
+func ocStringSet(desc string, v ...validator.String) schema.SetAttribute {
+	return schema.SetAttribute{
+		Optional: true, Computed: true, ElementType: types.StringType, MarkdownDescription: desc,
+		Validators:    []validator.Set{setvalidator.SizeAtLeast(1), setvalidator.ValueStringsAre(v...)},
+		PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+	}
+}
+
+func optString(desc string) schema.StringAttribute {
+	return schema.StringAttribute{
+		Optional: true, MarkdownDescription: desc,
+		Validators: []validator.String{stringvalidator.LengthAtLeast(1)},
+	}
+}
+
+func optStringSet(desc string) schema.SetAttribute {
+	return schema.SetAttribute{
+		Optional: true, ElementType: types.StringType, MarkdownDescription: desc,
+		Validators: []validator.Set{setvalidator.SizeAtLeast(1)},
+	}
+}
+
+// falseBool is an optional flag whose omission means false, so removing it
+// from the config clears it.
+func falseBool(desc string) schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Optional: true, Computed: true, Default: booldefault.StaticBool(false), MarkdownDescription: desc,
+	}
+}
+
+// isLegacyObjectID reports a pre-migration 24-hex Mongo ObjectID. Natural-key
+// re-key fallbacks only run for these, so a same-named object recreated in
+// the UI after a delete isn't silently adopted.
+func isLegacyObjectID(id string) bool {
+	if len(id) != 24 {
+		return false
+	}
+	for _, r := range id {
+		if !strings.ContainsRune("0123456789abcdef", r) {
+			return false
+		}
+	}
+	return true
 }

@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,9 +23,11 @@ import (
 )
 
 var (
-	_ resource.Resource                = (*firewallPolicyResource)(nil)
-	_ resource.ResourceWithConfigure   = (*firewallPolicyResource)(nil)
-	_ resource.ResourceWithImportState = (*firewallPolicyResource)(nil)
+	_ resource.Resource                   = (*firewallPolicyResource)(nil)
+	_ resource.ResourceWithConfigure      = (*firewallPolicyResource)(nil)
+	_ resource.ResourceWithImportState    = (*firewallPolicyResource)(nil)
+	_ resource.ResourceWithModifyPlan     = (*firewallPolicyResource)(nil)
+	_ resource.ResourceWithValidateConfig = (*firewallPolicyResource)(nil)
 )
 
 func NewFirewallPolicyResource() resource.Resource { return &firewallPolicyResource{} }
@@ -79,30 +81,6 @@ func (r *firewallPolicyResource) Metadata(_ context.Context, req resource.Metada
 	resp.TypeName = req.ProviderTypeName + "_network_firewall_policy"
 }
 
-// UseStateForUnknown keeps an unconfigured knob at its read value, so an
-// imported policy plans clean against a config that states only its intent.
-func ocString(desc string, v ...validator.String) schema.StringAttribute {
-	return schema.StringAttribute{
-		Optional: true, Computed: true, MarkdownDescription: desc, Validators: v,
-		PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
-	}
-}
-
-func ocBool(desc string) schema.BoolAttribute {
-	return schema.BoolAttribute{
-		Optional: true, Computed: true, MarkdownDescription: desc,
-		PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()},
-	}
-}
-
-func ocStringSet(desc string, v ...validator.String) schema.SetAttribute {
-	return schema.SetAttribute{
-		Optional: true, Computed: true, ElementType: types.StringType, MarkdownDescription: desc,
-		Validators:    []validator.Set{setvalidator.SizeAtLeast(1), setvalidator.ValueStringsAre(v...)},
-		PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
-	}
-}
-
 func policyEndpointAttrs(source bool) map[string]schema.Attribute {
 	attrs := map[string]schema.Attribute{
 		"zone_id": schema.StringAttribute{
@@ -113,34 +91,35 @@ func policyEndpointAttrs(source bool) map[string]schema.Attribute {
 			Required:            true,
 			MarkdownDescription: "What to match inside the zone, e.g. `ANY`, `NETWORK`, `IP`, `CLIENT`, `REGION`.",
 		},
-		"matching_target_type": ocString("`SPECIFIC` (inline `ips`/`network_ids`) or `OBJECT` (`ip_group_id`). Inferred on create when unset.",
+		"matching_target_type": ocString("`SPECIFIC` (inline `ips`/`network_ids`) or `OBJECT` (`ip_group_id`). "+
+			"When unset, inferred from the operands whenever they change.",
 			stringvalidator.OneOf("SPECIFIC", "OBJECT")),
-		"ips":           ocStringSet("Addresses, CIDRs or ranges, for `matching_target = \"IP\"` with `SPECIFIC`."),
-		"network_ids":   ocStringSet("Network `_id`s, for `matching_target = \"NETWORK\"`."),
-		"ip_group_id":   ocString("Firewall group `_id`, for `matching_target = \"IP\"` with `OBJECT`."),
-		"port":          ocString("Port, list or range, e.g. `443` or `22,53,80`.", stringvalidator.LengthAtLeast(1)),
-		"port_group_id": ocString("Port group `_id`, for `port_matching_type = \"OBJECT\"`."),
-		"port_matching_type": ocString("`ANY`, `SPECIFIC` (`port`) or `OBJECT` (`port_group_id`). Inferred on create when unset.",
+		"ips":           optStringSet("Addresses, CIDRs or ranges, for `matching_target = \"IP\"`."),
+		"network_ids":   optStringSet("Network `_id`s, for `matching_target = \"NETWORK\"`."),
+		"ip_group_id":   optString("Firewall group `_id`, for `matching_target = \"IP\"` with `OBJECT`."),
+		"port":          optString("Port, list or range, e.g. `443` or `22,53,80`."),
+		"port_group_id": optString("Port group `_id`, for `port_matching_type = \"OBJECT\"`."),
+		"port_matching_type": ocString("`ANY`, `SPECIFIC` (`port`) or `OBJECT` (`port_group_id`). "+
+			"When unset, inferred from `port`/`port_group_id` whenever they change.",
 			stringvalidator.OneOf("ANY", "SPECIFIC", "OBJECT")),
-		"match_opposite_ips":      ocBool("Invert the address match."),
-		"match_opposite_networks": ocBool("Invert the network match."),
-		"match_opposite_ports":    ocBool("Invert the port match."),
+		"match_opposite_ips":      falseBool("Invert the address match."),
+		"match_opposite_networks": falseBool("Invert the network match."),
+		"match_opposite_ports":    falseBool("Invert the port match."),
 	}
 	if source {
-		attrs["match_mac"] = ocBool("Match the client by MAC address.")
+		attrs["match_mac"] = falseBool("Match the client by MAC address.")
 	}
 	return attrs
 }
 
 func (r *firewallPolicyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "A zone-based firewall policy (v2 `firewall-policies`). Needs a site on the zone-based firewall.\n\n" +
-			"Ordering is not managed: the controller places a new policy, and `index` reflects its position. " +
-			"Updates never change `index`; reorder in the UniFi UI. The schedule and every unmodeled field keep their live value " +
-			"(updates GET the policy, overlay the configured fields, and PUT it back); a new policy is scheduled `ALWAYS`.\n\n" +
-			"Predefined (system) policies can't be managed. An Optional+Computed attribute left out of the config keeps its " +
-			"last-read value, so removing it doesn't reset it.\n\n" +
-			"Import by `_id`, or by `name=<policy name>` when the name is unique.\n\n" +
+		MarkdownDescription: "A zone-based firewall policy. Needs a site on the zone-based firewall.\n\n" +
+			"Ordering isn't managed: the controller places a new policy, `index` shows where, and updates never move it. " +
+			"Updates also leave the schedule and settings this resource doesn't model as they are; a new policy runs `ALWAYS`. " +
+			"An endpoint's match operands (`ips`, `network_ids`, `ip_group_id`, `port`, `port_group_id`) are exactly what the " +
+			"config says, so removing one clears it. Other optional settings keep their current value when removed from the config.\n\n" +
+			"Predefined (system) policies can't be managed. Import by `_id`, or by `name=<policy name>` when the name is unique.\n\n" +
 			"**HIL-unverified:** writes have not been confirmed on a live controller.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -295,7 +274,6 @@ func (r *firewallPolicyResource) ImportState(ctx context.Context, req resource.I
 // as "keep the live value".
 func (m *firewallPolicyModel) toPolicy(ctx context.Context, diags *diag.Diagnostics) *network.FirewallPolicy {
 	p := &network.FirewallPolicy{}
-	p.UnderscoreId = strPtrIfSet(m.ID)
 	p.Name = m.Name.ValueString()
 	p.Description = strPtrIfSet(m.Description)
 	p.Action = wire.FirewallPoliciesAction(m.Action.ValueString())
@@ -366,23 +344,36 @@ func applyPolicyCreateDefaults(p *network.FirewallPolicy) {
 	endpointCreateDefaults(&p.Destination)
 }
 
+// endpointCreateDefaults covers operands that were still unknown at plan time.
 func endpointCreateDefaults(e *network.PolicyEndpoint) {
 	if e.PortMatchingType == "" {
-		switch {
-		case e.PortGroupID != "":
-			e.PortMatchingType = "OBJECT"
-		case e.Port != "":
-			e.PortMatchingType = "SPECIFIC"
-		default:
-			e.PortMatchingType = "ANY"
-		}
+		e.PortMatchingType = inferPortMatchingType(e.Port, e.PortGroupID)
 	}
-	if e.MatchingTargetType == "" && e.MatchingTarget != "ANY" {
-		if e.IPGroupID != "" {
-			e.MatchingTargetType = "OBJECT"
-		} else {
-			e.MatchingTargetType = "SPECIFIC"
-		}
+	if e.MatchingTargetType == "" {
+		e.MatchingTargetType = inferMatchingTargetType(e.MatchingTarget, e.IPGroupID)
+	}
+}
+
+func inferPortMatchingType(port, portGroupID string) string {
+	switch {
+	case portGroupID != "":
+		return "OBJECT"
+	case port != "":
+		return "SPECIFIC"
+	default:
+		return "ANY"
+	}
+}
+
+// inferMatchingTargetType returns "" for ANY, which takes no type.
+func inferMatchingTargetType(target, ipGroupID string) string {
+	switch {
+	case target == "ANY":
+		return ""
+	case ipGroupID != "":
+		return "OBJECT"
+	default:
+		return "SPECIFIC"
 	}
 }
 
@@ -412,7 +403,7 @@ func (m *firewallPolicyModel) fromPolicy(p *network.FirewallPolicy) {
 	m.Predefined = types.BoolValue(p.Predefined != nil && *p.Predefined)
 	m.Source = &policySourceModel{}
 	m.Source.fromEndpoint(p.Source)
-	m.Source.MatchMAC = boolToState(p.Source.MatchMAC)
+	m.Source.MatchMAC = falseIfAbsent(p.Source.MatchMAC)
 	m.Destination = &policyEndpointModel{}
 	m.Destination.fromEndpoint(p.Destination)
 }
@@ -427,9 +418,9 @@ func (e *policyEndpointModel) fromEndpoint(w network.PolicyEndpoint) {
 	e.Port = strToStateOptional(w.Port)
 	e.PortGroupID = strToStateOptional(w.PortGroupID)
 	e.PortMatchingType = strToStateOptional(w.PortMatchingType)
-	e.MatchOppositeIPs = boolToState(w.MatchOppositeIPs)
-	e.MatchOppositeNetworks = boolToState(w.MatchOppositeNetworks)
-	e.MatchOppositePorts = boolToState(w.MatchOppositePorts)
+	e.MatchOppositeIPs = falseIfAbsent(w.MatchOppositeIPs)
+	e.MatchOppositeNetworks = falseIfAbsent(w.MatchOppositeNetworks)
+	e.MatchOppositePorts = falseIfAbsent(w.MatchOppositePorts)
 }
 
 // nonEmptyStringSet is sliceToStringSet with an empty slice read as null too;
@@ -439,4 +430,174 @@ func nonEmptyStringSet(items []string) types.Set {
 		return types.SetNull(types.StringType)
 	}
 	return sliceToStringSet(items)
+}
+
+// falseIfAbsent reads an absent flag as its default, false, so it matches
+// an omitted attribute (which defaults to false).
+func falseIfAbsent(p *bool) types.Bool {
+	return types.BoolValue(p != nil && *p)
+}
+
+// ModifyPlan gates creation on the zone-based firewall (invariant 3) and
+// infers each endpoint's match types from its operands when unconfigured.
+func (r *firewallPolicyResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+	creating := req.State.Raw.IsNull()
+	if creating && r.net != nil {
+		requireZoneFirewall(ctx, r.net, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+	var plan, cfg firewallPolicyModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &cfg)...)
+	var prior firewallPolicyModel
+	if !creating {
+		resp.Diagnostics.Append(req.State.Get(ctx, &prior)...)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if plan.Source != nil && cfg.Source != nil {
+		var p *policyEndpointModel
+		if prior.Source != nil {
+			p = &prior.Source.policyEndpointModel
+		}
+		inferEndpointModes(&plan.Source.policyEndpointModel, &cfg.Source.policyEndpointModel, p)
+	}
+	if plan.Destination != nil && cfg.Destination != nil {
+		inferEndpointModes(plan.Destination, cfg.Destination, prior.Destination)
+	}
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
+}
+
+// inferEndpointModes sets an unconfigured match type from the operands, but
+// keeps the prior value while the operands are unchanged: an imported policy
+// must plan clean even where the live type isn't what inference would pick.
+func inferEndpointModes(plan, cfg, prior *policyEndpointModel) {
+	if cfg.PortMatchingType.IsNull() {
+		switch {
+		case prior != nil && plan.Port.Equal(prior.Port) && plan.PortGroupID.Equal(prior.PortGroupID):
+			plan.PortMatchingType = prior.PortMatchingType
+		case plan.Port.IsUnknown() || plan.PortGroupID.IsUnknown():
+			plan.PortMatchingType = types.StringUnknown()
+		default:
+			plan.PortMatchingType = types.StringValue(inferPortMatchingType(plan.Port.ValueString(), plan.PortGroupID.ValueString()))
+		}
+	}
+	if cfg.MatchingTargetType.IsNull() {
+		unchanged := prior != nil && plan.MatchingTarget.Equal(prior.MatchingTarget) && plan.IPGroupID.Equal(prior.IPGroupID) &&
+			sameStringSet(plan.IPs, prior.IPs) && sameStringSet(plan.NetworkIDs, prior.NetworkIDs)
+		switch {
+		case unchanged:
+			plan.MatchingTargetType = prior.MatchingTargetType
+		case plan.MatchingTarget.IsUnknown() || plan.IPGroupID.IsUnknown():
+			plan.MatchingTargetType = types.StringUnknown()
+		default:
+			if t := inferMatchingTargetType(plan.MatchingTarget.ValueString(), plan.IPGroupID.ValueString()); t != "" {
+				plan.MatchingTargetType = types.StringValue(t)
+			} else {
+				plan.MatchingTargetType = types.StringUnknown() // ANY: the controller's value
+			}
+		}
+	}
+}
+
+// ValidateConfig rejects operand combinations that contradict each other.
+func (r *firewallPolicyResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var cfg firewallPolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &cfg)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if cfg.Source != nil {
+		validateEndpoint(path.Root("source"), &cfg.Source.policyEndpointModel, &resp.Diagnostics)
+	}
+	if cfg.Destination != nil {
+		validateEndpoint(path.Root("destination"), cfg.Destination, &resp.Diagnostics)
+	}
+}
+
+func validateEndpoint(at path.Path, e *policyEndpointModel, diags *diag.Diagnostics) {
+	set := func(v attr.Value) bool { return !v.IsNull() && !v.IsUnknown() }
+	bad := func(attrName, msg string) {
+		diags.AddAttributeError(at.AtName(attrName), "Contradictory firewall policy endpoint", msg)
+	}
+
+	if set(e.Port) && set(e.PortGroupID) {
+		bad("port_group_id", "Set `port` or `port_group_id`, not both.")
+	}
+	if set(e.IPs) && set(e.IPGroupID) {
+		bad("ip_group_id", "Set `ips` or `ip_group_id`, not both.")
+	}
+	if set(e.MatchingTarget) && e.MatchingTarget.ValueString() == "ANY" && (set(e.IPs) || set(e.NetworkIDs) || set(e.IPGroupID)) {
+		bad("matching_target", "`matching_target = \"ANY\"` takes no `ips`, `network_ids` or `ip_group_id`.")
+	}
+	if set(e.PortMatchingType) {
+		switch e.PortMatchingType.ValueString() {
+		case "ANY":
+			if set(e.Port) || set(e.PortGroupID) {
+				bad("port_matching_type", "`port_matching_type = \"ANY\"` takes no `port` or `port_group_id`.")
+			}
+		case "SPECIFIC":
+			if set(e.PortGroupID) || e.Port.IsNull() {
+				bad("port_matching_type", "`port_matching_type = \"SPECIFIC\"` needs `port` and no `port_group_id`.")
+			}
+		case "OBJECT":
+			if set(e.Port) || e.PortGroupID.IsNull() {
+				bad("port_matching_type", "`port_matching_type = \"OBJECT\"` needs `port_group_id` and no `port`.")
+			}
+		}
+	}
+	if set(e.MatchingTargetType) {
+		switch e.MatchingTargetType.ValueString() {
+		case "OBJECT":
+			if set(e.IPs) {
+				bad("matching_target_type", "`matching_target_type = \"OBJECT\"` takes `ip_group_id`, not `ips`.")
+			}
+		case "SPECIFIC":
+			if set(e.IPGroupID) {
+				bad("matching_target_type", "`matching_target_type = \"SPECIFIC\"` takes `ips`, not `ip_group_id`.")
+			}
+		}
+	}
+}
+
+// sameStringSet compares sets by membership; the framework's Set.Equal is
+// order-sensitive, and plan and state can list the same set differently.
+func sameStringSet(a, b types.Set) bool {
+	if a.IsNull() || a.IsUnknown() || b.IsNull() || b.IsUnknown() {
+		return a.Equal(b)
+	}
+	if len(a.Elements()) != len(b.Elements()) {
+		return false
+	}
+	have := map[string]bool{}
+	for _, v := range a.Elements() {
+		have[v.String()] = true
+	}
+	for _, v := range b.Elements() {
+		if !have[v.String()] {
+			return false
+		}
+	}
+	return true
+}
+
+// requireZoneFirewall stops a create on a classic site at plan time. A probe
+// error only warns, so an unexpected controller reply can't block planning.
+func requireZoneFirewall(ctx context.Context, net *network.Client, diags *diag.Diagnostics) {
+	zbf, err := net.ZoneBasedFirewall(ctx)
+	if err != nil {
+		diags.AddWarning("Couldn't confirm the site's firewall mode", err.Error())
+		return
+	}
+	if !zbf {
+		diags.AddError("Site uses the classic firewall",
+			"This site has no firewall zones, so it can't hold a zone-based firewall policy. "+
+				"Migrate the site to the zone-based firewall, or use unifi_network_firewall_rule.")
+	}
 }

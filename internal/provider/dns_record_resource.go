@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -129,7 +130,7 @@ func (r *dnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 	rec, err := r.net.DNS().Records().Get(ctx, state.ID.ValueString())
-	if isNotFoundErr(err) && configuredString(state.Name) {
+	if isNotFoundErr(err) && configuredString(state.Name) && isLegacyObjectID(state.ID.ValueString()) {
 		rec, err = r.findRekeyed(ctx, state)
 	}
 	if err != nil {
@@ -144,19 +145,16 @@ func (r *dnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-// findRekeyed recovers a record whose _id changed under it (the zone-based
-// firewall migration re-keys every object, and static-dns keeps no alias for
-// the old id). Only a unique (name, type) match is adopted.
+// findRekeyed recovers a record whose legacy ObjectID the zone-based firewall
+// migration replaced with a UUID; static-dns keeps no alias for the old id.
+// Only a unique (name, type) match is adopted.
 func (r *dnsRecordResource) findRekeyed(ctx context.Context, state dnsRecordResourceModel) (*wire.StaticDns, error) {
-	records, err := r.net.DNS().Records().List(ctx)
+	rec, err := r.net.DNS().Records().GetByKey(ctx, state.Name.ValueString(), state.Type.ValueString())
+	if errors.Is(err, network.ErrAmbiguous) {
+		return nil, network.ErrNotFound
+	}
 	if err != nil {
 		return nil, err
-	}
-	rec := uniqueMatch(records, func(rec *wire.StaticDns) bool {
-		return rec.Key == state.Name.ValueString() && string(derefEnum(rec.RecordType)) == state.Type.ValueString()
-	})
-	if rec == nil {
-		return nil, network.ErrNotFound
 	}
 	tflog.Warn(ctx, "DNS record id changed on the controller; adopting the new id", map[string]any{
 		"name": rec.Key, "old_id": state.ID.ValueString(), "new_id": deref(rec.UnderscoreId),

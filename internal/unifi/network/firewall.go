@@ -35,25 +35,40 @@ func (c *Client) PortForwards() LegacyCollection[wire.Portforward] {
 	return LegacyCollection[wire.Portforward]{core: c.core, typ: "portforward"}
 }
 
-// ZoneBasedFirewall reports whether the site has migrated to the zone-based
-// firewall. After the migration legacy /rest/firewallrule lists nothing and
-// rules live as v2 firewall policies. Firmware without the surface (404) is
-// classic.
+// ZoneBasedFirewall reports whether the site runs the zone-based firewall:
+// either it recorded the migration, or it lists zones (a site created
+// zone-based records no migration). There, legacy /rest/firewallrule lists
+// nothing. A 404 from both probes means classic; any other probe error is
+// returned with false, for the caller to decide.
 func (c *Client) ZoneBasedFirewall(ctx context.Context) (bool, error) {
 	var migrations []wire.SiteFeatureMigration
-	err := v2Decode(ctx, c.core, http.MethodGet, "site-feature-migration", nil, &migrations)
-	if errors.Is(err, ErrNotFound) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
+	mErr := v2Decode(ctx, c.core, http.MethodGet, "site-feature-migration", nil, &migrations)
 	for _, m := range migrations {
 		if m.Feature != nil && *m.Feature == wire.ZONEBASEDFIREWALL {
 			return true, nil
 		}
 	}
+	zones, zErr := c.Firewall().Zones().List(ctx)
+	if zErr == nil && len(zones) > 0 {
+		return true, nil
+	}
+	for _, err := range []error{mErr, zErr} {
+		if err != nil && !errors.Is(err, ErrNotFound) {
+			return false, err
+		}
+	}
 	return false, nil
+}
+
+// Zone returns the one zone matching every non-empty key.
+func (s FirewallService) Zone(ctx context.Context, zoneKey, name string) (*wire.FirewallZone, error) {
+	zones, err := s.Zones().List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return findOne(zones, func(z *wire.FirewallZone) bool {
+		return (zoneKey == "" || deref(z.ZoneKey) == zoneKey) && (name == "" || deref(z.Name) == name)
+	})
 }
 
 // Zones is the zone-based firewall's zone list (v2 /firewall/zone).
@@ -70,7 +85,8 @@ func (s FirewallService) Policies() PolicyCollection {
 // wire.FirewallPoliciesSource/Destination model only the decompiled base DTO;
 // the controller deserializes polymorphically on matching_target, and the
 // subclass fields (ips, network_ids, ip_group_id, match_mac, match_opposite_*)
-// are absent from the spec. Tags follow the live document.
+// are absent from the spec. Tags follow the live document. Replace with
+// generated types once the spec has the subtypes (#7).
 type PolicyEndpoint struct {
 	ZoneID                string   `json:"zone_id"`
 	MatchingTarget        string   `json:"matching_target"`
@@ -89,7 +105,7 @@ type PolicyEndpoint struct {
 
 // FirewallPolicy is wire.FirewallPolicies with the endpoints replaced by
 // PolicyEndpoint. schedule and cloud_template stay raw: the provider doesn't
-// model them, and the generated schedule type decodes dates strictly.
+// model them, and the generated schedule type decodes dates strictly (#7).
 type FirewallPolicy struct {
 	wire.FirewallPolicies
 	Source        PolicyEndpoint  `json:"source"`
@@ -110,6 +126,11 @@ var policyOwnedKeys = []string{
 // policyCounterKeys are read-only hit counters, dropped from the PUT body.
 var policyCounterKeys = []string{"hits", "last_hit"}
 
+// endpointMatchKeys are the endpoint's match operands. Update owns them
+// outright: one absent from the body is removed from the document, so a mode
+// change (ips to ip_group_id, port to ANY) leaves no stale operand behind.
+var endpointMatchKeys = []string{"ips", "network_ids", "ip_group_id", "port", "port_group_id"}
+
 // PolicyCollection is the firewall policy CRUD collection. The v2 PUT
 // replaces the whole DTO, so Update GET-merges instead of sending a sparse body.
 type PolicyCollection struct {
@@ -124,51 +145,36 @@ func (s PolicyCollection) Get(ctx context.Context, id string) (*FirewallPolicy, 
 	if err != nil {
 		return nil, err
 	}
-	var p FirewallPolicy
-	if err := json.Unmarshal(raw, &p); err != nil {
-		return nil, fmt.Errorf("decode firewall policy %s: %w", id, err)
-	}
-	return &p, nil
+	return decodePolicy(raw)
 }
 
-// GetByName returns the only policy with the given name. Names aren't unique
-// on the controller, so a duplicate is an error rather than a guess.
+// GetByName returns the only policy with the given name; names aren't unique
+// on the controller, so a duplicate is ErrAmbiguous.
 func (s PolicyCollection) GetByName(ctx context.Context, name string) (*FirewallPolicy, error) {
 	all, err := s.List(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var found *FirewallPolicy
-	for i := range all {
-		if all[i].Name != name {
-			continue
-		}
-		if found != nil {
-			return nil, fmt.Errorf("several firewall policies are named %q; import by _id", name)
-		}
-		found = &all[i]
-	}
-	if found == nil {
-		return nil, ErrNotFound
-	}
-	return found, nil
+	return findOne(all, func(p *FirewallPolicy) bool { return p.Name == name })
 }
 
-// getRaw GETs one policy document. A one-element array is accepted as well as
-// a bare object.
 func (s PolicyCollection) getRaw(ctx context.Context, id string) (json.RawMessage, error) {
 	if id == "" {
 		return nil, ErrNotFound
 	}
+	return s.do(ctx, http.MethodGet, s.path+"/"+id, nil)
+}
+
+// do sends a single-policy request and returns the one document in the reply.
+// The decompiled routes declare a bare object, but a one-element array is
+// accepted too; null, empty or [] reads as ErrNotFound.
+func (s PolicyCollection) do(ctx context.Context, method, path string, body any) (json.RawMessage, error) {
 	var raw json.RawMessage
-	if err := v2Decode(ctx, s.core, http.MethodGet, s.path+"/"+id, nil, &raw); err != nil {
+	if err := v2Decode(ctx, s.core, method, path, body, &raw); err != nil {
 		return nil, err
 	}
 	trimmed := bytes.TrimSpace(raw)
-	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
-		return nil, ErrNotFound
-	}
-	if trimmed[0] == '[' {
+	if len(trimmed) > 0 && trimmed[0] == '[' {
 		var items []json.RawMessage
 		if err := json.Unmarshal(trimmed, &items); err != nil {
 			return nil, err
@@ -176,15 +182,33 @@ func (s PolicyCollection) getRaw(ctx context.Context, id string) (json.RawMessag
 		if len(items) == 0 {
 			return nil, ErrNotFound
 		}
-		return items[0], nil
+		trimmed = bytes.TrimSpace(items[0])
+	}
+	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
+		return nil, ErrNotFound
 	}
 	return trimmed, nil
+}
+
+func decodePolicy(raw json.RawMessage) (*FirewallPolicy, error) {
+	var p FirewallPolicy
+	if err := json.Unmarshal(raw, &p); err != nil {
+		return nil, fmt.Errorf("decode firewall policy: %w", err)
+	}
+	return &p, nil
 }
 
 // Create POSTs a new policy. The body is the full DTO, so p must carry every
 // field the controller requires (schedule, port_matching_type, ip_version).
 func (s PolicyCollection) Create(ctx context.Context, p *FirewallPolicy) (*FirewallPolicy, error) {
-	out, err := s.V2Collection.Create(ctx, p)
+	raw, err := s.do(ctx, http.MethodPost, s.path, p)
+	if errors.Is(err, ErrNotFound) {
+		err = fmt.Errorf("create firewall policy %q returned no policy", p.Name)
+	}
+	if err != nil {
+		return nil, err
+	}
+	out, err := decodePolicy(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -195,8 +219,9 @@ func (s PolicyCollection) Create(ctx context.Context, p *FirewallPolicy) (*Firew
 }
 
 // Update overlays p's owned fields onto the live document and PUTs it back by
-// id. Endpoints merge key by key, so unmodeled endpoint keys survive too. A
-// nil, empty-string or omitted value in p leaves the live value alone.
+// id. Endpoints merge key by key, so unmodeled endpoint keys survive. Outside
+// endpointMatchKeys, a nil or empty value in p keeps the live value. An empty
+// matching_target_type on an ANY endpoint is removed, since ANY takes no type.
 func (s PolicyCollection) Update(ctx context.Context, id string, p *FirewallPolicy) (*FirewallPolicy, error) {
 	if id == "" {
 		return nil, errMissingID("firewall policy")
@@ -219,7 +244,7 @@ func (s PolicyCollection) Update(ctx context.Context, id string, p *FirewallPoli
 		}
 	}
 	for _, k := range []string{"source", "destination"} {
-		merged, err := mergeRawObject(doc[k], owned[k])
+		merged, err := mergeEndpoint(doc[k], owned[k])
 		if err != nil {
 			return nil, fmt.Errorf("merge firewall policy %s: %w", k, err)
 		}
@@ -231,34 +256,47 @@ func (s PolicyCollection) Update(ctx context.Context, id string, p *FirewallPoli
 	idJSON, _ := json.Marshal(id)
 	doc["_id"] = idJSON
 
-	var out FirewallPolicy
-	if err := v2Decode(ctx, s.core, http.MethodPut, s.path+"/"+id, doc, &out); err != nil {
+	raw, err := s.do(ctx, http.MethodPut, s.path+"/"+id, doc)
+	if errors.Is(err, ErrNotFound) {
+		return s.Get(ctx, id) // empty echo
+	}
+	if err != nil {
+		return nil, err
+	}
+	out, err := decodePolicy(raw)
+	if err != nil {
 		return nil, err
 	}
 	if out.UnderscoreId == nil {
-		return s.Get(ctx, id) // empty echo
+		return s.Get(ctx, id)
 	}
-	return &out, nil
+	return out, nil
 }
 
-// mergeRawObject overlays the keys of over onto base (both JSON objects).
-func mergeRawObject(base, over json.RawMessage) (json.RawMessage, error) {
+// mergeEndpoint overlays the owned endpoint over onto the live base.
+func mergeEndpoint(base, over json.RawMessage) (json.RawMessage, error) {
 	m := map[string]json.RawMessage{}
-	if len(base) > 0 && !bytes.Equal(bytes.TrimSpace(base), []byte("null")) {
+	if !emptyRaw(base) {
 		if err := json.Unmarshal(base, &m); err != nil {
 			return nil, err
 		}
 	}
-	if len(over) > 0 {
-		o := map[string]json.RawMessage{}
+	o := map[string]json.RawMessage{}
+	if !emptyRaw(over) {
 		if err := json.Unmarshal(over, &o); err != nil {
 			return nil, err
 		}
-		for k, v := range o {
-			if !emptyRaw(v) {
-				m[k] = v
-			}
+	}
+	for _, k := range endpointMatchKeys {
+		delete(m, k)
+	}
+	for k, v := range o {
+		if !emptyRaw(v) {
+			m[k] = v
 		}
+	}
+	if string(m["matching_target"]) == `"ANY"` && emptyRaw(o["matching_target_type"]) {
+		delete(m, "matching_target_type")
 	}
 	return json.Marshal(m)
 }

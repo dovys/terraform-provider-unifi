@@ -42,7 +42,7 @@ A new resource is a feature: branch off `next` and open the PR into `next` ([rel
 
 1. Confirm the surface and wire shape against a live controller. Surfaces come from observing the live API (browser devtools, the provider's wire logs, read-only GETs) and from the OpenAPI documents UniFi ships. See [Wire logs](#wire-logs).
 2. Map the Terraform model to the generated `wire.<Type>` in `internal/unifi/<app>/wire` ([Wire types](#wire-types)).
-3. Add the accessor and collection in `internal/unifi/<app>`. Write a custom collection only for a Read that filters a List or for an array-field merge. No hand-written per-type structs and no `models` package. v2 writes follow the [write contract](architecture.md#4-write-contract-per-surface).
+3. Add the accessor and collection in `internal/unifi/<app>`. Write a custom collection only for a Read that filters a List, an array-field merge, or a replace-style document. No hand-written per-type structs and no `models` package, except where the generated type can't carry the live shape (device `PortOverride`, firewall `PolicyEndpoint`/`FirewallPolicy`; [#7](https://github.com/dovys/terraform-provider-unifi/issues/7)). v2 writes follow the [write contract](architecture.md#4-write-contract-per-surface).
 4. Build the schema per invariants 6, 8, and 10. Controller-defaulted knobs are `Optional+Computed` with `UseStateForUnknown`.
 5. Implement CRUD and ImportState per invariants 6 and 9. Document the import key and the state `id`.
 6. Add examples as hand-written use cases in `examples/<use-case>/*.tf` and `examples/data/`, not per-resource snippets. Use `import {}` blocks for objects users import rather than create, such as WANs and the Default network. Note any state-backend or hardware/firmware caveat.

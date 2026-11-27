@@ -20,11 +20,12 @@ These writes ship but have not been confirmed on real hardware. Their schemas sh
   - the sparse `fixed_ap_*` PUT pins the client and leaves a coexisting reservation's `fixed_ip` intact;
   - re-pinning `ap_mac` takes effect;
   - destroy (`fixed_ap_enabled = false`) clears the lock without forgetting the client.
-- `unifi_network_firewall_policy` and `data.unifi_network_firewall_zone`. Built from the decompiled spec and live GETs of a zone-based Network 11.0 site; the Docker controller runs the classic firewall, so no Tier-2 test exists. Pending: a read-only HIL import of live policies to a clean plan. Then a live write run to confirm:
+- `unifi_network_firewall_policy` and `data.unifi_network_firewall_zone`. Built from the decompiled spec and live GETs of a zone-based Network 11.0 site; the Docker controller runs the classic firewall, so no Tier-2 test exists. A read-only HIL import of 11 live policies planned clean before the match operands became config-owned; re-run it. Then a live write run to confirm:
   - the create body the v2 POST accepts (the full DTO with `schedule = ALWAYS` and the inferred `port_matching_type` and `matching_target_type`);
-  - that the GET-merge-PUT keeps `index`, the schedule and unmodeled fields;
+  - that the GET-merge-PUT keeps `index`, the schedule and unmodeled fields, and that dropping a stale operand (`ips` on an `ANY` endpoint) is accepted;
   - the not-found response of `GET firewall-policies/<id>` (Read assumes a 404);
-  - that a site created on the zone-based firewall, with no `site-feature-migration` record, still refuses a classic `unifi_network_firewall_rule` create. Today it doesn't: the guard reads only that record.
+  - that a classic site returns no zones from `firewall/zone`, since the zone probe treats any zone as zone-based.
+- Firewall policy wire types are hand-written until the spec carries the endpoint subtypes ([#7](https://github.com/dovys/terraform-provider-unifi/issues/7)).
 - `unifi_network_mdns` (#91). Needs: live write run. The v2 `global/config/network` PUT replaces the whole document, so the resource GET-merges before writing. Tier 2 covers the lifecycle. Confirm:
   - the required IGMP fields survive an mDNS-only change;
   - `mode = "some"` with `network_ids` scopes the reflector;

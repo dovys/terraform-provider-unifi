@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -9,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
-	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
 )
 
 var (
@@ -78,15 +78,18 @@ func (d *firewallZoneDataSource) Read(ctx context.Context, req datasource.ReadRe
 		resp.Diagnostics.AddError("Missing lookup key", "Set `zone_key`, `name`, or both.")
 		return
 	}
-	zones, err := d.net.Firewall().Zones().List(ctx)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to list firewall zones", err.Error()+
-			"\n\nZones exist only on a site that runs the zone-based firewall.")
+	found, err := d.net.Firewall().Zone(ctx, key, name)
+	switch {
+	case errors.Is(err, network.ErrNotFound):
+		resp.Diagnostics.AddError("Firewall zone not found", fmt.Sprintf(
+			"No zone matches zone_key=%q name=%q. Zones exist only on a site that runs the zone-based firewall.", key, name))
 		return
-	}
-	found, err := findZone(zones, key, name)
-	if err != nil {
-		resp.Diagnostics.AddError("Firewall zone not found", err.Error())
+	case errors.Is(err, network.ErrAmbiguous):
+		resp.Diagnostics.AddError("Firewall zone lookup is ambiguous", fmt.Sprintf(
+			"Several zones match zone_key=%q name=%q; set both to narrow it.", key, name))
+		return
+	case err != nil:
+		resp.Diagnostics.AddError("Failed to list firewall zones", err.Error())
 		return
 	}
 	cfg.ID = types.StringValue(deref(found.UnderscoreId))
@@ -99,38 +102,4 @@ func (d *firewallZoneDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 	cfg.NetworkIDs = sliceToStringSet(append([]string{}, ids...))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &cfg)...)
-}
-
-// findZone returns the one zone matching every non-empty key.
-func findZone(zones []wire.FirewallZone, key, name string) (*wire.FirewallZone, error) {
-	var matches []*wire.FirewallZone
-	for i := range zones {
-		if (key == "" || deref(zones[i].ZoneKey) == key) && (name == "" || deref(zones[i].Name) == name) {
-			matches = append(matches, &zones[i])
-		}
-	}
-	switch len(matches) {
-	case 1:
-		return matches[0], nil
-	case 0:
-		return nil, fmt.Errorf("no zone matches zone_key=%q name=%q", key, name)
-	default:
-		return nil, fmt.Errorf("%d zones match zone_key=%q name=%q; narrow the lookup", len(matches), key, name)
-	}
-}
-
-// uniqueMatch returns the only item satisfying match, or nil for none or
-// several: a re-key fallback must never guess between candidates.
-func uniqueMatch[T any](items []T, match func(*T) bool) *T {
-	var found *T
-	for i := range items {
-		if !match(&items[i]) {
-			continue
-		}
-		if found != nil {
-			return nil
-		}
-		found = &items[i]
-	}
-	return found
 }

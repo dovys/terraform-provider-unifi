@@ -103,17 +103,59 @@ func TestFirewallPolicyUpdate_MergesOverLiveDocument(t *testing.T) {
 
 func TestZoneBasedFirewall(t *testing.T) {
 	cases := map[string]struct {
-		f    *fakeDoer
-		want bool
+		f       *fakeDoer
+		want    bool
+		wantErr bool
 	}{
-		"migrated":    {fakeQueue(`[{"feature":"ZONE_BASED_FIREWALL","timestamp":1763164800000}]`), true},
-		"none":        {fakeQueue(`[]`), false},
-		"old surface": {&fakeDoer{err: &transport.APIError{StatusCode: http.StatusNotFound}}, false},
+		"migrated":           {f: fakeQueue(`[{"feature":"ZONE_BASED_FIREWALL","timestamp":1763164800000}]`), want: true},
+		"created zone-based": {f: fakeQueue(`[]`, `[{"_id":"z1","zone_key":"internal"}]`), want: true},
+		"classic":            {f: fakeQueue(`[]`, `[]`)},
+		"old firmware (404)": {f: &fakeDoer{err: &transport.APIError{StatusCode: http.StatusNotFound}}},
+		"unexpected 400":     {f: &fakeDoer{err: &transport.APIError{StatusCode: http.StatusBadRequest}}, wantErr: true},
 	}
 	for name, tc := range cases {
 		got, err := newTestClient(tc.f).ZoneBasedFirewall(context.Background())
-		if err != nil || got != tc.want {
-			t.Errorf("%s: got %v, %v; want %v", name, got, err, tc.want)
+		if got != tc.want || (err != nil) != tc.wantErr {
+			t.Errorf("%s: got %v, %v; want %v, err=%v", name, got, err, tc.want, tc.wantErr)
 		}
+	}
+}
+
+// A mode change must not leave the old mode's operand in the document.
+func TestFirewallPolicyUpdate_DropsStaleOperands(t *testing.T) {
+	live := `{"_id":"p1","name":"n","action":"ALLOW","ip_version":"IPV4","schedule":{"mode":"ALWAYS"},
+		"source":{"zone_id":"z","matching_target":"ANY","port_matching_type":"ANY"},
+		"destination":{"zone_id":"z","matching_target":"IP","matching_target_type":"SPECIFIC","ips":["203.0.113.10"],
+			"port":"443","port_matching_type":"SPECIFIC","app_ids":["unmodeled"]}}`
+	f := fakeQueue(live, live)
+	p := &FirewallPolicy{}
+	p.Name, p.Action = "n", "ALLOW"
+	p.Source = PolicyEndpoint{ZoneID: "z", MatchingTarget: "ANY", PortMatchingType: "ANY"}
+	p.Destination = PolicyEndpoint{ZoneID: "z", MatchingTarget: "ANY", PortMatchingType: "ANY"}
+	if _, err := newTestClient(f).Firewall().Policies().Update(context.Background(), "p1", p); err != nil {
+		t.Fatal(err)
+	}
+	b, _ := json.Marshal(f.body)
+	var doc struct {
+		Destination map[string]any `json:"destination"`
+	}
+	_ = json.Unmarshal(b, &doc)
+	for _, k := range []string{"ips", "port", "matching_target_type"} {
+		if _, ok := doc.Destination[k]; ok {
+			t.Errorf("stale %q kept: %v", k, doc.Destination)
+		}
+	}
+	if doc.Destination["app_ids"] == nil || doc.Destination["port_matching_type"] != "ANY" {
+		t.Errorf("destination = %v", doc.Destination)
+	}
+}
+
+func TestFirewallPolicyCreate_AcceptsArrayEcho(t *testing.T) {
+	f := fakeQueue(`[{"_id":"p9","name":"n","action":"BLOCK","ip_version":"IPV4","source":{"zone_id":"z","matching_target":"ANY"},"destination":{"zone_id":"z","matching_target":"ANY"}}]`)
+	p := &FirewallPolicy{}
+	p.Name = "n"
+	got, err := newTestClient(f).Firewall().Policies().Create(context.Background(), p)
+	if err != nil || got.UnderscoreId == nil || *got.UnderscoreId != "p9" {
+		t.Fatalf("got %v, %v", got, err)
 	}
 }

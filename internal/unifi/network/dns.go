@@ -40,6 +40,18 @@ func (s RecordCollection) Get(ctx context.Context, id string) (*wire.StaticDns, 
 	return nil, ErrNotFound
 }
 
+// GetByKey returns the only record with the given name and type (ErrNotFound
+// or ErrAmbiguous otherwise).
+func (s RecordCollection) GetByKey(ctx context.Context, key, recordType string) (*wire.StaticDns, error) {
+	records, err := s.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return findOne(records, func(r *wire.StaticDns) bool {
+		return r.Key == key && r.RecordType != nil && string(*r.RecordType) == recordType
+	})
+}
+
 // Update PUTs the record, sending its _id in both the URL and the body per the
 // v2 write contract. The record's _id (UnderscoreId) must be set.
 func (s RecordCollection) Update(ctx context.Context, r *wire.StaticDns) (*wire.StaticDns, error) {
