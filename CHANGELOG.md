@@ -13,6 +13,10 @@ Dated entries, newest first. Add yours under today's date in the PR that makes t
 
 - After the zone-based firewall migration re-keys every object to a UUID, `unifi_network_device`, `unifi_network_dns_record` and `unifi_network_wan_sla` no longer drop out of state and plan a re-create. Read falls back to the MAC, a unique name and type, or the name, and adopts the new id.
 
+### Security
+
+- Go toolchain → `go1.26.11` (stdlib `net/http` GO-2026-6859).
+
 ### Changed
 
 - `unifi_network_firewall_rule` refuses to create a rule on a site that reports the `ZONE_BASED_FIREWALL` migration, pointing to `unifi_network_firewall_policy`. Read and destroy are unchanged.

@@ -2,7 +2,7 @@ module github.com/dovys/terraform-provider-unifi
 
 go 1.26.3
 
-toolchain go1.26.10
+toolchain go1.26.11
 
 require (
 	github.com/hashicorp/go-version v1.9.0
