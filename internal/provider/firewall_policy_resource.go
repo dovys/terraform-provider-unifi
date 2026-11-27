@@ -120,7 +120,7 @@ func (r *firewallPolicyResource) Schema(_ context.Context, _ resource.SchemaRequ
 			"An endpoint's match operands (`ips`, `network_ids`, `ip_group_id`, `port`, `port_group_id`) are exactly what the " +
 			"config says, so removing one clears it. Other optional settings keep their current value when removed from the config.\n\n" +
 			"Predefined (system) policies can't be managed. Import by `_id`, or by `name=<policy name>` when the name is unique.\n\n" +
-			"**HIL-unverified:** writes have not been confirmed on a live controller.",
+			"**Writes are HIL-unverified — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

@@ -138,9 +138,7 @@ func (r *threatManagementResource) Schema(_ context.Context, _ resource.SchemaRe
 			"`disabled`; the provider detects that and fails with a clear error rather than looping on " +
 			"drift. A console with no gateway is rejected at plan time. `mode = \"disabled\"` (and the " +
 			"non-engine flags) work everywhere.\n\n" +
-			"**The enabled (non-`disabled`) write path is modeled from the controller's undocumented " +
-			"API and has NOT been verified against live IDS/IPS hardware — no CyberSecure-licensed " +
-			"console was available. See the provider TODO.**",
+			"**Writes that enable the engine (any `mode` but `disabled`) are HIL-unverified — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

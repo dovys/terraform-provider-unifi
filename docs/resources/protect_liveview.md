@@ -3,12 +3,12 @@
 page_title: "unifi_protect_liveview Resource - unifi"
 subcategory: ""
 description: |-
-  A UniFi Protect live view — a saved multi-camera grid layout, managed over the private Protect API (/proxy/protect/api/liveviews). A full CRUD object (created, not configure-existing). Each slots entry lists the cameras shown in one grid cell and optional cycling. The slot shape is inferred (untyped in the spec) and HIL-unverified — see the provider TODO.
+  A UniFi Protect live view — a saved multi-camera grid layout, managed over the private Protect API (/proxy/protect/api/liveviews). A full CRUD object (created, not configure-existing). Each slots entry lists the cameras shown in one grid cell and optional cycling.
 ---
 
 # unifi_protect_liveview (Resource)
 
-A UniFi Protect live view — a saved multi-camera grid layout, managed over the private Protect API (`/proxy/protect/api/liveviews`). A full CRUD object (created, not configure-existing). Each `slots` entry lists the cameras shown in one grid cell and optional cycling. **The slot shape is inferred (untyped in the spec) and HIL-unverified — see the provider TODO.**
+A UniFi Protect live view — a saved multi-camera grid layout, managed over the private Protect API (`/proxy/protect/api/liveviews`). A full CRUD object (created, not configure-existing). Each `slots` entry lists the cameras shown in one grid cell and optional cycling.
 
 
 
@@ -24,7 +24,7 @@ A UniFi Protect live view — a saved multi-camera grid layout, managed over the
 - `is_default` (Boolean) Whether this is the default live view for all viewers.
 - `is_global` (Boolean) Whether this live view is global (available system-wide to all users).
 - `layout` (Number) Number of slots / grid layout (e.g. 1, 4, 9, 16). Should match the number of `slots` entries.
-- `slots` (Attributes List) Ordered grid cells. Each lists the camera ids shown in that cell and optional auto-cycling. (see [below for nested schema](#nestedatt--slots))
+- `slots` (Attributes List) Ordered grid cells. Each lists the camera ids shown in that cell and optional auto-cycling. **The slot shape is inferred (untyped in the spec) and HIL-unverified — see the provider TODO.** (see [below for nested schema](#nestedatt--slots))
 
 ### Read-Only
 

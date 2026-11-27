@@ -15,7 +15,7 @@ Open work that isn't a roadmap phase. Phases, deferred resources and design ques
 
 <!-- docs/testing.md and test/hil/README.md link to this heading by name. -->
 
-These writes ship but have not been confirmed on real hardware. Their schemas should carry the `HIL-unverified` marker; *Schema text* below tracks the gaps.
+These writes ship but have not been confirmed on real hardware. Their schemas carry the `HIL-unverified` marker.
 
 ### Network
 
@@ -77,11 +77,6 @@ These need a live controller; the [roadmap](docs/roadmap.md) open questions have
 
 - `unifi_network_wan`: whether `wan_type` and `network_group` change in place or need `RequiresReplace`.
 - Sparse PUT: how to clear an owned `omitempty` field.
-
-### Schema text
-
-- `unifi_network_client_ap_lock` and `unifi_network_mdns` lack the `HIL-unverified` marker, and `unifi_network_threat_management` words it differently.
-- `unifi_protect_liveview` marks the whole resource `HIL-unverified`; narrow it to slots.
 
 ## Settings keys
 

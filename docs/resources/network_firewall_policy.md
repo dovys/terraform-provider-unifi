@@ -6,7 +6,7 @@ description: |-
   A zone-based firewall policy. Needs a site on the zone-based firewall.
   Ordering isn't managed: the controller places a new policy, index shows where, and updates never move it. Updates also leave the schedule and settings this resource doesn't model as they are; a new policy runs ALWAYS. An endpoint's match operands (ips, network_ids, ip_group_id, port, port_group_id) are exactly what the config says, so removing one clears it. Other optional settings keep their current value when removed from the config.
   Predefined (system) policies can't be managed. Import by _id, or by name=<policy name> when the name is unique.
-  HIL-unverified: writes have not been confirmed on a live controller.
+  Writes are HIL-unverified — see the provider TODO.
 ---
 
 # unifi_network_firewall_policy (Resource)
@@ -17,7 +17,7 @@ Ordering isn't managed: the controller places a new policy, `index` shows where,
 
 Predefined (system) policies can't be managed. Import by `_id`, or by `name=<policy name>` when the name is unique.
 
-**HIL-unverified:** writes have not been confirmed on a live controller.
+**Writes are HIL-unverified — see the provider TODO.**
 
 
 
