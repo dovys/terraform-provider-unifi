@@ -14,7 +14,7 @@
 #   docker buildx imagetools inspect <image>:<tag> --format '{{.Manifest.Digest}}'
 services:
   mongo:
-    image: mongo:7@sha256:4b5bf3c2bb7516164f6dcb44acce4fdcb428abfe5771a1128304a0f34ab9ff7c # 7.0.34 (pinned 2026-06-03)
+    image: mongo:8.0.38@sha256:479e85ced54ffb8a40dade1dcde2da2a9ae858515b9415e9cc54bfb8f0575d01 # 8.0.38 (pinned 2026-11-27), newest major the controller image supports
     networks: [unifi]
     volumes:
       # Seeds the unifi/unifi_stat users the controller's connection string
@@ -31,7 +31,7 @@ services:
       start_period: 10s
 
   controller:
-    image: lscr.io/linuxserver/unifi-network-application@sha256:f87c4d57285f3118a0bad24f696f5aa088859d332b5bf865cdb8e515a1c819ab # :latest as of 2026-06-03
+    image: lscr.io/linuxserver/unifi-network-application:10.6.109-ls156@sha256:31d2bc6f7df15fd737d7995e3907bf24e106e8b55deae22ad7bdea183c9b2e8b # 10.6.109-ls156 (pinned 2026-11-27)
     depends_on:
       mongo:
         condition: service_healthy
@@ -47,7 +47,7 @@ services:
       MONGO_AUTHSOURCE: unifi
 
   bridge:
-    image: nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10 # 1.27 (pinned 2026-06-03)
+    image: nginx:1.30.8-alpine@sha256:8eb04fe3b385090e9aa02961f77398ad09b6bf33ab07f6669a5bb7acce22c0d3 # 1.30.8 stable (pinned 2026-11-27)
     depends_on: [controller]
     networks: [unifi]
     volumes:

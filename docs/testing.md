@@ -55,9 +55,9 @@ UniFi OS Server needs systemd, `SYS_ADMIN` and host cgroups, so it can't run in 
 
 `test/tier2/compose.yaml` defines three containers, with images pinned by digest:
 
-- `mongo`, seeded by `init-mongo.js` with the `unifi` and `unifi_stat` users the controller needs.
-- `lscr.io/linuxserver/unifi-network-application`, the standalone controller.
-- an nginx bridge (`unifi-os-bridge.conf`), bound to `127.0.0.1:8443`.
+- `mongo` 8.0, the newest major the controller image supports, seeded by `init-mongo.js` with the `unifi` and `unifi_stat` users the controller needs.
+- `lscr.io/linuxserver/unifi-network-application` 10.6.109, the standalone controller.
+- an nginx 1.30 bridge (`unifi-os-bridge.conf`), bound to `127.0.0.1:8443`.
 
 The provider speaks the UniFi OS console dialect: `/api/auth/login`, a `/proxy/network/` prefix, and CSRF. The standalone controller uses `/api/login` and bare `/api/...` and `/v2/...` paths. The bridge rewrites the login path, strips `/proxy/network`, and drops the `Secure` cookie flag so the session works over plain HTTP. The provider talks to the bridge as if it were a console.
 
