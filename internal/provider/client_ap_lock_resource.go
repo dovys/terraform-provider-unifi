@@ -45,7 +45,7 @@ func (r *clientAPLockResource) Schema(_ context.Context, _ resource.SchemaReques
 			"may already track the client from a lease), and `terraform destroy` clears the AP lock " +
 			"(`fixed_ap_enabled = false`) rather than deleting the client record. The lock and a DHCP " +
 			"reservation can coexist on the same MAC — the legacy `/rest/user` PUT merges server-side, so " +
-			"writing the AP-lock fields leaves any reservation fields untouched.",
+			"writing the AP-lock fields leaves any reservation fields untouched. **Writes are HIL-unverified — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

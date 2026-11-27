@@ -60,7 +60,7 @@ func (r *mdnsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"discovery (AirPlay, Chromecast, printers, …) across the selected networks (VLANs).\n\n" +
 			"Set `mode` to `all` (every network), `none` (off), or `some` (only the networks in `network_ids`). " +
 			"This resource owns only the mDNS scope; the document's other multicast knobs (IGMP snooping, " +
-			"multicast flooding) are left as the controller has them.",
+			"multicast flooding) are left as the controller has them. **Writes are HIL-unverified — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

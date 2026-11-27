@@ -3,12 +3,12 @@
 page_title: "unifi_network_client_ap_lock Resource - unifi"
 subcategory: ""
 description: |-
-  Pins a wireless client (by MAC) to a specific access point — the controller won't steer or roam it to another AP. Like unifi_network_dhcp_reservation, this is a client-record attribute, not a standalone object: it's find-or-create by MAC (the controller may already track the client from a lease), and terraform destroy clears the AP lock (fixed_ap_enabled = false) rather than deleting the client record. The lock and a DHCP reservation can coexist on the same MAC — the legacy /rest/user PUT merges server-side, so writing the AP-lock fields leaves any reservation fields untouched.
+  Pins a wireless client (by MAC) to a specific access point — the controller won't steer or roam it to another AP. Like unifi_network_dhcp_reservation, this is a client-record attribute, not a standalone object: it's find-or-create by MAC (the controller may already track the client from a lease), and terraform destroy clears the AP lock (fixed_ap_enabled = false) rather than deleting the client record. The lock and a DHCP reservation can coexist on the same MAC — the legacy /rest/user PUT merges server-side, so writing the AP-lock fields leaves any reservation fields untouched. Writes are HIL-unverified — see the provider TODO.
 ---
 
 # unifi_network_client_ap_lock (Resource)
 
-Pins a wireless client (by MAC) to a specific access point — the controller won't steer or roam it to another AP. Like `unifi_network_dhcp_reservation`, this is a client-record attribute, not a standalone object: it's *find-or-create by MAC* (the controller may already track the client from a lease), and `terraform destroy` clears the AP lock (`fixed_ap_enabled = false`) rather than deleting the client record. The lock and a DHCP reservation can coexist on the same MAC — the legacy `/rest/user` PUT merges server-side, so writing the AP-lock fields leaves any reservation fields untouched.
+Pins a wireless client (by MAC) to a specific access point — the controller won't steer or roam it to another AP. Like `unifi_network_dhcp_reservation`, this is a client-record attribute, not a standalone object: it's *find-or-create by MAC* (the controller may already track the client from a lease), and `terraform destroy` clears the AP lock (`fixed_ap_enabled = false`) rather than deleting the client record. The lock and a DHCP reservation can coexist on the same MAC — the legacy `/rest/user` PUT merges server-side, so writing the AP-lock fields leaves any reservation fields untouched. **Writes are HIL-unverified — see the provider TODO.**
 
 
 

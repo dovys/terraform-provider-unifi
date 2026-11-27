@@ -4,14 +4,14 @@ page_title: "unifi_network_mdns Resource - unifi"
 subcategory: ""
 description: |-
   Multicast DNS (mDNS) reflector scope for the site — a singleton on the site's global network-config (/v2/.../global/config/network). The reflector bridges Bonjour/mDNS service discovery (AirPlay, Chromecast, printers, …) across the selected networks (VLANs).
-  Set mode to all (every network), none (off), or some (only the networks in network_ids). This resource owns only the mDNS scope; the document's other multicast knobs (IGMP snooping, multicast flooding) are left as the controller has them.
+  Set mode to all (every network), none (off), or some (only the networks in network_ids). This resource owns only the mDNS scope; the document's other multicast knobs (IGMP snooping, multicast flooding) are left as the controller has them. Writes are HIL-unverified — see the provider TODO.
 ---
 
 # unifi_network_mdns (Resource)
 
 Multicast DNS (mDNS) reflector scope for the site — a **singleton** on the site's global network-config (`/v2/.../global/config/network`). The reflector bridges Bonjour/mDNS service discovery (AirPlay, Chromecast, printers, …) across the selected networks (VLANs).
 
-Set `mode` to `all` (every network), `none` (off), or `some` (only the networks in `network_ids`). This resource owns only the mDNS scope; the document's other multicast knobs (IGMP snooping, multicast flooding) are left as the controller has them.
+Set `mode` to `all` (every network), `none` (off), or `some` (only the networks in `network_ids`). This resource owns only the mDNS scope; the document's other multicast knobs (IGMP snooping, multicast flooding) are left as the controller has them. **Writes are HIL-unverified — see the provider TODO.**
 
 
 
