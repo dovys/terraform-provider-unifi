@@ -22,7 +22,7 @@ Dated entries, newest first. Add yours under today's date in the PR that makes t
 
 - `github.com/oapi-codegen/runtime` → v1.9.1, plus every other minor/patch bump in the module graph.
 - Go → 1.27 (`go 1.27.0`, toolchain `go1.27.4`). Builds from source need Go 1.27.
-- `oapi-codegen` → v2.9.0 and every remaining indirect module to its latest release. `wire` is not regenerated with it.
+- `oapi-codegen` → v2.9.0 and every remaining indirect module to its latest release. `wire` is not regenerated with it; the blockers are in [TODO.md](TODO.md#wire-regeneration).
 - CI: golangci-lint → v2.15.0, govulncheck → v1.10.0.
 
 ### Changed
