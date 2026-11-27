@@ -16,6 +16,11 @@ Dated entries, newest first. Add yours under today's date in the PR that makes t
 ### Security
 
 - Go toolchain → `go1.26.11` (stdlib `net/http` GO-2026-6859).
+- `golang.org/x/net` → v0.63.0 (GO-2026-6866, GO-2026-6860) and `golang.org/x/crypto` → v0.59.0 (GO-2026-5932).
+
+### Dependencies
+
+- `github.com/oapi-codegen/runtime` → v1.9.1, plus every other minor/patch bump in the module graph.
 
 ### Changed
 
