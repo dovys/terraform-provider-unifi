@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
@@ -128,6 +129,9 @@ func (r *dnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 	rec, err := r.net.DNS().Records().Get(ctx, state.ID.ValueString())
+	if isNotFoundErr(err) && configuredString(state.Name) {
+		rec, err = r.findRekeyed(ctx, state)
+	}
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -138,6 +142,26 @@ func (r *dnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	state.fromRecord(rec)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+}
+
+// findRekeyed recovers a record whose _id changed under it (the zone-based
+// firewall migration re-keys every object, and static-dns keeps no alias for
+// the old id). Only a unique (name, type) match is adopted.
+func (r *dnsRecordResource) findRekeyed(ctx context.Context, state dnsRecordResourceModel) (*wire.StaticDns, error) {
+	records, err := r.net.DNS().Records().List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	rec := uniqueMatch(records, func(rec *wire.StaticDns) bool {
+		return rec.Key == state.Name.ValueString() && string(derefEnum(rec.RecordType)) == state.Type.ValueString()
+	})
+	if rec == nil {
+		return nil, network.ErrNotFound
+	}
+	tflog.Warn(ctx, "DNS record id changed on the controller; adopting the new id", map[string]any{
+		"name": rec.Key, "old_id": state.ID.ValueString(), "new_id": deref(rec.UnderscoreId),
+	})
+	return rec, nil
 }
 
 func (r *dnsRecordResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

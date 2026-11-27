@@ -2,6 +2,22 @@
 
 Dated entries, newest first. Add yours under today's date in the PR that makes the change. Versions come from git, not this file: every push to `main` releases a patch, and a `next → main` merge commit releases a minor ([`docs/releasing.md`](docs/releasing.md)). Each GitHub Release lists its commits. Sections tagged `[vX.Y.Z]` predate the date-based convention.
 
+## 2026-11-27
+
+### Added
+
+- **`unifi_network_firewall_policy`**: zone-based firewall policies (v2 `firewall-policies`). Update GETs the live policy, overlays the configured fields and PUTs it back, so ordering (`index`), the schedule and unmodeled fields are never changed. Predefined policies are refused. Import by `_id` or `name=<name>`. Writes are HIL-unverified.
+- **`data.unifi_network_firewall_zone`**: look up a zone by `zone_key` or `name`, so policies reference zones without ids.
+
+### Fixed
+
+- After the zone-based firewall migration re-keys every object to a UUID, `unifi_network_device`, `unifi_network_dns_record` and `unifi_network_wan_sla` no longer drop out of state and plan a re-create. Read falls back to the MAC, a unique name and type, or the name, and adopts the new id.
+
+### Changed
+
+- `unifi_network_firewall_rule` refuses to create a rule on a site that reports the `ZONE_BASED_FIREWALL` migration, pointing to `unifi_network_firewall_policy`. Read and destroy are unchanged.
+- Invariants 9 and 10 list the firewall policy GET-merge-PUT as the second raw-JSON passthrough: the generated wire type lacks the polymorphic endpoint fields (`ips`, `network_ids`, `ip_group_id`, `match_mac`, `match_opposite_*`).
+
 ## 2026-10-26
 
 ### Added

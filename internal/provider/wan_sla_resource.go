@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
@@ -189,14 +190,22 @@ func (r *wanSLAResource) Read(ctx context.Context, req resource.ReadRequest, res
 		resp.Diagnostics.AddError("Reading WAN SLA failed", err.Error())
 		return
 	}
-	for i := range slas {
-		if slas[i].UnderscoreId != nil && *slas[i].UnderscoreId == id {
-			fresh := wireToWANSLAModel(&slas[i])
-			resp.Diagnostics.Append(resp.State.Set(ctx, &fresh)...)
-			return
+	found := uniqueMatch(slas, func(s *wire.WanSlas) bool { return deref(s.UnderscoreId) == id })
+	if found == nil && configuredString(state.Name) {
+		// Re-keyed by the zone-based firewall migration; SLA names are unique.
+		found = uniqueMatch(slas, func(s *wire.WanSlas) bool { return deref(s.Name) == state.Name.ValueString() })
+		if found != nil {
+			tflog.Warn(ctx, "WAN SLA id changed on the controller; adopting the new id", map[string]any{
+				"name": state.Name.ValueString(), "old_id": id, "new_id": deref(found.UnderscoreId),
+			})
 		}
 	}
-	resp.State.RemoveResource(ctx) // remove-on-404 (invariant 6)
+	if found == nil {
+		resp.State.RemoveResource(ctx) // remove-on-404 (invariant 6)
+		return
+	}
+	fresh := wireToWANSLAModel(found)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &fresh)...)
 }
 
 func (r *wanSLAResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

@@ -34,7 +34,7 @@ Design: [apps/network.md](apps/network.md).
 | Site | | `unifi_network_site`, `unifi_network_application_info` |
 | Devices and ports | `unifi_network_device`, `unifi_network_port_profile` | `unifi_network_device` |
 | Wi-Fi | `unifi_network_wlan`, `unifi_network_wlan_group`, `unifi_network_ap_group` | |
-| Firewall | `unifi_network_firewall_rule`, `unifi_network_firewall_group`, `unifi_network_port_forward` | |
+| Firewall | `unifi_network_firewall_rule`, `unifi_network_firewall_policy`, `unifi_network_firewall_group`, `unifi_network_port_forward` | `unifi_network_firewall_zone` |
 | Routing and traffic | `unifi_network_static_route`, `unifi_network_traffic_rule`, `unifi_network_traffic_route`, `unifi_network_user_group` | |
 | DNS and DHCP | `unifi_network_dns_record`, `unifi_network_dynamic_dns`, `unifi_network_dhcp_reservation`, `unifi_network_mdns` | |
 | Clients | `unifi_network_client_ap_lock` | |
@@ -43,6 +43,7 @@ Design: [apps/network.md](apps/network.md).
 
 - `unifi_network_device` reads are confirmed live. Adopt, forget, the config write and the full `device.state` enum wait on the [W3 rig](../TODO.md#w3-rig).
 - `unifi_network_client_ap_lock` write is not yet confirmed on hardware.
+- `unifi_network_firewall_policy` writes are not yet confirmed on hardware, and the Docker controller runs the classic firewall, so there is no Tier-2 lifecycle; see [TODO.md](../TODO.md#network).
 - `unifi_network_threat_management` modes other than `disabled` need a CyberSecure-licensed gateway.
 - `unifi_network_wan` updates and `unifi_network_wan_sla` monitor types are [known bugs](../TODO.md#known-bugs).
 
@@ -81,7 +82,7 @@ Design: [apps/console.md](apps/console.md). Uses the UniFi OS API under `/api` o
 | Item | Reason |
 | --- | --- |
 | `unifi_network_site` resource | The request and response shapes of the `/cmd/sitemgr` create, update and delete calls need a multi-site controller to confirm. The data source and client methods exist. |
-| Zone firewall (`firewall_zone`, `firewall_policy`) | Needs a controller running the zone-based firewall to verify the classic-vs-zone capability gate. |
+| `unifi_network_firewall_zone` resource | Custom zone create and update need a zone-based test controller; the data source covers lookups. |
 | VPN server, VPN client, BGP | Needs a test rig with a configured VPN and a BGP-capable gateway. |
 | Chime per-doorbell `ringSettings` | Refers to ringtone objects that aren't modeled yet. |
 | More `unifi_network_settings` keys | Added by value and on request; [TODO.md](../TODO.md#settings-keys) has the order. |

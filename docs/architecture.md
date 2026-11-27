@@ -98,6 +98,7 @@ Read refreshes Computed fields, rewrites a configured value only when the contro
 | device | legacy `/stat/device` (also `data.unifi_network_device`) | adopt: `/cmd/devmgr`; config: sparse `PUT /rest/device/<id>`, `port_overrides` GET-merged |
 | port profile | legacy `/rest/portconf` | legacy |
 | firewall group, firewall rule | legacy `/rest/firewallgroup`, `/rest/firewallrule` | legacy |
+| firewall policy, firewall zone (data source) | v2 `/firewall-policies`, `/firewall/zone` | v2, replace-style: GET-merge-PUT |
 | traffic rule, traffic route | v2 | v2 |
 | static route, port forward, dynamic DNS | legacy `/rest/{routing,portforward,dynamicdns}` | legacy |
 | local DNS record | v2 `/static-dns` | v2 |

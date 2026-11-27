@@ -63,11 +63,14 @@ The device lifecycle, the `port_overrides` merge, and the per-port VLAN rules ar
 | Resource | Surface | Notes |
 |----------|:------:|-------|
 | `unifi_network_firewall_rule` | L `rest/firewallrule` | Classic rules. `rule_index` accepts any value `>= 0`; apply checks it is unique within the ruleset. Match on address, port, network or firewall group, and connection state. |
+| `unifi_network_firewall_policy` | V2 `firewall-policies` | Zone-based firewall policies. Update GETs the policy, overlays the configured fields and PUTs it back, so `index` (ordering), the schedule and unmodeled fields keep their live value. Create sends the full DTO with a schedule of `ALWAYS`. Predefined policies are refused. Import by `_id` or `name=<name>`. |
 | `unifi_network_firewall_group` | L `rest/firewallgroup` | `address-group`, `port-group` or `ipv6-address-group`. `type` forces replacement. `members` is always sent, as an explicit empty list when unset. |
 | `unifi_network_traffic_rule` | V2 `trafficrules` | App and category rules. |
 | `unifi_network_traffic_route` | V2 `trafficroutes` | Policy-based routing. |
 
-The provider doesn't detect whether a console runs zone-based firewall; classic rules only.
+A site that has migrated to the zone-based firewall reports it in v2 `site-feature-migration`; there, legacy `rest/firewallrule` lists nothing, and creating a `unifi_network_firewall_rule` fails at plan time. `data.unifi_network_firewall_zone` (v2 `firewall/zone`) resolves a zone by `zone_key` or `name`.
+
+The migration also re-keys every object from an ObjectID to a UUID. Legacy GET-by-id still resolves the old id and returns the new one, which Read adopts. List-and-filter reads can't, so they fall back to a stable key and adopt the new id: `unifi_network_device` by MAC, `unifi_network_dns_record` by a unique name and type, `unifi_network_wan_sla` by name.
 
 ### Identity, RADIUS and clients
 
@@ -133,5 +136,5 @@ Open question: it's unconfirmed whether `unifi_network_wan` `wan_type` and `netw
 ## Not modeled
 
 - Client devices: inventory, presence, blocking and per-client QoS are runtime state. The exceptions are DHCP reservations and AP locks.
-- Zone-based firewall (`firewall_zone`, `firewall_policy`), VPN server and client, BGP, and site create/delete. See [../roadmap.md](../roadmap.md).
+- Firewall zone writes, VPN server and client, BGP, and site create/delete. See [../roadmap.md](../roadmap.md).
 - DPI apps and groups, QoS rules, and the remaining setting keys, including `mgmt` (schedule tasks).
