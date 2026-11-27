@@ -43,7 +43,7 @@ Design: [apps/network.md](apps/network.md).
 
 - `unifi_network_device` reads are confirmed live. Adopt, forget, the config write and the full `device.state` enum wait on the [W3 rig](../TODO.md#w3-rig).
 - `unifi_network_client_ap_lock` write is not yet confirmed on hardware.
-- `unifi_network_firewall_policy` writes are not yet confirmed on hardware, and the Docker controller runs the classic firewall, so there is no Tier-2 lifecycle; see [TODO.md](../TODO.md#network).
+- `unifi_network_firewall_policy` writes are not yet confirmed on hardware, and its Tier-2 test skips on the Docker controller, which runs the classic firewall; see [TODO.md](../TODO.md#network).
 - `unifi_network_threat_management` modes other than `disabled` need a CyberSecure-licensed gateway.
 
 ### Protect

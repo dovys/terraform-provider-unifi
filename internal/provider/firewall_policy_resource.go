@@ -143,7 +143,7 @@ func (r *firewallPolicyResource) Schema(_ context.Context, _ resource.SchemaRequ
 			"connection_states": ocStringSet("States matched when `connection_state_type = \"CUSTOM\"`: `NEW`, `ESTABLISHED`, `RELATED`, `INVALID`.",
 				stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
 			"create_allow_respond": ocBool("Also create the return-traffic allow for an `ALLOW` policy. " +
-				"Defaults to `false` on create. The controller rejects return traffic into the Gateway zone."),
+				"Defaults to `false` on create into the Gateway zone, which rejects return traffic; elsewhere the controller's default applies."),
 			"logging":                 ocBool("Log matched traffic."),
 			"match_ip_sec":            ocBool("Match on IPsec."),
 			"match_opposite_protocol": ocBool("Invert the protocol match."),
@@ -188,6 +188,10 @@ func (r *firewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 	applyPolicyCreateDefaults(body)
+	if err := r.defaultGatewayAllowRespond(ctx, body); err != nil {
+		resp.Diagnostics.AddError("Failed to read firewall zones", err.Error())
+		return
+	}
 	created, err := r.net.Firewall().Policies().Create(ctx, body)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create firewall policy", err.Error())
@@ -320,6 +324,27 @@ func (e *policyEndpointModel) toEndpoint(ctx context.Context, diags *diag.Diagno
 	}
 }
 
+// defaultGatewayAllowRespond sends create_allow_respond = false for an unset
+// create into the Gateway zone. The controller takes the omitted key as true
+// and 400s it there ("create respond traffic not allowed", #8); elsewhere the
+// key stays omitted so the controller's default applies.
+func (r *firewallPolicyResource) defaultGatewayAllowRespond(ctx context.Context, p *network.FirewallPolicy) error {
+	if p.CreateAllowRespond != nil {
+		return nil
+	}
+	zones, err := r.net.Firewall().Zones().List(ctx)
+	if err != nil {
+		return err
+	}
+	for _, z := range zones {
+		if deref(z.UnderscoreId) == p.Destination.ZoneID && deref(z.ZoneKey) == "gateway" {
+			f := false
+			p.CreateAllowRespond = &f
+		}
+	}
+	return nil
+}
+
 // applyPolicyCreateDefaults fills what the v2 POST requires (it takes the full
 // DTO) where the config left it unset.
 func applyPolicyCreateDefaults(p *network.FirewallPolicy) {
@@ -333,12 +358,6 @@ func applyPolicyCreateDefaults(p *network.FirewallPolicy) {
 	if p.Protocol == nil {
 		all := "all"
 		p.Protocol = &all
-	}
-	// Omitted, a policy into the Gateway zone 400s ("create respond traffic
-	// not allowed"); false is accepted there (#8).
-	if p.CreateAllowRespond == nil {
-		f := false
-		p.CreateAllowRespond = &f
 	}
 	if p.ConnectionStateType == nil {
 		all := wire.FirewallPoliciesConnectionStateType("ALL")
