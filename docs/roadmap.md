@@ -1,6 +1,6 @@
 # Roadmap
 
-What the provider ships today, what is deferred and why, and the design questions still open. Known bugs, and writes that ship but aren't yet confirmed on hardware, are tracked in [TODO.md](../TODO.md#verify-against-hardware).
+What the provider ships today, what is deferred and why, and the design questions still open. Writes that ship but aren't yet confirmed on hardware are tracked in [TODO.md](../TODO.md#verify-against-hardware).
 
 A resource ships when it meets the [Definition of Done](development.md#definition-of-done): its unit tests pass in CI, its acceptance lifecycle passes against the Docker controller (`make testacc`), and, where the hardware exists, it imports real objects on a live console to a clean plan. Each app section below lists its exceptions.
 
@@ -45,7 +45,6 @@ Design: [apps/network.md](apps/network.md).
 - `unifi_network_client_ap_lock` write is not yet confirmed on hardware.
 - `unifi_network_firewall_policy` writes are not yet confirmed on hardware, and the Docker controller runs the classic firewall, so there is no Tier-2 lifecycle; see [TODO.md](../TODO.md#network).
 - `unifi_network_threat_management` modes other than `disabled` need a CyberSecure-licensed gateway.
-- `unifi_network_wan` updates are a [known bug](../TODO.md#known-bugs).
 
 ### Protect
 

@@ -30,10 +30,10 @@ A WAN uplink (`networkconf` with `purpose=wan`): DHCP/PPPoE/static, dual-WAN loa
 - `igmp_proxy_for` (String) IGMP-proxy downstream network.
 - `igmp_proxy_upstream` (Boolean) Whether this uplink is the IGMP-proxy upstream.
 - `ip` (String) Static WAN IP address (`wan_type=static`).
-- `ipv6_delegation_type` (String) IPv6 prefix-delegation type (`none`, `dhcpv6`, …).
+- `ipv6_delegation_type` (String) IPv6 prefix-delegation type: `none`, `pd`, or `single_network`.
 - `ipv6_dns_servers` (List of String) Up to two IPv6 DNS servers. Setting any switches IPv6 DNS to manual.
 - `ipv6_pd_size` (Number) IPv6 prefix-delegation size.
-- `ipv6_type` (String) IPv6 uplink type (`wan_type_v6`, e.g. `disabled`, `dhcpv6`, `static`). Set to `disabled` to turn IPv6 off on the uplink.
+- `ipv6_type` (String) IPv6 uplink type (`wan_type_v6`): `disabled`, `dhcpv6`, `slaac`, or `static`. Set to `disabled` to turn IPv6 off on the uplink.
 - `load_balance_type` (String) Multi-WAN role: `weighted` (load balance) or `failover-only`.
 - `load_balance_weight` (Number) Load-balance weight (0–100) when `load_balance_type=weighted`.
 - `mac_override` (String) Clone this MAC address on the WAN interface (empty disables MAC override).

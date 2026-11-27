@@ -189,8 +189,8 @@ func (r *wanResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 			"mac_override":        optStr("Clone this MAC address on the WAN interface (empty disables MAC override)."),
 			"report_wan_event":    optBool("Whether WAN up/down events are reported."),
 
-			"ipv6_type":            optStr("IPv6 uplink type (`wan_type_v6`, e.g. `disabled`, `dhcpv6`, `static`). Set to `disabled` to turn IPv6 off on the uplink."),
-			"ipv6_delegation_type": optStr("IPv6 prefix-delegation type (`none`, `dhcpv6`, …)."),
+			"ipv6_type":            optStr("IPv6 uplink type (`wan_type_v6`): `disabled`, `dhcpv6`, `slaac`, or `static`. Set to `disabled` to turn IPv6 off on the uplink."),
+			"ipv6_delegation_type": optStr("IPv6 prefix-delegation type: `none`, `pd`, or `single_network`."),
 			"ipv6_pd_size":         optInt("IPv6 prefix-delegation size."),
 		},
 	}
@@ -276,6 +276,9 @@ func (r *wanResource) ImportState(ctx context.Context, req resource.ImportStateR
 
 func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagnostics) *wire.Networkconf {
 	wanPurpose := wire.NetworkconfPurpose("wan")
+	// The enum fields use strPtrIfSet: the controller omits them when unset, Read
+	// stores "", and echoing "" in the PUT fails the enum pattern
+	// (api.err.InvalidPayload).
 	conf := &wire.Networkconf{
 		UnderscoreId:          strPtrOrNil(m.ID),
 		Name:                  strPtrOrNil(m.Name),
@@ -286,7 +289,7 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 		WanIp:                 strPtrIfSet(m.IP),
 		WanNetmask:            strPtrIfSet(m.Netmask),
 		WanGateway:            strPtrIfSet(m.Gateway),
-		WanLoadBalanceType:    (*wire.NetworkconfWanLoadBalanceType)(strPtrOrNil(m.LoadBalanceType)),
+		WanLoadBalanceType:    (*wire.NetworkconfWanLoadBalanceType)(strPtrIfSet(m.LoadBalanceType)),
 		WanLoadBalanceWeight:  intPtr(m.LoadBalanceWeight),
 		WanFailoverPriority:   intPtr(m.FailoverPriority),
 		WanSmartqEnabled:      boolPtr(m.SmartQEnabled),
@@ -295,8 +298,8 @@ func (m *wanResourceModel) toNetworkConf(ctx context.Context, diags *diag.Diagno
 		IgmpProxyUpstream:     boolPtr(m.IGMPProxyUpstream),
 		IgmpProxyFor:          (*wire.NetworkconfIgmpProxyFor)(strPtrIfSet(m.IGMPProxyFor)),
 		ReportWanEvent:        boolPtr(m.ReportWANEvent),
-		WanTypeV6:             (*wire.NetworkconfWanTypeV6)(strPtrOrNil(m.IPv6Type)),
-		Ipv6WanDelegationType: (*wire.NetworkconfIpv6WanDelegationType)(strPtrOrNil(m.IPv6DelegationType)),
+		WanTypeV6:             (*wire.NetworkconfWanTypeV6)(strPtrIfSet(m.IPv6Type)),
+		Ipv6WanDelegationType: (*wire.NetworkconfIpv6WanDelegationType)(strPtrIfSet(m.IPv6DelegationType)),
 		WanDhcpv6PdSize:       intPtr(m.IPv6PDSize),
 	}
 
