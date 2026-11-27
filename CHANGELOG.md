@@ -20,7 +20,7 @@ Dated entries, newest first. Add yours under today's date in the PR that makes t
 
 ### Testing
 
-- Tier-2 Docker stack: Network Application 10.3.58 → 10.6.109, MongoDB 7.0.34 → 8.0.38, nginx bridge 1.27 → 1.30.8. Run `./test-extended.sh --fresh` once: a new image recreates the controller, which drops the seeded admin.
+- Tier-2 Docker stack: Network Application 10.3.58 → 10.6.109, MongoDB 7.0.34 → 8.0.38, nginx bridge 1.27 → 1.30.8. Run `./test-extended.sh --fresh` once: the harness reuses a stack that is already serving, so a stack left up keeps running the old images and their MongoDB 7.0 data dir.
 
 ### Dependencies
 
