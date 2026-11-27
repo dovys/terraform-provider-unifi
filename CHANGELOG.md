@@ -11,6 +11,7 @@ Dated entries, newest first. Add yours under today's date in the PR that makes t
 
 ### Fixed
 
+- **`unifi_network_wan_sla`** can now create SLAs. The monitor `type` takes the controller's values, `ICMP`, `DNS` and `SPEED_LIMIT`; the v2 API rejected the lowercase `icmp`, `dns` and `speedLimit` the provider used to send. Breaking: configs with the lowercase values now fail validation, so uppercase them. No such config ever applied. The controller also requires `interval` and `time_period` on every monitor.
 - After the zone-based firewall migration re-keys every object to a UUID, `unifi_network_device`, `unifi_network_dns_record` and `unifi_network_wan_sla` no longer drop out of state and plan a re-create. Read falls back to the MAC, a unique name and type, or the name, and adopts the new id. The name fallbacks run only for a legacy ObjectID.
 
 ### Security

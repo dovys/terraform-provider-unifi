@@ -4,7 +4,6 @@ Open work that isn't a roadmap phase. Phases, deferred resources and design ques
 
 ## Known bugs
 
-- `unifi_network_wan_sla`: the provider sends the monitor `type` in lowercase (`icmp`), but the API accepts only `ICMP`, `DNS` and `SPEED_LIMIT`. Fix the validator and wire value, then un-skip `test/acc/wan_sla_acc_test.go`.
 - `unifi_network_wan`: an update PUT returns `api.err.InvalidPayload` for any field. The Tier-2 test skips the update step until this is fixed.
 
 ## Wire regeneration
@@ -14,6 +13,7 @@ Open work that isn't a roadmap phase. Phases, deferred resources and design ques
 - Access, with any oapi-codegen version: the `go:generate` line in `internal/unifi/access/wire/gen.go` passes no roots, so the projector's defaults yield 19 of the 36 committed types. The `access` package breaks on the missing `AccessPolicyBoAccessPolicyBo`, `DoorGuardBoDoorGuardBo`, `DoorGuardBoUpdateDoorGuard`, `HolidayBoHolidayGroupDetail`, `HolidayBoHolidayGroupParams`, `HolidayBoHolidayGroupSimple`, `LocationBoDoor` and `LocationBoUpdateDoorParams`. Pass their roots explicitly.
 - oapi-codegen v2.9.0 emits `Example:` comments from spec examples (281 in Protect), some with `192.168.x` addresses that `scripts/check-secrets.sh` rejects. Strip `example` in `scripts/strip-spec-prose.go`.
 - v2.9.0 prefixes enum constants with their type name (`Aes128` → `NetworkconfIpsecIkeEncryptionAes128`). Network and Protect still build.
+- The spec types `wan_slas_monitor.type` as `icmp`, `dns`, `speedLimit`; the controller accepts only `ICMP`, `DNS`, `SPEED_LIMIT`. Fix the spec, then drop the `network.SLAMonitor*` constants that work around it.
 
 ## Verify against hardware
 
@@ -43,6 +43,7 @@ These writes ship but have not been confirmed on real hardware. Their schemas sh
   - whether categories are accepted while `ips_mode = "disabled"`;
   - the per-network `honeypot` array survives the shallow merge;
   - the unmodeled `utm_token`, `ad_blocking_enabled`, `dns_filtering` and `endpoint_scanning` fields are server-managed.
+- `unifi_network_wan_sla`. Needs: live write run; an SLA no WAN references is inert. Tier 2 covers the lifecycle. Confirm a gateway accepts `SPEED_LIMIT` monitors, which the Docker controller rejects with `api.err.UnknownMonitorTypeException`.
 
 ### Protect
 
@@ -83,7 +84,7 @@ These need a live controller; the [roadmap](docs/roadmap.md) open questions have
 
 ### Schema text
 
-- `unifi_network_client_ap_lock`, `unifi_network_mdns` and `unifi_network_wan_sla` lack the `HIL-unverified` marker, and `unifi_network_threat_management` words it differently. The `wan_sla` text should also flag the `type` casing bug.
+- `unifi_network_client_ap_lock` and `unifi_network_mdns` lack the `HIL-unverified` marker, and `unifi_network_threat_management` words it differently.
 - `unifi_protect_liveview` marks the whole resource `HIL-unverified`; narrow it to slots.
 
 ## Settings keys

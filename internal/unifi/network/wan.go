@@ -82,6 +82,18 @@ func (s WANService) SLAs() SLACollection {
 	return SLACollection{V2Collection[wire.WanSlas]{core: s.core, path: "wan-slas"}}
 }
 
+// Monitor types the controller accepts. The generated wire.WanSlasMonitorType
+// constants (icmp, dns, speedLimit) have the wrong casing and are rejected with
+// a 400; use these instead.
+const (
+	SLAMonitorICMP       wire.WanSlasMonitorType = "ICMP"
+	SLAMonitorDNS        wire.WanSlasMonitorType = "DNS"
+	SLAMonitorSpeedLimit wire.WanSlasMonitorType = "SPEED_LIMIT"
+)
+
+// SLAMonitorTypes lists every accepted monitor type.
+var SLAMonitorTypes = []wire.WanSlasMonitorType{SLAMonitorICMP, SLAMonitorDNS, SLAMonitorSpeedLimit}
+
 // SLACollection is the WAN SLA CRUD collection. It overrides Update to send the
 // SLA's _id in both the URL and the body (the v2 write contract).
 type SLACollection struct {

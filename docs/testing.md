@@ -100,7 +100,7 @@ UNIFI_HOST=http://localhost:8443 UNIFI_USERNAME=tfadmin UNIFI_PASSWORD=tfadmin-p
 
 These resources run the full lifecycle: create, update, import with `ImportStateVerify`, and destroy, with a clean plan after each step, a second empty plan, `CheckDestroy` and a sweeper.
 
-`network`, `dns_record`, `firewall_group`, `firewall_rule`, `static_route`, `port_forward`, `port_profile`, `user_group`, `radius_profile`, `radius_account`, `traffic_rule`, `ap_group`, `wlan`, `dynamic_dns`
+`network`, `dns_record`, `firewall_group`, `firewall_rule`, `static_route`, `port_forward`, `port_profile`, `user_group`, `radius_profile`, `radius_account`, `traffic_rule`, `ap_group`, `wlan`, `dynamic_dns`, `wan_sla`
 
 These deviate:
 
@@ -111,7 +111,6 @@ These deviate:
 | `mdns` | Singleton: `CheckDestroy` asserts the scope was reset, not that the object is gone. |
 | `wan` | Create, import and destroy only. Any WAN update PUT returns `api.err.InvalidPayload`; see [TODO.md](../TODO.md) *Known bugs*. |
 | `traffic_route` | Skipped. It needs a VPN or WAN egress network the Docker controller can't provide. Tier 3's W1 write level covers it. |
-| `wan_sla` | Skipped. The generated wire type sends the monitor `type` lowercase (`icmp`); the v2 API accepts only `ICMP`, `DNS` or `SPEED_LIMIT`. Remove the skip once that's fixed. |
 
 ## Tier 3: hardware-in-the-loop
 

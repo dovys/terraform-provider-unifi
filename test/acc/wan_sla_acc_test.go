@@ -45,11 +45,6 @@ func wanSLAIDs(c unifi.Client, ctx context.Context) ([]string, error) {
 }
 
 func TestAccWANSLAResource(t *testing.T) {
-	// Surfaces a real provider bug: the monitor `type` is sent lowercase
-	// ("icmp"), but the v2 wan-slas API only accepts the uppercase enum
-	// (ICMP/DNS/SPEED_LIMIT) — the clean-room spec guessed the casing (wan_sla was
-	// modeled from docs, never seen populated). Un-skip once that's fixed.
-	t.Skip("wan_sla monitor type casing bug: provider sends 'icmp', controller wants 'ICMP'")
 	name := acctest.NamePrefix + "sla"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -62,7 +57,7 @@ func TestAccWANSLAResource(t *testing.T) {
 				Config: testAccWANSLAConfig(name, 60),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("unifi_network_wan_sla.test", "name", name),
-					resource.TestCheckResourceAttr("unifi_network_wan_sla.test", "monitors.0.type", "icmp"),
+					resource.TestCheckResourceAttr("unifi_network_wan_sla.test", "monitors.0.type", "ICMP"),
 					resource.TestCheckResourceAttrSet("unifi_network_wan_sla.test", "id"),
 				),
 			},
@@ -84,9 +79,10 @@ func testAccWANSLAConfig(name string, interval int) string {
 resource "unifi_network_wan_sla" "test" {
   name = %q
   monitors = [{
-    target   = "1.1.1.1"
-    type     = "icmp"
-    interval = %d
+    target      = "1.1.1.1"
+    type        = "ICMP"
+    interval    = %d
+    time_period = 300
   }]
 }
 `, name, interval)

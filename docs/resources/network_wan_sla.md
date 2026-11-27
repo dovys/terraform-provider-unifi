@@ -3,12 +3,12 @@
 page_title: "unifi_network_wan_sla Resource - unifi"
 subcategory: ""
 description: |-
-  A UniFi WAN failover SLA (health-monitor) profile (wan-slas, v2) — the probes and thresholds that decide whether a WAN is healthy, referenced by WAN load balancing.
+  A UniFi WAN failover SLA (health-monitor) profile (wan-slas, v2) — the probes and thresholds that decide whether a WAN is healthy, referenced by WAN load balancing. Writes are HIL-unverified — see the provider TODO.
 ---
 
 # unifi_network_wan_sla (Resource)
 
-A UniFi WAN failover SLA (health-monitor) profile (`wan-slas`, v2) — the probes and thresholds that decide whether a WAN is healthy, referenced by WAN load balancing.
+A UniFi WAN failover SLA (health-monitor) profile (`wan-slas`, v2) — the probes and thresholds that decide whether a WAN is healthy, referenced by WAN load balancing. **Writes are HIL-unverified — see the provider TODO.**
 
 
 
@@ -34,8 +34,8 @@ A UniFi WAN failover SLA (health-monitor) profile (`wan-slas`, v2) — the probe
 
 Optional:
 
-- `domain` (String) Domain to resolve (for `dns` probes).
-- `interval` (Number) Seconds between probes.
+- `domain` (String) Domain to resolve (for `DNS` probes).
+- `interval` (Number) Seconds between probes. The controller rejects a monitor without one.
 - `target` (String) Probe target (IP/host).
-- `time_period` (Number) Evaluation window in seconds.
-- `type` (String) Probe type: `icmp`, `dns`, or `speedLimit`.
+- `time_period` (Number) Evaluation window in seconds. The controller rejects a monitor without one, or one too short for `interval` (`Invalid time period`).
+- `type` (String) Probe type: `ICMP`, `DNS`, or `SPEED_LIMIT`.

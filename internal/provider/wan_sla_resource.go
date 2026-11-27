@@ -42,6 +42,14 @@ type wanSLAResourceModel struct {
 	Monitors             []wanSLAMonitorModel `tfsdk:"monitors"`
 }
 
+var wanSLAMonitorTypes = func() []string {
+	out := make([]string, len(network.SLAMonitorTypes))
+	for i, t := range network.SLAMonitorTypes {
+		out[i] = string(t)
+	}
+	return out
+}()
+
 type wanSLAMonitorModel struct {
 	Target     types.String `tfsdk:"target"`
 	Type       types.String `tfsdk:"type"`
@@ -57,7 +65,8 @@ func (r *wanSLAResource) Metadata(_ context.Context, req resource.MetadataReques
 func (r *wanSLAResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A UniFi WAN failover SLA (health-monitor) profile (`wan-slas`, v2) — the probes " +
-			"and thresholds that decide whether a WAN is healthy, referenced by WAN load balancing.",
+			"and thresholds that decide whether a WAN is healthy, referenced by WAN load balancing. " +
+			"**Writes are HIL-unverified — see the provider TODO.**",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -87,20 +96,20 @@ func (r *wanSLAResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 						},
 						"type": schema.StringAttribute{
 							Optional:            true,
-							MarkdownDescription: "Probe type: `icmp`, `dns`, or `speedLimit`.",
-							Validators:          []validator.String{stringvalidator.OneOf("icmp", "dns", "speedLimit")},
+							MarkdownDescription: "Probe type: `ICMP`, `DNS`, or `SPEED_LIMIT`.",
+							Validators:          []validator.String{stringvalidator.OneOf(wanSLAMonitorTypes...)},
 						},
 						"interval": schema.Int64Attribute{
 							Optional:            true,
-							MarkdownDescription: "Seconds between probes.",
+							MarkdownDescription: "Seconds between probes. The controller rejects a monitor without one.",
 						},
 						"domain": schema.StringAttribute{
 							Optional:            true,
-							MarkdownDescription: "Domain to resolve (for `dns` probes).",
+							MarkdownDescription: "Domain to resolve (for `DNS` probes).",
 						},
 						"time_period": schema.Int64Attribute{
 							Optional:            true,
-							MarkdownDescription: "Evaluation window in seconds.",
+							MarkdownDescription: "Evaluation window in seconds. The controller rejects a monitor without one, or one too short for `interval` (`Invalid time period`).",
 						},
 					},
 				},

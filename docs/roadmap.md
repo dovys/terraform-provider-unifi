@@ -45,7 +45,7 @@ Design: [apps/network.md](apps/network.md).
 - `unifi_network_client_ap_lock` write is not yet confirmed on hardware.
 - `unifi_network_firewall_policy` writes are not yet confirmed on hardware, and the Docker controller runs the classic firewall, so there is no Tier-2 lifecycle; see [TODO.md](../TODO.md#network).
 - `unifi_network_threat_management` modes other than `disabled` need a CyberSecure-licensed gateway.
-- `unifi_network_wan` updates and `unifi_network_wan_sla` monitor types are [known bugs](../TODO.md#known-bugs).
+- `unifi_network_wan` updates are a [known bug](../TODO.md#known-bugs).
 
 ### Protect
 
