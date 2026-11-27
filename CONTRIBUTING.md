@@ -29,7 +29,7 @@ Don't open a public issue. Report it privately through [GitHub's advisory form](
 
 ## Build
 
-You need Go, the Terraform CLI, golangci-lint v2 (CI uses v2.12.2), and Docker for acceptance tests. `go.mod` pins the Go toolchain, and Go fetches it, govulncheck, and tfplugindocs automatically.
+You need Go, the Terraform CLI, golangci-lint v2 (CI uses v2.15.0), and Docker for acceptance tests. `go.mod` pins the Go toolchain, and Go fetches it, govulncheck, and tfplugindocs automatically.
 
 ```sh
 make build   # go install ./...
