@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
@@ -227,6 +228,16 @@ func (r *deviceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 	dev, err := r.net.Devices().Get(ctx, state.ID.ValueString())
+	if isNotFoundErr(err) && configuredString(state.MAC) {
+		// The zone-based firewall migration re-keys every object to a UUID, and
+		// /stat/device carries no alias for the old id. The MAC is stable.
+		dev, err = r.net.Devices().GetByMAC(ctx, state.MAC.ValueString())
+		if err == nil {
+			tflog.Warn(ctx, "device id changed on the controller; adopting the new id", map[string]any{
+				"mac": state.MAC.ValueString(), "old_id": state.ID.ValueString(), "new_id": deref(dev.UnderscoreId),
+			})
+		}
+	}
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)

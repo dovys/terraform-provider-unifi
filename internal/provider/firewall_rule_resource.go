@@ -35,6 +35,7 @@ var (
 	_ resource.Resource                = (*firewallRuleResource)(nil)
 	_ resource.ResourceWithConfigure   = (*firewallRuleResource)(nil)
 	_ resource.ResourceWithImportState = (*firewallRuleResource)(nil)
+	_ resource.ResourceWithModifyPlan  = (*firewallRuleResource)(nil)
 )
 
 func NewFirewallRuleResource() resource.Resource { return &firewallRuleResource{} }
@@ -100,8 +101,9 @@ func (r *firewallRuleResource) Schema(_ context.Context, _ resource.SchemaReques
 	}
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A UniFi classic firewall rule (`firewallrule`, legacy `/rest`). Matches on protocol, " +
-			"addresses/ports, networks, firewall groups, and connection state within a ruleset (chain). The newer " +
-			"zone-based firewall is a separate surface (a later phase).",
+			"addresses/ports, networks, firewall groups, and connection state within a ruleset (chain).\n\n" +
+			"A site on the zone-based firewall has no classic rules: creating one fails at plan time, so use " +
+			"`unifi_network_firewall_policy` there. After a migration, rules already in state drop out on refresh.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -167,9 +169,23 @@ func (r *firewallRuleResource) Configure(_ context.Context, req resource.Configu
 	}
 }
 
+// ModifyPlan refuses a create on a zone-based site, where a legacy POST would
+// write a rule the migrated firewall ignores.
+func (r *firewallRuleResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if r.net == nil || !req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
+		return
+	}
+	refuseOnZoneFirewall(ctx, r.net, &resp.Diagnostics)
+}
+
 func (r *firewallRuleResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan firewallRuleResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	// Repeated here: ModifyPlan skips the check when the provider was unconfigured at plan time.
+	refuseOnZoneFirewall(ctx, r.net, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -336,4 +352,18 @@ func (m *firewallRuleResourceModel) fromFirewallRule(r *wire.Firewallrule) {
 	m.DstNetworkID = strToStateOptional(deref(r.DstNetworkconfId))
 	m.DstNetworkType = strToStateOptional(string(derefEnum(r.DstNetworkconfType)))
 	m.DstFirewallGroupIDs = sliceToStringSet(derefSlice(r.DstFirewallgroupIds))
+}
+
+func refuseOnZoneFirewall(ctx context.Context, net *network.Client, diags *diag.Diagnostics) {
+	zbf, err := net.ZoneBasedFirewall(ctx)
+	if err != nil {
+		// An older or unexpected controller reply mustn't block classic planning.
+		diags.AddWarning("Couldn't confirm the site's firewall mode", err.Error())
+		return
+	}
+	if zbf {
+		diags.AddError("Site uses the zone-based firewall",
+			"This site runs the zone-based firewall, so a classic firewall rule would have no effect. "+
+				"Use unifi_network_firewall_policy instead.")
+	}
 }

@@ -145,3 +145,33 @@ func (s V2Collection[T]) Delete(ctx context.Context, id string) error {
 	}
 	return err
 }
+
+// ErrAmbiguous is returned by a natural-key lookup that matches several
+// objects; a lookup by name must never guess.
+var ErrAmbiguous = errors.New("several objects match")
+
+// findOne returns the only item satisfying match: ErrNotFound for none,
+// ErrAmbiguous for several.
+func findOne[T any](items []T, match func(*T) bool) (*T, error) {
+	var found *T
+	for i := range items {
+		if !match(&items[i]) {
+			continue
+		}
+		if found != nil {
+			return nil, ErrAmbiguous
+		}
+		found = &items[i]
+	}
+	if found == nil {
+		return nil, ErrNotFound
+	}
+	return found, nil
+}
+
+func deref(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
+}

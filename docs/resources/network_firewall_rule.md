@@ -3,12 +3,15 @@
 page_title: "unifi_network_firewall_rule Resource - unifi"
 subcategory: ""
 description: |-
-  A UniFi classic firewall rule (firewallrule, legacy /rest). Matches on protocol, addresses/ports, networks, firewall groups, and connection state within a ruleset (chain). The newer zone-based firewall is a separate surface (a later phase).
+  A UniFi classic firewall rule (firewallrule, legacy /rest). Matches on protocol, addresses/ports, networks, firewall groups, and connection state within a ruleset (chain).
+  A site on the zone-based firewall has no classic rules: creating one fails at plan time, so use unifi_network_firewall_policy there. After a migration, rules already in state drop out on refresh.
 ---
 
 # unifi_network_firewall_rule (Resource)
 
-A UniFi classic firewall rule (`firewallrule`, legacy `/rest`). Matches on protocol, addresses/ports, networks, firewall groups, and connection state within a ruleset (chain). The newer zone-based firewall is a separate surface (a later phase).
+A UniFi classic firewall rule (`firewallrule`, legacy `/rest`). Matches on protocol, addresses/ports, networks, firewall groups, and connection state within a ruleset (chain).
+
+A site on the zone-based firewall has no classic rules: creating one fails at plan time, so use `unifi_network_firewall_policy` there. After a migration, rules already in state drop out on refresh.
 
 
 

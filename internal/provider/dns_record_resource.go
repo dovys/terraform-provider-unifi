@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network"
 	"github.com/dovys/terraform-provider-unifi/internal/unifi/network/wire"
@@ -128,6 +130,9 @@ func (r *dnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 	rec, err := r.net.DNS().Records().Get(ctx, state.ID.ValueString())
+	if isNotFoundErr(err) && configuredString(state.Name) && isLegacyObjectID(state.ID.ValueString()) {
+		rec, err = r.findRekeyed(ctx, state)
+	}
 	if err != nil {
 		if isNotFoundErr(err) {
 			resp.State.RemoveResource(ctx)
@@ -138,6 +143,23 @@ func (r *dnsRecordResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 	state.fromRecord(rec)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+}
+
+// findRekeyed recovers a record whose legacy ObjectID the zone-based firewall
+// migration replaced with a UUID; static-dns keeps no alias for the old id.
+// Only a unique (name, type) match is adopted.
+func (r *dnsRecordResource) findRekeyed(ctx context.Context, state dnsRecordResourceModel) (*wire.StaticDns, error) {
+	rec, err := r.net.DNS().Records().GetByKey(ctx, state.Name.ValueString(), state.Type.ValueString())
+	if errors.Is(err, network.ErrAmbiguous) {
+		return nil, network.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	tflog.Warn(ctx, "DNS record id changed on the controller; adopting the new id", map[string]any{
+		"name": rec.Key, "old_id": state.ID.ValueString(), "new_id": deref(rec.UnderscoreId),
+	})
+	return rec, nil
 }
 
 func (r *dnsRecordResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

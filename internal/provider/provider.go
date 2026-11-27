@@ -205,6 +205,7 @@ func (p *UnifiProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewAPGroupResource,
 		NewFirewallGroupResource,
 		NewFirewallRuleResource,
+		NewFirewallPolicyResource,
 		NewDHCPReservationResource,
 		NewClientAPLockResource,
 		NewPortProfileResource,
@@ -255,6 +256,7 @@ func (p *UnifiProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewSiteDataSource,
 		NewApplicationInfoDataSource,
 		NewDeviceDataSource,
+		NewFirewallZoneDataSource,
 		// On the rebuilt substruct client (c.Network().WAN().ListNetworkGroups()).
 		NewWANNetworkGroupDataSource,
 		// Protect app (c.Protect()…).

@@ -53,3 +53,13 @@ output "ap_ip" {
 output "ap_version" {
   value = data.unifi_network_device.ap.version
 }
+
+# Look up a zone-based firewall zone by key (built-in zones) or name (custom
+# zones), e.g. for a unifi_network_firewall_policy source or destination.
+data "unifi_network_firewall_zone" "dmz" {
+  zone_key = "dmz"
+}
+
+output "dmz_networks" {
+  value = data.unifi_network_firewall_zone.dmz.network_ids
+}
