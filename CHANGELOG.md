@@ -18,6 +18,10 @@ Dated entries, newest first. Add yours under today's date in the PR that makes t
 - Go toolchain → `go1.26.11` (stdlib `net/http` GO-2026-6859).
 - `golang.org/x/net` → v0.63.0 (GO-2026-6866, GO-2026-6860) and `golang.org/x/crypto` → v0.59.0 (GO-2026-5932).
 
+### Testing
+
+- Tier-2 Docker stack: Network Application 10.3.58 → 10.6.109, MongoDB 7.0.34 → 8.0.38, nginx bridge 1.27 → 1.30.8. Run `./test-extended.sh --fresh` once: a new image recreates the controller, which drops the seeded admin.
+
 ### Dependencies
 
 - `github.com/oapi-codegen/runtime` → v1.9.1, plus every other minor/patch bump in the module graph.
