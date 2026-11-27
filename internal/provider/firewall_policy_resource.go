@@ -142,7 +142,8 @@ func (r *firewallPolicyResource) Schema(_ context.Context, _ resource.SchemaRequ
 				stringvalidator.OneOf("ALL", "RESPOND_ONLY", "CUSTOM")),
 			"connection_states": ocStringSet("States matched when `connection_state_type = \"CUSTOM\"`: `NEW`, `ESTABLISHED`, `RELATED`, `INVALID`.",
 				stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
-			"create_allow_respond":    ocBool("Also create the return-traffic allow for an `ALLOW` policy."),
+			"create_allow_respond": ocBool("Also create the return-traffic allow for an `ALLOW` policy. " +
+				"Defaults to `false` on create. The controller rejects return traffic into the Gateway zone."),
 			"logging":                 ocBool("Log matched traffic."),
 			"match_ip_sec":            ocBool("Match on IPsec."),
 			"match_opposite_protocol": ocBool("Invert the protocol match."),
@@ -332,6 +333,12 @@ func applyPolicyCreateDefaults(p *network.FirewallPolicy) {
 	if p.Protocol == nil {
 		all := "all"
 		p.Protocol = &all
+	}
+	// Omitted, a policy into the Gateway zone 400s ("create respond traffic
+	// not allowed"); false is accepted there (#8).
+	if p.CreateAllowRespond == nil {
+		f := false
+		p.CreateAllowRespond = &f
 	}
 	if p.ConnectionStateType == nil {
 		all := wire.FirewallPoliciesConnectionStateType("ALL")
