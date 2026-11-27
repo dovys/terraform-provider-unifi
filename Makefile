@@ -37,7 +37,7 @@ tffmt:
 
 # Mirrors the CI govulncheck gate: scans deps and the stdlib of the go.mod toolchain.
 vulncheck:
-	go run golang.org/x/vuln/cmd/govulncheck@v1.3.0 ./...
+	go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
 
 # Regenerate everything (docs + wire codegen). The wire `go:generate` directives
 # read the API spec root from UNIFI_SPECS (the maintainer's version-pinned spec,

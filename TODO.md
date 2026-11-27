@@ -7,6 +7,14 @@ Open work that isn't a roadmap phase. Phases, deferred resources and design ques
 - `unifi_network_wan_sla`: the provider sends the monitor `type` in lowercase (`icmp`), but the API accepts only `ICMP`, `DNS` and `SPEED_LIMIT`. Fix the validator and wire value, then un-skip `test/acc/wan_sla_acc_test.go`.
 - `unifi_network_wan`: an update PUT returns `api.err.InvalidPayload` for any field. The Tier-2 test skips the update step until this is fixed.
 
+## Wire regeneration
+
+`make generate` does not reproduce the committed `wire` packages, which oapi-codegen v2.7.0 generated. Fix these before regenerating:
+
+- Access, with any oapi-codegen version: the `go:generate` line in `internal/unifi/access/wire/gen.go` passes no roots, so the projector's defaults yield 19 of the 36 committed types. The `access` package breaks on the missing `AccessPolicyBoAccessPolicyBo`, `DoorGuardBoDoorGuardBo`, `DoorGuardBoUpdateDoorGuard`, `HolidayBoHolidayGroupDetail`, `HolidayBoHolidayGroupParams`, `HolidayBoHolidayGroupSimple`, `LocationBoDoor` and `LocationBoUpdateDoorParams`. Pass their roots explicitly.
+- oapi-codegen v2.9.0 emits `Example:` comments from spec examples (281 in Protect), some with `192.168.x` addresses that `scripts/check-secrets.sh` rejects. Strip `example` in `scripts/strip-spec-prose.go`.
+- v2.9.0 prefixes enum constants with their type name (`Aes128` → `NetworkconfIpsecIkeEncryptionAes128`). Network and Protect still build.
+
 ## Verify against hardware
 
 <!-- docs/testing.md and test/hil/README.md link to this heading by name. -->

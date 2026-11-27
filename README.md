@@ -48,7 +48,7 @@ Then run `terraform init` as usual. On Windows the directory is `%APPDATA%\terra
 
 ### From source
 
-Build with Go 1.26.3 or later (the `go.mod` toolchain directive pins 1.26.11, which Go downloads automatically) and point Terraform at the binary with a [dev override](https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers):
+Build with Go 1.27 or later (the `go.mod` toolchain directive pins 1.27.4, which Go downloads automatically) and point Terraform at the binary with a [dev override](https://developer.hashicorp.com/terraform/cli/config/config-file#development-overrides-for-provider-developers):
 
 ```bash
 make build   # go install ./... into $(go env GOBIN), or $(go env GOPATH)/bin
