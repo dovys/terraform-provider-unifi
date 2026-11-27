@@ -34,7 +34,7 @@ Import takes the controller `_id` unless noted. Objects the controller flags `at
 | Resource | Surface | Notes |
 |----------|:------:|-------|
 | `unifi_network_network` | L `rest/networkconf` | LAN networks: `purpose` is `corporate`, `guest` or `vlan-only`, and changing it forces replacement. `purpose = "wan"` is rejected; use `unifi_network_wan`. Omit it and the controller defaults to `corporate`. Covers DHCP, DNS, IPv6, IGMP and mDNS. The DHCP guard maps `dhcp_guard_servers` to `dhcpd_ip_1..3`; guard on with no server fails at plan time instead of returning `api.err.MissingIPAddress`. Import also accepts `name=<name>`. |
-| `unifi_network_wan` | L `rest/networkconf` | Same object with `purpose=wan`. PPPoE, DHCP or static, plus load balancing and bandwidth. `pppoe_password` is sensitive and not read back. Import also accepts `name=<name>`. |
+| `unifi_network_wan` | L `rest/networkconf` | Same object with `purpose=wan`. PPPoE, DHCP or static, plus load balancing and bandwidth. `pppoe_password` is sensitive and not read back. The controller omits unset enums (`wan_type_v6`, `ipv6_wan_delegation_type`) from the GET and rejects `""` for them, so an empty enum is left out of the PUT. Import also accepts `name=<name>`. |
 | `unifi_network_wan_sla` | V2 `wan-slas` | WAN failover health monitor: probe targets, interval, down threshold. Import also accepts `name=<name>`. |
 | `unifi_network_static_route` | L `rest/routing` | |
 | `unifi_network_port_forward` | L `rest/portforward` | DNAT. |
@@ -123,7 +123,6 @@ Gaps:
 | `unifi_network_client_ap_lock` | No Tier-2 test (the Docker controller has no AP). Live write pending. |
 | `unifi_network_wlan_group` | No Tier-2 test. |
 | `unifi_network_traffic_route` | Tier-2 test skipped: needs a VPN or WAN egress network the Docker controller lacks. |
-| `unifi_network_wan` | Tier-2 update step skipped: update PUTs return `api.err.InvalidPayload`. |
 | `unifi_network_threat_management` | Only `mode = "disabled"` verified; other modes need a CyberSecure license. |
 | `unifi_network_mdns` | Live write pending. |
 | `unifi_network_network`, `unifi_network_wlan`, `unifi_network_settings`, `unifi_network_dynamic_dns`, `unifi_network_wan_sla` | Writes covered by Tier 2 but not on hardware. |

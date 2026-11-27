@@ -2,10 +2,6 @@
 
 Open work that isn't a roadmap phase. Phases, deferred resources and design questions live in [`docs/roadmap.md`](docs/roadmap.md). Test tiers are described in [`docs/testing.md`](docs/testing.md). Below, "live write run" means the W0–W2 rungs of `./test-hil.sh write` against a live console, and "W3 rig" means a disposable controller and devices.
 
-## Known bugs
-
-- `unifi_network_wan`: an update PUT returns `api.err.InvalidPayload` for any field. The Tier-2 test skips the update step until this is fixed.
-
 ## Wire regeneration
 
 `make generate` does not reproduce the committed `wire` packages, which oapi-codegen v2.7.0 generated. Fix these before regenerating:

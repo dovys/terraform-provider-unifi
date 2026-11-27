@@ -34,17 +34,17 @@ func TestAccWANResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet("unifi_network_wan.test", "id"),
 				),
 			},
-			// NOTE: no update step. A PUT to a purpose=wan networkconf currently
-			// fails api.err.InvalidPayload regardless of which field changes — a
-			// separate, known WAN-update bug, not a harness issue. Re-add the
-			// update step here once that's fixed.
+			{ // update
+				Config: testAccWANConfig(name, "dhcp", 60),
+				Check:  resource.TestCheckResourceAttr("unifi_network_wan.test", "load_balance_weight", "60"),
+			},
 			{ // import
 				ResourceName:      "unifi_network_wan.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{ // second consecutive plan must be empty
-				Config: testAccWANConfig(name, "dhcp", 50),
+				Config: testAccWANConfig(name, "dhcp", 60),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()},
 				},

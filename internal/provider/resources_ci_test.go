@@ -224,6 +224,27 @@ func TestWANConf_OmitsEmptyStaticFields(t *testing.T) {
 	}
 }
 
+// The controller omits unset enum fields, so Read leaves "" in state; an
+// update must not echo "" (it fails the enum pattern).
+func TestWANConf_OmitsEmptyEnums(t *testing.T) {
+	var diags diag.Diagnostics
+	conf := (&wanResourceModel{
+		Name:               types.StringValue("uplink"),
+		WANType:            types.StringValue("dhcp"),
+		NetworkGroup:       types.StringValue("WAN2"),
+		LoadBalanceType:    types.StringValue(""),
+		IPv6Type:           types.StringValue(""),
+		IPv6DelegationType: types.StringValue(""),
+	}).toNetworkConf(context.Background(), &diags)
+	if diags.HasError() {
+		t.Fatalf("toNetworkConf diags: %v", diags)
+	}
+	if conf.WanLoadBalanceType != nil || conf.WanTypeV6 != nil || conf.Ipv6WanDelegationType != nil {
+		t.Errorf("empty enums must be omitted, got lb=%v v6=%v pd=%v",
+			conf.WanLoadBalanceType, conf.WanTypeV6, conf.Ipv6WanDelegationType)
+	}
+}
+
 func TestDNSRecord_RoundTrip(t *testing.T) {
 	m := &dnsRecordResourceModel{
 		ID:       types.StringNull(),
