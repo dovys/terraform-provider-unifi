@@ -6,7 +6,7 @@ Dated entries, newest first. Add yours under today's date in the PR that makes t
 
 ### Fixed
 
-- `unifi_network_firewall_policy` applies the controller's whole respond-traffic rule to `create_allow_respond` ([#8](https://github.com/dovys/terraform-provider-unifi/issues/8)). Unset, create sends `false` for a `BLOCK` or `REJECT` policy, a destination in the Gateway or External zone, `connection_state_type = "RESPOND_ONLY"`, or `connection_states` of exactly `ESTABLISHED` and `RELATED`; those creates failed with `HTTP 400: Firewall policy create respond traffic not allowed`. An explicit `true` in those cases now fails at plan instead of apply. Updates are unchanged.
+- `unifi_network_firewall_policy` applies the controller's whole respond-traffic rule to `create_allow_respond` on create and update ([#8](https://github.com/dovys/terraform-provider-unifi/issues/8)). Unset, it is sent as `false` for a `BLOCK` or `REJECT` policy, a destination in the Gateway or External zone, `connection_state_type = "RESPOND_ONLY"`, or `connection_states` of exactly `ESTABLISHED` and `RELATED`. Those creates, and updates that turned an `ALLOW` holding `true` into one of these, failed with `HTTP 400: Firewall policy create respond traffic not allowed`. An explicit `true` in those cases now fails at plan instead of apply.
 
 ## 2026-11-27
 
