@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -143,7 +144,9 @@ func (r *firewallPolicyResource) Schema(_ context.Context, _ resource.SchemaRequ
 			"connection_states": ocStringSet("States matched when `connection_state_type = \"CUSTOM\"`: `NEW`, `ESTABLISHED`, `RELATED`, `INVALID`.",
 				stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
 			"create_allow_respond": ocBool("Also create the return-traffic allow for an `ALLOW` policy. " +
-				"Defaults to `false` on create into the Gateway zone, which rejects return traffic; elsewhere the controller's default applies."),
+				"The controller rejects `true` on a non-`ALLOW` action, a `gateway` or `external` destination zone, " +
+				"`connection_state_type = \"RESPOND_ONLY\"`, or `connection_states` of exactly `ESTABLISHED` and `RELATED`. " +
+				"Unset, create sends `false` in those cases and otherwise leaves the controller's default, `true`; set to `true`, plan fails in them."),
 			"logging":                 ocBool("Log matched traffic."),
 			"match_ip_sec":            ocBool("Match on IPsec."),
 			"match_opposite_protocol": ocBool("Invert the protocol match."),
@@ -188,7 +191,7 @@ func (r *firewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 	applyPolicyCreateDefaults(body)
-	if err := r.defaultGatewayAllowRespond(ctx, body); err != nil {
+	if err := r.defaultAllowRespond(ctx, body); err != nil {
 		resp.Diagnostics.AddError("Failed to read firewall zones", err.Error())
 		return
 	}
@@ -324,25 +327,71 @@ func (e *policyEndpointModel) toEndpoint(ctx context.Context, diags *diag.Diagno
 	}
 }
 
-// defaultGatewayAllowRespond sends create_allow_respond = false for an unset
-// create into the Gateway zone. The controller takes the omitted key as true
-// and 400s it there ("create respond traffic not allowed", #8); elsewhere the
-// key stays omitted so the controller's default applies.
-func (r *firewallPolicyResource) defaultGatewayAllowRespond(ctx context.Context, p *network.FirewallPolicy) error {
+// defaultAllowRespond sends create_allow_respond = false for an unset create
+// that conflicts: the controller reads the omitted key as true and 400s it
+// ("create respond traffic not allowed", #8). Otherwise the key stays omitted
+// so the controller's default applies.
+func (r *firewallPolicyResource) defaultAllowRespond(ctx context.Context, p *network.FirewallPolicy) error {
 	if p.CreateAllowRespond != nil {
 		return nil
 	}
-	zones, err := r.net.Firewall().Zones().List(ctx)
-	if err != nil {
-		return err
-	}
-	for _, z := range zones {
-		if deref(z.UnderscoreId) == p.Destination.ZoneID && deref(z.ZoneKey) == "gateway" {
-			f := false
-			p.CreateAllowRespond = &f
+	var states []string
+	if p.ConnectionStates != nil {
+		for _, s := range *p.ConnectionStates {
+			states = append(states, string(s))
 		}
 	}
+	reason := respondConflict(string(p.Action), string(derefEnum(p.ConnectionStateType)), states)
+	if reason == "" {
+		key, err := r.zoneKey(ctx, p.Destination.ZoneID)
+		if err != nil {
+			return err
+		}
+		reason = respondZoneConflict(key)
+	}
+	if reason != "" {
+		f := false
+		p.CreateAllowRespond = &f
+	}
 	return nil
+}
+
+func (r *firewallPolicyResource) zoneKey(ctx context.Context, id string) (string, error) {
+	zones, err := r.net.Firewall().Zones().List(ctx)
+	if err != nil {
+		return "", err
+	}
+	for _, z := range zones {
+		if deref(z.UnderscoreId) == id {
+			return deref(z.ZoneKey), nil
+		}
+	}
+	return "", nil
+}
+
+// respondConflict reports why the controller rejects create_allow_respond =
+// true on a create with these settings, or "" if it doesn't. Empty values
+// never conflict, so callers pass "" for anything unknown.
+func respondConflict(action, stateType string, states []string) string {
+	switch {
+	case action != "" && action != "ALLOW":
+		return fmt.Sprintf("`action` is `%s`; only an `ALLOW` policy can create return traffic", action)
+	case stateType == "RESPOND_ONLY":
+		return "`connection_state_type` is `RESPOND_ONLY`"
+	case len(states) == 2 && slices.Contains(states, "ESTABLISHED") && slices.Contains(states, "RELATED"):
+		return "`connection_states` is exactly `ESTABLISHED` and `RELATED`"
+	}
+	return ""
+}
+
+// respondZoneConflict is respondConflict's destination-zone case. The
+// controller checks a Gateway or External zone attribute the API doesn't
+// expose; the built-in zones carrying it are keyed `gateway` and `external`.
+func respondZoneConflict(zoneKey string) string {
+	if zoneKey == "gateway" || zoneKey == "external" {
+		return fmt.Sprintf("the destination is the `%s` zone", zoneKey)
+	}
+	return ""
 }
 
 // applyPolicyCreateDefaults fills what the v2 POST requires (it takes the full
@@ -464,8 +513,9 @@ func falseIfAbsent(p *bool) types.Bool {
 	return types.BoolValue(p != nil && *p)
 }
 
-// ModifyPlan gates creation on the zone-based firewall (invariant 3) and
-// infers each endpoint's match types from its operands when unconfigured.
+// ModifyPlan gates creation on the zone-based firewall and on
+// create_allow_respond (invariant 3), and infers each endpoint's match types
+// from its operands when unconfigured.
 func (r *firewallPolicyResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
 	if req.Plan.Raw.IsNull() {
 		return
@@ -497,7 +547,39 @@ func (r *firewallPolicyResource) ModifyPlan(ctx context.Context, req resource.Mo
 	if plan.Destination != nil && cfg.Destination != nil {
 		inferEndpointModes(plan.Destination, cfg.Destination, prior.Destination)
 	}
+	if creating && r.net != nil {
+		r.checkAllowRespond(ctx, &cfg, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
 	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
+}
+
+// checkAllowRespond fails the plan for an explicit create_allow_respond = true
+// the controller would 400 at create. Unknown inputs skip their check. Create
+// only: whether the controller applies the rule to an update is unconfirmed.
+func (r *firewallPolicyResource) checkAllowRespond(ctx context.Context, cfg *firewallPolicyModel, diags *diag.Diagnostics) {
+	if cfg.CreateAllowRespond.IsUnknown() || !cfg.CreateAllowRespond.ValueBool() {
+		return
+	}
+	var states []string
+	if !cfg.ConnectionStates.IsUnknown() {
+		states = stringSetToSlice(ctx, cfg.ConnectionStates, diags)
+	}
+	reason := respondConflict(cfg.Action.ValueString(), cfg.ConnectionStateType.ValueString(), states)
+	if reason == "" && cfg.Destination != nil && !cfg.Destination.ZoneID.IsUnknown() {
+		key, err := r.zoneKey(ctx, cfg.Destination.ZoneID.ValueString())
+		if err != nil {
+			diags.AddWarning("Couldn't read firewall zones", err.Error())
+			return
+		}
+		reason = respondZoneConflict(key)
+	}
+	if reason != "" {
+		diags.AddAttributeError(path.Root("create_allow_respond"), "Return traffic not allowed",
+			"The controller rejects `create_allow_respond = true` here: "+reason+". Set it to `false` or leave it unset.")
+	}
 }
 
 // inferEndpointModes sets an unconfigured match type from the operands, but

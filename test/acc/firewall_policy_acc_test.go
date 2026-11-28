@@ -50,8 +50,9 @@ func skipUnlessZoneFirewall(t *testing.T) {
 }
 
 // TestAccFirewallPolicyResource_GatewayZone creates ALLOW and BLOCK policies
-// into the Gateway zone with create_allow_respond unset; the controller 400s
-// that create unless create_allow_respond is sent false (#8).
+// into the Gateway zone, and a BLOCK into the Internal zone, with
+// create_allow_respond unset; the controller 400s each create unless
+// create_allow_respond is sent false (#8).
 func TestAccFirewallPolicyResource_GatewayZone(t *testing.T) {
 	name := acctest.NamePrefix + "fwp-gw"
 	resource.Test(t, resource.TestCase{
@@ -68,6 +69,7 @@ func TestAccFirewallPolicyResource_GatewayZone(t *testing.T) {
 					resource.TestCheckResourceAttr("unifi_network_firewall_policy.block", "name", name+"-block"),
 					resource.TestCheckResourceAttr("unifi_network_firewall_policy.block", "create_allow_respond", "false"),
 					resource.TestCheckResourceAttr("unifi_network_firewall_policy.allow", "create_allow_respond", "false"),
+					resource.TestCheckResourceAttr("unifi_network_firewall_policy.block_internal", "create_allow_respond", "false"),
 					resource.TestCheckResourceAttrSet("unifi_network_firewall_policy.block", "id"),
 				),
 			},
@@ -77,6 +79,7 @@ func TestAccFirewallPolicyResource_GatewayZone(t *testing.T) {
 			},
 			{ResourceName: "unifi_network_firewall_policy.block", ImportState: true, ImportStateVerify: true},
 			{ResourceName: "unifi_network_firewall_policy.allow", ImportState: true, ImportStateVerify: true},
+			{ResourceName: "unifi_network_firewall_policy.block_internal", ImportState: true, ImportStateVerify: true},
 			{
 				Config:           testAccFirewallPolicyGatewayConfig(name, true),
 				ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}},
@@ -104,6 +107,13 @@ resource "unifi_network_firewall_policy" "allow" {
   protocol    = "tcp"
   source      = { zone_id = data.unifi_network_firewall_zone.internal.id, matching_target = "ANY" }
   destination = { zone_id = data.unifi_network_firewall_zone.gateway.id, matching_target = "ANY", port = "443" }
+}
+
+resource "unifi_network_firewall_policy" "block_internal" {
+  name        = "%[1]s-block-internal"
+  action      = "BLOCK"
+  source      = { zone_id = data.unifi_network_firewall_zone.internal.id, matching_target = "ANY" }
+  destination = { zone_id = data.unifi_network_firewall_zone.internal.id, matching_target = "ANY" }
 }
 `, name, logging)
 }

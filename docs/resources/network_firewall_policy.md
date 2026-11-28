@@ -35,7 +35,7 @@ Predefined (system) policies can't be managed. Import by `_id`, or by `name=<pol
 
 - `connection_state_type` (String) `ALL`, `RESPOND_ONLY` or `CUSTOM` (with `connection_states`). Defaults to `ALL` on create.
 - `connection_states` (Set of String) States matched when `connection_state_type = "CUSTOM"`: `NEW`, `ESTABLISHED`, `RELATED`, `INVALID`.
-- `create_allow_respond` (Boolean) Also create the return-traffic allow for an `ALLOW` policy. Defaults to `false` on create into the Gateway zone, which rejects return traffic; elsewhere the controller's default applies.
+- `create_allow_respond` (Boolean) Also create the return-traffic allow for an `ALLOW` policy. The controller rejects `true` on a non-`ALLOW` action, a `gateway` or `external` destination zone, `connection_state_type = "RESPOND_ONLY"`, or `connection_states` of exactly `ESTABLISHED` and `RELATED`. Unset, create sends `false` in those cases and otherwise leaves the controller's default, `true`; set to `true`, plan fails in them.
 - `description` (String) Free-text description.
 - `enabled` (Boolean) Whether the policy is active. Defaults to `true` on create.
 - `ip_version` (String) `IPV4`, `IPV6` or `BOTH`. Defaults to `IPV4` on create.

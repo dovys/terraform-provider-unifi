@@ -406,36 +406,97 @@ func TestFirewallPolicy_CreateSendsFullDTO(t *testing.T) {
 	}
 }
 
-// TestFirewallPolicy_CreateAllowRespondDefaultsFalse: omitted, the controller
-// 400s a create into the Gateway zone (#8), so create sends false there unless
-// set. Into any other zone an unset attribute stays omitted.
-func TestFirewallPolicy_CreateAllowRespondDefaultsFalse(t *testing.T) {
+func TestRespondConflict(t *testing.T) {
+	for name, tc := range map[string]struct {
+		action, stateType string
+		states            []string
+		want              bool
+	}{
+		"allow all":                 {action: "ALLOW", stateType: "ALL"},
+		"block":                     {action: "BLOCK", want: true},
+		"reject":                    {action: "REJECT", want: true},
+		"unknown action":            {action: ""},
+		"respond only":              {action: "ALLOW", stateType: "RESPOND_ONLY", want: true},
+		"established and related":   {action: "ALLOW", stateType: "CUSTOM", states: []string{"RELATED", "ESTABLISHED"}, want: true},
+		"established only":          {action: "ALLOW", stateType: "CUSTOM", states: []string{"ESTABLISHED"}},
+		"new, established, related": {action: "ALLOW", stateType: "CUSTOM", states: []string{"NEW", "ESTABLISHED", "RELATED"}},
+	} {
+		if got := respondConflict(tc.action, tc.stateType, tc.states) != ""; got != tc.want {
+			t.Errorf("%s: conflict = %v, want %v", name, got, tc.want)
+		}
+	}
+	for key, want := range map[string]bool{"gateway": true, "external": true, "internal": false, "vpn": false, "": false} {
+		if got := respondZoneConflict(key) != ""; got != want {
+			t.Errorf("zone %q: conflict = %v, want %v", key, got, want)
+		}
+	}
+}
+
+// TestFirewallPolicy_CreateAllowRespond: omitted, the controller defaults
+// create_allow_respond to true and 400s a conflicting create (#8). Unset,
+// create sends false on a conflict and omits the key otherwise; an explicit
+// true on a conflict fails the plan.
+func TestFirewallPolicy_CreateAllowRespond(t *testing.T) {
 	const zoneGateway = "0a1b2c3d-1111-4111-8111-000000000003"
 	for name, tc := range map[string]struct {
-		dst  string
-		set  any // nil leaves the attribute unset
-		want any // nil expects the key absent
+		action    string
+		stateType string
+		states    []string
+		dst       any
+		set       any  // nil leaves the attribute unset
+		want      any  // nil expects the key absent
+		planErr   bool // explicit true on a conflict
 	}{
-		"unset gateway":  {dst: zoneGateway, want: false},
-		"unset internal": {dst: zoneInternal},
-		"false gateway":  {dst: zoneGateway, set: false, want: false},
-		"true gateway":   {dst: zoneGateway, set: true, want: true},
+		"unset allow internal":      {dst: zoneInternal},
+		"unset allow gateway":       {dst: zoneGateway, want: false},
+		"unset allow external":      {dst: zoneExternal, want: false},
+		"unset block internal":      {action: "BLOCK", dst: zoneInternal, want: false},
+		"unset reject internal":     {action: "REJECT", dst: zoneInternal, want: false},
+		"unset respond only":        {stateType: "RESPOND_ONLY", dst: zoneInternal, want: false},
+		"unset established related": {stateType: "CUSTOM", states: []string{"ESTABLISHED", "RELATED"}, dst: zoneInternal, want: false},
+		"unset new established":     {stateType: "CUSTOM", states: []string{"NEW", "ESTABLISHED"}, dst: zoneInternal},
+		"false gateway":             {dst: zoneGateway, set: false, want: false},
+		"false block":               {action: "BLOCK", dst: zoneInternal, set: false, want: false},
+		"true internal":             {dst: zoneInternal, set: true, want: true},
+		"true gateway":              {dst: zoneGateway, set: true, planErr: true},
+		"true external":             {dst: zoneExternal, set: true, planErr: true},
+		"true block":                {action: "BLOCK", dst: zoneInternal, set: true, planErr: true},
+		"true respond only":         {stateType: "RESPOND_ONLY", dst: zoneInternal, set: true, planErr: true},
+		"true established related":  {stateType: "CUSTOM", states: []string{"ESTABLISHED", "RELATED"}, dst: zoneInternal, set: true, planErr: true},
+		"true unknown zone":         {dst: tftypes.UnknownValue, set: true},
 	} {
 		t.Run(name, func(t *testing.T) {
 			ctx := context.Background()
-			created := `{"_id":"p-gw","action":"ALLOW","connection_state_type":"ALL","enabled":true,"index":10020,
-				"ip_version":"IPV4","name":"to gateway","predefined":false,"protocol":"all",
+			if tc.action == "" {
+				tc.action = "ALLOW"
+			}
+			stateType := tc.stateType
+			if stateType == "" {
+				stateType = "ALL"
+			}
+			states, _ := json.Marshal(tc.states)
+			dst, _ := tc.dst.(string)
+			created := `{"_id":"p-new","action":"` + tc.action + `","connection_state_type":"` + stateType + `",
+				"connection_states":` + string(states) + `,"enabled":true,"index":10020,
+				"ip_version":"IPV4","name":"respond","predefined":false,"protocol":"all",
 				"create_allow_respond":` + strconv.FormatBool(tc.want == true) + `,
 				"source":{"zone_id":"` + zoneInternal + `","matching_target":"ANY","port_matching_type":"ANY"},
-				"destination":{"zone_id":"` + tc.dst + `","matching_target":"ANY","port_matching_type":"ANY"}}`
+				"destination":{"zone_id":"` + dst + `","matching_target":"ANY","port_matching_type":"ANY"}}`
 			srv, ty, fc := policyServer(t, map[string]string{
 				"POST /firewall-policies": created,
 				"GET /firewall/zone": `[{"_id":"` + zoneInternal + `","zone_key":"internal"},
+					{"_id":"` + zoneExternal + `","zone_key":"external"},
 					{"_id":"` + zoneGateway + `","zone_key":"gateway"}]`,
 			})
-			cfgMap := map[string]any{"name": "to gateway", "action": "ALLOW",
+			cfgMap := map[string]any{"name": "respond", "action": tc.action,
 				"source":      map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"},
 				"destination": map[string]any{"zone_id": tc.dst, "matching_target": "ANY"}}
+			if tc.stateType != "" {
+				cfgMap["connection_state_type"] = tc.stateType
+			}
+			if tc.states != nil {
+				cfgMap["connection_states"] = tc.states
+			}
 			if tc.set != nil {
 				cfgMap["create_allow_respond"] = tc.set
 			}
@@ -447,7 +508,24 @@ func TestFirewallPolicy_CreateAllowRespondDefaultsFalse(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			assertNoErrorDiags(t, "plan", plan.Diagnostics)
+			var planErr *tfprotov6.Diagnostic
+			for _, d := range plan.Diagnostics {
+				if d.Severity == tfprotov6.DiagnosticSeverityError {
+					planErr = d
+				}
+			}
+			if (planErr != nil) != tc.planErr {
+				t.Fatalf("plan error = %v, want error=%v", planErr, tc.planErr)
+			}
+			if tc.planErr {
+				if planErr.Attribute.String() != tftypes.NewAttributePath().WithAttributeName("create_allow_respond").String() {
+					t.Errorf("error on %v, want create_allow_respond", planErr.Attribute)
+				}
+				return
+			}
+			if dst == "" {
+				return // an unknown zone id can't be applied; the plan passing is the check
+			}
 			apply, err := srv.ApplyResourceChange(ctx, &tfprotov6.ApplyResourceChangeRequest{
 				TypeName: policyType, PriorState: &priorDV, Config: &cfgDV, PlannedState: plan.PlannedState,
 			})
@@ -466,6 +544,20 @@ func TestFirewallPolicy_CreateAllowRespondDefaultsFalse(t *testing.T) {
 				t.Errorf("create_allow_respond = %v (present=%v), want %v", got, ok, tc.want)
 			}
 		})
+	}
+}
+
+// An existing policy's update isn't checked: whether the controller applies
+// the respond-traffic rule to a PUT is unconfirmed.
+func TestFirewallPolicyUpdate_AllowRespondUnchecked(t *testing.T) {
+	cfg := map[string]any{}
+	for k, v := range intents["network-to-network"] {
+		cfg[k] = v
+	}
+	cfg["create_allow_respond"] = true
+	body := applyUpdate(t, livePolicies["network-to-network"], "p-net", cfg)
+	if body["create_allow_respond"] != true {
+		t.Errorf("create_allow_respond = %v, want true", body["create_allow_respond"])
 	}
 }
 

@@ -25,8 +25,8 @@ These writes ship but have not been confirmed on real hardware. Their schemas ca
   - re-pinning `ap_mac` takes effect;
   - destroy (`fixed_ap_enabled = false`) clears the lock without forgetting the client.
 - `unifi_network_firewall_policy` and `data.unifi_network_firewall_zone`. Built from the decompiled spec and live GETs of a zone-based Network 11.0 site; the Docker controller runs the classic firewall, so the Tier-2 test (`TestAccFirewallPolicyResource_GatewayZone`) skips there. A read-only HIL import of 11 live policies planned clean before the match operands became config-owned; re-run it. Then a live write run to confirm:
-  - the create body the v2 POST accepts (the full DTO with `schedule = ALWAYS`, `create_allow_respond = false` into the Gateway zone and the inferred `port_matching_type` and `matching_target_type`), including the Gateway-zone policies of the Tier-2 test;
-  - which zone pairs accept `create_allow_respond = true`, so plan can reject the rest (only the Gateway zone's 400 is observed);
+  - the create body the v2 POST accepts (the full DTO with `schedule = ALWAYS`, `create_allow_respond = false` where it conflicts, and the inferred `port_matching_type` and `matching_target_type`), including the Tier-2 test's policies;
+  - the respond-traffic rule behind `create_allow_respond`, decompiled but only observed for an ALLOW into the Gateway zone: `true` is rejected on a non-`ALLOW` action, a `gateway` or `external` destination zone, `RESPOND_ONLY`, or states of exactly `ESTABLISHED` and `RELATED`. Confirm each case, that the `gateway` and `external` zone keys are the only zones carrying the attribute the controller checks, and whether an update PUT is held to the rule (plan checks create only);
   - that the GET-merge-PUT keeps `index`, the schedule and unmodeled fields, and that dropping a stale operand (`ips` on an `ANY` endpoint) is accepted;
   - the not-found response of `GET firewall-policies/<id>` (Read assumes a 404);
   - that a classic site returns no zones from `firewall/zone`, since the zone probe treats any zone as zone-based.
