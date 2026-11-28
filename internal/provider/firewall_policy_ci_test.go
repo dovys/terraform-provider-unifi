@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -402,6 +403,69 @@ func TestFirewallPolicy_CreateSendsFullDTO(t *testing.T) {
 	src := body["source"].(map[string]any)
 	if src["port_matching_type"] != "ANY" || src["matching_target_type"] != "SPECIFIC" {
 		t.Errorf("source defaults = %v", src)
+	}
+}
+
+// TestFirewallPolicy_CreateAllowRespondDefaultsFalse: omitted, the controller
+// 400s a create into the Gateway zone (#8), so create sends false there unless
+// set. Into any other zone an unset attribute stays omitted.
+func TestFirewallPolicy_CreateAllowRespondDefaultsFalse(t *testing.T) {
+	const zoneGateway = "0a1b2c3d-1111-4111-8111-000000000003"
+	for name, tc := range map[string]struct {
+		dst  string
+		set  any // nil leaves the attribute unset
+		want any // nil expects the key absent
+	}{
+		"unset gateway":  {dst: zoneGateway, want: false},
+		"unset internal": {dst: zoneInternal},
+		"false gateway":  {dst: zoneGateway, set: false, want: false},
+		"true gateway":   {dst: zoneGateway, set: true, want: true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
+			created := `{"_id":"p-gw","action":"ALLOW","connection_state_type":"ALL","enabled":true,"index":10020,
+				"ip_version":"IPV4","name":"to gateway","predefined":false,"protocol":"all",
+				"create_allow_respond":` + strconv.FormatBool(tc.want == true) + `,
+				"source":{"zone_id":"` + zoneInternal + `","matching_target":"ANY","port_matching_type":"ANY"},
+				"destination":{"zone_id":"` + tc.dst + `","matching_target":"ANY","port_matching_type":"ANY"}}`
+			srv, ty, fc := policyServer(t, map[string]string{
+				"POST /firewall-policies": created,
+				"GET /firewall/zone": `[{"_id":"` + zoneInternal + `","zone_key":"internal"},
+					{"_id":"` + zoneGateway + `","zone_key":"gateway"}]`,
+			})
+			cfgMap := map[string]any{"name": "to gateway", "action": "ALLOW",
+				"source":      map[string]any{"zone_id": zoneInternal, "matching_target": "ANY"},
+				"destination": map[string]any{"zone_id": tc.dst, "matching_target": "ANY"}}
+			if tc.set != nil {
+				cfgMap["create_allow_respond"] = tc.set
+			}
+			cfgDV, _ := tfprotov6.NewDynamicValue(ty, tfValue(ty, cfgMap))
+			priorDV, _ := tfprotov6.NewDynamicValue(ty, tftypes.NewValue(ty, nil))
+			plan, err := srv.PlanResourceChange(ctx, &tfprotov6.PlanResourceChangeRequest{
+				TypeName: policyType, PriorState: &priorDV, Config: &cfgDV, ProposedNewState: &cfgDV,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			assertNoErrorDiags(t, "plan", plan.Diagnostics)
+			apply, err := srv.ApplyResourceChange(ctx, &tfprotov6.ApplyResourceChangeRequest{
+				TypeName: policyType, PriorState: &priorDV, Config: &cfgDV, PlannedState: plan.PlannedState,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			assertNoErrorDiags(t, "apply", apply.Diagnostics)
+
+			call, ok := fc.lastCall(http.MethodPost, "/firewall-policies")
+			if !ok {
+				t.Fatal("no POST")
+			}
+			var body map[string]any
+			_ = json.Unmarshal([]byte(call.Body), &body)
+			if got, ok := body["create_allow_respond"]; ok != (tc.want != nil) || got != tc.want {
+				t.Errorf("create_allow_respond = %v (present=%v), want %v", got, ok, tc.want)
+			}
+		})
 	}
 }
 

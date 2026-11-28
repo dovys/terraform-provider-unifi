@@ -142,7 +142,8 @@ func (r *firewallPolicyResource) Schema(_ context.Context, _ resource.SchemaRequ
 				stringvalidator.OneOf("ALL", "RESPOND_ONLY", "CUSTOM")),
 			"connection_states": ocStringSet("States matched when `connection_state_type = \"CUSTOM\"`: `NEW`, `ESTABLISHED`, `RELATED`, `INVALID`.",
 				stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
-			"create_allow_respond":    ocBool("Also create the return-traffic allow for an `ALLOW` policy."),
+			"create_allow_respond": ocBool("Also create the return-traffic allow for an `ALLOW` policy. " +
+				"Defaults to `false` on create into the Gateway zone, which rejects return traffic; elsewhere the controller's default applies."),
 			"logging":                 ocBool("Log matched traffic."),
 			"match_ip_sec":            ocBool("Match on IPsec."),
 			"match_opposite_protocol": ocBool("Invert the protocol match."),
@@ -187,6 +188,10 @@ func (r *firewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 	applyPolicyCreateDefaults(body)
+	if err := r.defaultGatewayAllowRespond(ctx, body); err != nil {
+		resp.Diagnostics.AddError("Failed to read firewall zones", err.Error())
+		return
+	}
 	created, err := r.net.Firewall().Policies().Create(ctx, body)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create firewall policy", err.Error())
@@ -317,6 +322,27 @@ func (e *policyEndpointModel) toEndpoint(ctx context.Context, diags *diag.Diagno
 		MatchOppositeNetworks: boolPtr(e.MatchOppositeNetworks),
 		MatchOppositePorts:    boolPtr(e.MatchOppositePorts),
 	}
+}
+
+// defaultGatewayAllowRespond sends create_allow_respond = false for an unset
+// create into the Gateway zone. The controller takes the omitted key as true
+// and 400s it there ("create respond traffic not allowed", #8); elsewhere the
+// key stays omitted so the controller's default applies.
+func (r *firewallPolicyResource) defaultGatewayAllowRespond(ctx context.Context, p *network.FirewallPolicy) error {
+	if p.CreateAllowRespond != nil {
+		return nil
+	}
+	zones, err := r.net.Firewall().Zones().List(ctx)
+	if err != nil {
+		return err
+	}
+	for _, z := range zones {
+		if deref(z.UnderscoreId) == p.Destination.ZoneID && deref(z.ZoneKey) == "gateway" {
+			f := false
+			p.CreateAllowRespond = &f
+		}
+	}
+	return nil
 }
 
 // applyPolicyCreateDefaults fills what the v2 POST requires (it takes the full

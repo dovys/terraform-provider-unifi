@@ -110,6 +110,7 @@ These deviate:
 | `dhcp_reservation` | Client records are never deleted. `CheckDestroy` asserts the fixed IP is cleared, and the sweeper clears the reservation on the test MAC. |
 | `mdns` | Singleton: `CheckDestroy` asserts the scope was reset, not that the object is gone. |
 | `traffic_route` | Skipped. It needs a VPN or WAN egress network the Docker controller can't provide. Tier 3's W1 write level covers it. |
+| `firewall_policy` | Skipped. It needs a zone-based firewall site; the Docker controller runs the classic firewall. `TestAccFirewallPolicyResource_GatewayZone` runs on a zone-based controller; see [TODO.md](../TODO.md#network). |
 
 ## Tier 3: hardware-in-the-loop
 
