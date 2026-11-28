@@ -50,8 +50,10 @@ func skipUnlessZoneFirewall(t *testing.T) {
 }
 
 // TestAccFirewallPolicyResource_GatewayZone creates ALLOW and BLOCK policies
-// into the Gateway zone with create_allow_respond unset; the controller 400s
-// that create unless create_allow_respond is sent false (#8).
+// into the Gateway zone, and a BLOCK into the Internal zone, with
+// create_allow_respond unset; the controller 400s each create unless
+// create_allow_respond is sent false (#8). The second step turns an ALLOW
+// holding true into a BLOCK, which the PUT must send as false.
 func TestAccFirewallPolicyResource_GatewayZone(t *testing.T) {
 	name := acctest.NamePrefix + "fwp-gw"
 	resource.Test(t, resource.TestCase{
@@ -68,15 +70,22 @@ func TestAccFirewallPolicyResource_GatewayZone(t *testing.T) {
 					resource.TestCheckResourceAttr("unifi_network_firewall_policy.block", "name", name+"-block"),
 					resource.TestCheckResourceAttr("unifi_network_firewall_policy.block", "create_allow_respond", "false"),
 					resource.TestCheckResourceAttr("unifi_network_firewall_policy.allow", "create_allow_respond", "false"),
+					resource.TestCheckResourceAttr("unifi_network_firewall_policy.block_internal", "create_allow_respond", "false"),
+					resource.TestCheckResourceAttr("unifi_network_firewall_policy.flip", "create_allow_respond", "true"),
 					resource.TestCheckResourceAttrSet("unifi_network_firewall_policy.block", "id"),
 				),
 			},
 			{
 				Config: testAccFirewallPolicyGatewayConfig(name, true),
-				Check:  resource.TestCheckResourceAttr("unifi_network_firewall_policy.block", "logging", "true"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("unifi_network_firewall_policy.block", "logging", "true"),
+					resource.TestCheckResourceAttr("unifi_network_firewall_policy.flip", "create_allow_respond", "false"),
+				),
 			},
 			{ResourceName: "unifi_network_firewall_policy.block", ImportState: true, ImportStateVerify: true},
 			{ResourceName: "unifi_network_firewall_policy.allow", ImportState: true, ImportStateVerify: true},
+			{ResourceName: "unifi_network_firewall_policy.block_internal", ImportState: true, ImportStateVerify: true},
+			{ResourceName: "unifi_network_firewall_policy.flip", ImportState: true, ImportStateVerify: true},
 			{
 				Config:           testAccFirewallPolicyGatewayConfig(name, true),
 				ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{plancheck.ExpectEmptyPlan()}},
@@ -85,7 +94,12 @@ func TestAccFirewallPolicyResource_GatewayZone(t *testing.T) {
 	})
 }
 
-func testAccFirewallPolicyGatewayConfig(name string, logging bool) string {
+// updated sets logging on block and turns flip from ALLOW into BLOCK.
+func testAccFirewallPolicyGatewayConfig(name string, updated bool) string {
+	flip := "ALLOW"
+	if updated {
+		flip = "BLOCK"
+	}
 	return fmt.Sprintf(`
 data "unifi_network_firewall_zone" "internal" { zone_key = "internal" }
 data "unifi_network_firewall_zone" "gateway" { zone_key = "gateway" }
@@ -105,5 +119,20 @@ resource "unifi_network_firewall_policy" "allow" {
   source      = { zone_id = data.unifi_network_firewall_zone.internal.id, matching_target = "ANY" }
   destination = { zone_id = data.unifi_network_firewall_zone.gateway.id, matching_target = "ANY", port = "443" }
 }
-`, name, logging)
+
+resource "unifi_network_firewall_policy" "block_internal" {
+  name        = "%[1]s-block-internal"
+  action      = "BLOCK"
+  source      = { zone_id = data.unifi_network_firewall_zone.internal.id, matching_target = "ANY" }
+  destination = { zone_id = data.unifi_network_firewall_zone.internal.id, matching_target = "ANY" }
+}
+
+resource "unifi_network_firewall_policy" "flip" {
+  name        = "%[1]s-flip"
+  action      = "%[3]s"
+  protocol    = "tcp"
+  source      = { zone_id = data.unifi_network_firewall_zone.internal.id, matching_target = "ANY" }
+  destination = { zone_id = data.unifi_network_firewall_zone.internal.id, matching_target = "ANY", port = "8443" }
+}
+`, name, updated, flip)
 }
